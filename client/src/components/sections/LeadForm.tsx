@@ -1,15 +1,10 @@
 import { FormEvent, useState } from "react";
+import { User, Phone, Mail, Sparkles, Calendar, MessageSquare, Send, CheckCircle2 } from "lucide-react";
 import { api } from "../../lib/api";
-import { Button } from "../ui/Button";
 import styles from "./LeadForm.module.scss";
 
 type Status = "idle" | "sending" | "success" | "error";
 
-/**
- * The functional replacement for "khách vẫn phải rời trang qua Zalo/hotline"
- * (Mục 1.1 of the technical proposal) — a real form that saves to the
- * backend's `leads` table instead of just displaying contact info.
- */
 export function LeadForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -19,21 +14,30 @@ export function LeadForm() {
     const form = new FormData(e.currentTarget);
     const name = String(form.get("name") ?? "").trim();
     const phone = String(form.get("phone") ?? "").trim();
+    const email = String(form.get("email") ?? "").trim();
+    const eventType = String(form.get("event_type") ?? "").trim();
+    const weddingDate = String(form.get("wedding_date") ?? "").trim();
+    const rawMessage = String(form.get("message") ?? "").trim();
 
     if (!name || !phone) {
-      setError("Vui lòng nhập tên và số điện thoại.");
+      setError("Vui lòng nhập họ tên và số điện thoại.");
       return;
     }
 
     setStatus("sending");
     setError(null);
+
+    const fullMessage = eventType
+      ? `[Loại sự kiện: ${eventType}]${rawMessage ? `\n${rawMessage}` : ""}`
+      : rawMessage;
+
     try {
       await api.submitLead({
         name,
         phone,
-        email: String(form.get("email") ?? "") || undefined,
-        wedding_date: String(form.get("wedding_date") ?? "") || undefined,
-        message: String(form.get("message") ?? "") || undefined,
+        email: email || undefined,
+        wedding_date: weddingDate || undefined,
+        message: fullMessage || undefined,
       });
       setStatus("success");
       e.currentTarget.reset();
@@ -44,27 +48,115 @@ export function LeadForm() {
   }
 
   if (status === "success") {
-    return <div className={styles.success}>✓ Cảm ơn bạn! Đội tư vấn Pi Decor sẽ liên hệ trong 24h.</div>;
+    return (
+      <div className={styles.successCard}>
+        <div className={styles.successIcon}>
+          <CheckCircle2 size={32} />
+        </div>
+        <h3 className={styles.successTitle}>Gửi thông tin thành công!</h3>
+        <p className={styles.successText}>
+          Cảm ơn bạn đã tin tưởng Pi Decor. Đội ngũ tư vấn sẽ liên hệ lại với bạn trong vòng 24 giờ.
+        </p>
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <input name="name" placeholder="Họ tên" required className={styles.input} />
-      <input name="phone" placeholder="Số điện thoại" required className={styles.input} />
-      <input name="email" type="email" placeholder="Email (không bắt buộc)" className={styles.input} />
-      <input name="wedding_date" type="date" aria-label="Ngày cưới dự kiến" className={styles.input} />
-      <textarea
-        name="message"
-        placeholder="Bạn muốn tư vấn về điều gì?"
-        rows={3}
-        className={styles.textarea}
-      />
+    <div className={styles.formCard}>
+      <div className={styles.formHeader}>
+        <h3 className={styles.formTitle}>Để lại thông tin tư vấn</h3>
+        <p className={styles.formSub}>Pi Decor sẽ gọi điện hỗ trợ bạn lên concept &amp; dự toán chi phí.</p>
+      </div>
 
-      {error && <p className={styles.error}>{error}</p>}
+      <form onSubmit={handleSubmit} className={styles.form}>
+        {/* Name & Phone Grid */}
+        <div className={styles.gridRow}>
+          <div className={styles.field}>
+            <label className={styles.label}>
+              <User size={14} /> Họ và tên *
+            </label>
+            <input
+              name="name"
+              type="text"
+              placeholder="VD: Nguyễn Văn A"
+              required
+              className={styles.input}
+            />
+          </div>
 
-      <Button type="submit" disabled={status === "sending"} className={styles.submit}>
-        {status === "sending" ? "Đang gửi…" : "Gửi thông tin"}
-      </Button>
-    </form>
+          <div className={styles.field}>
+            <label className={styles.label}>
+              <Phone size={14} /> Số điện thoại *
+            </label>
+            <input
+              name="phone"
+              type="tel"
+              placeholder="VD: 0905 123 456"
+              required
+              className={styles.input}
+            />
+          </div>
+        </div>
+
+        {/* Email Field */}
+        <div className={styles.field}>
+          <label className={styles.label}>
+            <Mail size={14} /> Email <span className={styles.optionalTag}>(Không bắt buộc)</span>
+          </label>
+          <input
+            name="email"
+            type="email"
+            placeholder="VD: email@example.com"
+            className={styles.input}
+          />
+        </div>
+
+        {/* Event Type Select (Ngay dưới Email) */}
+        <div className={styles.field}>
+          <label className={styles.label}>
+            <Sparkles size={14} /> Loại sự kiện
+          </label>
+          <select name="event_type" defaultValue="PiWedding — Trang Trí Cưới Hỏi" className={styles.select}>
+            <option value="PiWedding — Trang Trí Cưới Hỏi">PiWedding — Trang Trí Cưới Hỏi</option>
+            <option value="PiKids — Tiệc Thôi Nôi & Sinh Nhật">PiKids — Tiệc Thôi Nôi &amp; Sinh Nhật</option>
+            <option value="PiEvent — Sự Kiện & Doanh Nghiệp">PiEvent — Sự Kiện &amp; Doanh Nghiệp</option>
+            <option value="Khác">Loại sự kiện khác</option>
+          </select>
+        </div>
+
+        {/* Expected Event Date Field (Chọn ngày dự kiến) */}
+        <div className={styles.field}>
+          <label className={styles.label}>
+            <Calendar size={14} /> Chọn ngày tổ chức dự kiến
+          </label>
+          <input
+            name="wedding_date"
+            type="date"
+            aria-label="Chọn ngày tổ chức dự kiến"
+            className={styles.input}
+          />
+        </div>
+
+        {/* Message Field */}
+        <div className={styles.field}>
+          <label className={styles.label}>
+            <MessageSquare size={14} /> Ý tưởng hoặc ghi chú thêm <span className={styles.optionalTag}>(Không bắt buộc)</span>
+          </label>
+          <textarea
+            name="message"
+            placeholder="VD: Mong muốn tông màu pastel, tiệc ngoài trời, khoảng 200 khách..."
+            rows={3}
+            className={styles.textarea}
+          />
+        </div>
+
+        {error && <p className={styles.error}>{error}</p>}
+
+        <button type="submit" disabled={status === "sending"} className={styles.submitBtn}>
+          <Send size={15} />
+          {status === "sending" ? "Đang gửi thông tin…" : "Gửi Đăng Ký Tư Vấn"}
+        </button>
+      </form>
+    </div>
   );
 }

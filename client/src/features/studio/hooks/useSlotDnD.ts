@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { SlotConfig, SlotDefinition, Asset } from '../types'
-import { Rule, evaluateRules } from '../rules'
+import { AnyRule, evaluateRules } from '../rules'
 import { extractSVGColors, hexToHSL, hslToHex } from '../utils/svgColorUtils'
 
 export interface UseSlotDnDReturn {
@@ -16,6 +16,7 @@ export interface UseSlotDnDReturn {
   ) => void
   removeAsset: (slotKey: string) => void
   resetConfig: () => void
+  setWholeConfig: (config: SlotConfig) => void
   lockedSlots: Set<string>
   isDirty: boolean
 }
@@ -24,7 +25,7 @@ const STORAGE_PREFIX = 'pidecor_draft_'
 
 export function useSlotDnD(
   slots: SlotDefinition[],
-  rules: Rule[],
+  rules: AnyRule[],
   templateId: string,
   initialConfig: SlotConfig = {}
 ): UseSlotDnDReturn {
@@ -70,7 +71,14 @@ export function useSlotDnD(
     return () => clearTimeout(timer)
   }, [slotConfig, storageKey])
 
+  // Set whole config directly (e.g. applying admin preset or clearing to blank)
+  const setWholeConfig = useCallback((newConfig: SlotConfig) => {
+    setSlotConfig(newConfig)
+    setIsDirty(true)
+  }, [])
+
   // Assign asset to slot
+
   const assignAsset = useCallback((slotKey: string, asset: Asset) => {
     // Check if slot is locked
     if (lockedSlots.has(slotKey)) {
@@ -217,6 +225,7 @@ export function useSlotDnD(
     assignColor,
     removeAsset,
     resetConfig,
+    setWholeConfig,
     lockedSlots,
     isDirty
   }

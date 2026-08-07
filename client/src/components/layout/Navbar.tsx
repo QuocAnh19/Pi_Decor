@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Container } from "../ui/Layout";
 import styles from "./Navbar.module.scss";
@@ -6,7 +6,7 @@ import styles from "./Navbar.module.scss";
 const links = [
   { href: "/#services", label: "Dịch vụ" },
   { href: "/#lookbook", label: "Dự án" },
-  { href: "/ban-do", label: "Bản đồ" },
+  { href: "/#ban-do", label: "Bản đồ" },
   { href: "/#contact", label: "Liên hệ" },
 ];
 
@@ -23,6 +23,16 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Handle logo click to scroll to top smoothly
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   // Studio and the map page both sit over real content immediately, not a
   // full-bleed hero image, so they skip the transparent-to-solid transition.
   const solid = scrolled || isSubPage;
@@ -30,13 +40,13 @@ export function Navbar() {
   return (
     <header className={`${styles.header} ${solid ? styles.headerSolid : ""}`}>
       <Container className={styles.bar}>
-        <Link to="/" className={styles.logo}>
+        <Link to="/" onClick={handleLogoClick} className={styles.logo}>
           Pi Decor
         </Link>
 
         <nav className={styles.nav}>
           {isSubPage ? (
-            <Link to="/" className={styles.navLink}>
+            <Link to="/" onClick={handleLogoClick} className={styles.navLink}>
               ← Về trang chủ
             </Link>
           ) : (

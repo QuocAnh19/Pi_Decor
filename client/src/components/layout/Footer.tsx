@@ -11,38 +11,51 @@ export function Footer() {
           <div>
             <p className={styles.brand}>Pi Decor</p>
             <p className={styles.tagline}>
-              Thiết kế tiệc cưới tương tác — nơi ý tưởng của bạn thành hình trước cả ngày trọng đại.
+              Thiết kế tiệc cưới tương tác — nơi ý tưởng của bạn thành hình
+              trước ngày trọng đại.
             </p>
 
             <div className={styles.linksGrid}>
               <div>
                 <p className={styles.linksHeading}>Khám phá</p>
                 <ul className={styles.linksList}>
-                  <li><a href="/#services">Dịch vụ</a></li>
-                  <li><Link to="/studio">Studio thiết kế</Link></li>
-                  <li><a href="/#lookbook">Dự án</a></li>
+                  <li>
+                    <a href="/#services">Dịch vụ</a>
+                  </li>
+                  <li>
+                    <Link to="/studio">Studio thiết kế</Link>
+                  </li>
+                  <li>
+                    <a href="/#lookbook">Dự án</a>
+                  </li>
                 </ul>
               </div>
               <div>
                 <p className={styles.linksHeading}>Liên hệ</p>
                 <ul className={styles.linksList}>
-                  <li>hello@pidecor.vn</li>
-                  <li>+84 000 000 000</li>
-                  <li>Instagram · Facebook · TikTok</li>
+                  <li>
+                    Địa chỉ: 372 Trần Đại Nghĩa, Hòa Hải, Ngũ Hành Sơn, Đà Nẵng,
+                    Việt Nam
+                  </li>
+                  <li>Email: hello@pidecor.vn</li>
+                  <li>Hotline: +84 000 000 000</li>
+                  {/* <li>Instagram · Facebook · TikTok</li> */}
                 </ul>
               </div>
             </div>
           </div>
 
           <div>
-            <p className={styles.formHeading}>Để lại thông tin, đội tư vấn sẽ liên hệ lại</p>
+            <p className={styles.formHeading}>
+              Để lại thông tin, đội tư vấn sẽ liên hệ lại
+            </p>
             <div className={styles.formWrap}>
               <LeadForm />
             </div>
           </div>
         </div>
 
-        <div className={styles.bottom}>© 2026 Pi Decor Team</div>
+        <div className={styles.bottom}>© Pi Decor Team</div>
       </Container>
     </footer>
   );

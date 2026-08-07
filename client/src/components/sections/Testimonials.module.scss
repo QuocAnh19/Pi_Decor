@@ -1,9 +1,47 @@
 @use "@/styles/variables" as *;
 
+.sectionHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.writeReviewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(161, 92, 46, 0.3);
+  background: rgba(161, 92, 46, 0.08);
+  color: $color-accent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $color-accent;
+    color: #ffffff;
+    border-color: $color-accent;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(161, 92, 46, 0.25);
+  }
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 24px;
 
   @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr 1fr;
@@ -11,34 +49,77 @@
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   border-radius: $radius-l;
   border: 1px solid $color-line;
   background: $color-paper;
-  padding: 32px;
+  padding: 24px;
   box-shadow: $shadow-sm;
-  transition: box-shadow $transition-default;
+  transition: all $transition-default;
+  position: relative;
 
   &:hover {
-    box-shadow: $shadow-default;
+    box-shadow: 0 10px 28px -6px rgba(39, 22, 32, 0.1);
+    transform: translateY(-2px);
+    border-color: rgba(161, 92, 46, 0.3);
   }
+}
+
+.starsRow {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 8px;
+  color: #f59e0b;
 }
 
 .quoteMark {
   font-family: $font-serif;
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   line-height: 1;
-  color: $color-accent;
+  color: rgba(161, 92, 46, 0.3);
+  position: absolute;
+  top: 16px;
+  right: 20px;
 }
 
 .quote {
-  margin-top: 8px;
+  margin: 8px 0 16px 0;
   font-size: 0.9375rem;
   line-height: 1.6;
   color: $color-ink;
+  flex: 1;
+}
+
+/* Up to 3 Small Photos Attachment Grid */
+.photosRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.photoThumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid $color-line;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: scale(1.08);
+    border-color: $color-accent;
+  }
 }
 
 .figcaption {
-  margin-top: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed $color-line;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -46,14 +127,15 @@
 
 .avatar {
   display: flex;
-  height: 36px;
-  width: 36px;
+  height: 38px;
+  width: 38px;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
   font-size: 0.875rem;
   font-weight: 600;
   color: $color-ink;
+  flex-shrink: 0;
 }
 
 .avatarRose {
@@ -66,6 +148,10 @@
   background: $color-material-sand;
 }
 
+.meta {
+  font-size: 0.875rem;
+}
+
 .name {
   display: block;
   font-weight: 600;
@@ -73,9 +159,282 @@
 }
 
 .role {
+  font-size: 0.75rem;
   color: $color-ink-muted;
 }
 
-.meta {
+.newBadge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-left: 6px;
+}
+
+.loadMoreWrap {
+  margin-top: 36px;
+  text-align: center;
+}
+
+.loadMoreBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: $radius-pill;
+  border: 1px solid $color-line;
+  background: $color-paper;
+  color: $color-ink;
   font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: $shadow-sm;
+
+  &:hover {
+    border-color: $color-accent;
+    color: $color-accent;
+    box-shadow: $shadow-default;
+    transform: translateY(-1px);
+  }
+}
+
+/* Modal Form Styles */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(39, 22, 32, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modalCard {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid $color-line;
+  width: 100%;
+  max-width: 540px;
+  padding: 28px;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h3 {
+    font-family: $font-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $color-ink;
+    margin: 0;
+  }
+}
+
+.closeBtn {
+  background: transparent;
+  border: 1px solid $color-line;
+  color: $color-ink-muted;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $color-ink;
+    border-color: $color-ink;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $color-ink;
+  }
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid $color-line;
+  background: $color-paper;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: $color-ink;
+  font-family: inherit;
+  box-sizing: border-box;
+
+  &:focus {
+    outline: none;
+    border-color: $color-accent;
+    box-shadow: 0 0 0 3px rgba(161, 92, 46, 0.12);
+  }
+}
+
+.starRating {
+  display: flex;
+  gap: 6px;
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    color: #cbd5e1;
+    transition: transform 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  .starActive {
+    color: #f59e0b;
+  }
+}
+
+/* Up to 3 Photos Upload Dropzone */
+.uploadDropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  background: $color-paper;
+  border: 2px dashed $color-line;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: $color-accent;
+    background: rgba(161, 92, 46, 0.04);
+  }
+}
+
+.uploadIcon {
+  color: $color-accent;
+}
+
+.uploadText {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.uploadHint {
+  font-size: 0.75rem;
+  color: $color-ink-muted;
+}
+
+.previewThumbRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.previewThumbItem {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid $color-line;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.removeImgBtn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  border: none;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: #dc2626;
+  }
+}
+
+.submitModalBtn {
+  width: 100%;
+  padding: 12px;
+  border-radius: $radius-pill;
+  border: none;
+  background: $color-accent;
+  color: #ffffff;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+
+  &:hover {
+    background: $color-accent-hover;
+    box-shadow: 0 4px 14px rgba(161, 92, 46, 0.3);
+  }
+}
+
+/* Lightbox Modal */
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.lightboxImg {
+  max-width: 90vw;
+  max-height: 85vh;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  object-fit: contain;
 }

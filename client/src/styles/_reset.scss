@@ -10,6 +10,24 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Global Scrollbar Hiding — hides scrollbars on all pages & elements while keeping smooth scrolling active */
+html,
+body,
+*,
+*::before,
+*::after {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 body {
   margin: 0;
   background: $color-paper;

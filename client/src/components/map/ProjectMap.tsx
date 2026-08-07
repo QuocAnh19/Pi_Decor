@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { Venue, VenueDetail } from "../../lib/types";
@@ -12,8 +11,6 @@ interface ProjectMapProps {
   className?: string;
 }
 
-// Accent-colored teardrop pin, drawn once and reused for every marker — same
-// palette as the rest of the site instead of Leaflet's default blue pin.
 const PIN_SVG = encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" width="34" height="44" viewBox="0 0 34 44">
     <path d="M17 0C7.6 0 0 7.6 0 17c0 12.75 17 27 17 27s17-14.25 17-27C34 7.6 26.4 0 17 0z" fill="#A15C2E"/>
@@ -21,7 +18,6 @@ const PIN_SVG = encodeURIComponent(`
   </svg>
 `);
 
-// Same pin, larger + plum-colored, for whichever venue's popup is open.
 const PIN_SVG_ACTIVE = encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" width="40" height="52" viewBox="0 0 34 44">
     <path d="M17 0C7.6 0 0 7.6 0 17c0 12.75 17 27 17 27s17-14.25 17-27C34 7.6 26.4 0 17 0z" fill="#3B141F"/>
@@ -40,35 +36,19 @@ const DEFAULT_CENTER: [number, number] = [16.0544, 108.2022]; // Đà Nẵng
 
 interface ActivePopup {
   venueId: string;
-  container: HTMLDivElement;
   detail: VenueDetail | null;
   loading: boolean;
 }
 
-/**
- * OpenStreetMap tiles via Leaflet, one pin per venue. Clicking a pin opens a
- * small popup anchored right at that marker (Leaflet positions/auto-pans it
- * for us) showing a few real projects done there — the trust-building
- * moment from Mục 3 of the mapping spec, sized to sit next to the pin
- * instead of taking over the map.
- */
 export function ProjectMap({ venues, className = "" }: ProjectMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
   const [activePopup, setActivePopup] = useState<ActivePopup | null>(null);
-  const activeVenueIdRef = useRef<string | null>(null);
-  activeVenueIdRef.current = activePopup?.venueId ?? null;
 
-  function openPopupFor(venue: Venue, marker: L.Marker, map: L.Map) {
-    map.closePopup();
-    const container = document.createElement("div");
-    setActivePopup({ venueId: venue.id, container, detail: null, loading: true });
-
-    L.popup({ maxWidth: 280, minWidth: 240, className: styles.popup, autoPanPadding: [24, 24] })
-      .setLatLng(marker.getLatLng())
-      .setContent(container)
-      .openOn(map);
+  function openModalFor(venue: Venue, marker: L.Marker, map: L.Map) {
+    map.panTo(marker.getLatLng(), { animate: true });
+    setActivePopup({ venueId: venue.id, detail: null, loading: true });
 
     api
       .getVenue(venue.id)
@@ -82,7 +62,7 @@ export function ProjectMap({ venues, className = "" }: ProjectMapProps) {
       });
   }
 
-  // Mount the map + markers once.
+  // Mount map + markers once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -95,12 +75,10 @@ export function ProjectMap({ venues, className = "" }: ProjectMapProps) {
       maxZoom: 19,
     }).addTo(map);
 
-    map.on("popupclose", () => setActivePopup(null));
-
     const points: L.LatLngExpression[] = [];
     venues.forEach((venue) => {
       const marker = L.marker([venue.lat, venue.lng], { icon }).addTo(map);
-      marker.on("click", () => openPopupFor(venue, marker, map));
+      marker.on("click", () => openModalFor(venue, marker, map));
       markersRef.current.set(venue.id, marker);
       points.push([venue.lat, venue.lng]);
     });
@@ -122,7 +100,7 @@ export function ProjectMap({ venues, className = "" }: ProjectMapProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [venues]);
 
-  // Re-skin the active marker whenever the open popup's venue changes.
+  // Re-skin the active marker
   useEffect(() => {
     markersRef.current.forEach((marker, id) => {
       const active = id === activePopup?.venueId;
@@ -134,11 +112,15 @@ export function ProjectMap({ venues, className = "" }: ProjectMapProps) {
   return (
     <div className={`${styles.wrap} ${className}`}>
       <div ref={containerRef} className={styles.canvas} />
-      {activePopup &&
-        createPortal(
-          <VenuePopupCard venue={activePopup.detail} loading={activePopup.loading} />,
-          activePopup.container
-        )}
+
+      {/* Render venue detail popup modal outside map frame on document.body */}
+      {activePopup && (
+        <VenuePopupCard
+          venue={activePopup.detail}
+          loading={activePopup.loading}
+          onClose={() => setActivePopup(null)}
+        />
+      )}
     </div>
   );
 }

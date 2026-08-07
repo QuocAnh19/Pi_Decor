@@ -75,10 +75,10 @@
   align-items: flex-start;
   justify-content: flex-end;
   padding-bottom: 64px;
-  padding-top: 96px;
+  padding-top: 80px;
 
   @media (min-width: 768px) {
-    padding-bottom: 96px;
+    padding-bottom: 170px;
   }
 }
 
@@ -103,7 +103,7 @@
   }
 
   @media (min-width: 768px) {
-    font-size: 4.25rem;
+    font-size: 3.85rem;
   }
 }
 

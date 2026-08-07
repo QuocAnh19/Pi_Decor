@@ -58,9 +58,9 @@ export const seedSlots: SlotDefinition[] = [
     label: 'Chi Tiết Rèm Lớp Phủ',
     slotType: 'drape_detail',
     normX: 0.5,
-    normY: 0.22,
+    normY: 0.20,
     normWidth: 0.65,
-    normHeight: 0.25,
+    normHeight: 0.22,
     allowScale: false,
     allowRotate: false,
     mirrorX: false,
@@ -73,15 +73,31 @@ export const seedSlots: SlotDefinition[] = [
     slotKey: 'flower-left',
     label: 'Cụm Hoa Trang Trí Góc Trái',
     slotType: 'flower',
-    normX: 0.18,
-    normY: 0.28,
-    normWidth: 0.22,
-    normHeight: 0.35,
+    normX: 0.16,
+    normY: 0.25,
+    normWidth: 0.20,
+    normHeight: 0.30,
     allowScale: true,
     allowRotate: true,
     mirrorX: false,
     zIndex: 3,
     sortOrder: 3
+  },
+  {
+    id: 'slot-flower-right',
+    templateId: 'tpl-classic-01',
+    slotKey: 'flower-right',
+    label: 'Cụm Hoa Trang Trí Góc Phải',
+    slotType: 'flower',
+    normX: 0.84,
+    normY: 0.25,
+    normWidth: 0.20,
+    normHeight: 0.30,
+    allowScale: true,
+    allowRotate: true,
+    mirrorX: true,
+    zIndex: 3,
+    sortOrder: 4
   },
   {
     id: 'slot-name-text',
@@ -90,14 +106,14 @@ export const seedSlots: SlotDefinition[] = [
     label: 'Tên Cô Dâu & Chú Rể',
     slotType: 'text_name',
     normX: 0.5,
-    normY: 0.52,
+    normY: 0.55,
     normWidth: 0.45,
     normHeight: 0.15,
     allowScale: true,
     allowRotate: false,
     mirrorX: false,
     zIndex: 4,
-    sortOrder: 4,
+    sortOrder: 5,
     required: true
   }
 ]
@@ -231,3 +247,37 @@ export const seedRules: SlotRule[] = [
     priority: 10
   }
 ]
+
+export const seedPublishedSlotConfig: Record<string, any> = {
+  'drape-main': {
+    assetId: 'asset-drape-red',
+    asset: seedAssets[0],
+    colorOverride: '#8B0000',
+    filterMode: 'multiply_blend'
+  },
+  'drape-detail': {
+    assetId: 'asset-detail-rect',
+    asset: seedAssets[2],
+    colorOverride: '#B22222',
+    filterMode: 'multiply_blend'
+  },
+  'flower-left': {
+    assetId: 'asset-flower-pastel',
+    asset: seedAssets[4],
+    colorOverride: '#FFB6C1',
+    filterMode: 'multiply_blend'
+  },
+  'flower-right': {
+    assetId: 'asset-flower-pastel',
+    asset: seedAssets[4],
+    colorOverride: '#FFB6C1',
+    filterMode: 'multiply_blend'
+  },
+  'name-text': {
+    assetId: 'asset-text-vuquy',
+    asset: seedAssets[6],
+    colorOverride: '#FFD700',
+    filterMode: 'flat_tint'
+  }
+}
+

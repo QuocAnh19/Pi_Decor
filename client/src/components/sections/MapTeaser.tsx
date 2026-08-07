@@ -31,12 +31,12 @@ export function MapTeaser() {
   if (status === "error" || status === "empty") return null;
 
   return (
-    <Section tone="default">
+    <Section id="ban-do" tone="default">
       <Container>
         <SectionHeader
           eyebrow="Bản đồ dự án"
           title="Chúng tôi đã từng dựng tiệc ở đâu?"
-          description="Tiệc của bạn tổ chức đúng địa điểm này? Bấm vào pin để xem lại decor thật."
+          description="Tiệc của bạn tổ chức đúng địa điểm này? Chạm vào pin để xem lại decor thật."
           align="left"
         />
 

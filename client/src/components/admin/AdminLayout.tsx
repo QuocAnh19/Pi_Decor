@@ -1,11 +1,12 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, MapPin, LogOut, ExternalLink, Palette } from "lucide-react";
+import { LayoutDashboard, Users, FolderKanban, MapPin, LogOut, ExternalLink, Palette } from "lucide-react";
 import { useAuth } from "../../lib/authContext";
 import styles from "./AdminLayout.module.scss";
 
 const navItems = [
   { to: "/admin", label: "Tổng quan", icon: LayoutDashboard, end: true },
   { to: "/admin/leads", label: "Khách hàng", icon: Users, end: false },
+  { to: "/admin/projects", label: "Dự án", icon: FolderKanban, end: false },
   { to: "/admin/venues", label: "Bản đồ", icon: MapPin, end: false },
   { to: "/admin/studio", label: "Studio Builder", icon: Palette, end: false },
 ];

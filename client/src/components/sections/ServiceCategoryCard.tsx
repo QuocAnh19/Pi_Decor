@@ -46,7 +46,6 @@ export function ServiceCategoryCard({
             src={category.cover}
             alt={category.title}
             label={`Ảnh ${category.brand}`}
-            hint="1200×1500 · dọc · JPG"
             className={styles.media}
             mediaClassName={styles.mediaImg}
           />
@@ -55,7 +54,7 @@ export function ServiceCategoryCard({
 
         <span className={styles.badge}>
           <span className={styles.iconTile}>
-            <Icon size={20} strokeWidth={1.75} />
+            <Icon size={18} strokeWidth={1.75} />
           </span>
           <span className={styles.brand}>{category.brand}</span>
         </span>

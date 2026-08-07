@@ -71,7 +71,6 @@ export function Hero() {
       <Feather className={styles.feather} />
 
       <Container className={styles.content}>
-        <p className={styles.eyebrow}>Pi Decor · PiKids — PiWedding — PiEvent</p>
         <h1 className={styles.title}>
           Kiến tạo không gian,
           <br />

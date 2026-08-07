@@ -1,5 +1,4 @@
 import type {
-  Service,
   ServiceCategory,
   CategoryPortfolioItem,
   FabricSwatch,
@@ -32,43 +31,7 @@ export const heroCollageMedia: HeroMedia[] = [
   { src: "/images/hero-collage-2.jpg", alt: "Chi tiết decor bàn tiệc" },
 ];
 
-// Kept for anywhere that still wants a flat service list (not used by the
-// homepage Services section anymore — see `serviceCategories` below, which
-// mirrors Pi Decor's real 3 product lines: PiKids / PiWedding / PiEvent).
-export const services: Service[] = [
-  {
-    id: "studio",
-    title: "Interactive Studio",
-    description:
-      "Chọn vải voan, cụm hoa, cổng hoa và xem thay đổi theo thời gian thực trước khi đặt lịch.",
-    icon: "Palette",
-    href: "/studio",
-  },
-  {
-    id: "decor",
-    title: "Wedding Decor",
-    description: "Trang trí sảnh tiệc trọn gói theo phong cách riêng của bạn.",
-    icon: "Sparkles",
-  },
-  {
-    id: "planner",
-    title: "Wedding Planner",
-    description: "Lên kế hoạch chi tiết từng hạng mục, đúng tiến độ.",
-    icon: "ClipboardList",
-  },
-  {
-    id: "tradition",
-    title: "Gia Tiên & Mâm Quả",
-    description: "Không gian truyền thống, chỉn chu theo đúng nghi lễ.",
-    icon: "Flower2",
-  },
-  {
-    id: "outdoor",
-    title: "Tiệc Ngoài Trời",
-    description: "Decor sân vườn, rooftop — lãng mạn giữa thiên nhiên.",
-    icon: "TreePine",
-  },
-];
+
 
 /**
  * The 3 product lines Pi Decor actually operates (from the business card:
@@ -91,7 +54,7 @@ export const serviceCategories: ServiceCategory[] = [
     href: "/studio",
     ctaLabel: "Vào Studio thiết kế",
     featured: true,
-    cover: "/images/service-piwedding.jpg",
+    cover: "/images/service-piwedding.png",
   },
   {
     id: "pikids",
@@ -104,7 +67,7 @@ export const serviceCategories: ServiceCategory[] = [
     accent: "kids",
     items: ["Đầy Tháng", "Thôi Nôi", "Sinh Nhật", "Party"],
     ctaLabel: "Liên hệ tư vấn",
-    cover: "/images/service-pikids.jpg",
+    cover: "/images/service-pikids.png",
   },
   {
     id: "pievent",
@@ -117,7 +80,7 @@ export const serviceCategories: ServiceCategory[] = [
     accent: "event",
     items: ["Khai Trương", "Lễ - Tết", "Sum Up", "Team Building"],
     ctaLabel: "Liên hệ tư vấn",
-    cover: "/images/service-pievent.jpg",
+    cover: "/images/service-pievent.png",
   },
 ];
 

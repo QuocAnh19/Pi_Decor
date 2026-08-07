@@ -32,8 +32,7 @@ export function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className={styles.title}>Chào {admin?.email?.split("@")[0]} 👋</h1>
-      <p className={styles.subtitle}>Tổng quan hoạt động của Pi Decor.</p>
+      <h1 className={styles.title}>Chào {admin?.email?.split("@")[0]}</h1>
 
       {status === "loading" && <p className={styles.status}>Đang tải…</p>}
       {status === "error" && <p className={styles.status}>Không tải được dữ liệu, thử tải lại trang.</p>}

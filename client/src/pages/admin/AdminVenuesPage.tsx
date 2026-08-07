@@ -119,7 +119,6 @@ export function AdminVenuesPage() {
   return (
     <div>
       <h1 className={styles.title}>Bản đồ dự án</h1>
-      <p className={styles.subtitle}>Quản lý địa điểm và các dự án thật hiển thị trên trang /ban-do.</p>
 
       {error && (
         <p className={styles.error} onClick={() => setError(null)}>

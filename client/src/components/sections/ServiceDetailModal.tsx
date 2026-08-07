@@ -76,11 +76,26 @@ export function ServiceDetailModal({
   );
 
   return (
-    <div className={rootClass} role="dialog" aria-modal="true" aria-label={category.title}>
-      <button type="button" className={styles.backdrop} aria-label="Đóng" onClick={onClose} />
+    <div
+      className={rootClass}
+      role="dialog"
+      aria-modal="true"
+      aria-label={category.title}
+    >
+      <button
+        type="button"
+        className={styles.backdrop}
+        aria-label="Đóng"
+        onClick={onClose}
+      />
 
       <div className={styles.panel}>
-        <button type="button" className={styles.close} onClick={onClose} aria-label="Đóng">
+        <button
+          type="button"
+          className={styles.close}
+          onClick={onClose}
+          aria-label="Đóng"
+        >
           <Icons.X size={18} />
         </button>
 
@@ -89,7 +104,6 @@ export function ServiceDetailModal({
             src={category.cover}
             alt={category.title}
             label={`Ảnh ${category.brand}`}
-            hint="1600×700 · ngang · JPG"
             className={styles.heroMedia}
           />
           <div className={styles.heroScrim} aria-hidden="true" />
@@ -148,7 +162,9 @@ export function ServiceDetailModal({
                   <span className={styles.projectTag}>{item.tag}</span>
                 </div>
                 <p className={styles.projectTitle}>{item.title}</p>
-                {item.location && <p className={styles.projectLocation}>{item.location}</p>}
+                {item.location && (
+                  <p className={styles.projectLocation}>{item.location}</p>
+                )}
               </div>
             ))}
           </div>
