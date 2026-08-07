@@ -1,0 +1,63 @@
+@use "@/styles/variables" as *;
+
+.wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: $radius-l;
+  box-shadow: $shadow-default;
+  background: $color-paper-dim;
+}
+
+.canvas {
+  height: 100%;
+  width: 100%;
+
+  // Leaflet's own CSS handles the tile grid; this just makes the default
+  // popup/tooltip/attribution chrome match the rest of the site instead of
+  // Leaflet's stock sans-serif.
+  :global(.leaflet-container) {
+    font-family: $font-sans;
+    background: $color-paper-dim;
+  }
+
+  :global(.leaflet-tooltip) {
+    border: none;
+    border-radius: $radius-s;
+    background: $color-ink;
+    color: $color-paper;
+    font-size: 0.75rem;
+    font-weight: 500;
+    box-shadow: $shadow-sm;
+  }
+
+  :global(.leaflet-tooltip-top::before) {
+    border-top-color: $color-ink;
+  }
+}
+
+// Leaflet passes this class to the popup's root element (see the `className`
+// option in ProjectMap.tsx) — re-skin its chrome to match the paper/ink
+// palette instead of Leaflet's default white box + blue link.
+.popup {
+  :global(.leaflet-popup-content-wrapper) {
+    border-radius: $radius-m;
+    background: $color-paper;
+    box-shadow: $shadow-default;
+  }
+
+  :global(.leaflet-popup-content) {
+    margin: 12px 14px;
+  }
+
+  :global(.leaflet-popup-tip) {
+    background: $color-paper;
+  }
+
+  :global(.leaflet-popup-close-button) {
+    color: $color-ink-faint;
+
+    &:hover {
+      color: $color-ink;
+    }
+  }
+}

@@ -1,0 +1,58 @@
+@use "@/styles/variables" as *;
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.card {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: $radius-l;
+  box-shadow: $shadow-sm;
+  transition: transform $transition-default, box-shadow $transition-default;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+.media {
+  height: 100%;
+  width: 100%;
+}
+
+// Hover-zoom: the photo itself scales up inside its clipped frame — the
+// card and label never move, only the image.
+.photo {
+  transform: scale(1);
+  transition: transform 500ms ease-out;
+}
+
+.card:hover .photo {
+  transform: scale(1.1);
+}
+
+.overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(39, 22, 32, 0.7), transparent);
+}
+
+.tag {
+  pointer-events: none;
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  font-family: $font-serif;
+  font-size: 1.125rem;
+  color: $color-paper;
+}

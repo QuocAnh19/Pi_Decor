@@ -1,0 +1,56 @@
+@use "variables" as *;
+
+// Enforces the single max content width + horizontal padding rule site-wide.
+// Used inside every component's .module.scss instead of a shared <Container>
+// className string.
+@mixin container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: $max-width-content;
+  padding-inline: 24px;
+
+  @media (min-width: 768px) {
+    padding-inline: 32px;
+  }
+}
+
+// Vertical rhythm for page sections.
+@mixin section($tone: default) {
+  padding-block: 80px;
+
+  @media (min-width: 768px) {
+    padding-block: 112px;
+  }
+
+  @if $tone == dim {
+    background: $color-paper-dim;
+  } @else if $tone == blush {
+    background: $color-blush;
+  }
+}
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid $color-accent;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: $radius-pill;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color $transition-default, color $transition-default,
+    border-color $transition-default;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}

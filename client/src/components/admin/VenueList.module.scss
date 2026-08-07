@@ -1,0 +1,128 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+@use "@/styles/mixins" as *;
+
+.wrap {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  overflow: hidden;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid $admin-border;
+}
+
+.heading {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $admin-text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $admin-accent;
+  background: $admin-accent-subtle;
+  padding: 6px 12px;
+  border-radius: $radius-pill;
+
+  &:hover {
+    background: rgba($color-accent, 0.28);
+  }
+
+  @include focus-ring;
+}
+
+.empty {
+  padding: 24px 16px;
+  font-size: 0.8rem;
+  color: $admin-text-faint;
+}
+
+.list {
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid $admin-border;
+  cursor: pointer;
+  transition: background-color $transition-default;
+
+  &:hover {
+    background: $admin-surface-raised;
+  }
+}
+
+.itemActive {
+  background: $admin-accent-subtle;
+}
+
+.itemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: $radius-s;
+  background: $admin-surface-raised;
+  color: $admin-text-muted;
+}
+
+.itemBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $admin-text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemMeta {
+  font-size: 0.7rem;
+  color: $admin-text-faint;
+  margin-top: 2px;
+}
+
+.itemActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  color: $admin-text-faint;
+  padding: 6px;
+  border-radius: $radius-s;
+
+  &:hover {
+    color: $admin-text;
+    background: $admin-surface;
+  }
+
+  @include focus-ring;
+}
+
+.iconButtonDanger:hover {
+  color: $admin-danger;
+}

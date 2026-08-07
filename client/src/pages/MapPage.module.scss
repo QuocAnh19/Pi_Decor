@@ -1,0 +1,47 @@
+@use "@/styles/variables" as *;
+
+.intro {
+  max-width: 640px;
+  margin-bottom: 36px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $color-accent;
+}
+
+.title {
+  margin-top: 10px;
+  font-family: $font-serif;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.subtitle {
+  margin-top: 12px;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: $color-ink-muted;
+}
+
+.status {
+  padding: 48px 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: $color-ink-muted;
+}
+
+.explorer {
+  height: 640px;
+
+  @media (max-width: 768px) {
+    height: 520px;
+  }
+}

@@ -1,0 +1,191 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+@use "@/styles/mixins" as *;
+
+.title {
+  font-family: $font-serif;
+  font-size: 1.5rem;
+  color: $admin-text;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: $admin-text-faint;
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.status {
+  font-size: 0.875rem;
+  color: $admin-text-muted;
+}
+
+.error {
+  font-size: 0.8rem;
+  color: $admin-danger;
+  background: $admin-danger-subtle;
+  border-radius: $radius-s;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detailPanel {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  padding: 20px;
+  min-height: 200px;
+}
+
+.placeholder {
+  font-size: 0.85rem;
+  color: $admin-text-faint;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid $admin-border;
+}
+
+.detailName {
+  font-family: $font-serif;
+  font-size: 1.1rem;
+  color: $admin-text;
+}
+
+.detailMeta {
+  font-size: 0.8rem;
+  color: $admin-text-faint;
+  margin-top: 2px;
+}
+
+.addProjectButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $admin-accent;
+  background: $admin-accent-subtle;
+  padding: 8px 14px;
+  border-radius: $radius-pill;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba($color-accent, 0.28);
+  }
+
+  @include focus-ring;
+}
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.projectItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: $radius-s;
+
+  &:hover {
+    background: $admin-surface-raised;
+  }
+}
+
+.projectThumb {
+  width: 44px;
+  height: 44px;
+  border-radius: $radius-s;
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $admin-text-faint;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.projectThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.projectBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.projectTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $admin-text;
+}
+
+.unpublished {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: $admin-warning;
+  background: $admin-warning-subtle;
+  padding: 2px 7px;
+  border-radius: $radius-pill;
+}
+
+.projectMeta {
+  font-size: 0.75rem;
+  color: $admin-text-faint;
+  margin-top: 2px;
+}
+
+.projectActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  color: $admin-text-faint;
+  padding: 6px;
+  border-radius: $radius-s;
+
+  &:hover {
+    color: $admin-text;
+    background: $admin-surface;
+  }
+
+  @include focus-ring;
+}
+
+.iconButtonDanger:hover {
+  color: $admin-danger;
+}

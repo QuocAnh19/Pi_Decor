@@ -1,0 +1,26 @@
+@use "variables" as *;
+
+// ─────────────────────────────────────────────────────────────────────────
+// Palette for the admin area only (PiDecor_AdminPanel.md §5: "bảng màu trầm
+// /tối hơn để phân biệt rõ với web khách"). Spacing, radius, font tokens are
+// still pulled from _variables.scss / _mixins.scss — only color changes.
+// ─────────────────────────────────────────────────────────────────────────
+
+$admin-bg: #17111a; // page background behind the layout
+$admin-surface: #211823; // sidebar / cards
+$admin-surface-raised: #2b1f2d; // hovered rows, modals
+$admin-border: #3a2c3b;
+$admin-text: #f3ece6;
+$admin-text-muted: #b3a3ab;
+$admin-text-faint: #837480;
+
+$admin-accent: $color-accent; // same brand accent, for continuity
+$admin-accent-hover: $color-accent-hover;
+$admin-accent-subtle: rgba(161, 92, 46, 0.18);
+
+$admin-danger: #e0687a;
+$admin-danger-subtle: rgba(224, 104, 122, 0.14);
+$admin-success: #6fb083;
+$admin-success-subtle: rgba(111, 176, 131, 0.14);
+$admin-warning: #dcae5c;
+$admin-warning-subtle: rgba(220, 174, 92, 0.14);

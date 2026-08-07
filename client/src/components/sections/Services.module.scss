@@ -1,0 +1,38 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  // PiWedding (featured) spans both columns of the top row and stays tall;
+  // PiKids + PiEvent share the row underneath — the "1 ô lớn + 2 ô phụ"
+  // bento rhythm the original plan called for, now carrying the real
+  // product lines instead of a flat 5-up grid.
+  @media (min-width: 1024px) {
+    grid-template-columns: 1.15fr 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+}
+
+.featuredSlot {
+  @media (min-width: 1024px) {
+    grid-column: 1 / span 1;
+    grid-row: 1 / span 2;
+  }
+}
+
+// The two flanking cards (PiKids, PiEvent) — direct grid children after
+// .featuredSlot — stack as wide slots to the right of the tall card.
+@media (min-width: 1024px) {
+  .grid > *:nth-child(2) {
+    grid-column: 2 / span 2;
+    grid-row: 1 / span 1;
+  }
+  .grid > *:nth-child(3) {
+    grid-column: 2 / span 2;
+    grid-row: 2 / span 1;
+  }
+}

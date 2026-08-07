@@ -1,0 +1,87 @@
+// ─────────────────────────────────────────────────────────────────────────
+// Design tokens for Pi Decor.
+//
+// Same palette as before (one warm neutral scale carrying most of the UI,
+// plus a single accent color for interactive elements), just expressed as
+// SCSS variables instead of a Tailwind config. Material colors stay a
+// separate scale — they only ever appear inside the Studio's fabric picker.
+// ─────────────────────────────────────────────────────────────────────────
+
+// Base
+$color-paper: #fbf7f1; // page background
+$color-paper-dim: #f4eee3; // alternate section background
+$color-ink: #271620; // primary text
+$color-ink-muted: #6e6259; // secondary text
+$color-ink-faint: #9c9186; // tertiary / placeholder text
+$color-line: #e7ded0; // hairline borders/dividers
+
+// Accent
+$color-accent: #a15c2e;
+$color-accent-hover: #874c25;
+$color-accent-subtle: #f1e4d8;
+
+// Blush / plum (collage + testimonials band accents)
+$color-blush: #f8e9e7;
+$color-blush-dim: #f1dedb;
+$color-plum: #3b141f;
+$color-plum-light: #5c2433;
+
+// Material swatches (Studio fabric colors — real product subject matter)
+$color-material-rose: #e7b6bb;
+$color-material-sage: #afc49c;
+$color-material-sand: #c99f6f;
+$color-material-lavender: #b98ac9;
+$color-material-champagne: #e7be79;
+$color-material-smoke: #8a9bae;
+
+// Homepage service-category accents (PiKids / PiWedding / PiEvent) — one
+// "chấm phá" tone per product line, built from the same pastel family as
+// the material swatches above so the extra color stays inside the brand,
+// never introducing a jarring new hue.
+$color-kids-accent: #e59a6b; // warm apricot — playful, still soft
+$color-kids-accent-dim: #f6ddc6;
+$color-wedding-accent: $color-accent; // champagne gold — the flagship line
+$color-wedding-accent-dim: $color-accent-subtle;
+$color-event-accent: #4f6b63; // muted sage-slate — calm, professional
+$color-event-accent-dim: #dbe6e0;
+
+// Typography
+$font-serif: "Fraunces", serif;
+$font-sans: "Be Vietnam Pro", sans-serif;
+$font-script: "Cormorant Garamond", serif;
+
+// Layout
+$max-width-content: 1240px;
+$radius-s: 8px;
+$radius-m: 16px;
+$radius-l: 24px;
+$radius-pill: 999px;
+
+// Motion
+$transition-default: 200ms ease-in-out;
+
+// Shadows
+$shadow-sm: 0 1px 2px rgba(39, 22, 32, 0.06);
+$shadow-default: 0 4px 16px rgba(39, 22, 32, 0.08);
+$shadow-lg: 0 30px 70px -20px rgba(39, 22, 32, 0.28);
+
+// Also exposed as CSS custom properties so components that need a runtime
+// value (e.g. inline style for a dynamically-picked swatch hex) can read
+// them without importing SCSS — mirrors how the old Tailwind theme() tokens
+// were reachable from anywhere.
+:root {
+  --color-paper: #{$color-paper};
+  --color-paper-dim: #{$color-paper-dim};
+  --color-ink: #{$color-ink};
+  --color-ink-muted: #{$color-ink-muted};
+  --color-ink-faint: #{$color-ink-faint};
+  --color-line: #{$color-line};
+  --color-accent: #{$color-accent};
+  --color-accent-hover: #{$color-accent-hover};
+  --color-accent-subtle: #{$color-accent-subtle};
+  --color-blush: #{$color-blush};
+  --color-plum: #{$color-plum};
+  --shadow-default: #{$shadow-default};
+  --shadow-lg: #{$shadow-lg};
+  --radius-l: #{$radius-l};
+}

@@ -1,0 +1,66 @@
+@use "@/styles/variables" as *;
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: background-color $transition-default, border-color $transition-default;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.headerSolid {
+  background: rgba(251, 247, 241, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid $color-line;
+}
+
+.bar {
+  display: flex;
+  height: 64px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: $font-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.nav {
+  display: none;
+  align-items: center;
+  gap: 32px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $color-ink;
+
+  @media (min-width: 768px) {
+    display: flex;
+  }
+}
+
+.navLink {
+  color: $color-ink-muted;
+  transition: color $transition-default;
+
+  &:hover {
+    color: $color-ink;
+  }
+}
+
+.cta {
+  border-radius: $radius-pill;
+  background: $color-accent;
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $color-paper;
+  transition: background-color $transition-default;
+
+  &:hover {
+    background: $color-accent-hover;
+  }
+}

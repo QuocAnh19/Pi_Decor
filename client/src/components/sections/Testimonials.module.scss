@@ -1,0 +1,81 @@
+@use "@/styles/variables" as *;
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.card {
+  border-radius: $radius-l;
+  border: 1px solid $color-line;
+  background: $color-paper;
+  padding: 32px;
+  box-shadow: $shadow-sm;
+  transition: box-shadow $transition-default;
+
+  &:hover {
+    box-shadow: $shadow-default;
+  }
+}
+
+.quoteMark {
+  font-family: $font-serif;
+  font-size: 2.5rem;
+  line-height: 1;
+  color: $color-accent;
+}
+
+.quote {
+  margin-top: 8px;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: $color-ink;
+}
+
+.figcaption {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  display: flex;
+  height: 36px;
+  width: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.avatarRose {
+  background: $color-material-rose;
+}
+.avatarSage {
+  background: $color-material-sage;
+}
+.avatarSand {
+  background: $color-material-sand;
+}
+
+.name {
+  display: block;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.role {
+  color: $color-ink-muted;
+}
+
+.meta {
+  font-size: 0.875rem;
+}

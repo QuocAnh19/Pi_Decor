@@ -1,0 +1,10 @@
+.reveal {
+  transition: transform 700ms ease-out, opacity 700ms ease-out;
+  transform: translateY(24px);
+  opacity: 0;
+}
+
+.visible {
+  transform: translateY(0);
+  opacity: 1;
+}

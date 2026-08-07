@@ -1,0 +1,84 @@
+@use "@/styles/variables" as *;
+
+.footer {
+  border-top: 1px solid $color-line;
+  background: $color-paper;
+}
+
+.inner {
+  padding-block: 64px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1.2fr;
+  }
+}
+
+.brand {
+  font-family: $font-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.tagline {
+  margin-top: 12px;
+  max-width: 20rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: $color-ink-muted;
+}
+
+.linksGrid {
+  margin-top: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.linksHeading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.linksList {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: $color-ink-muted;
+}
+
+.linksList a {
+  transition: color $transition-default;
+
+  &:hover {
+    color: $color-ink;
+  }
+}
+
+.formHeading {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.formWrap {
+  margin-top: 16px;
+}
+
+.bottom {
+  margin-top: 48px;
+  border-top: 1px solid $color-line;
+  padding-top: 24px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: $color-ink-faint;
+}

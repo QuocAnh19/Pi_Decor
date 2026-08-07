@@ -1,0 +1,94 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+
+.title {
+  font-family: $font-serif;
+  font-size: 1.5rem;
+  color: $admin-text;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: $admin-text-faint;
+  margin-top: 4px;
+  margin-bottom: 32px;
+}
+
+.status {
+  font-size: 0.875rem;
+  color: $admin-text-muted;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+
+  @media (min-width: 900px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  padding: 20px;
+  transition: border-color $transition-default, background-color $transition-default;
+
+  &:hover {
+    border-color: $admin-accent;
+    background: $admin-surface-raised;
+  }
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-s;
+  background: $admin-surface-raised;
+  color: $admin-text-muted;
+  margin-bottom: 16px;
+}
+
+.cardIconAccent {
+  background: $admin-accent-subtle;
+  color: $admin-accent;
+}
+
+.cardValue {
+  font-family: $font-serif;
+  font-size: 1.75rem;
+  color: $admin-text;
+}
+
+.cardLabel {
+  font-size: 0.8rem;
+  color: $admin-text-faint;
+  margin-top: 4px;
+}
+
+.quickLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.quickLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: $admin-accent;
+  padding: 10px 16px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+
+  &:hover {
+    border-color: $admin-accent;
+  }
+}

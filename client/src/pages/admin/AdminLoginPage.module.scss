@@ -1,0 +1,91 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+@use "@/styles/mixins" as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $admin-bg;
+  padding: 24px;
+  font-family: $font-sans;
+}
+
+.card {
+  width: 100%;
+  max-width: 360px;
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-l;
+  padding: 40px 32px;
+  box-shadow: $shadow-lg;
+}
+
+.iconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-s;
+  background: $admin-accent-subtle;
+  color: $admin-accent;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-family: $font-serif;
+  font-size: 1.25rem;
+  color: $admin-text;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: $admin-text-faint;
+  margin-top: 4px;
+  margin-bottom: 28px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: $admin-text-muted;
+  margin-bottom: 16px;
+}
+
+.input {
+  border-radius: $radius-s;
+  border: 1px solid $admin-border;
+  background: $admin-bg;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: $admin-text;
+  font-family: inherit;
+
+  &:focus-visible {
+    outline: 2px solid $admin-accent;
+    outline-offset: 1px;
+  }
+}
+
+.error {
+  font-size: 0.8rem;
+  color: $admin-danger;
+  margin-bottom: 16px;
+}
+
+.submit {
+  @include button-base;
+  width: 100%;
+  background: $admin-accent;
+  color: $color-paper;
+  padding: 12px;
+  margin-top: 8px;
+
+  &:hover {
+    background: $admin-accent-hover;
+  }
+}

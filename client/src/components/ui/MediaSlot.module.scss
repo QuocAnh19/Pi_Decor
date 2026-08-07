@@ -1,0 +1,48 @@
+@use "@/styles/variables" as *;
+
+.slot {
+  position: relative;
+  overflow: hidden;
+  background: $color-paper-dim;
+}
+
+.media {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed $color-line;
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(39, 22, 32, 0.03) 0px,
+    rgba(39, 22, 32, 0.03) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  padding-inline: 16px;
+  text-align: center;
+}
+
+.placeholderIcon {
+  color: $color-ink-faint;
+}
+
+.placeholderLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $color-ink-muted;
+}
+
+.placeholderHint {
+  font-size: 0.6875rem;
+  color: $color-ink-faint;
+}

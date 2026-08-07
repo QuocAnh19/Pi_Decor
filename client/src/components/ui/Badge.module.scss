@@ -1,0 +1,26 @@
+@use "@/styles/variables" as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: $radius-pill;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ink {
+  background: $color-ink;
+  color: $color-paper;
+}
+
+.paper {
+  background: $color-paper;
+  color: $color-ink;
+  border: 1px solid $color-line;
+}
+
+.accent {
+  background: $color-accent-subtle;
+  color: $color-accent;
+}
