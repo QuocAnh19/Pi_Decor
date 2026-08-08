@@ -12,6 +12,9 @@ import { servicesRouter } from "./routes/services/index.js";
 import { venuesRouter } from "./routes/venues/index.js";
 import { authRouter } from "./routes/auth/index.js";
 import { adminRouter } from "./routes/admin/index.js";
+import { quotationsRouter } from "./routes/quotations/index.js";
+import { testimonialsRouter } from "./routes/testimonials/index.js";
+import { studioRouter } from "./routes/studio/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -42,29 +45,9 @@ app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
-// ── Rate limiting (database/SECURITY.md §5) ────────────────────────────────
-// Applied per-IP. Two separate limiters because the two endpoints have very
-// different legitimate traffic shapes: login is rare and sensitive (brute
-// force target); the public lead form is public-facing and the main spam
-// vector on this API.
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: "Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ít phút." },
-});
-
-const leadsLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau." },
-});
+import { loginLimiter } from "./middlewares/rateLimiters.js";
 
 app.use("/api/auth/login", loginLimiter);
-app.use("/api/leads", leadsLimiter);
 
 // Routes are organized by business domain, not by CRUD verb — same
 // structure as Server/routes in the Ecovera reference project (Mục 2.4 /
@@ -76,6 +59,9 @@ app.use("/api/services", servicesRouter);
 app.use("/api/venues", venuesRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/quotations", quotationsRouter);
+app.use("/api/testimonials", testimonialsRouter);
+app.use("/api/studio", studioRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Không tìm thấy route: ${req.method} ${req.path}` });
@@ -84,5 +70,6 @@ app.use((req, res) => {
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
   console.error(err);
-  res.status(err.status ?? 500).json({ message: err.message ?? "Lỗi máy chủ." });
+  const statusCode = err.http_code || err.status || (res.statusCode >= 400 ? res.statusCode : 500);
+  res.status(statusCode).json({ message: err.message ?? "Lỗi máy chủ." });
 });

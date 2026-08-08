@@ -22,10 +22,19 @@ import pg from "pg";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = path.join(__dirname, "migrations");
 
+async function client_bootstrap(pool) {
+  await pool.query(`
+    create table if not exists schema_migrations (
+      filename    text primary key,
+      applied_at  timestamptz not null default now()
+    );
+  `);
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     console.error(
-      "✗ DATABASE_URL is not set. Add it to server/.env (see .env.example) before running migrations."
+      "✗ DATABASE_URL is not set. Add it to server/.env (see .env.example) before running migrations.",
     );
     process.exit(1);
   }
@@ -39,25 +48,23 @@ async function main() {
 
   const files = (await readdir(MIGRATIONS_DIR))
     .filter((f) => f.endsWith(".sql"))
-    .sort(); // "0001_..." < "0002_..." lexicographically — keep the zero-padding
+    .sort();
 
-  // 0002_schema_migrations.sql creates the tracking table itself, so it must
-  // always run first and can't check itself. Every other file is applied
-  // only if not already recorded.
+  // Đảm bảo bảng tracking tồn tại TRƯỚC khi loop, không phụ thuộc thứ tự file
+  await client_bootstrap(pool);
+
   const client = await pool.connect();
   try {
     for (const file of files) {
       const sql = await readFile(path.join(MIGRATIONS_DIR, file), "utf-8");
 
-      if (file !== "0002_schema_migrations.sql") {
-        const { rows } = await client.query(
-          "select 1 from schema_migrations where filename = $1",
-          [file]
-        ).catch(() => ({ rows: [] })); // table may not exist yet on a brand-new DB
-        if (rows.length > 0) {
-          console.log(`· skip  ${file} (already applied)`);
-          continue;
-        }
+      const { rows } = await client.query(
+        "select 1 from schema_migrations where filename = $1",
+        [file],
+      );
+      if (rows.length > 0) {
+        console.log(`· skip  ${file} (already applied)`);
+        continue;
       }
 
       console.log(`→ apply ${file}`);
@@ -66,7 +73,7 @@ async function main() {
         await client.query(sql);
         await client.query(
           "insert into schema_migrations (filename) values ($1) on conflict do nothing",
-          [file]
+          [file],
         );
         await client.query("commit");
       } catch (err) {

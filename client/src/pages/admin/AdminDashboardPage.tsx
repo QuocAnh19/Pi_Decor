@@ -3,32 +3,27 @@ import { Link } from "react-router-dom";
 import { Users, MapPin, Palette, Sparkles, ArrowRight } from "lucide-react";
 import { useAuth } from "../../lib/authContext";
 import { api } from "../../lib/api";
-import type { AdminSummary, Venue } from "../../lib/types";
+import type { AdminSummary } from "../../lib/types";
 import styles from "./AdminDashboardPage.module.scss";
 
 /**
- * /admin — Dashboard tổng quan (M5 in the spec's milestone table). Pulls
- * counts from GET /api/admin/summary, plus a venues count from the public
- * GET /api/venues (summary doesn't include venues/projects yet).
+ * /admin — Dashboard tổng quan (M5 in the spec's milestone table).
+ * Pulls counts directly from GET /api/admin/summary.
  */
 export function AdminDashboardPage() {
   const { token, admin } = useAuth();
   const [summary, setSummary] = useState<AdminSummary | null>(null);
-  const [venues, setVenues] = useState<Venue[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   useEffect(() => {
     if (!token) return;
-    Promise.all([api.getSummary(token), api.getVenues()])
-      .then(([summaryRes, venuesRes]) => {
+    api.getSummary(token)
+      .then((summaryRes) => {
         setSummary(summaryRes);
-        setVenues(venuesRes);
         setStatus("ready");
       })
       .catch(() => setStatus("error"));
   }, [token]);
-
-  const totalProjects = venues.reduce((sum, v) => sum + v.project_count, 0);
 
   return (
     <div>
@@ -60,7 +55,7 @@ export function AdminDashboardPage() {
               <div className={styles.cardIcon}>
                 <MapPin size={18} strokeWidth={1.75} />
               </div>
-              <p className={styles.cardValue}>{venues.length}</p>
+              <p className={styles.cardValue}>{summary.venues_total}</p>
               <p className={styles.cardLabel}>Địa điểm trên Bản đồ</p>
             </Link>
 
@@ -68,7 +63,7 @@ export function AdminDashboardPage() {
               <div className={styles.cardIcon}>
                 <Palette size={18} strokeWidth={1.75} />
               </div>
-              <p className={styles.cardValue}>{totalProjects}</p>
+              <p className={styles.cardValue}>{summary.projects_published_total}</p>
               <p className={styles.cardLabel}>Dự án đã công khai</p>
             </Link>
           </div>

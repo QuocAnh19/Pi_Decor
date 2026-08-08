@@ -1,21 +1,25 @@
 import { Router } from "express";
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
+import { validate } from "../../middlewares/validate.js";
+import { loginSchema } from "../../schemas/auth.schema.js";
 
 export const authRouter = Router();
 
-// Pre-computed dummy hash to prevent timing attacks / user enumeration
 const DUMMY_HASH = bcrypt.hashSync("dummy_password_timing_protection", 10);
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// POST /api/auth/login — admin login only (no public customer accounts yet,
-// matching the current scope: the Studio doesn't require sign-in). Run
-// `npm run seed` first to create the admin row from .env.
-authRouter.post("/login", async (req, res) => {
+function hashToken(rawToken) {
+  return crypto.createHash("sha256").update(rawToken).digest("hex");
+}
+
+// POST /api/auth/login — admin login only
+authRouter.post("/login", validate(loginSchema), async (req, res) => {
   const { email, password } = req.body ?? {};
 
-  // Input sanitization & normalization
   const cleanEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
   const cleanPassword = typeof password === "string" ? password : "";
 
@@ -27,13 +31,11 @@ authRouter.post("/login", async (req, res) => {
     return res.status(400).json({ message: "Định dạng email không hợp lệ." });
   }
 
-  // Lookup admin with case-insensitive email match
   const admins = await db.get("admins");
   const admin = admins.find(
     (a) => a.email && a.email.trim().toLowerCase() === cleanEmail
   );
 
-  // Timing attack safe password verification (always executes bcrypt.compare)
   const passwordHash = admin ? admin.password_hash : DUMMY_HASH;
   const isPasswordValid = await bcrypt.compare(cleanPassword, passwordHash);
 
@@ -41,7 +43,6 @@ authRouter.post("/login", async (req, res) => {
     return res.status(401).json({ message: "Sai email hoặc mật khẩu." });
   }
 
-  // Security check for JWT Secret in Production
   const jwtSecret = process.env.JWT_SECRET ?? "dev-secret";
   if (process.env.NODE_ENV === "production" && jwtSecret === "dev-secret") {
     console.warn(
@@ -55,6 +56,72 @@ authRouter.post("/login", async (req, res) => {
     { expiresIn: process.env.JWT_EXPIRES_IN ?? "8h" }
   );
 
-  res.json({ token, admin: { id: admin.id, email: admin.email } });
+  const rawRefreshToken = crypto.randomBytes(40).toString("hex");
+  const tokenHash = hashToken(rawRefreshToken);
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  await db.insert("refresh_tokens", {
+    id: uuid(),
+    admin_id: admin.id,
+    token_hash: tokenHash,
+    expires_at: expiresAt,
+    revoked_at: null,
+    created_at: new Date().toISOString(),
+  });
+
+  res.json({
+    token,
+    refreshToken: rawRefreshToken,
+    admin: { id: admin.id, email: admin.email },
+  });
 });
 
+// POST /api/auth/refresh — get new access token via refresh token
+authRouter.post("/refresh", async (req, res) => {
+  const { refresh_token } = req.body ?? {};
+  if (!refresh_token || typeof refresh_token !== "string") {
+    return res.status(401).json({ message: "Thiếu refresh token." });
+  }
+
+  const tokenHash = hashToken(refresh_token);
+  const refreshTokens = await db.get("refresh_tokens");
+  const match = refreshTokens.find(
+    (rt) =>
+      rt.token_hash === tokenHash &&
+      !rt.revoked_at &&
+      new Date(rt.expires_at) > new Date()
+  );
+
+  if (!match) {
+    return res.status(401).json({ message: "Refresh token không hợp lệ hoặc đã hết hạn." });
+  }
+
+  const admins = await db.get("admins");
+  const admin = admins.find((a) => a.id === match.admin_id);
+  if (!admin) {
+    return res.status(401).json({ message: "Tài khoản admin không tồn tại." });
+  }
+
+  const jwtSecret = process.env.JWT_SECRET ?? "dev-secret";
+  const token = jwt.sign(
+    { sub: admin.id, email: admin.email, role: "admin" },
+    jwtSecret,
+    { expiresIn: process.env.JWT_EXPIRES_IN ?? "8h" }
+  );
+
+  res.json({ token });
+});
+
+// POST /api/auth/logout — revoke refresh token
+authRouter.post("/logout", async (req, res) => {
+  const { refresh_token } = req.body ?? {};
+  if (refresh_token && typeof refresh_token === "string") {
+    const tokenHash = hashToken(refresh_token);
+    await db.update(
+      "refresh_tokens",
+      (rt) => rt.token_hash === tokenHash,
+      { revoked_at: new Date().toISOString() }
+    );
+  }
+  res.json({ message: "Đã đăng xuất thành công." });
+});

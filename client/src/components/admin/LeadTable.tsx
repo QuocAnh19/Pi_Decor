@@ -15,12 +15,13 @@ const statusClass: Record<LeadStatus, string> = {
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("vi-VN", {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
@@ -43,7 +44,7 @@ export function LeadTable({ leads, onSelect, onStatusChange }: LeadTableProps) {
             <th>Ngày gửi</th>
             <th>Khách hàng</th>
             <th>Liên hệ</th>
-            <th>Ngày cưới</th>
+            <th>Ngày dự kiến</th>
             <th></th>
             <th>Trạng thái</th>
           </tr>
@@ -61,7 +62,7 @@ export function LeadTable({ leads, onSelect, onStatusChange }: LeadTableProps) {
                 <div>{lead.phone}</div>
                 {lead.email && <div className={styles.email}>{lead.email}</div>}
               </td>
-              <td className={styles.dim}>{lead.wedding_date ?? "—"}</td>
+              <td className={styles.dim}>{lead.wedding_date ? formatDate(lead.wedding_date) : "—"}</td>
               <td>
                 {lead.design_snapshot && (
                   <span className={styles.snapshotTag} title="Có kèm thiết kế từ Studio">

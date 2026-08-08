@@ -48,7 +48,12 @@ database/
     ├── 0008_venues.sql
     ├── 0009_projects.sql
     ├── 0010_updated_at_trigger.sql
-    └── 0011_views.sql
+    ├── 0011_views.sql
+    ├── 0012_media_assets.sql
+    ├── 0013_lead_activities.sql
+    ├── 0014_quotations.sql
+    ├── 0015_testimonials.sql
+    └── 0016_studio_templates.sql
 ```
 
 Each file is numbered and runs in that exact order — `0005_designs.sql`
@@ -58,15 +63,24 @@ having to open the file.
 
 ## How the tables map to the app
 
-| Table       | Route file                          | Notes |
-|-------------|--------------------------------------|-------|
-| `admins`    | `routes/auth/index.js`               | 1 row today — see `PiDecor_AdminPanel.md` §2 |
-| `leads`     | `routes/leads/index.js`              | Footer form + Studio export |
-| `designs`   | `routes/designs/index.js`            | Saved Konva canvas states, FK → `leads` |
-| `materials` | `routes/materials/index.js`          | API exists; no admin UI screen yet |
-| `services`  | `routes/services/index.js`           | Bento Services grid content |
-| `venues`    | `routes/venues/index.js`             | Map pins |
-| `projects`  | `routes/venues/index.js`             | Case studies nested under a venue, FK → `venues`, optional FK → `leads` |
+| Table                     | Route file                           | Notes |
+|---------------------------|--------------------------------------|-------|
+| `admins`                  | `routes/auth/index.js`               | 1 row today — see `PiDecor_AdminPanel.md` §2 |
+| `leads`                   | `routes/leads/index.js`              | Footer form + Studio export |
+| `designs`                 | `routes/designs/index.js`            | Saved Konva canvas states, FK → `leads` |
+| `materials`               | `routes/materials/index.js`          | API exists; no admin UI screen yet |
+| `services`                | `routes/services/index.js`           | Bento Services grid content |
+| `venues`                  | `routes/venues/index.js`             | Map pins |
+| `projects`                | `routes/venues/index.js`             | Case studies nested under a venue, FK → `venues`, optional FK → `leads` |
+| `media_assets`            | `utils/uploadImage.js`               | Track uploaded images/assets across entity types |
+| `lead_activities`         | `routes/leads/index.js`              | Timeline activities and status logs for leads |
+| `quotations`              | `routes/quotations/index.js`         | Quotation records generated for leads |
+| `testimonials`            | `routes/testimonials/index.js`       | Customer testimonials and moderation status |
+| `studio_templates`        | `routes/studio/index.js`             | Interactive studio canvas background templates |
+| `studio_slot_definitions` | `routes/studio/index.js`             | Template slot position & type definitions |
+| `studio_assets`           | `routes/studio/index.js`             | Shared studio asset catalog |
+| `studio_slot_rules`       | `routes/studio/index.js`             | Template conditional slot rules |
+| `refresh_tokens`          | `routes/auth/index.js`               | Admin JWT refresh token hashes for session renewal |
 
 ## Kết nối Postgres — hướng dẫn từng bước
 

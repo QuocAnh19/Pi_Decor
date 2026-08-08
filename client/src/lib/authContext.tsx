@@ -2,39 +2,29 @@ import { createContext, ReactNode, useContext, useEffect, useMemo, useState } fr
 import { api } from "./api";
 import type { Admin } from "./types";
 
-/**
- * authContext — the one place that knows the admin is logged in.
- *
- * Deliberately tiny: there's exactly one account type in this app (see
- * PiDecor_AdminPanel.md §2), so this holds a single { token, admin } pair,
- * not a generic multi-role user object. Token lives in localStorage so a
- * page refresh on /admin doesn't bounce the admin back to /admin/login —
- * see §7 of the spec for the tradeoff that comes with that (XSS exposure vs
- * a real httpOnly cookie), accepted for now at "1 admin" scale.
- */
-
 const STORAGE_KEY = "pidecor_admin_auth";
 
 interface StoredAuth {
   token: string;
+  refreshToken?: string;
   admin: Admin;
 }
 
 interface AuthContextValue {
   token: string | null;
+  refreshToken: string | null;
   admin: Admin | null;
-  /** False until the initial localStorage read has happened — used by
-   * AdminGuard to avoid a flash-redirect to /login before we've had a
-   * chance to check for an existing session. */
   isReady: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateToken: (newToken: string) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [isReady, setIsReady] = useState(false);
 
@@ -45,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const parsed = JSON.parse(raw) as StoredAuth;
         if (parsed.token && parsed.admin) {
           setToken(parsed.token);
+          if (parsed.refreshToken) setRefreshToken(parsed.refreshToken);
           setAdmin(parsed.admin);
         }
       } catch {
@@ -57,19 +48,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const res = await api.adminLogin({ email, password });
     setToken(res.token);
+    if (res.refreshToken) setRefreshToken(res.refreshToken);
     setAdmin(res.admin);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(res));
   }
 
+  function updateToken(newToken: string) {
+    setToken(newToken);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as StoredAuth;
+        parsed.token = newToken;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   function logout() {
+    if (refreshToken) {
+      api.logout(refreshToken).catch(() => {});
+    }
     setToken(null);
+    setRefreshToken(null);
     setAdmin(null);
     localStorage.removeItem(STORAGE_KEY);
   }
 
   const value = useMemo(
-    () => ({ token, admin, isReady, login, logout }),
-    [token, admin, isReady]
+    () => ({ token, refreshToken, admin, isReady, login, logout, updateToken }),
+    [token, refreshToken, admin, isReady]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -84,12 +84,52 @@ const TABLES = {
     "id", "venue_id", "title", "wedding_date", "style_tags", "cover_image",
     "gallery", "lead_id", "published", "created_at", "updated_at",
   ],
+  media_assets: [
+    "id", "entity_type", "entity_id", "url", "provider", "public_id",
+    "width", "height", "format", "bytes", "created_at",
+  ],
+  lead_activities: [
+    "id", "lead_id", "admin_id", "activity_type", "body", "metadata", "created_at",
+  ],
+  quotations: [
+    "id", "lead_id", "admin_id", "quotation_number", "items", "subtotal",
+    "discount", "total", "status", "valid_until", "notes",
+    "created_at", "updated_at",
+  ],
+  testimonials: [
+    "id", "lead_id", "author", "role", "quote", "rating", "photos",
+    "status", "source", "created_at", "updated_at",
+  ],
+  studio_templates: [
+    "id", "name", "thumbnail", "svg_base", "category", "is_active",
+    "created_at", "updated_at",
+  ],
+  studio_slot_definitions: [
+    "id", "template_id", "slot_key", "label", "slot_type", "norm_x", "norm_y",
+    "norm_width", "norm_height", "allow_scale", "allow_rotate", "mirror_x",
+    "z_index", "sort_order", "required",
+  ],
+  studio_assets: [
+    "id", "asset_type", "name", "thumbnail", "svg_data", "color_hex",
+    "font_family", "tags", "is_active", "dominant_colors",
+    "created_at", "updated_at",
+  ],
+  studio_slot_rules: [
+    "id", "template_id", "rule_name", "condition_slot", "condition_value",
+    "target_slot", "action", "action_value", "priority",
+  ],
+  refresh_tokens: [
+    "id", "admin_id", "token_hash", "expires_at", "revoked_at", "created_at",
+  ],
 };
 
 // jsonb columns need JSON.stringify() before going over the wire; pg does
 // NOT do this automatically for plain JS objects/arrays bound as query
 // params (it only auto-parses jsonb coming *back* from the database).
-const JSONB_COLUMNS = new Set(["design_snapshot", "layers", "gallery"]);
+const JSONB_COLUMNS = new Set([
+  "design_snapshot", "layers", "gallery", "metadata", "items", "photos",
+  "tags", "dominant_colors", "condition_value", "action_value",
+]);
 
 function assertKnownTable(table) {
   if (!TABLES[table]) {

@@ -4,9 +4,7 @@ import { db } from "../../config/database.js";
 
 export const designsRouter = Router();
 
-// POST /api/designs — save a full layer set (from the Konva/Zustand store)
-// tied to a lead, so a customer can come back and keep editing instead of
-// only ever exporting a one-shot PNG/PDF (Mục 3.2 of the technical proposal).
+// POST /api/designs — save a full layer set tied to a lead
 designsRouter.post("/", async (req, res) => {
   const { lead_id, layers, thumbnail_url } = req.body ?? {};
   if (!lead_id || !Array.isArray(layers)) {
@@ -21,6 +19,22 @@ designsRouter.post("/", async (req, res) => {
     created_at: new Date().toISOString(),
   };
   await db.insert("designs", design);
+
+  // Automatically log a design_saved activity for this lead
+  try {
+    await db.insert("lead_activities", {
+      id: uuid(),
+      lead_id,
+      admin_id: null,
+      activity_type: "design_saved",
+      body: "Khách hàng đã lưu phối cảnh thiết kế mới",
+      metadata: { design_id: design.id },
+      created_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn("Failed to insert design_saved lead_activity:", err);
+  }
+
   res.status(201).json(design);
 });
 

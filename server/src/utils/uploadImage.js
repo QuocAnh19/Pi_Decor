@@ -1,37 +1,53 @@
+import "dotenv/config";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import { v4 as uuid } from "uuid";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-/**
- * utils/uploadImage.js
- * ─────────────────────
- * Ecovera writes uploads straight to Server/src/uploads via Multer's disk
- * storage — fine on a machine with a persistent disk, but the technical
- * proposal (Mục 2.5 / Mục 5) calls this out as the one pattern NOT to
- * repeat, because Render Free's filesystem is wiped on every restart.
- *
- * This file keeps the same Multer-based call signature so routes don't
- * change, but isolates the storage engine in one place. Today it writes to
- * local disk (great for local dev). Before deploying to Render, swap the
- * `storage` below for `multer-storage-cloudinary` (or stream `req.file.buffer`
- * to the Cloudinary SDK with `multer.memoryStorage()`) — nothing else in the
- * codebase needs to change.
- */
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOAD_DIR = path.join(__dirname, "..", "..", "uploads");
 
-const storage = multer.diskStorage({
-  destination: UPLOAD_DIR,
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${uuid()}${ext}`);
-  },
-});
+const hasCloudinary = Boolean(
+  process.env.CLOUDINARY_CLOUD_NAME &&
+  process.env.CLOUDINARY_API_KEY &&
+  process.env.CLOUDINARY_API_SECRET
+);
+
+let storage;
+
+if (hasCloudinary) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+
+  storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "pidecor",
+      resource_type: "auto",
+    },
+  });
+
+  console.log(`[uploadImage.js] Using Cloudinary Storage (${process.env.CLOUDINARY_CLOUD_NAME}).`);
+} else {
+  storage = multer.diskStorage({
+    destination: UPLOAD_DIR,
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${uuid()}${ext}`);
+    },
+  });
+
+  console.log("[uploadImage.js] Cloudinary credentials not set — using local disk storage.");
+}
 
 export const uploadImage = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
       return cb(new Error("Chỉ chấp nhận file ảnh."));
@@ -40,7 +56,29 @@ export const uploadImage = multer({
   },
 });
 
-/** Builds the public URL for a file saved by the storage engine above. */
-export function publicUrlFor(req, filename) {
-  return `${req.protocol}://${req.get("host")}/uploads/${filename}`;
+/** Builds the public URL for a saved file (Cloudinary secure_url or local disk static path). */
+export function publicUrlFor(req, filenameOrFile) {
+  if (!filenameOrFile) return null;
+
+  if (typeof filenameOrFile === "object" && filenameOrFile !== null) {
+    if (filenameOrFile.path && filenameOrFile.path.startsWith("http")) {
+      return filenameOrFile.path;
+    }
+    if (filenameOrFile.secure_url) {
+      return filenameOrFile.secure_url;
+    }
+    if (filenameOrFile.filename) {
+      filenameOrFile = filenameOrFile.filename;
+    }
+  }
+
+  if (typeof filenameOrFile === "string" && filenameOrFile.startsWith("http")) {
+    return filenameOrFile;
+  }
+
+  if (hasCloudinary && typeof filenameOrFile === "string" && filenameOrFile.length > 0) {
+    return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${filenameOrFile}`;
+  }
+
+  return `${req.protocol}://${req.get("host")}/uploads/${filenameOrFile}`;
 }

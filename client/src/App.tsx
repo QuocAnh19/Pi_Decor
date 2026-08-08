@@ -11,6 +11,8 @@ import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import { AdminLeadsPage } from "./pages/admin/AdminLeadsPage";
 import { AdminProjectsPage } from "./pages/admin/AdminProjectsPage";
 import { AdminVenuesPage } from "./pages/admin/AdminVenuesPage";
+import { AdminMaterialsPage } from "./pages/admin/AdminMaterialsPage";
+import { AdminTestimonialsPage } from "./pages/admin/AdminTestimonialsPage";
 import { AdminStudioPage } from "./pages/admin/AdminStudioPage";
 import styles from "./App.module.scss";
 
@@ -49,6 +51,8 @@ export default function App() {
           <Route path="leads" element={<AdminLeadsPage />} />
           <Route path="projects" element={<AdminProjectsPage />} />
           <Route path="venues" element={<AdminVenuesPage />} />
+          <Route path="materials" element={<AdminMaterialsPage />} />
+          <Route path="testimonials" element={<AdminTestimonialsPage />} />
         </Route>
         {/* Full-screen editor route for Admin Studio Builder (outside AdminLayout sidebar) */}
         <Route path="studio" element={<AdminStudioPage />} />

@@ -77,6 +77,18 @@ export interface HeroMedia {
   alt: string;
 }
 
+// ── Materials Catalog ──────────────────────────────────────────────────
+
+export interface MaterialItem {
+  id: string;
+  name: string;
+  category: string;
+  color_hex: string | null;
+  image_url: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 // ── Bản đồ dự án đã thực hiện (PiDecor_MappingProject.md) ──────────────────
 
 export type VenueType = "hotel" | "restaurant" | "resort" | "sảnh tiệc";
@@ -148,12 +160,21 @@ export interface Lead {
   created_at: string;
 }
 
+export interface PaginatedLeadsResponse {
+  data: Lead[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface AdminSummary {
   leads_total: number;
   leads_new: number;
   designs_total: number;
   materials_total: number;
   services_total: number;
+  venues_total: number;
+  projects_published_total: number;
 }
 
 export interface VenuePayload {
@@ -174,4 +195,139 @@ export interface ProjectPayload {
   gallery?: string[];
   lead_id?: string | null;
   published?: boolean;
+}
+
+// ── Lead Activities Timeline ─────────────────────────────────────────────
+
+export type ActivityType = "status_change" | "note" | "call" | "email" | "quotation_sent" | "design_saved";
+
+export interface LeadActivity {
+  id: string;
+  lead_id: string;
+  admin_id: string | null;
+  activity_type: ActivityType;
+  body: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+// ── Quotations ────────────────────────────────────────────────────────────
+
+export type QuotationStatus = "draft" | "sent" | "accepted" | "declined" | "expired";
+
+export interface QuotationItem {
+  description: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+}
+
+export interface Quotation {
+  id: string;
+  lead_id: string;
+  admin_id: string | null;
+  quotation_number: string;
+  items: QuotationItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  status: QuotationStatus;
+  valid_until: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuotationPayload {
+  lead_id: string;
+  items: Omit<QuotationItem, "subtotal">[];
+  discount?: number;
+  valid_until?: string | null;
+  notes?: string | null;
+}
+
+// ── Testimonials & Moderation ────────────────────────────────────────────
+
+export type TestimonialStatus = "pending" | "approved" | "rejected";
+export type TestimonialSource = "customer" | "admin_seed";
+
+export interface TestimonialItem {
+  id: string;
+  lead_id?: string | null;
+  author: string;
+  role?: string | null;
+  quote: string;
+  rating: number;
+  photos: string[];
+  status?: TestimonialStatus;
+  source?: TestimonialSource;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface TestimonialPayload {
+  author: string;
+  role?: string;
+  quote: string;
+  rating?: number;
+  photos?: string[];
+  lead_id?: string;
+}
+
+// ── Studio DB Rows (Backend Response Shapes) ──────────────────────────────
+
+export interface StudioTemplateRow {
+  id: string;
+  name: string;
+  thumbnail: string | null;
+  svg_base: string;
+  category: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudioSlotDefinitionRow {
+  id: string;
+  template_id: string;
+  slot_key: string;
+  label: string;
+  slot_type: string;
+  norm_x: number;
+  norm_y: number;
+  norm_width: number | null;
+  norm_height: number | null;
+  allow_scale: boolean;
+  allow_rotate: boolean;
+  mirror_x: boolean;
+  z_index: number;
+  sort_order: number;
+  required: boolean;
+}
+
+export interface StudioAssetRow {
+  id: string;
+  asset_type: string;
+  name: string;
+  thumbnail: string | null;
+  svg_data: string | null;
+  color_hex: string | null;
+  font_family: string | null;
+  tags: string[];
+  is_active: boolean;
+  dominant_colors: string[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudioSlotRuleRow {
+  id: string;
+  template_id: string;
+  rule_name: string | null;
+  condition_slot: string;
+  condition_value: Record<string, unknown>;
+  target_slot: string;
+  action: "force_asset" | "restrict_assets" | "hide_slot";
+  action_value: Record<string, unknown> | null;
+  priority: number;
 }

@@ -19,6 +19,7 @@ import { SlotMarker } from '../admin/SlotMarker'
 import { AssetPicker } from './AssetPicker'
 import { DraggableAsset } from './DraggableAsset'
 import { SaveBar } from './SaveBar'
+import { SaveDesignModal } from './SaveDesignModal'
 import { TemplateSelectorModal } from './TemplateSelectorModal'
 import { AddSlotModal } from '../admin/AddSlotModal'
 import { svgToNormalized } from '../../utils/coordinates'
@@ -41,6 +42,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
   const [mode, setMode] = useState<'published' | 'scratch'>('published')
   const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(true)
   const [isAddSlotOpen, setIsAddSlotOpen] = useState<boolean>(false)
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false)
   const [initialClickNorm, setInitialClickNorm] = useState<{ normX: number; normY: number } | undefined>(undefined)
 
   // Load published template data from localStorage if available, fallback to seed data
@@ -412,12 +414,19 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
 
             <SaveBar
               onSaveDraft={() => console.log('Draft saved to localStorage')}
-              onSaveFinal={() => console.log('Final design saved:', slotConfig)}
+              onSaveFinal={() => setIsSaveModalOpen(true)}
               onExportPDF={() => console.log('Export PDF triggered')}
               isDirty={isDirty}
             />
           </div>
         </header>
+
+        {/* Save Design Modal */}
+        <SaveDesignModal
+          isOpen={isSaveModalOpen}
+          onClose={() => setIsSaveModalOpen(false)}
+          slotConfig={slotConfig}
+        />
 
         {/* Main Work Area: 3-Column Layout (Left Slots Sidebar | Center Demo Canvas | Right Customizer Inspector) */}
         <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr 340px', gap: '16px', flex: 1, alignItems: 'start' }}>

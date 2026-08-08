@@ -160,3 +160,113 @@
 .snapshotValue {
   color: $admin-text;
 }
+
+// ── Timeline & Activities ──────────────────────────────────────────────────
+
+.timelineList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  border-radius: $radius-s;
+  font-size: 0.8125rem;
+}
+
+.timelineIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: $admin-surface-raised;
+  color: $admin-accent;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.timelineBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timelineHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.timelineType {
+  font-weight: 600;
+  color: $admin-text;
+  font-size: 0.8rem;
+}
+
+.timelineTime {
+  font-size: 0.7rem;
+  color: $admin-text-faint;
+}
+
+.timelineContent {
+  color: $admin-text-muted;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.noteForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.noteTextarea {
+  width: 100%;
+  min-height: 64px;
+  padding: 8px 10px;
+  border: 1px solid $admin-border;
+  border-radius: $radius-s;
+  background: $admin-surface;
+  color: $admin-text;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    border-color: $admin-accent;
+  }
+}
+
+.noteSubmitBtn {
+  align-self: flex-end;
+  padding: 6px 14px;
+  background: $admin-accent;
+  color: #ffffff;
+  border: none;
+  border-radius: $radius-s;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+

@@ -1,11 +1,44 @@
-import { X, Phone, Mail, CalendarHeart, MessageSquare } from "lucide-react";
-import type { Lead, LeadStatus } from "../../lib/types";
+import React, { useEffect, useState } from "react";
+import {
+  X,
+  Phone,
+  Mail,
+  CalendarHeart,
+  MessageSquare,
+  ArrowRightLeft,
+  StickyNote,
+  FileText,
+  Palette,
+  Clock,
+} from "lucide-react";
+import { api } from "../../lib/api";
+import { useAuth } from "../../lib/authContext";
+import { QuotationModal } from "./QuotationModal";
+import type { ActivityType, Lead, LeadActivity, LeadStatus } from "../../lib/types";
 import styles from "./LeadDetailDrawer.module.scss";
 
 const statusLabel: Record<LeadStatus, string> = {
   new: "Mới",
   contacted: "Đã liên hệ",
   closed: "Đã chốt",
+};
+
+const activityTypeLabel: Record<ActivityType, string> = {
+  status_change: "Đổi trạng thái",
+  note: "Ghi chú",
+  call: "Cuộc gọi",
+  email: "Email",
+  quotation_sent: "Gửi báo giá",
+  design_saved: "Lưu phối cảnh",
+};
+
+const activityIconMap: Record<ActivityType, React.ElementType> = {
+  status_change: ArrowRightLeft,
+  note: StickyNote,
+  call: Phone,
+  email: Mail,
+  quotation_sent: FileText,
+  design_saved: Palette,
 };
 
 function formatDate(iso: string) {
@@ -25,15 +58,59 @@ interface LeadDetailDrawerProps {
 }
 
 /**
- * Slide-in drawer for one lead — includes design_snapshot playback (§4 of
- * the spec: "hiện lại đúng vải/rèm/hoa/chi tiết khách đã chọn trong
- * Studio") for leads that came from the Studio's "Lưu thiết kế" flow.
+ * Slide-in drawer for one lead — includes design_snapshot playback and activity timeline.
  */
 export function LeadDetailDrawer({ lead, onClose, onStatusChange }: LeadDetailDrawerProps) {
+  const { token } = useAuth();
+  const [activities, setActivities] = useState<LeadActivity[]>([]);
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+  const [noteBody, setNoteBody] = useState("");
+  const [submittingNote, setSubmittingNote] = useState(false);
+  const [quotationModalOpen, setQuotationModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!lead || !token) return;
+    setActivitiesLoading(true);
+    api
+      .getLeadActivities(lead.id, token)
+      .then(setActivities)
+      .catch((err) => console.warn("Failed to load activities:", err))
+      .finally(() => setActivitiesLoading(false));
+  }, [lead?.id, token]);
+
   if (!lead) return null;
 
   const snapshot = lead.design_snapshot;
   const flowerEntries = snapshot ? Object.entries(snapshot.flowers).filter(([, v]) => v) : [];
+
+  async function handleAddNote(e: React.FormEvent) {
+    e.preventDefault();
+    if (!lead || !token || !noteBody.trim()) return;
+
+    setSubmittingNote(true);
+    try {
+      const newAct = await api.addLeadActivity(
+        lead.id,
+        { activity_type: "note", body: noteBody.trim() },
+        token
+      );
+      setActivities((prev) => [newAct, ...prev]);
+      setNoteBody("");
+    } catch (err) {
+      console.error("Failed to add note activity:", err);
+    } finally {
+      setSubmittingNote(false);
+    }
+  }
+
+  function renderActivityContent(act: LeadActivity) {
+    if (act.activity_type === "status_change" && act.metadata?.from && act.metadata?.to) {
+      const fromText = statusLabel[act.metadata.from as LeadStatus] ?? act.metadata.from;
+      const toText = statusLabel[act.metadata.to as LeadStatus] ?? act.metadata.to;
+      return `Trạng thái chuyển từ "${fromText}" sang "${toText}"`;
+    }
+    return act.body ?? "—";
+  }
 
   return (
     <>
@@ -145,8 +222,86 @@ export function LeadDetailDrawer({ lead, onClose, onStatusChange }: LeadDetailDr
               )}
             </section>
           )}
+
+          <section className={styles.section}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <p className={styles.sectionTitle} style={{ margin: 0 }}>Báo giá dịch vụ</p>
+              <button
+                type="button"
+                className={styles.statusButton}
+                style={{ flex: "none", padding: "6px 12px", background: "#7c3aed", color: "#fff", borderColor: "#7c3aed", cursor: "pointer" }}
+                onClick={() => setQuotationModalOpen(true)}
+              >
+                + Tạo báo giá
+              </button>
+            </div>
+          </section>
+
+          {/* Timeline & Lead Activities */}
+          <section className={styles.section}>
+            <p className={styles.sectionTitle}>
+              <Clock size={13} strokeWidth={1.75} /> Timeline hoạt động
+            </p>
+
+            {activitiesLoading ? (
+              <p className={styles.timelineContent}>Đang tải timeline...</p>
+            ) : activities.length === 0 ? (
+              <p className={styles.timelineContent}>Chưa có lịch sử hoạt động.</p>
+            ) : (
+              <div className={styles.timelineList}>
+                {activities.map((act) => {
+                  const IconComp = activityIconMap[act.activity_type] ?? Clock;
+                  return (
+                    <div key={act.id} className={styles.timelineItem}>
+                      <div className={styles.timelineIcon}>
+                        <IconComp size={14} strokeWidth={1.75} />
+                      </div>
+                      <div className={styles.timelineBody}>
+                        <div className={styles.timelineHeader}>
+                          <span className={styles.timelineType}>
+                            {activityTypeLabel[act.activity_type] ?? act.activity_type}
+                          </span>
+                          <span className={styles.timelineTime}>{formatDate(act.created_at)}</span>
+                        </div>
+                        <div className={styles.timelineContent}>{renderActivityContent(act)}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Note form */}
+            <form className={styles.noteForm} onSubmit={handleAddNote}>
+              <textarea
+                className={styles.noteTextarea}
+                placeholder="Thêm ghi chú riêng cho lead này..."
+                value={noteBody}
+                onChange={(e) => setNoteBody(e.target.value)}
+              />
+              <button
+                type="submit"
+                className={styles.noteSubmitBtn}
+                disabled={submittingNote || !noteBody.trim()}
+              >
+                {submittingNote ? "Đang gửi..." : "Ghi chú"}
+              </button>
+            </form>
+          </section>
         </div>
       </aside>
+
+      {quotationModalOpen && (
+        <QuotationModal
+          lead={lead}
+          onClose={() => setQuotationModalOpen(false)}
+          onSaved={() => {
+            if (token) {
+              api.getLeadActivities(lead.id, token).then(setActivities).catch(() => {});
+            }
+          }}
+        />
+      )}
     </>
   );
 }

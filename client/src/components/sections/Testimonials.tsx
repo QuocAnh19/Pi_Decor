@@ -9,104 +9,15 @@ import {
 } from "lucide-react";
 import { Container, Section, SectionHeader } from "../ui/Layout";
 import { Reveal } from "../ui/Reveal";
+import { api } from "../../lib/api";
+import type { TestimonialItem } from "../../lib/types";
 import styles from "./Testimonials.module.scss";
-
-export interface TestimonialItem {
-  id: string;
-  quote: string;
-  author: string;
-  role: string;
-  rating?: number;
-  photos?: string[];
-  isNew?: boolean;
-}
-
-const STORAGE_KEY = "pidecor_customer_reviews";
-
-// Expanded initial seed list with photos & 5-star ratings
-const INITIAL_TESTIMONIALS: TestimonialItem[] = [
-  {
-    id: "t1",
-    quote:
-      "Mình tự tay thử màu vải & phối cụm hoa trên Studio trước cả tuần, đến ngày cưới trang trí đúng y như hình dung 100%. Rất chỉn chu!",
-    author: "Thu Hà",
-    role: "Cô dâu, TP.HCM · PiWedding",
-    rating: 5,
-    photos: [
-      "https://images.unsplash.com/photo-1519741497674-611481863552?w=400",
-      "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=400",
-    ],
-  },
-  {
-    id: "t2",
-    quote:
-      "Đặt tiệc thôi nôi cho con mà vẫn chọn được đúng tông màu pastel ngọt ngào mình thích. Đội ngũ thi công cực kỳ thân thiện và đúng giờ.",
-    author: "Minh & Anh",
-    role: "Ba mẹ bé Tôm, Hà Nội · PiKids",
-    rating: 5,
-    photos: [
-      "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=400",
-    ],
-  },
-  {
-    id: "t3",
-    quote:
-      "Đội thi công dựng đúng 100% timeline sự kiện khai trương, không lệch một khâu nào. Backdrop rực rỡ thu hút rất nhiều khách check-in.",
-    author: "Ngọc Linh",
-    role: "Quản lý thương hiệu, Đà Nẵng · PiEvent",
-    rating: 5,
-    photos: [
-      "https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400",
-      "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=400",
-    ],
-  },
-  {
-    id: "t4",
-    quote:
-      "Gia tiên tông sen hồng đẹp ngoài sức mong đợi! Mẹ mình khen hết lời vì vừa truyền thống lại vừa hiện đại, tinh tế.",
-    author: "Thanh Hằng & Đức Dũng",
-    role: "Cô dâu & Chú rể, Đà Nẵng · PiWedding",
-    rating: 5,
-    photos: [
-      "https://images.unsplash.com/photo-1520854221256-17451cc331bf?w=400",
-    ],
-  },
-  {
-    id: "t5",
-    quote:
-      "Trang trí tiệc sinh nhật 1 tuổi cho bé cực xinh! Màu bóng và hoa giả phối vô cùng tự nhiên, chụp hình góc nào cũng ăn ảnh.",
-    author: "Phương Anh",
-    role: "Mẹ bé Bống, Hội An · PiKids",
-    rating: 5,
-  },
-  {
-    id: "t6",
-    quote:
-      "Tiệc Gala Year End Party được Pi Decor làm backdrop hoành tráng. Rất hài lòng với sự chuyên nghiệp của các bạn!",
-    author: "Hoàng Nam",
-    role: "Giám đốc sự kiện, Đà Nẵng · PiEvent",
-    rating: 5,
-  },
-];
 
 const avatarClasses = [styles.avatarRose, styles.avatarSage, styles.avatarSand];
 
 export function Testimonials() {
-  const [reviews, setReviews] = useState<TestimonialItem[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to load customer reviews from localStorage", e);
-    }
-    return INITIAL_TESTIMONIALS;
-  });
-
+  const [reviews, setReviews] = useState<TestimonialItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [visibleCount, setVisibleCount] = useState<number>(3);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
@@ -117,18 +28,19 @@ export function Testimonials() {
   const [rating, setRating] = useState<number>(5);
   const [quoteText, setQuoteText] = useState("");
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
-  // Save to localStorage whenever reviews update
+  // Fetch approved testimonials from backend API
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
-    } catch (e) {
-      console.warn("Failed to save customer reviews to localStorage", e);
-    }
-  }, [reviews]);
+    api
+      .getTestimonials()
+      .then((data) => setReviews(data))
+      .catch((err) => console.warn("Failed to load approved testimonials:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Handle uploading photos (Max 3 photos)
   const handlePhotoUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -148,10 +60,12 @@ export function Testimonials() {
         return;
       }
 
+      setPhotoFiles((prev) => [...prev, file]);
+
       const reader = new FileReader();
       reader.onload = () => {
         if (reader.result) {
-          setSelectedPhotos((prev: string[]) => {
+          setSelectedPhotos((prev) => {
             if (prev.length >= 3) return prev;
             return [...prev, reader.result as string];
           });
@@ -162,38 +76,54 @@ export function Testimonials() {
   };
 
   const handleRemovePhoto = (index: number) => {
-    setSelectedPhotos((prev: string[]) =>
-      prev.filter((_, i: number) => i !== index),
-    );
+    setSelectedPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotoFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmitReview = (e: FormEvent) => {
+  const handleSubmitReview = async (e: FormEvent) => {
     e.preventDefault();
     if (!authorName.trim() || !quoteText.trim()) {
       alert("Vui lòng nhập họ tên và nội dung cảm nhận!");
       return;
     }
 
-    const newReview: TestimonialItem = {
-      id: `rev-${Date.now()}`,
-      author: authorName.trim(),
-      role: roleText.trim(),
-      quote: quoteText.trim(),
-      rating,
-      photos: selectedPhotos.length > 0 ? selectedPhotos : undefined,
-      isNew: true,
-    };
+    setSubmitting(true);
+    try {
+      if (photoFiles.length > 0) {
+        const formData = new FormData();
+        formData.append("author", authorName.trim());
+        formData.append("role", roleText.trim());
+        formData.append("quote", quoteText.trim());
+        formData.append("rating", String(rating));
+        photoFiles.forEach((file) => formData.append("photos", file));
 
-    setReviews((prev: TestimonialItem[]) => [newReview, ...prev]);
-    setIsModalOpen(false);
+        await api.submitTestimonial(formData);
+      } else {
+        await api.submitTestimonial({
+          author: authorName.trim(),
+          role: roleText.trim(),
+          quote: quoteText.trim(),
+          rating,
+          photos: [],
+        });
+      }
 
-    // Reset Form
-    setAuthorName("");
-    setRoleText("Cô dâu / Chú rể · PiWedding");
-    setRating(5);
-    setQuoteText("");
-    setSelectedPhotos([]);
-    setUploadError(null);
+      alert("Cảm ơn bạn! Đánh giá đang được xem xét và sẽ hiển thị sau khi duyệt.");
+      setIsModalOpen(false);
+
+      // Reset Form
+      setAuthorName("");
+      setRoleText("Cô dâu / Chú rể · PiWedding");
+      setRating(5);
+      setQuoteText("");
+      setSelectedPhotos([]);
+      setPhotoFiles([]);
+      setUploadError(null);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Gửi đánh giá thất bại.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const isExpanded = visibleCount >= reviews.length;
@@ -220,26 +150,22 @@ export function Testimonials() {
         </div>
 
         {/* Testimonials Grid */}
-        <div className={styles.grid}>
-          {reviews
-            .slice(0, visibleCount)
-            .map((t: TestimonialItem, i: number) => (
+        {loading ? (
+          <p style={{ textAlign: "center", color: "#64748b", padding: "2rem 0" }}>Đang tải đánh giá...</p>
+        ) : reviews.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#64748b", padding: "2rem 0" }}>Chưa có đánh giá nào được duyệt.</p>
+        ) : (
+          <div className={styles.grid}>
+            {reviews.slice(0, visibleCount).map((t: TestimonialItem, i: number) => (
               <Reveal key={t.id} delay={(i % 3) * 80}>
                 <figure className={styles.card}>
                   <span className={styles.quoteMark}>“</span>
 
                   {/* Stars */}
                   <div className={styles.starsRow}>
-                    {Array.from({ length: t.rating || 5 }).map(
-                      (_, idx: number) => (
-                        <Star
-                          key={idx}
-                          size={14}
-                          fill="#f59e0b"
-                          color="#f59e0b"
-                        />
-                      ),
-                    )}
+                    {Array.from({ length: t.rating || 5 }).map((_, idx: number) => (
+                      <Star key={idx} size={14} fill="#f59e0b" color="#f59e0b" />
+                    ))}
                   </div>
 
                   <blockquote className={styles.quote}>{t.quote}</blockquote>
@@ -247,41 +173,33 @@ export function Testimonials() {
                   {/* Up to 3 Small Photos Attachment Row */}
                   {t.photos && t.photos.length > 0 && (
                     <div className={styles.photosRow}>
-                      {t.photos
-                        .slice(0, 3)
-                        .map((photoUrl: string, pIdx: number) => (
-                          <img
-                            key={pIdx}
-                            src={photoUrl}
-                            alt={`Ảnh đánh giá ${pIdx + 1}`}
-                            className={styles.photoThumb}
-                            onClick={() => setLightboxImg(photoUrl)}
-                            title="Click để phóng to ảnh"
-                          />
-                        ))}
+                      {t.photos.slice(0, 3).map((photoUrl: string, pIdx: number) => (
+                        <img
+                          key={pIdx}
+                          src={photoUrl}
+                          alt={`Ảnh đánh giá ${pIdx + 1}`}
+                          className={styles.photoThumb}
+                          onClick={() => setLightboxImg(photoUrl)}
+                          title="Click để phóng to ảnh"
+                        />
+                      ))}
                     </div>
                   )}
 
                   <figcaption className={styles.figcaption}>
-                    <span
-                      className={`${styles.avatar} ${avatarClasses[i % avatarClasses.length]}`}
-                    >
+                    <span className={`${styles.avatar} ${avatarClasses[i % avatarClasses.length]}`}>
                       {t.author.charAt(0)}
                     </span>
                     <span className={styles.meta}>
-                      <span className={styles.name}>
-                        {t.author}
-                        {t.isNew && (
-                          <span className={styles.newBadge}>Mới gửi</span>
-                        )}
-                      </span>
+                      <span className={styles.name}>{t.author}</span>
                       <span className={styles.role}>{t.role}</span>
                     </span>
                   </figcaption>
                 </figure>
               </Reveal>
             ))}
-        </div>
+          </div>
+        )}
 
         {/* Load More Button */}
         {reviews.length > 3 && (
@@ -296,8 +214,7 @@ export function Testimonials() {
                 </>
               ) : (
                 <>
-                  <ChevronDown size={16} /> Xem Thêm Đánh Giá (
-                  {reviews.length - 3})
+                  <ChevronDown size={16} /> Xem Thêm Đánh Giá ({reviews.length - 3})
                 </>
               )}
             </button>
@@ -307,26 +224,16 @@ export function Testimonials() {
 
       {/* Customer Review Modal */}
       {isModalOpen && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            className={styles.modalCard}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h3>Gửi Đánh Giá Cảm Nhận</h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className={styles.closeBtn}
-              >
+              <button onClick={() => setIsModalOpen(false)} className={styles.closeBtn}>
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSubmitReview} className={styles.form}>
-              {/* Star Rating Selection */}
               <div className={styles.field}>
                 <label>Đánh giá số sao</label>
                 <div className={styles.starRating}>
@@ -346,7 +253,6 @@ export function Testimonials() {
                 </div>
               </div>
 
-              {/* Author Name */}
               <div className={styles.field}>
                 <label>Họ và tên *</label>
                 <input
@@ -359,7 +265,6 @@ export function Testimonials() {
                 />
               </div>
 
-              {/* Role / Service */}
               <div className={styles.field}>
                 <label>Dịch vụ đã sử dụng</label>
                 <select
@@ -367,20 +272,13 @@ export function Testimonials() {
                   onChange={(e) => setRoleText(e.target.value)}
                   className={styles.select}
                 >
-                  <option value="Cô dâu / Chú rể · PiWedding">
-                    Cô dâu / Chú rể · PiWedding
-                  </option>
+                  <option value="Cô dâu / Chú rể · PiWedding">Cô dâu / Chú rể · PiWedding</option>
                   <option value="Ba mẹ bé · PiKids">Ba mẹ bé · PiKids</option>
-                  <option value="Quản lý sự kiện · PiEvent">
-                    Quản lý sự kiện · PiEvent
-                  </option>
-                  <option value="Khách hàng thân thiết">
-                    Khách hàng thân thiết
-                  </option>
+                  <option value="Quản lý sự kiện · PiEvent">Quản lý sự kiện · PiEvent</option>
+                  <option value="Khách hàng thân thiết">Khách hàng thân thiết</option>
                 </select>
               </div>
 
-              {/* Quote / Review Text */}
               <div className={styles.field}>
                 <label>Nội dung cảm nhận *</label>
                 <textarea
@@ -393,7 +291,6 @@ export function Testimonials() {
                 />
               </div>
 
-              {/* Photos Upload (Up to 3 Photos) */}
               <div className={styles.field}>
                 <label>Tải ảnh thực tế (Tối đa 3 ảnh)</label>
                 {selectedPhotos.length < 3 && (
@@ -402,9 +299,7 @@ export function Testimonials() {
                     <span className={styles.uploadText}>
                       Chọn ảnh chụp từ thiết bị ({selectedPhotos.length}/3)
                     </span>
-                    <span className={styles.uploadHint}>
-                      Hỗ trợ PNG, JPG, WEBP
-                    </span>
+                    <span className={styles.uploadHint}>Hỗ trợ PNG, JPG, WEBP</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -416,18 +311,11 @@ export function Testimonials() {
                 )}
 
                 {uploadError && (
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#dc2626",
-                      marginTop: "4px",
-                    }}
-                  >
+                  <div style={{ fontSize: "12px", color: "#dc2626", marginTop: "4px" }}>
                     ⚠️ {uploadError}
                   </div>
                 )}
 
-                {/* Uploaded Thumbnail Previews */}
                 {selectedPhotos.length > 0 && (
                   <div className={styles.previewThumbRow}>
                     {selectedPhotos.map((photo: string, pIdx: number) => (
@@ -447,8 +335,8 @@ export function Testimonials() {
                 )}
               </div>
 
-              <button type="submit" className={styles.submitModalBtn}>
-                Gửi Đánh Giá Ngay
+              <button type="submit" className={styles.submitModalBtn} disabled={submitting}>
+                {submitting ? "Đang gửi..." : "Gửi Đánh Giá Ngay"}
               </button>
             </form>
           </div>
@@ -457,19 +345,9 @@ export function Testimonials() {
 
       {/* Lightbox Modal for Full Image View */}
       {lightboxImg && (
-        <div
-          className={styles.lightboxOverlay}
-          onClick={() => setLightboxImg(null)}
-        >
-          <div
-            style={{ position: "relative" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <img
-              src={lightboxImg}
-              alt="Phóng to"
-              className={styles.lightboxImg}
-            />
+        <div className={styles.lightboxOverlay} onClick={() => setLightboxImg(null)}>
+          <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
+            <img src={lightboxImg} alt="Phóng to" className={styles.lightboxImg} />
             <button
               onClick={() => setLightboxImg(null)}
               style={{

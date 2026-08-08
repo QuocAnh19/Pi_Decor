@@ -1,5 +1,14 @@
 import { FormEvent, useState } from "react";
-import { User, Phone, Mail, Sparkles, Calendar, MessageSquare, Send, CheckCircle2 } from "lucide-react";
+import {
+  User,
+  Phone,
+  Mail,
+  Sparkles,
+  Calendar,
+  MessageSquare,
+  Send,
+  CheckCircle2,
+} from "lucide-react";
 import { api } from "../../lib/api";
 import styles from "./LeadForm.module.scss";
 
@@ -11,7 +20,8 @@ export function LeadForm() {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
+    const formEl = e.currentTarget; // lưu tham chiếu trước await
+    const form = new FormData(formEl);
     const name = String(form.get("name") ?? "").trim();
     const phone = String(form.get("phone") ?? "").trim();
     const email = String(form.get("email") ?? "").trim();
@@ -40,10 +50,12 @@ export function LeadForm() {
         message: fullMessage || undefined,
       });
       setStatus("success");
-      e.currentTarget.reset();
+      formEl.reset();
     } catch (err) {
       setStatus("error");
-      setError(err instanceof Error ? err.message : "Có lỗi xảy ra, thử lại sau.");
+      setError(
+        err instanceof Error ? err.message : "Có lỗi xảy ra, thử lại sau.",
+      );
     }
   }
 
@@ -55,7 +67,8 @@ export function LeadForm() {
         </div>
         <h3 className={styles.successTitle}>Gửi thông tin thành công!</h3>
         <p className={styles.successText}>
-          Cảm ơn bạn đã tin tưởng Pi Decor. Đội ngũ tư vấn sẽ liên hệ lại với bạn trong vòng 24 giờ.
+          Cảm ơn bạn đã tin tưởng Pi Decor. Đội ngũ tư vấn sẽ liên hệ lại với
+          bạn trong vòng 24 giờ.
         </p>
       </div>
     );
@@ -65,7 +78,9 @@ export function LeadForm() {
     <div className={styles.formCard}>
       <div className={styles.formHeader}>
         <h3 className={styles.formTitle}>Để lại thông tin tư vấn</h3>
-        <p className={styles.formSub}>Pi Decor sẽ gọi điện hỗ trợ bạn lên concept &amp; dự toán chi phí.</p>
+        <p className={styles.formSub}>
+          Pi Decor sẽ gọi điện hỗ trợ bạn lên concept &amp; dự toán chi phí.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className={styles.form}>
@@ -101,7 +116,8 @@ export function LeadForm() {
         {/* Email Field */}
         <div className={styles.field}>
           <label className={styles.label}>
-            <Mail size={14} /> Email <span className={styles.optionalTag}>(Không bắt buộc)</span>
+            <Mail size={14} /> Email{" "}
+            <span className={styles.optionalTag}>(Không bắt buộc)</span>
           </label>
           <input
             name="email"
@@ -116,10 +132,20 @@ export function LeadForm() {
           <label className={styles.label}>
             <Sparkles size={14} /> Loại sự kiện
           </label>
-          <select name="event_type" defaultValue="PiWedding — Trang Trí Cưới Hỏi" className={styles.select}>
-            <option value="PiWedding — Trang Trí Cưới Hỏi">PiWedding — Trang Trí Cưới Hỏi</option>
-            <option value="PiKids — Tiệc Thôi Nôi & Sinh Nhật">PiKids — Tiệc Thôi Nôi &amp; Sinh Nhật</option>
-            <option value="PiEvent — Sự Kiện & Doanh Nghiệp">PiEvent — Sự Kiện &amp; Doanh Nghiệp</option>
+          <select
+            name="event_type"
+            defaultValue="PiWedding — Trang Trí Cưới Hỏi"
+            className={styles.select}
+          >
+            <option value="PiWedding — Trang Trí Cưới Hỏi">
+              PiWedding — Trang Trí Cưới Hỏi
+            </option>
+            <option value="PiKids — Tiệc Thôi Nôi & Sinh Nhật">
+              PiKids — Tiệc Thôi Nôi &amp; Sinh Nhật
+            </option>
+            <option value="PiEvent — Sự Kiện & Doanh Nghiệp">
+              PiEvent — Sự Kiện &amp; Doanh Nghiệp
+            </option>
             <option value="Khác">Loại sự kiện khác</option>
           </select>
         </div>
@@ -140,7 +166,8 @@ export function LeadForm() {
         {/* Message Field */}
         <div className={styles.field}>
           <label className={styles.label}>
-            <MessageSquare size={14} /> Ý tưởng hoặc ghi chú thêm <span className={styles.optionalTag}>(Không bắt buộc)</span>
+            <MessageSquare size={14} /> Ý tưởng hoặc ghi chú thêm{" "}
+            <span className={styles.optionalTag}>(Không bắt buộc)</span>
           </label>
           <textarea
             name="message"
@@ -152,7 +179,11 @@ export function LeadForm() {
 
         {error && <p className={styles.error}>{error}</p>}
 
-        <button type="submit" disabled={status === "sending"} className={styles.submitBtn}>
+        <button
+          type="submit"
+          disabled={status === "sending"}
+          className={styles.submitBtn}
+        >
           <Send size={15} />
           {status === "sending" ? "Đang gửi thông tin…" : "Gửi Đăng Ký Tư Vấn"}
         </button>

@@ -2,9 +2,20 @@ import type {
   Admin,
   AdminSummary,
   Lead,
+  LeadActivity,
   LeadStatus,
+  PaginatedLeadsResponse,
+  MaterialItem,
   Project,
   ProjectPayload,
+  Quotation,
+  QuotationPayload,
+  StudioAssetRow,
+  StudioSlotDefinitionRow,
+  StudioSlotRuleRow,
+  StudioTemplateRow,
+  TestimonialItem,
+  TestimonialPayload,
   Venue,
   VenueDetail,
   VenuePayload,
@@ -12,37 +23,63 @@ import type {
 
 /**
  * api.ts — the one file in the client that knows how to call the backend.
- * Every component that needs server data goes through here instead of
- * calling `fetch` directly, so the base URL / error handling / auth header
- * only ever live in one place (same pattern as Ecovera's `authFetch.js`).
- *
- * Base URL comes from VITE_API_URL (set in `.env` for prod, e.g.
- * https://pidecor-api.onrender.com/api) and falls back to the local
- * dev server started by `server/`.
+ * Base URL comes from VITE_API_URL and falls back to the local dev server.
  */
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const { headers, ...restOptions } = options;
+  const isFormData = restOptions.body instanceof FormData;
+  const defaultHeaders: Record<string, string> = isFormData
+    ? {}
+    : { "Content-Type": "application/json" };
+
   const res = await fetch(`${API_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...options.headers },
-    ...options,
+    ...restOptions,
+    headers: { ...defaultHeaders, ...(headers as Record<string, string>) },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.message ?? `Request failed (${res.status})`);
   }
-  // DELETE endpoints (admin venues/projects) reply 204 with no body.
+  // DELETE endpoints reply 204 with no body.
   if (res.status === 204) return undefined as T;
   return res.json();
 }
 
-/** Same as `request`, plus the admin Bearer token every /admin/* and every
- * write under /leads and /venues expects (see verifyToken.js on the API). */
-function authRequest<T>(path: string, token: string, options: RequestInit = {}): Promise<T> {
-  return request<T>(path, {
-    ...options,
-    headers: { Authorization: `Bearer ${token}`, ...options.headers },
-  });
+/** Same as `request`, plus the admin Bearer token with auto 401 refresh retry */
+async function authRequest<T>(path: string, token: string, options: RequestInit = {}): Promise<T> {
+  const { headers, ...restOptions } = options;
+  try {
+    return await request<T>(path, {
+      ...restOptions,
+      headers: { Authorization: `Bearer ${token}`, ...headers },
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error && (err.message.includes("401") || err.message.includes("Unauthorized"))) {
+      const raw = localStorage.getItem("pidecor_admin_auth");
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.refreshToken) {
+            const refreshRes = await request<{ token: string }>("/auth/refresh", {
+              method: "POST",
+              body: JSON.stringify({ refresh_token: parsed.refreshToken }),
+            });
+            parsed.token = refreshRes.token;
+            localStorage.setItem("pidecor_admin_auth", JSON.stringify(parsed));
+            return await request<T>(path, {
+              ...restOptions,
+              headers: { Authorization: `Bearer ${refreshRes.token}`, ...headers },
+            });
+          }
+        } catch {
+          localStorage.removeItem("pidecor_admin_auth");
+        }
+      }
+    }
+    throw err;
+  }
 }
 
 export interface LeadPayload {
@@ -55,42 +92,49 @@ export interface LeadPayload {
 }
 
 export const api = {
-  // Contact form (Footer) and the Studio "Xuất thiết kế" flow both submit
-  // through this single endpoint — the backend tells them apart by whether
-  // design_snapshot is present.
+  // ── Leads & Contact ──────────────────────────────────────────────────
   submitLead: (payload: LeadPayload) =>
     request<{ id: string }>("/leads", { method: "POST", body: JSON.stringify(payload) }),
 
-  getMaterials: () => request<unknown[]>("/materials"),
+  getLeads: (
+    token: string,
+    params?: { page?: number; limit?: number; q?: string; status?: string }
+  ) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", String(params.page));
+    if (params?.limit) searchParams.set("limit", String(params.limit));
+    if (params?.q) searchParams.set("q", params.q);
+    if (params?.status && params.status !== "all") searchParams.set("status", params.status);
 
-  getServices: () => request<unknown[]>("/services"),
-
-  // Bản đồ dự án đã thực hiện (PiDecor_MappingProject.md)
-  getVenues: () => request<Venue[]>("/venues"),
-
-  getVenue: (id: string) => request<VenueDetail>(`/venues/${id}`),
-
-  // ── Admin (PiDecor_AdminPanel.md) ─────────────────────────────────────
-  // Everything below requires the JWT from adminLogin(); authContext.tsx is
-  // the one place in the app that holds that token and passes it in.
-
-  adminLogin: (payload: { email: string; password: string }) =>
-    request<{ token: string; admin: Admin }>("/auth/login", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-
-  getSummary: (token: string) => authRequest<AdminSummary>("/admin/summary", token),
-
-  // GET /api/leads is public-path-shaped but admin-only (verifyToken +
-  // requireAdmin inside leadsRouter) — newest first, per the spec.
-  getLeads: (token: string) => authRequest<Lead[]>("/leads", token),
+    const queryStr = searchParams.toString();
+    return authRequest<PaginatedLeadsResponse>(`/leads${queryStr ? `?${queryStr}` : ""}`, token);
+  },
 
   updateLeadStatus: (id: string, status: LeadStatus, token: string) =>
     authRequest<Lead>(`/leads/${id}`, token, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
+
+  getLeadActivities: (leadId: string, token: string) =>
+    authRequest<LeadActivity[]>(`/leads/${leadId}/activities`, token),
+
+  addLeadActivity: (leadId: string, payload: { activity_type: string; body?: string }, token: string) =>
+    authRequest<LeadActivity>(`/leads/${leadId}/activities`, token, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  // ── Materials & Services ─────────────────────────────────────────────
+  getMaterials: (category?: string) =>
+    request<MaterialItem[]>(category ? `/materials?category=${encodeURIComponent(category)}` : "/materials"),
+
+  getServices: () => request<unknown[]>("/services"),
+
+  // ── Map Venues & Projects ───────────────────────────────────────────
+  getVenues: () => request<Venue[]>("/venues"),
+
+  getVenue: (id: string) => request<VenueDetail>(`/venues/${id}`),
 
   createVenue: (payload: VenuePayload, token: string) =>
     authRequest<Venue>("/venues", token, { method: "POST", body: JSON.stringify(payload) }),
@@ -115,4 +159,124 @@ export const api = {
 
   deleteProject: (projectId: string, token: string) =>
     authRequest<void>(`/venues/projects/${projectId}`, token, { method: "DELETE" }),
+
+  // ── Admin Auth & Dashboard Summary ─────────────────────────────────
+  adminLogin: (payload: { email: string; password: string }) =>
+    request<{ token: string; refreshToken?: string; admin: Admin }>("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  refreshToken: (refreshToken: string) =>
+    request<{ token: string }>("/auth/refresh", {
+      method: "POST",
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    }),
+
+  logout: (refreshToken: string) =>
+    request<{ message: string }>("/auth/logout", {
+      method: "POST",
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    }),
+
+  getSummary: (token: string) => authRequest<AdminSummary>("/admin/summary", token),
+
+  // ── Quotations ───────────────────────────────────────────────────────
+  getQuotations: (token: string, leadId?: string) =>
+    authRequest<Quotation[]>(leadId ? `/quotations?lead_id=${encodeURIComponent(leadId)}` : "/quotations", token),
+
+  getQuotation: (id: string, token: string) =>
+    authRequest<Quotation>(`/quotations/${id}`, token),
+
+  createQuotation: (payload: QuotationPayload, token: string) =>
+    authRequest<Quotation>("/quotations", token, { method: "POST", body: JSON.stringify(payload) }),
+
+  updateQuotation: (id: string, payload: Partial<QuotationPayload> & { status?: string }, token: string) =>
+    authRequest<Quotation>(`/quotations/${id}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+
+  deleteQuotation: (id: string, token: string) =>
+    authRequest<void>(`/quotations/${id}`, token, { method: "DELETE" }),
+
+  // ── Testimonials ─────────────────────────────────────────────────────
+  getTestimonials: () => request<TestimonialItem[]>("/testimonials"),
+
+  submitTestimonial: async (payload: TestimonialPayload | FormData) => {
+    if (payload instanceof FormData) {
+      const res = await fetch(`${API_URL}/testimonials`, {
+        method: "POST",
+        body: payload,
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Gửi đánh giá thất bại.");
+      }
+      return res.json() as Promise<TestimonialItem>;
+    }
+    return request<TestimonialItem>("/testimonials", { method: "POST", body: JSON.stringify(payload) });
+  },
+
+  getTestimonialsAdmin: (token: string, status?: string) =>
+    authRequest<TestimonialItem[]>(status ? `/testimonials/admin?status=${encodeURIComponent(status)}` : "/testimonials/admin", token),
+
+  updateTestimonialStatus: (id: string, status: string, token: string) =>
+    authRequest<TestimonialItem>(`/testimonials/${id}`, token, { method: "PATCH", body: JSON.stringify({ status }) }),
+
+  deleteTestimonial: (id: string, token: string) =>
+    authRequest<void>(`/testimonials/${id}`, token, { method: "DELETE" }),
+
+  // ── Studio Templates & Assets ────────────────────────────────────────
+  getStudioTemplates: () => request<StudioTemplateRow[]>("/studio/templates"),
+
+  getStudioTemplatesAdmin: (token: string) =>
+    authRequest<StudioTemplateRow[]>("/studio/templates/admin", token),
+
+  createStudioTemplate: (payload: Partial<StudioTemplateRow>, token: string) =>
+    authRequest<StudioTemplateRow>("/studio/templates", token, { method: "POST", body: JSON.stringify(payload) }),
+
+  updateStudioTemplate: (id: string, payload: Partial<StudioTemplateRow>, token: string) =>
+    authRequest<StudioTemplateRow>(`/studio/templates/${id}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+
+  deleteStudioTemplate: (id: string, token: string) =>
+    authRequest<void>(`/studio/templates/${id}`, token, { method: "DELETE" }),
+
+  getStudioSlotDefinitions: (templateId: string) =>
+    request<StudioSlotDefinitionRow[]>(`/studio/templates/${templateId}/slots`),
+
+  createStudioSlotDefinition: (templateId: string, payload: Partial<StudioSlotDefinitionRow>, token: string) =>
+    authRequest<StudioSlotDefinitionRow>(`/studio/templates/${templateId}/slots`, token, { method: "POST", body: JSON.stringify(payload) }),
+
+  reorderStudioSlots: (templateId: string, items: { id: string; sort_order: number }[], token: string) =>
+    authRequest<StudioSlotDefinitionRow[]>(`/studio/templates/${templateId}/slots/reorder`, token, { method: "PATCH", body: JSON.stringify(items) }),
+
+  updateStudioSlotDefinition: (slotId: string, payload: Partial<StudioSlotDefinitionRow>, token: string) =>
+    authRequest<StudioSlotDefinitionRow>(`/studio/slots/${slotId}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+
+  deleteStudioSlotDefinition: (slotId: string, token: string) =>
+    authRequest<void>(`/studio/slots/${slotId}`, token, { method: "DELETE" }),
+
+  getStudioAssets: () => request<StudioAssetRow[]>("/studio/assets"),
+
+  getStudioAssetsAdmin: (token: string) =>
+    authRequest<StudioAssetRow[]>("/studio/assets/admin", token),
+
+  createStudioAsset: (payload: Partial<StudioAssetRow>, token: string) =>
+    authRequest<StudioAssetRow>("/studio/assets", token, { method: "POST", body: JSON.stringify(payload) }),
+
+  updateStudioAsset: (id: string, payload: Partial<StudioAssetRow>, token: string) =>
+    authRequest<StudioAssetRow>(`/studio/assets/${id}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+
+  deleteStudioAsset: (id: string, token: string) =>
+    authRequest<void>(`/studio/assets/${id}`, token, { method: "DELETE" }),
+
+  getStudioSlotRules: (templateId: string) =>
+    request<StudioSlotRuleRow[]>(`/studio/templates/${templateId}/rules`),
+
+  createStudioSlotRule: (templateId: string, payload: Partial<StudioSlotRuleRow>, token: string) =>
+    authRequest<StudioSlotRuleRow>(`/studio/templates/${templateId}/rules`, token, { method: "POST", body: JSON.stringify(payload) }),
+
+  updateStudioSlotRule: (ruleId: string, payload: Partial<StudioSlotRuleRow>, token: string) =>
+    authRequest<StudioSlotRuleRow>(`/studio/rules/${ruleId}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+
+  deleteStudioSlotRule: (ruleId: string, token: string) =>
+    authRequest<void>(`/studio/rules/${ruleId}`, token, { method: "DELETE" }),
 };
