@@ -24,6 +24,7 @@ import { TemplateSelectorModal } from './TemplateSelectorModal'
 import { AddSlotModal } from '../admin/AddSlotModal'
 import { svgToNormalized } from '../../utils/coordinates'
 import { Asset, SlotDefinition, SlotConfig } from '../../types'
+import { AnyRule } from '../../rules'
 import { api } from '../../../../lib/api'
 import { toStudioSlot, toStudioTemplate, toStudioRule } from '../../utils/adapters'
 import { Template } from '../../types'
@@ -32,7 +33,7 @@ export interface CustomerEditorProps {
   templateId?: string
   overrideSlots?: SlotDefinition[]
   overrideSlotConfig?: SlotConfig
-  overrideRules?: any[]
+  overrideRules?: AnyRule[]
   onBackToGallery?: () => void
 }
 
@@ -55,7 +56,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
 
   const initialSlots: SlotDefinition[] = overrideSlots || seedSlots
   const assets: Asset[] = seedAssets
-  const [rulesState, setRulesState] = useState<any[]>(() => overrideRules || curtainRules)
+  const [rulesState, setRulesState] = useState<AnyRule[]>(() => overrideRules || curtainRules)
 
   // Get admin published slot configuration (or seed default)
   const adminPresetConfig: SlotConfig = overrideSlotConfig || seedPublishedSlotConfig

@@ -15,6 +15,7 @@ import { adminRouter } from "./routes/admin/index.js";
 import { quotationsRouter } from "./routes/quotations/index.js";
 import { testimonialsRouter } from "./routes/testimonials/index.js";
 import { studioRouter } from "./routes/studio/index.js";
+import { pool } from "./config/database.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -37,13 +38,23 @@ app.use(
     },
   })
 );
+
 app.use(express.json());
 
 // Local-disk uploads served statically. See utils/uploadImage.js for why
 // this must become Cloudinary (or similar) before deploying to Render Free.
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
-app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+app.get("/api/health", async (_req, res) => {
+  try {
+    if (pool) {
+      await pool.query("SELECT 1");
+    }
+    res.json({ status: "ok", db: pool ? "connected" : "json_fallback", ts: new Date().toISOString() });
+  } catch (err) {
+    res.status(503).json({ status: "degraded", db: "unreachable", error: err.message });
+  }
+});
 
 import { loginLimiter } from "./middlewares/rateLimiters.js";
 

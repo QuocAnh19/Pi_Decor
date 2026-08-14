@@ -148,11 +148,11 @@ export const api = {
   deleteVenue: (id: string, token: string) =>
     authRequest<void>(`/venues/${id}`, token, { method: "DELETE" }),
 
-  getProjects: () => request<any[]>("/projects"),
+  getProjects: () => request<Project[]>("/projects"),
 
   createProject: (payload: FormData | object, token: string) => {
     const isFormData = payload instanceof FormData;
-    return authRequest<any>("/projects", token, {
+    return authRequest<Project>("/projects", token, {
       method: "POST",
       body: isFormData ? payload : JSON.stringify(payload),
     });
@@ -166,7 +166,7 @@ export const api = {
 
   updateProject: (projectId: string, payload: FormData | object, token: string) => {
     const isFormData = payload instanceof FormData;
-    return authRequest<any>(`/projects/${projectId}`, token, {
+    return authRequest<Project>(`/projects/${projectId}`, token, {
       method: "PATCH",
       body: isFormData ? payload : JSON.stringify(payload),
     });

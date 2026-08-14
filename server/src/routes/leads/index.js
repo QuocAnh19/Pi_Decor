@@ -35,38 +35,46 @@ leadsRouter.post("/", leadsLimiter, validate(createLeadSchema), async (req, res)
 
 // GET /api/leads — list with pagination & search, newest first. Admin-only.
 leadsRouter.get("/", verifyToken, requireAdmin, async (req, res) => {
-  let leads = await db.get("leads");
-  leads = [...leads].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
   const { q, status, page = 1, limit = 20 } = req.query;
 
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.max(1, Math.min(100, parseInt(limit, 10) || 20)); // cap ở 100
+  const offset = (pageNum - 1) * limitNum;
+
+  // Build điều kiện WHERE động
+  const conditions = [];
+  const values = [];
+
   if (q && typeof q === "string" && q.trim()) {
-    const term = q.trim().toLowerCase();
-    leads = leads.filter(
-      (l) =>
-        (l.name && l.name.toLowerCase().includes(term)) ||
-        (l.phone && l.phone.toLowerCase().includes(term)) ||
-        (l.email && l.email.toLowerCase().includes(term))
+    const term = `%${q.trim().toLowerCase()}%`;
+    values.push(term, term, term);
+    conditions.push(
+      `(lower(name) like $${values.length - 2} OR lower(phone) like $${values.length - 1} OR lower(coalesce(email,'')) like $${values.length})`
     );
   }
 
-  if (status && typeof status === "string" && status.trim() && status !== "all") {
-    leads = leads.filter((l) => l.status === status.trim());
+  if (status && status !== "all") {
+    values.push(status.trim());
+    conditions.push(`status = $${values.length}`);
   }
 
-  const pageNum = Math.max(1, parseInt(page, 10) || 1);
-  const limitNum = Math.max(1, parseInt(limit, 10) || 20);
-  const total = leads.length;
+  const whereStr = conditions.length ? `where ${conditions.join(" and ")}` : "";
 
-  const startIndex = (pageNum - 1) * limitNum;
-  const paginatedData = leads.slice(startIndex, startIndex + limitNum);
+  // Đếm tổng (cho pagination)
+  const [{ n: total }] = await db.query(
+    `select count(*)::int as n from leads ${whereStr}`,
+    values
+  );
 
-  res.json({
-    data: paginatedData,
-    total,
-    page: pageNum,
-    limit: limitNum,
-  });
+  // Lấy page hiện tại
+  const data = await db.query(
+    `select * from leads ${whereStr}
+     order by created_at desc
+     limit $${values.length + 1} offset $${values.length + 2}`,
+    [...values, limitNum, offset]
+  );
+
+  res.json({ data, total, page: pageNum, limit: limitNum });
 });
 
 // GET /api/leads/:id/activities — get timeline activities for a lead (newest first). Admin-only.
@@ -130,7 +138,7 @@ leadsRouter.patch("/:id", verifyToken, requireAdmin, validate(updateLeadStatusSc
   }
 
   const oldStatus = existing.status;
-  const updated = await db.update("leads", (l) => l.id === req.params.id, { status });
+  const updated = await db.updateById("leads", req.params.id, { status });
 
   if (updated && oldStatus !== status) {
     await db.insert("lead_activities", {

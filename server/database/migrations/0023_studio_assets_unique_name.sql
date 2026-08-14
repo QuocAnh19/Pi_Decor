@@ -1,6 +1,6 @@
 -- ============================================================================
--- 0021_studio_assets_unique_name.sql
--- Pi Decor — Postgres schema, migration 21
+-- 0023_studio_assets_unique_name.sql
+-- Pi Decor — Postgres schema, migration 23
 -- ============================================================================
 -- Clean up duplicate rows in studio_assets and add unique index on (asset_type, name)
 -- ============================================================================

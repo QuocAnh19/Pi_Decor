@@ -124,7 +124,7 @@ quotationsRouter.patch("/:id", async (req, res) => {
   patch.total = total;
 
   const oldStatus = existing.status;
-  const updated = await db.update("quotations", (q) => q.id === req.params.id, patch);
+  const updated = await db.updateById("quotations", req.params.id, patch);
 
   // If status transitions to 'sent', log a lead activity
   if (updated && patch.status === "sent" && oldStatus !== "sent") {
@@ -158,6 +158,6 @@ quotationsRouter.delete("/:id", async (req, res) => {
     return res.status(403).json({ message: "Chỉ được xóa báo giá ở trạng thái nháp (draft)." });
   }
 
-  await db.remove("quotations", (q) => q.id === req.params.id);
+  await db.removeById("quotations", req.params.id);
   res.status(204).send();
 });

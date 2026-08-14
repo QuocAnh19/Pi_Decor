@@ -54,7 +54,7 @@ studioRouter.patch("/templates/:id", verifyToken, requireAdmin, async (req, res)
     patch.svg_base = sanitizeSvg(patch.svg_base);
   }
 
-  const updated = await db.update("studio_templates", (t) => String(t.id) === String(req.params.id), patch);
+  const updated = await db.updateById("studio_templates", req.params.id, patch);
   if (!updated) {
     return res.status(404).json({ message: "Không tìm thấy template." });
   }
@@ -96,9 +96,9 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req
 
     let savedTemplate;
     if (existing) {
-      savedTemplate = await db.update(
+      savedTemplate = await db.updateById(
         "studio_templates",
-        (t) => String(t.id) === String(existing.id),
+        existing.id,
         {
           name: String(name).trim(),
           thumbnail: thumbnail ?? existing.thumbnail ?? null,
@@ -126,7 +126,7 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req
 
     // Batch sync slot definitions for this template
     if (Array.isArray(slots)) {
-      await db.remove("studio_slot_definitions", (s) => String(s.template_id) === String(savedTemplate.id));
+      await db.removeWhere("studio_slot_definitions", "template_id", savedTemplate.id);
 
       for (const slot of slots) {
         const slotRow = {
@@ -152,7 +152,7 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req
 
     // Batch sync slot rules for this template
     if (Array.isArray(rules)) {
-      await db.remove("studio_slot_rules", (r) => String(r.template_id) === String(savedTemplate.id));
+      await db.removeWhere("studio_slot_rules", "template_id", savedTemplate.id);
 
       for (const rule of rules) {
         const ruleRow = {
@@ -185,7 +185,7 @@ studioRouter.delete("/templates/:id", verifyToken, requireAdmin, async (req, res
   const templates = await db.get("studio_templates");
   const existing = templates.find((t) => String(t.id) === String(req.params.id));
 
-  const removed = await db.remove("studio_templates", (t) => String(t.id) === String(req.params.id));
+  const removed = await db.removeById("studio_templates", req.params.id);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy template." });
   }
@@ -195,8 +195,8 @@ studioRouter.delete("/templates/:id", verifyToken, requireAdmin, async (req, res
   }
 
   // Clean up associated slots and rules (app-level cascade for JSON DB mode)
-  await db.remove("studio_slot_definitions", (s) => String(s.template_id) === String(req.params.id));
-  await db.remove("studio_slot_rules", (r) => String(r.template_id) === String(req.params.id));
+  await db.removeWhere("studio_slot_definitions", "template_id", req.params.id);
+  await db.removeWhere("studio_slot_rules", "template_id", req.params.id);
 
   res.status(204).send();
 });
@@ -256,7 +256,7 @@ studioRouter.patch("/templates/:id/slots/reorder", verifyToken, requireAdmin, as
 
   for (const item of items) {
     if (item.id && item.sort_order !== undefined) {
-      await db.update("studio_slot_definitions", (s) => s.id === item.id, { sort_order: Number(item.sort_order) });
+      await db.updateById("studio_slot_definitions", item.id, { sort_order: Number(item.sort_order) });
     }
   }
 
@@ -270,7 +270,7 @@ studioRouter.patch("/templates/:id/slots/reorder", verifyToken, requireAdmin, as
 
 // PATCH /api/studio/slots/:slotId — admin only, edit single slot
 studioRouter.patch("/slots/:slotId", verifyToken, requireAdmin, async (req, res) => {
-  const updated = await db.update("studio_slot_definitions", (s) => s.id === req.params.slotId, req.body);
+  const updated = await db.updateById("studio_slot_definitions", req.params.slotId, req.body);
   if (!updated) {
     return res.status(404).json({ message: "Không tìm thấy slot definition." });
   }
@@ -279,7 +279,7 @@ studioRouter.patch("/slots/:slotId", verifyToken, requireAdmin, async (req, res)
 
 // DELETE /api/studio/slots/:slotId — admin only, delete single slot
 studioRouter.delete("/slots/:slotId", verifyToken, requireAdmin, async (req, res) => {
-  const removed = await db.remove("studio_slot_definitions", (s) => s.id === req.params.slotId);
+  const removed = await db.removeById("studio_slot_definitions", req.params.slotId);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy slot definition." });
   }
@@ -322,7 +322,7 @@ studioRouter.post("/assets", verifyToken, requireAdmin, uploadImage.single("svg"
   const existing = assets.find((a) => a.name === cleanName && a.asset_type === asset_type);
 
   if (existing) {
-    const updated = await db.update("studio_assets", (a) => a.id === existing.id, {
+    const updated = await db.updateById("studio_assets", existing.id, {
       thumbnail: finalThumbnail ?? existing.thumbnail ?? null,
       svg_data: finalSvg ?? existing.svg_data ?? null,
       color_hex: color_hex ?? existing.color_hex ?? null,
@@ -372,7 +372,7 @@ studioRouter.patch("/assets/:id", verifyToken, requireAdmin, uploadImage.single(
     }
   }
 
-  const updated = await db.update("studio_assets", (a) => String(a.id) === String(req.params.id), patch);
+  const updated = await db.updateById("studio_assets", req.params.id, patch);
   res.json(updated);
 });
 
@@ -381,7 +381,7 @@ studioRouter.delete("/assets/:id", verifyToken, requireAdmin, async (req, res) =
   const assets = await db.get("studio_assets");
   const existing = assets.find((a) => String(a.id) === String(req.params.id));
 
-  const removed = await db.remove("studio_assets", (a) => String(a.id) === String(req.params.id));
+  const removed = await db.removeById("studio_assets", req.params.id);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy asset." });
   }
@@ -432,7 +432,7 @@ studioRouter.post("/templates/:id/rules", verifyToken, requireAdmin, async (req,
 
 // PATCH /api/studio/rules/:ruleId — admin only, edit rule
 studioRouter.patch("/rules/:ruleId", verifyToken, requireAdmin, async (req, res) => {
-  const updated = await db.update("studio_slot_rules", (r) => r.id === req.params.ruleId, req.body);
+  const updated = await db.updateById("studio_slot_rules", req.params.ruleId, req.body);
   if (!updated) {
     return res.status(404).json({ message: "Không tìm thấy rule." });
   }
@@ -441,7 +441,7 @@ studioRouter.patch("/rules/:ruleId", verifyToken, requireAdmin, async (req, res)
 
 // DELETE /api/studio/rules/:ruleId — admin only, delete rule
 studioRouter.delete("/rules/:ruleId", verifyToken, requireAdmin, async (req, res) => {
-  const removed = await db.remove("studio_slot_rules", (r) => r.id === req.params.ruleId);
+  const removed = await db.removeById("studio_slot_rules", req.params.ruleId);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy rule." });
   }

@@ -252,4 +252,110 @@ export const db = {
     ]);
     return toRemove.length;
   },
+
+  /**
+   * Cập nhật row theo ID — không cần fetch toàn bộ bảng.
+   * Dùng cho tất cả route có req.params.id.
+   * Returns: row sau khi update, hoặc null nếu không tìm thấy.
+   */
+  updateById: async (table, id, patch) => {
+    assertKnownTable(table);
+    const cols = TABLES[table].filter(
+      (c) => c in patch && c !== "id" && c !== "created_at"
+    );
+    if (cols.length === 0) {
+      // không có gì để update — fetch row hiện tại trả về
+      const { rows } = await pool.query(
+        `select * from ${table} where id = $1`, [id]
+      );
+      return rows[0] ?? null;
+    }
+
+    const values = cols.map((c) => serializeValue(c, patch[c]));
+    const setClauses = cols.map((c, i) => `${quoteCol(c)} = $${i + 1}`);
+
+    const { rows } = await pool.query(
+      `update ${table}
+       set ${setClauses.join(", ")}
+       where id = $${cols.length + 1}
+       returning *`,
+      [...values, id]
+    );
+    return rows[0] ?? null;
+  },
+
+  /**
+   * Xóa row theo ID — không cần fetch toàn bộ bảng.
+   * Returns: số row đã xóa (0 hoặc 1).
+   */
+  removeById: async (table, id) => {
+    assertKnownTable(table);
+    const { rowCount } = await pool.query(
+      `delete from ${table} where id = $1`, [id]
+    );
+    return rowCount;
+  },
+
+  /**
+   * Xóa nhiều rows theo một cột cụ thể — dùng cho foreign key.
+   * Ví dụ: xóa tất cả slot_definitions của một template.
+   * db.removeWhere("studio_slot_definitions", "template_id", templateId)
+   */
+  removeWhere: async (table, column, value) => {
+    assertKnownTable(table);
+    const { rowCount } = await pool.query(
+      `delete from ${table} where ${quoteCol(column)} = $1`, [value]
+    );
+    return rowCount;
+  },
+
+  /**
+   * Cập nhật rows theo một cột cụ thể — không cần fetch toàn bộ bảng.
+   * Ví dụ: revoke token theo token_hash.
+   */
+  updateWhere: async (table, column, value, patch) => {
+    assertKnownTable(table);
+    const cols = TABLES[table].filter(
+      (c) => c in patch && c !== "id" && c !== "created_at"
+    );
+    if (cols.length === 0) return [];
+
+    const values = cols.map((c) => serializeValue(c, patch[c]));
+    const setClauses = cols.map((c, i) => `${quoteCol(c)} = $${i + 1}`);
+
+    const { rows } = await pool.query(
+      `update ${table}
+       set ${setClauses.join(", ")}
+       where ${quoteCol(column)} = $${cols.length + 1}
+       returning *`,
+      [...values, value]
+    );
+    return rows;
+  },
+
+  /**
+   * Chạy SQL tùy ý — dùng cho các trường hợp cần WHERE + LIMIT + OFFSET
+   * mà interface get/update không đủ linh hoạt.
+   * values: mảng giá trị cho $1, $2, ... trong sql string.
+   */
+  query: async (sql, values = []) => {
+    const { rows } = await pool.query(sql, values);
+    return rows;
+  },
+
+  /**
+   * Đếm rows theo điều kiện — dùng cho summary counts.
+   * Ví dụ: db.count("leads", "status = $1", ["new"])
+   */
+  count: async (table, whereClause = "1=1", values = []) => {
+    assertKnownTable(table);
+    const { rows } = await pool.query(
+      `select count(*)::int as n from ${table} where ${whereClause}`,
+      values
+    );
+    return rows[0].n;
+  },
 };
+
+export { pool };
+

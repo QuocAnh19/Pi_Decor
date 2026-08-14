@@ -1,5 +1,5 @@
 -- ============================================================================
--- 0019_add_missing_project_columns.sql
+-- 0021_add_missing_project_columns.sql
 -- Add missing project fields for Admin Projects Form (location, description, budget, status, category_id, tag)
 -- ============================================================================
 

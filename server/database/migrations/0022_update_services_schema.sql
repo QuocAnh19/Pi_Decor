@@ -1,5 +1,5 @@
 -- ============================================================================
--- 0020_update_services_schema.sql
+-- 0022_update_services_schema.sql
 -- Update services table schema to match real Pi Decor brand lines (PiWedding, PiKids, PiEvent)
 -- ============================================================================
 

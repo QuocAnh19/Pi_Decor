@@ -1,6 +1,6 @@
 -- ============================================================================
--- 0017_studio_templates_default_config.sql
--- Pi Decor — Postgres schema, migration 17
+-- 0019_studio_templates_default_config.sql
+-- Pi Decor — Postgres schema, migration 19
 -- ============================================================================
 -- Adds default_config jsonb column to studio_templates table for storing
 -- published slot configs (materials, assigned images, filter modes, colors).

@@ -85,7 +85,7 @@ servicesRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => {
 
   patch.updated_at = new Date().toISOString();
 
-  const updated = await db.update("services", (s) => s.id === req.params.id, patch);
+  const updated = await db.updateById("services", req.params.id, patch);
   res.json(formatService(updated));
 });
 
@@ -93,7 +93,7 @@ servicesRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
   const services = await db.get("services");
   const existing = services.find((s) => s.id === req.params.id);
 
-  const removed = await db.remove("services", (s) => s.id === req.params.id);
+  const removed = await db.removeById("services", req.params.id);
   if (!removed) return res.status(404).json({ message: "Không tìm thấy dịch vụ." });
 
   if (existing) {

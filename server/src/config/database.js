@@ -25,9 +25,10 @@ import { fileURLToPath } from "url";
  */
 
 let db;
+let pool = null;
 
 if (process.env.DATABASE_URL) {
-  ({ db } = await import("./database.pg.js"));
+  ({ db, pool } = await import("./database.pg.js"));
   console.log("[database.js] Using Postgres via DATABASE_URL.");
 } else {
   db = createJsonFileDb();
@@ -37,7 +38,7 @@ if (process.env.DATABASE_URL) {
   );
 }
 
-export { db };
+export { db, pool };
 
 // ── JSON-file implementation (unchanged from the original prototype) ──────
 
@@ -119,6 +120,68 @@ function createJsonFileDb() {
         data[collection] = (data[collection] ?? []).filter((r) => !predicate(r));
         await writeAll(data);
         return before - data[collection].length;
+      }),
+
+    updateById: (collection, id, patch) =>
+      locked(async () => {
+        const data = await readAll();
+        const rows = data[collection] ?? [];
+        const idx = rows.findIndex((r) => String(r.id) === String(id));
+        if (idx === -1) return null;
+        rows[idx] = { ...rows[idx], ...patch };
+        await writeAll(data);
+        return rows[idx];
+      }),
+
+    removeById: (collection, id) =>
+      locked(async () => {
+        const data = await readAll();
+        const before = data[collection]?.length ?? 0;
+        data[collection] = (data[collection] ?? []).filter((r) => String(r.id) !== String(id));
+        await writeAll(data);
+        return before - (data[collection]?.length ?? 0);
+      }),
+
+    removeWhere: (collection, column, value) =>
+      locked(async () => {
+        const data = await readAll();
+        const before = data[collection]?.length ?? 0;
+        data[collection] = (data[collection] ?? []).filter((r) => String(r[column]) !== String(value));
+        await writeAll(data);
+        return before - (data[collection]?.length ?? 0);
+      }),
+
+    updateWhere: (collection, column, value, patch) =>
+      locked(async () => {
+        const data = await readAll();
+        const rows = data[collection] ?? [];
+        let updatedCount = 0;
+        for (let i = 0; i < rows.length; i++) {
+          if (String(rows[i][column]) === String(value)) {
+            rows[i] = { ...rows[i], ...patch };
+            updatedCount++;
+          }
+        }
+        await writeAll(data);
+        return updatedCount;
+      }),
+
+    query: async () => {
+      throw new Error("[database.js] Raw SQL query() is not supported in JSON file mode. Use Postgres.");
+    },
+
+    count: (collection, whereClause = "1=1", values = []) =>
+      locked(async () => {
+        const data = await readAll();
+        const rows = data[collection] ?? [];
+        if (!whereClause || whereClause === "1=1") return rows.length;
+        if (whereClause === "status = $1" && values?.[0]) {
+          return rows.filter((r) => r.status === values[0]).length;
+        }
+        if (whereClause === "published = true") {
+          return rows.filter((r) => r.published === true || r.published === 1).length;
+        }
+        return rows.length;
       }),
   };
 }

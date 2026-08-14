@@ -118,7 +118,7 @@ testimonialsRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => 
     }
   }
 
-  const updated = await db.update("testimonials", (t) => t.id === req.params.id, patch);
+  const updated = await db.updateById("testimonials", req.params.id, patch);
   res.json(updated);
 });
 
@@ -127,7 +127,7 @@ testimonialsRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) =>
   const testimonials = await db.get("testimonials");
   const existing = testimonials.find((t) => t.id === req.params.id);
 
-  const removed = await db.remove("testimonials", (t) => t.id === req.params.id);
+  const removed = await db.removeById("testimonials", req.params.id);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy đánh giá." });
   }

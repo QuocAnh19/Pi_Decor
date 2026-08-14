@@ -158,7 +158,7 @@ projectsRouter.patch("/:id", verifyToken, requireAdmin, projectUpload, async (re
 
   patch.updated_at = new Date().toISOString();
 
-  const updated = await db.update("projects", (p) => p.id === req.params.id, patch);
+  const updated = await db.updateById("projects", req.params.id, patch);
   res.json(updated);
 });
 
@@ -167,7 +167,7 @@ projectsRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
   const projects = await db.get("projects");
   const existing = projects.find((p) => p.id === req.params.id);
 
-  const removed = await db.remove("projects", (p) => p.id === req.params.id);
+  const removed = await db.removeById("projects", req.params.id);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy dự án." });
   }

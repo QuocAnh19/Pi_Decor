@@ -1,3 +1,5 @@
+import type { Project } from "../../../lib/types";
+
 export interface ProjectItem {
   id: string;
   categoryId: string; // 'piwedding' | 'pikids' | 'pievent'
@@ -48,7 +50,7 @@ export const ASYMMETRIC_SLOT_DESCS: SlotDesc[] = [
   { label: "Khung 10 (Nổi bật 2x2)", spanKey: "span2x2", hint: "Ảnh vuông vừa 2x2" },
 ];
 
-export function dbToProjectItem(item: any): ProjectItem {
+export function dbToProjectItem(item: Project): ProjectItem {
   const tags = Array.isArray(item.style_tags) ? item.style_tags : [];
   const gallery = Array.isArray(item.gallery) ? item.gallery : [];
   return {
@@ -62,8 +64,8 @@ export function dbToProjectItem(item: any): ProjectItem {
     description: item.description ?? "",
     date: item.wedding_date ? String(item.wedding_date).split("T")[0] : "",
     budget: item.budget ?? "Thỏa thuận",
-    status: item.status ?? (item.published === false ? "draft" : "active"),
+    status: (item.status as "active" | "featured" | "draft") ?? (item.published === false ? "draft" : "active"),
     createdAt: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
-    venue_id: item.venue_id,
+    venue_id: item.venue_id ?? undefined,
   };
 }

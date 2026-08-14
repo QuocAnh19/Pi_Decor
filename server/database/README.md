@@ -53,7 +53,14 @@ database/
     ├── 0013_lead_activities.sql
     ├── 0014_quotations.sql
     ├── 0015_testimonials.sql
-    └── 0016_studio_templates.sql
+    ├── 0016_remove_lead_status_trigger.sql
+    ├── 0017_studio_templates.sql
+    ├── 0018_refresh_tokens.sql
+    ├── 0019_studio_templates_default_config.sql
+    ├── 0020_make_venue_id_nullable_in_projects.sql
+    ├── 0021_add_missing_project_columns.sql
+    ├── 0022_update_services_schema.sql
+    └── 0023_studio_assets_unique_name.sql
 ```
 
 Each file is numbered and runs in that exact order — `0005_designs.sql`

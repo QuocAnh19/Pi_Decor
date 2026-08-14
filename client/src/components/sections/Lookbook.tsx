@@ -4,21 +4,23 @@ import { Container, Section, SectionHeader } from "../ui/Layout";
 import { MediaSlot } from "../ui/MediaSlot";
 import { Reveal } from "../ui/Reveal";
 import { api } from "../../lib/api";
+import type { Project, CategoryPortfolioItem } from "../../lib/types";
 import styles from "./Lookbook.module.scss";
 
 export function Lookbook() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<CategoryPortfolioItem[]>([]);
 
   useEffect(() => {
     api
       .getProjects()
-      .then((data) => {
+      .then((data: Project[]) => {
         if (Array.isArray(data) && data.length > 0) {
-          const publishedOnly = data.filter((p: any) => p.published !== false);
-          const mapped = publishedOnly.map((p: any) => {
+          const publishedOnly = data.filter((p) => p.published !== false);
+          const mapped: CategoryPortfolioItem[] = publishedOnly.map((p) => {
             const tags = Array.isArray(p.style_tags) ? p.style_tags : [];
             return {
               id: p.id,
+              categoryId: "piwedding",
               tag: tags[1] ?? tags[0] ?? "GiaTiên",
               title: p.title,
               location: p.location ?? "Đà Nẵng",

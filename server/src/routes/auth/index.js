@@ -118,9 +118,10 @@ authRouter.post("/logout", async (req, res) => {
   const { refresh_token } = req.body ?? {};
   if (refresh_token && typeof refresh_token === "string") {
     const tokenHash = hashToken(refresh_token);
-    await db.update(
+    await db.updateWhere(
       "refresh_tokens",
-      (rt) => rt.token_hash === tokenHash,
+      "token_hash",
+      tokenHash,
       { revoked_at: new Date().toISOString() }
     );
   }

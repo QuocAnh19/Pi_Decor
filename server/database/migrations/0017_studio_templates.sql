@@ -1,6 +1,6 @@
 -- ============================================================================
--- 0016_studio_templates.sql
--- Pi Decor — Postgres schema, migration 16
+-- 0017_studio_templates.sql
+-- Pi Decor — Postgres schema, migration 17
 -- ============================================================================
 -- Backs: Studio interactive builder templates, slot definitions, assets, and rules.
 --   Maps 1-to-1 with client/src/features/studio/types/index.ts:

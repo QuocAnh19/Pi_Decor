@@ -2,6 +2,8 @@ import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
+import { validate } from "../../middlewares/validate.js";
+import { createVenueSchema, updateVenueSchema } from "../../schemas/venues.schema.js";
 import { deleteImageFile, deleteMultipleImageFiles } from "../../utils/uploadImage.js";
 
 export const venuesRouter = Router();
@@ -61,11 +63,8 @@ venuesRouter.get("/:id", async (req, res) => {
 
 // POST /api/admin/venues — create a venue. lat/lng entered manually for now;
 // wiring this to Nominatim/Goong from the address is the next milestone.
-venuesRouter.post("/", verifyToken, requireAdmin, async (req, res) => {
+venuesRouter.post("/", verifyToken, requireAdmin, validate(createVenueSchema), async (req, res) => {
   const { name, type, address, city, lat, lng, cover_image } = req.body ?? {};
-  if (!name || lat === undefined || lng === undefined) {
-    return res.status(400).json({ message: "Thiếu tên hoặc toạ độ (lat/lng)." });
-  }
   const venue = {
     id: uuid(),
     name,
@@ -80,7 +79,7 @@ venuesRouter.post("/", verifyToken, requireAdmin, async (req, res) => {
   res.status(201).json(venue);
 });
 
-venuesRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => {
+venuesRouter.patch("/:id", verifyToken, requireAdmin, validate(updateVenueSchema), async (req, res) => {
   const venues = await db.get("venues");
   const existing = venues.find((v) => v.id === req.params.id);
   if (!existing) return res.status(404).json({ message: "Không tìm thấy địa điểm." });
@@ -90,7 +89,7 @@ venuesRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => {
     await deleteImageFile(existing.cover_image);
   }
 
-  const updated = await db.update("venues", (v) => v.id === req.params.id, patch);
+  const updated = await db.updateById("venues", req.params.id, patch);
   res.json(updated);
 });
 
@@ -98,7 +97,7 @@ venuesRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
   const venues = await db.get("venues");
   const existing = venues.find((v) => v.id === req.params.id);
 
-  const removed = await db.remove("venues", (v) => v.id === req.params.id);
+  const removed = await db.removeById("venues", req.params.id);
   if (!removed) return res.status(404).json({ message: "Không tìm thấy địa điểm." });
 
   if (existing) {
@@ -147,7 +146,7 @@ venuesRouter.patch("/projects/:projectId", verifyToken, requireAdmin, async (req
     await deleteImageFile(existing.cover_image);
   }
 
-  const updated = await db.update("projects", (p) => p.id === req.params.projectId, patch);
+  const updated = await db.updateById("projects", req.params.projectId, patch);
   res.json(updated);
 });
 
@@ -155,7 +154,7 @@ venuesRouter.delete("/projects/:projectId", verifyToken, requireAdmin, async (re
   const projects = await db.get("projects");
   const existing = projects.find((p) => p.id === req.params.projectId);
 
-  const removed = await db.remove("projects", (p) => p.id === req.params.projectId);
+  const removed = await db.removeById("projects", req.params.projectId);
   if (!removed) return res.status(404).json({ message: "Không tìm thấy dự án." });
 
   if (existing) {

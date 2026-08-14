@@ -27,7 +27,7 @@ export function ServicesSection() {
               tag: p.tag || styleTags[1] || "Gia Tiên",
               title: p.title || "Dự án mới",
               location: p.location || "Đà Nẵng",
-              src: p.cover_image || p.src || "/images/portfolio/piwedding-gia-tien-1.jpg",
+              src: p.cover_image || "/images/portfolio/piwedding-gia-tien-1.jpg",
               gallery: Array.isArray(p.gallery) ? p.gallery : [],
             };
           });

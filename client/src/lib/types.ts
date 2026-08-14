@@ -115,7 +115,7 @@ export interface Venue {
 
 export interface Project {
   id: string;
-  venue_id: string;
+  venue_id?: string | null;
   title: string;
   wedding_date: string | null;
   style_tags: string[];
@@ -123,6 +123,13 @@ export interface Project {
   gallery: string[];
   lead_id: string | null;
   published: boolean;
+  location?: string | null;
+  description?: string | null;
+  budget?: string | null;
+  status?: string | null;
+  category_id?: string | null;
+  tag?: string | null;
+  created_at?: string;
 }
 
 export interface VenueDetail extends Venue {

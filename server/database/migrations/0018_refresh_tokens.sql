@@ -1,4 +1,4 @@
--- 0017_refresh_tokens.sql — Refresh tokens for admin sessions
+-- 0018_refresh_tokens.sql — Refresh tokens for admin sessions
 
 create table if not exists refresh_tokens (
   id          uuid primary key default gen_random_uuid(),

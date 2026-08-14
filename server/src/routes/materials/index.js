@@ -2,6 +2,8 @@ import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
+import { validate } from "../../middlewares/validate.js";
+import { createMaterialSchema, updateMaterialSchema } from "../../schemas/materials.schema.js";
 import { uploadImage, publicUrlFor, deleteImageFile } from "../../utils/uploadImage.js";
 
 export const materialsRouter = Router();
@@ -50,17 +52,10 @@ materialsRouter.get("/", async (req, res) => {
 });
 
 // POST /api/materials — admin only, optional image upload.
-materialsRouter.post("/", verifyToken, requireAdmin, uploadImage.single("image"), async (req, res) => {
+materialsRouter.post("/", verifyToken, requireAdmin, uploadImage.single("image"), validate(createMaterialSchema), async (req, res) => {
   const { name, category, color_hex } = req.body ?? {};
-  if (!name) {
-    return res.status(400).json({ message: "Vui lòng nhập tên vật liệu." });
-  }
 
   const categoryToUse = normalizeCategory(category);
-
-  if (color_hex && !HEX_COLOR_REGEX.test(color_hex)) {
-    return res.status(400).json({ message: "Mã màu color_hex không hợp lệ (cần định dạng #RRGGBB)." });
-  }
 
   const existingMaterials = await db.get("materials");
   const finalName = generateUniqueName(existingMaterials, name);
@@ -80,7 +75,7 @@ materialsRouter.post("/", verifyToken, requireAdmin, uploadImage.single("image")
 });
 
 // PATCH /api/materials/:id — admin only, edit fields and/or replace image.
-materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("image"), async (req, res) => {
+materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("image"), validate(updateMaterialSchema), async (req, res) => {
   const existingMaterials = await db.get("materials");
   const existing = existingMaterials.find((m) => String(m.id) === String(req.params.id));
   if (!existing) return res.status(404).json({ message: "Không tìm thấy vật liệu." });
@@ -88,9 +83,6 @@ materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("ima
   const patch = { ...req.body, updated_at: new Date().toISOString() };
   if (patch.category) {
     patch.category = normalizeCategory(patch.category);
-  }
-  if (patch.color_hex && !HEX_COLOR_REGEX.test(patch.color_hex)) {
-    return res.status(400).json({ message: "Mã màu color_hex không hợp lệ (cần định dạng #RRGGBB)." });
   }
 
   if (patch.name) {
@@ -104,7 +96,7 @@ materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("ima
     }
   }
 
-  const updated = await db.update("materials", (m) => String(m.id) === String(req.params.id), patch);
+  const updated = await db.updateById("materials", req.params.id, patch);
   res.json(updated);
 });
 
@@ -114,7 +106,7 @@ materialsRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
   const existingMaterials = await db.get("materials");
   const existing = existingMaterials.find((m) => String(m.id) === String(targetId));
 
-  const removed = await db.remove("materials", (m) => String(m.id) === String(targetId));
+  const removed = await db.removeById("materials", targetId);
   if (!removed) return res.status(404).json({ message: "Không tìm thấy vật liệu." });
 
   if (existing?.image_url) {
