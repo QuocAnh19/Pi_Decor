@@ -1,19 +1,23 @@
 import { ReactNode } from "react";
 import styles from "./Badge.module.scss";
 
-type Tone = "ink" | "paper" | "accent";
+export type BadgeTone = "ink" | "paper" | "accent" | "published" | "draft" | "warning";
 
-const toneClass: Record<Tone, string> = {
+const toneClass: Record<BadgeTone, string> = {
   ink: styles.ink,
   paper: styles.paper,
   accent: styles.accent,
+  published: styles.published,
+  draft: styles.draft,
+  warning: styles.warning,
 };
 
-/**
- * Solid-background label used for captions overlaid on imagery or color.
- * Deliberately opaque (no translucency/blur) so it stays legible regardless
- * of what sits behind it.
- */
-export function Badge({ tone = "paper", children }: { tone?: Tone; children: ReactNode }) {
-  return <span className={`${styles.badge} ${toneClass[tone]}`}>{children}</span>;
+export interface BadgeProps {
+  tone?: BadgeTone;
+  className?: string;
+  children: ReactNode;
+}
+
+export function Badge({ tone = "paper", className = "", children }: BadgeProps) {
+  return <span className={`${styles.badge} ${toneClass[tone]} ${className}`}>{children}</span>;
 }

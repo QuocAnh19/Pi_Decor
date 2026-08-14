@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ImagePlus } from "lucide-react";
+import { PhotoIcon } from "@heroicons/react/24/outline";
 import styles from "./MediaSlot.module.scss";
 
 /**
@@ -72,7 +72,7 @@ export function MediaSlot({
       )}
       {!showReal && (
         <div className={styles.placeholder}>
-          <ImagePlus size={22} strokeWidth={1.5} className={styles.placeholderIcon} />
+          <PhotoIcon className={`h-6 w-6 ${styles.placeholderIcon}`} style={{ width: 22, height: 22 }} />
           <p className={styles.placeholderLabel}>{label}</p>
           {hint && <p className={styles.placeholderHint}>{hint}</p>}
         </div>

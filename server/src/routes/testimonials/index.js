@@ -2,7 +2,7 @@ import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
-import { uploadImage, publicUrlFor } from "../../utils/uploadImage.js";
+import { uploadImage, publicUrlFor, deleteImageFile, deleteMultipleImageFiles } from "../../utils/uploadImage.js";
 import { testimonialLimiter } from "../../middlewares/rateLimiters.js";
 
 export const testimonialsRouter = Router();
@@ -110,6 +110,12 @@ testimonialsRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => 
     if (containsBase64) {
       return res.status(400).json({ message: "Không chấp nhận ảnh chuỗi base64 Data URL." });
     }
+
+    const existingPhotos = safeParsePhotos(existing.photos);
+    const removedPhotos = existingPhotos.filter((oldP) => !patch.photos.includes(oldP));
+    if (removedPhotos.length > 0) {
+      await deleteMultipleImageFiles(removedPhotos);
+    }
   }
 
   const updated = await db.update("testimonials", (t) => t.id === req.params.id, patch);
@@ -118,9 +124,23 @@ testimonialsRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => 
 
 // DELETE /api/testimonials/:id — admin only
 testimonialsRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
+  const testimonials = await db.get("testimonials");
+  const existing = testimonials.find((t) => t.id === req.params.id);
+
   const removed = await db.remove("testimonials", (t) => t.id === req.params.id);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy đánh giá." });
   }
+
+  if (existing) {
+    const existingPhotos = safeParsePhotos(existing.photos);
+    if (existingPhotos.length > 0) {
+      await deleteMultipleImageFiles(existingPhotos);
+    }
+    if (existing.avatar_url) {
+      await deleteImageFile(existing.avatar_url);
+    }
+  }
+
   res.status(204).send();
 });

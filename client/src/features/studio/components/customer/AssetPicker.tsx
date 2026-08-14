@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Asset, SlotDefinition, SlotConfig, SlotType } from '../../types'
+import { SearchInput } from '../../../../components/ui'
 import { DraggableAsset } from './DraggableAsset'
 import { TextAssetCustomizer } from './TextAssetCustomizer'
 import { CurtainColorFilterControl } from '../shared/CurtainColorFilterControl'
@@ -13,7 +14,7 @@ export interface AssetPickerProps {
   onApplyColor?: (hex: string, filterMode?: 'multiply_blend' | 'flat_tint' | 'color_map', saturation?: number) => void
 }
 
-type TabType = 'all' | 'drape' | 'flower' | 'text' | 'color'
+type TabType = 'all' | 'fabric' | 'drape_detail' | 'flower' | 'text'
 
 export const AssetPicker: React.FC<AssetPickerProps> = ({
   assets,
@@ -30,16 +31,14 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   const getTabForSlotType = (type: SlotType): TabType => {
     switch (type) {
       case 'drape':
+        return 'fabric'
       case 'drape_detail':
-        return 'drape'
+        return 'drape_detail'
       case 'flower':
         return 'flower'
       case 'text_name':
       case 'text_date':
         return 'text'
-      case 'color_accent':
-      case 'prop':
-        return 'color'
       default:
         return 'all'
     }
@@ -73,14 +72,14 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
     return assets.filter((asset) => {
       // 1. Tab filter
       let matchesTab = true
-      if (activeTab === 'drape') {
-        matchesTab = asset.assetType === 'drape' || asset.assetType === 'drape_detail'
+      if (activeTab === 'fabric') {
+        matchesTab = asset.assetType === 'drape'
+      } else if (activeTab === 'drape_detail') {
+        matchesTab = asset.assetType === 'drape_detail'
       } else if (activeTab === 'flower') {
         matchesTab = asset.assetType === 'flower'
       } else if (activeTab === 'text') {
         matchesTab = asset.assetType === 'text_name' || asset.assetType === 'text_date'
-      } else if (activeTab === 'color') {
-        matchesTab = asset.assetType === 'color_accent' || asset.assetType === 'prop'
       }
 
       if (!matchesTab) return false
@@ -121,33 +120,23 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
         </h3>
 
         {/* Search Input */}
-        <input
-          type="text"
-          placeholder="🔍 Tìm theo tên hoặc #tag..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            backgroundColor: '#0f172a',
-            border: '1px solid #334155',
-            borderRadius: '6px',
-            color: '#f8fafc',
-            fontSize: '12px',
-            marginBottom: '10px',
-            outline: 'none'
-          }}
-        />
+        <div style={{ marginBottom: '10px' }}>
+          <SearchInput
+            placeholder="Tìm theo tên hoặc #tag..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
         {/* Tab Buttons */}
         <div style={{ display: 'flex', gap: '4px', backgroundColor: '#0f172a', padding: '4px', borderRadius: '8px' }}>
           {(
             [
               { id: 'all', label: 'Tất cả' },
-              { id: 'drape', label: 'Rèm' },
-              { id: 'flower', label: 'Hoa' },
-              { id: 'text', label: 'Bộ Chữ' },
-              { id: 'color', label: 'Khác' }
+              { id: 'fabric', label: 'Rèm Nền' },
+              { id: 'drape_detail', label: 'Rèm Chi Tiết' },
+              { id: 'flower', label: 'Cụm Hoa' },
+              { id: 'text', label: 'Dãy Chữ Số' }
             ] as const
           ).map((tab) => (
             <button
@@ -172,8 +161,8 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
         </div>
       </div>
 
-      {/* 1. Integrated Curtain Color Filter Control (Shown when 'drape' tab is active) */}
-      {activeTab === 'drape' && onApplyColor && (
+      {/* 1. Integrated Curtain Color Filter Control (Shown when 'fabric' or 'drape_detail' tab is active) */}
+      {(activeTab === 'fabric' || activeTab === 'drape_detail') && onApplyColor && (
         <div style={{ padding: '12px 16px 0 16px' }}>
           <CurtainColorFilterControl
             slotLabel={activeSlot?.label}

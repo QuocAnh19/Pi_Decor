@@ -90,3 +90,14 @@ video {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Global SVG & Heroicons Sizing Controls */
+svg[data-slot="icon"],
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  max-width: 100%;
+  max-height: 100%;
+}
+

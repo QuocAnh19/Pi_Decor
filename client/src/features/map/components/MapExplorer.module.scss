@@ -1,0 +1,23 @@
+@use "@/styles/variables" as *;
+
+.explorer {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  border-radius: $radius-l;
+  overflow: hidden;
+  box-shadow: $shadow-default;
+}
+
+.compact {
+  height: 380px;
+
+  @media (min-width: 768px) {
+    height: 420px;
+  }
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}

@@ -1,42 +1,41 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { categoryPortfolio } from "../../lib/content";
 import { Container, Section, SectionHeader } from "../ui/Layout";
 import { MediaSlot } from "../ui/MediaSlot";
 import { Reveal } from "../ui/Reveal";
+import { api } from "../../lib/api";
 import styles from "./Lookbook.module.scss";
 
-const STORAGE_KEY = "pidecor_admin_projects";
-
 export function Lookbook() {
-  // Retrieve projects sorted by time descending (newest first)
-  const recentProjects = useMemo(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Filter out draft items
-          const activeOnly = parsed.filter((p: any) => p.status !== "draft");
-          // Sort newest timestamp / date first
-          return activeOnly.sort((a: any, b: any) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+  const [projects, setProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    api
+      .getProjects()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const publishedOnly = data.filter((p: any) => p.published !== false);
+          const mapped = publishedOnly.map((p: any) => {
+            const tags = Array.isArray(p.style_tags) ? p.style_tags : [];
+            return {
+              id: p.id,
+              tag: tags[1] ?? tags[0] ?? "GiaTiên",
+              title: p.title,
+              location: p.location ?? "Đà Nẵng",
+              src: p.cover_image ?? categoryPortfolio[0].src,
+            };
+          });
+          setProjects(mapped);
+        } else {
+          setProjects(categoryPortfolio);
         }
-      }
-    } catch (e) {
-      console.warn("Failed to load admin projects for Lookbook:", e);
-    }
-
-    // Fallback seed portfolio sorted by time descending
-    const fallbackList = categoryPortfolio.map((item, idx) => ({
-      id: item.id,
-      tag: item.tag,
-      title: item.title,
-      location: item.location,
-      src: item.src,
-      createdAt: Date.now() - idx * 86400000,
-    }));
-
-    return fallbackList.sort((a, b) => b.createdAt - a.createdAt);
+      })
+      .catch(() => {
+        setProjects(categoryPortfolio);
+      });
   }, []);
+
+  const displayList = projects.length > 0 ? projects : categoryPortfolio;
 
   return (
     <Section id="lookbook" tone="dim">
@@ -48,20 +47,20 @@ export function Lookbook() {
           align="left"
         />
         <div className={styles.grid}>
-          {recentProjects.slice(0, 9).map((item, i) => (
+          {displayList.slice(0, 9).map((item, i) => (
             <Reveal key={item.id} delay={i * 80}>
               <div className={styles.card}>
                 <MediaSlot
                   src={item.src}
                   alt={item.title || item.tag}
                   label={`Ảnh: ${item.tag}`}
-                  hint={`public${item.src ?? ""} · 4:5`}
+                  hint={`public${item.src ?? ""} · 16:10`}
                   className={styles.media}
                   mediaClassName={styles.photo}
                 />
                 <div className={styles.overlay} />
                 <div className={styles.contentOverlay}>
-                  <p className={styles.tag}>#PiDecor_{item.tag.replace(/\s+/g, "")}</p>
+                  <p className={styles.tag}>#PiDecor_{String(item.tag ?? "Concept").replace(/\s+/g, "")}</p>
                   {item.title && <p className={styles.cardTitle}>{item.title}</p>}
                   {item.location && <p className={styles.location}>{item.location}</p>}
                 </div>

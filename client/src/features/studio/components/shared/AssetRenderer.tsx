@@ -44,8 +44,10 @@ export function AssetRenderer({
         .replace(/<\/svg>/i, '')
     }
 
-    // Direct attribute & raster image recoloring engine
-    if (colorOverride) {
+    const isTextAsset = slotType === 'text_name' || slotType === 'text_date' || asset.tags?.includes('custom-artistic-text') || asset.tags?.includes('text_name')
+
+    // Direct attribute & raster image recoloring engine (Skip for text assets to preserve 3D gold gradients & custom fonts)
+    if (colorOverride && !isTextAsset) {
       if (asset.svgData.includes('var(--curtain-')) {
         innerContent = `<g style="${buildCurtainCSSVars(colorOverride)}">${innerContent}</g>`
       } else {
@@ -63,7 +65,7 @@ export function AssetRenderer({
           innerContent = `<defs>${bitmapDefs}</defs><g filter="url(#${filterId})">${innerContent}</g>`
         }
       }
-    } else if (colorMap && Object.keys(colorMap).length > 0) {
+    } else if (colorMap && Object.keys(colorMap).length > 0 && !isTextAsset) {
       innerContent = swapSVGColors(innerContent, colorMap)
     }
 
@@ -80,33 +82,38 @@ export function AssetRenderer({
     )
   }
 
-  // Case 2: Thumbnail or Image URL (Raster PNG/JPG)
-  if (asset.thumbnail) {
-    const filterId = `img-filter-${slotKey ?? 'x'}`
-    const filterDefs = colorOverride ? buildBitmapTintFilter(colorOverride, filterId, colorSaturation) : ''
+  // Case 2: Thumbnail or Image URL (Raster PNG/JPG from Cloudinary / Uploads)
+  const imageSrc =
+    asset.thumbnail ||
+    (asset as unknown as { image_url?: string; imageUrl?: string }).image_url ||
+    (asset as unknown as { imageUrl?: string }).imageUrl;
+
+  if (imageSrc) {
+    const filterId = `img-filter-${slotKey ?? "x"}`;
+    const filterDefs = colorOverride ? buildBitmapTintFilter(colorOverride, filterId, colorSaturation) : "";
 
     return (
-      <div style={{ position: 'relative', width, height }}>
+      <div style={{ position: "relative", width, height }}>
         {colorOverride && (
-          <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+          <svg style={{ position: "absolute", width: 0, height: 0, overflow: "hidden", pointerEvents: "none" }}>
             <defs dangerouslySetInnerHTML={{ __html: filterDefs }} />
           </svg>
         )}
         <img
-          src={asset.thumbnail}
+          src={imageSrc}
           alt={asset.name}
           className={className}
           style={{
-            width: '100%',
-            height: '100%',
+            width: "100%",
+            height: "100%",
             objectFit,
-            display: 'block',
-            filter: colorOverride ? `url(#${filterId})` : 'none'
+            display: "block",
+            filter: colorOverride ? `url(#${filterId})` : "none",
           }}
           draggable={false}
         />
       </div>
-    )
+    );
   }
 
   // Case 3: Color asset (colorHex)

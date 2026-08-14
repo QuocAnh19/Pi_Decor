@@ -29,20 +29,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
+    async function initAuth() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        setIsReady(true);
+        return;
+      }
+
       try {
         const parsed = JSON.parse(raw) as StoredAuth;
         if (parsed.token && parsed.admin) {
-          setToken(parsed.token);
-          if (parsed.refreshToken) setRefreshToken(parsed.refreshToken);
-          setAdmin(parsed.admin);
+          try {
+            // Verify stored access token with backend
+            const meRes = await api.getMe(parsed.token);
+            setToken(parsed.token);
+            if (parsed.refreshToken) setRefreshToken(parsed.refreshToken);
+            setAdmin(meRes.admin || parsed.admin);
+          } catch {
+            // Token expired or invalid — try to refresh token if available
+            if (parsed.refreshToken) {
+              try {
+                const refreshed = await api.refreshToken(parsed.refreshToken);
+                parsed.token = refreshed.token;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+                setToken(refreshed.token);
+                setRefreshToken(parsed.refreshToken);
+                setAdmin(parsed.admin);
+              } catch {
+                localStorage.removeItem(STORAGE_KEY);
+                setToken(null);
+                setRefreshToken(null);
+                setAdmin(null);
+              }
+            } else {
+              localStorage.removeItem(STORAGE_KEY);
+              setToken(null);
+              setRefreshToken(null);
+              setAdmin(null);
+            }
+          }
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
         }
       } catch {
         localStorage.removeItem(STORAGE_KEY);
+      } finally {
+        setIsReady(true);
       }
     }
-    setIsReady(true);
+
+    initAuth();
   }, []);
 
   async function login(email: string, password: string) {

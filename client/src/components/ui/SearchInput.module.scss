@@ -1,0 +1,31 @@
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.searchIcon {
+  color: #64748b;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.clearBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    color: #f8fafc;
+    background-color: #334155;
+  }
+}

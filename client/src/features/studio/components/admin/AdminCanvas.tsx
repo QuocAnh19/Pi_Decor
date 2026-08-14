@@ -269,7 +269,7 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
               fill={isSnapUnlocked ? '#fbbf24' : '#38bdf8'}
             />
             <text x={w / 2} y={23} textAnchor="middle" fill="#0f172a" fontSize={10} fontWeight="700">
-              {isSnapUnlocked ? '🔓 Đã Mở Khóa Dính (Tự Do)' : '🎯 Căn Giữa Ngang'}
+              {isSnapUnlocked ? 'Đã Mở Khóa Dính (Tự Do)' : 'Căn Giữa Ngang'}
             </text>
           </g>
         )}
@@ -295,7 +295,7 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
               fill={isSnapUnlocked ? '#fbbf24' : '#38bdf8'}
             />
             <text x={isSnapUnlocked ? 82 : 60} y={h / 2 + 4} textAnchor="middle" fill="#0f172a" fontSize={10} fontWeight="700">
-              {isSnapUnlocked ? '🔓 Mở Khóa Dính' : '🎯 Căn Giữa Dọc'}
+              {isSnapUnlocked ? 'Mở Khóa Dính' : 'Căn Giữa Dọc'}
             </text>
           </g>
         )}

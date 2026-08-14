@@ -1,0 +1,47 @@
+// ─────────────────────────────────────────────────────────────────────────
+// Core Design Tokens for Pi Decor (Unified Tokens)
+// ─────────────────────────────────────────────────────────────────────────
+
+// Admin & Studio theme (Slate / Sky / Rose / Emerald / Amber)
+$color-admin-bg: #0f172a;
+$color-admin-surface: #1e293b;
+$color-admin-surface-darkest: #0b1120;
+$color-admin-border: #334155;
+$color-admin-border-light: #475569;
+$color-admin-accent: #38bdf8;
+$color-admin-accent-hover: #0284c7;
+$color-admin-text-muted: #94a3b8;
+$color-admin-text-light: #cbd5e1;
+$color-danger: #e11d48;
+$color-success: #10b981;
+$color-warning: #f59e0b;
+
+// Client theme
+$color-paper: #fbf7f1;
+$color-ink: #271620;
+$color-accent-brand: #a15c2e;
+
+// Typography Scale (8-step standardized scale)
+$text-xs: 0.75rem;   // 12px
+$text-sm: 0.875rem;  // 14px
+$text-base: 1rem;    // 16px
+$text-lg: 1.125rem;  // 18px
+$text-xl: 1.25rem;   // 20px
+$text-2xl: 1.5rem;   // 24px
+$text-3xl: 1.875rem; // 30px
+$text-4xl: 2.25rem;  // 36px
+
+// Spacing Scale (4px / 8px multiple scale)
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-6: 24px;
+$space-8: 32px;
+$space-12: 48px;
+$space-20: 80px;
+
+// Breakpoints
+$bp-sm: 640px;
+$bp-md: 768px;
+$bp-lg: 1024px;

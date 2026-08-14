@@ -3,7 +3,7 @@
 .toast {
   position: fixed;
   left: 50%;
-  z-index: 50;
+  z-index: 3000;
   transform: translateX(-50%);
   border-radius: 8px;
   background: $color-ink;

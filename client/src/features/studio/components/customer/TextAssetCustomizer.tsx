@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Asset } from '../../types'
+import { Input, Select } from '../../../../components/ui'
 
 export interface TextAssetCustomizerProps {
   onApply: (asset: Asset) => void
@@ -309,33 +310,22 @@ export const TextAssetCustomizer: React.FC<TextAssetCustomizerProps> = ({
 
         {/* Text Input */}
         <div>
-          <label style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
-            Nội dung chữ:
-          </label>
-          <input
+          <Input
+            label="Nội dung chữ:"
             type="text"
             value={activeLine.data.text}
             onChange={(e) => activeLine.set((prev) => ({ ...prev, text: e.target.value }))}
-            style={{ width: '100%', padding: '6px 10px', backgroundColor: '#0f172a', border: '1px solid #38bdf8', borderRadius: '6px', color: '#ffffff', fontSize: '13px', fontWeight: '600' }}
           />
         </div>
 
         {/* Font Family Dropdown */}
         <div>
-          <label style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
-            Font Chữ Nghệ Thuật (10 Kiểu Hot):
-          </label>
-          <select
+          <Select
+            label="Font Chữ Nghệ Thuật (10 Kiểu Hot):"
             value={activeLine.data.fontFamily}
             onChange={(e) => activeLine.set((prev) => ({ ...prev, fontFamily: e.target.value }))}
-            style={{ width: '100%', padding: '6px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '6px', color: '#ffffff', fontSize: '12px' }}
-          >
-            {ARTISTIC_FONTS.map((f) => (
-              <option key={f.id} value={f.family}>
-                {f.name}
-              </option>
-            ))}
-          </select>
+            options={ARTISTIC_FONTS.map((f) => ({ value: f.family, label: f.name }))}
+          />
         </div>
 
         {/* Line Position Y Slider (Individual Height / Line Gap) */}
@@ -396,15 +386,12 @@ export const TextAssetCustomizer: React.FC<TextAssetCustomizerProps> = ({
           </div>
 
           <div>
-            <label style={{ fontSize: '11px', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>
-              Khoảng cách chữ (Spacing):
-            </label>
-            <input
+            <Input
+              label="Khoảng cách chữ (Spacing):"
               type="text"
               placeholder="0em hoặc 0.18em"
               value={activeLine.data.letterSpacing}
               onChange={(e) => activeLine.set((prev) => ({ ...prev, letterSpacing: e.target.value }))}
-              style={{ width: '100%', padding: '4px 6px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '4px', color: '#ffffff', fontSize: '12px' }}
             />
           </div>
         </div>

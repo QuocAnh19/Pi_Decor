@@ -2,7 +2,7 @@
 
 .section {
   background: $color-ink;
-  padding-block: 80px;
+  padding-block: $space-20;
 
   @media (min-width: 768px) {
     padding-block: 96px;
@@ -13,34 +13,34 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: $space-6;
   text-align: center;
 }
 
 .title {
   max-width: 32rem;
-  font-size: 1.875rem;
+  font-size: $text-3xl;
   line-height: 1.2;
   color: $color-paper;
 
   @media (min-width: 768px) {
-    font-size: 2.25rem;
+    font-size: $text-4xl;
   }
 }
 
 .subtitle {
   max-width: 26rem;
-  font-size: 0.9375rem;
+  font-size: $text-sm;
   line-height: 1.6;
   color: rgba($color-paper, 0.7);
 }
 
 .cta {
-  margin-top: 8px;
+  margin-top: $space-2;
   border-radius: $radius-pill;
   background: $color-accent;
-  padding: 14px 28px;
-  font-size: 0.875rem;
+  padding: $space-3 $space-6;
+  font-size: $text-sm;
   font-weight: 600;
   color: $color-paper;
   transition: background-color $transition-default;

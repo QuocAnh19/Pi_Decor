@@ -1,8 +1,8 @@
 import { Hero } from "../components/sections/Hero";
-import { Services } from "../components/sections/Services";
+import { Services } from "../features/services";
 import { Lookbook } from "../components/sections/Lookbook";
-import { MapTeaser } from "../components/sections/MapTeaser";
-import { Testimonials } from "../components/sections/Testimonials";
+import { MapTeaser } from "../features/map";
+import { Testimonials } from "../features/testimonials";
 import { ClosingCta } from "../components/sections/ClosingCta";
 
 export function HomePage() {

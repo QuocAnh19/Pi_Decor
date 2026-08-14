@@ -22,7 +22,7 @@
 
 .brand {
   font-family: $font-serif;
-  font-size: 1.15rem;
+  font-size: $text-lg;
   color: $admin-text;
   padding: 0 8px;
   margin-bottom: 32px;
@@ -31,7 +31,7 @@
 .brandTag {
   color: $admin-accent;
   font-family: $font-sans;
-  font-size: 0.7rem;
+  font-size: $text-xs;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -52,7 +52,7 @@
   gap: 10px;
   padding: 10px 12px;
   border-radius: $radius-s;
-  font-size: 0.875rem;
+  font-size: $text-sm;
   color: $admin-text-muted;
   transition: background-color $transition-default, color $transition-default;
 
@@ -80,7 +80,7 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: $radius-s;
-  font-size: 0.8rem;
+  font-size: $text-sm;
   color: $admin-text-faint;
   border-top: 1px solid $admin-border;
   margin-top: 12px;
@@ -108,7 +108,7 @@
 }
 
 .headerEmail {
-  font-size: 0.8rem;
+  font-size: $text-xs;
   color: $admin-text-faint;
 }
 
@@ -116,7 +116,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.8rem;
+  font-size: $text-xs;
   color: $admin-text-muted;
   padding: 6px 12px;
   border-radius: $radius-pill;

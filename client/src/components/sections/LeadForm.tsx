@@ -1,18 +1,26 @@
 import { FormEvent, useState } from "react";
 import {
-  User,
-  Phone,
-  Mail,
-  Sparkles,
-  Calendar,
-  MessageSquare,
-  Send,
-  CheckCircle2,
-} from "lucide-react";
+  UserIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  SparklesIcon,
+  CalendarIcon,
+  ChatBubbleLeftRightIcon,
+  PaperAirplaneIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/24/outline";
 import { api } from "../../lib/api";
+import { Input, Select, Textarea } from "../ui";
 import styles from "./LeadForm.module.scss";
 
 type Status = "idle" | "sending" | "success" | "error";
+
+const EVENT_TYPE_OPTIONS = [
+  { value: "PiWedding — Trang Trí Cưới Hỏi", label: "PiWedding — Trang Trí Cưới Hỏi" },
+  { value: "PiKids — Tiệc Thôi Nôi & Sinh Nhật", label: "PiKids — Tiệc Thôi Nôi & Sinh Nhật" },
+  { value: "PiEvent — Sự Kiện & Doanh Nghiệp", label: "PiEvent — Sự Kiện & Doanh Nghiệp" },
+  { value: "Khác", label: "Loại sự kiện khác" },
+];
 
 export function LeadForm() {
   const [status, setStatus] = useState<Status>("idle");
@@ -63,7 +71,7 @@ export function LeadForm() {
     return (
       <div className={styles.successCard}>
         <div className={styles.successIcon}>
-          <CheckCircle2 size={32} />
+          <CheckCircleIcon className="h-8 w-8" style={{ width: 32, height: 32 }} />
         </div>
         <h3 className={styles.successTitle}>Gửi thông tin thành công!</h3>
         <p className={styles.successText}>
@@ -86,96 +94,80 @@ export function LeadForm() {
       <form onSubmit={handleSubmit} className={styles.form}>
         {/* Name & Phone Grid */}
         <div className={styles.gridRow}>
-          <div className={styles.field}>
-            <label className={styles.label}>
-              <User size={14} /> Họ và tên *
-            </label>
-            <input
-              name="name"
-              type="text"
-              placeholder="VD: Nguyễn Văn A"
-              required
-              className={styles.input}
-            />
-          </div>
+          <Input
+            name="name"
+            type="text"
+            label={
+              <span className={styles.labelSpan}>
+                <UserIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Họ và tên *
+              </span>
+            }
+            placeholder="VD: Nguyễn Văn A"
+            required
+          />
 
-          <div className={styles.field}>
-            <label className={styles.label}>
-              <Phone size={14} /> Số điện thoại *
-            </label>
-            <input
-              name="phone"
-              type="tel"
-              placeholder="VD: 0905 123 456"
-              required
-              className={styles.input}
-            />
-          </div>
+          <Input
+            name="phone"
+            type="tel"
+            label={
+              <span className={styles.labelSpan}>
+                <PhoneIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Số điện thoại *
+              </span>
+            }
+            placeholder="VD: 0905 123 456"
+            required
+          />
         </div>
 
         {/* Email Field */}
-        <div className={styles.field}>
-          <label className={styles.label}>
-            <Mail size={14} /> Email{" "}
-            <span className={styles.optionalTag}>(Không bắt buộc)</span>
-          </label>
-          <input
-            name="email"
-            type="email"
-            placeholder="VD: email@example.com"
-            className={styles.input}
-          />
-        </div>
+        <Input
+          name="email"
+          type="email"
+          label={
+            <span className={styles.labelSpan}>
+              <EnvelopeIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Email{" "}
+              <span className={styles.optionalTag}>(Không bắt buộc)</span>
+            </span>
+          }
+          placeholder="VD: email@example.com"
+        />
 
-        {/* Event Type Select (Ngay dưới Email) */}
-        <div className={styles.field}>
-          <label className={styles.label}>
-            <Sparkles size={14} /> Loại sự kiện
-          </label>
-          <select
-            name="event_type"
-            defaultValue="PiWedding — Trang Trí Cưới Hỏi"
-            className={styles.select}
-          >
-            <option value="PiWedding — Trang Trí Cưới Hỏi">
-              PiWedding — Trang Trí Cưới Hỏi
-            </option>
-            <option value="PiKids — Tiệc Thôi Nôi & Sinh Nhật">
-              PiKids — Tiệc Thôi Nôi &amp; Sinh Nhật
-            </option>
-            <option value="PiEvent — Sự Kiện & Doanh Nghiệp">
-              PiEvent — Sự Kiện &amp; Doanh Nghiệp
-            </option>
-            <option value="Khác">Loại sự kiện khác</option>
-          </select>
-        </div>
+        {/* Event Type Select */}
+        <Select
+          name="event_type"
+          label={
+            <span className={styles.labelSpan}>
+              <SparklesIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Loại sự kiện
+            </span>
+          }
+          defaultValue="PiWedding — Trang Trí Cưới Hỏi"
+          options={EVENT_TYPE_OPTIONS}
+        />
 
-        {/* Expected Event Date Field (Chọn ngày dự kiến) */}
-        <div className={styles.field}>
-          <label className={styles.label}>
-            <Calendar size={14} /> Chọn ngày tổ chức dự kiến
-          </label>
-          <input
-            name="wedding_date"
-            type="date"
-            aria-label="Chọn ngày tổ chức dự kiến"
-            className={styles.input}
-          />
-        </div>
+        {/* Expected Event Date Field */}
+        <Input
+          name="wedding_date"
+          type="date"
+          label={
+            <span className={styles.labelSpan}>
+              <CalendarIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Chọn ngày tổ chức dự kiến
+            </span>
+          }
+          aria-label="Chọn ngày tổ chức dự kiến"
+        />
 
         {/* Message Field */}
-        <div className={styles.field}>
-          <label className={styles.label}>
-            <MessageSquare size={14} /> Ý tưởng hoặc ghi chú thêm{" "}
-            <span className={styles.optionalTag}>(Không bắt buộc)</span>
-          </label>
-          <textarea
-            name="message"
-            placeholder="VD: Mong muốn tông màu pastel, tiệc ngoài trời, khoảng 200 khách..."
-            rows={3}
-            className={styles.textarea}
-          />
-        </div>
+        <Textarea
+          name="message"
+          label={
+            <span className={styles.labelSpan}>
+              <ChatBubbleLeftRightIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Ý tưởng hoặc ghi chú thêm{" "}
+              <span className={styles.optionalTag}>(Không bắt buộc)</span>
+            </span>
+          }
+          placeholder="VD: Mong muốn tông màu pastel, tiệc ngoài trời, khoảng 200 khách..."
+          rows={3}
+        />
 
         {error && <p className={styles.error}>{error}</p>}
 
@@ -184,7 +176,7 @@ export function LeadForm() {
           disabled={status === "sending"}
           className={styles.submitBtn}
         >
-          <Send size={15} />
+          <PaperAirplaneIcon className="h-4 w-4 inline mr-1" style={{ display: 'inline', width: 16, height: 16 }} />
           {status === "sending" ? "Đang gửi thông tin…" : "Gửi Đăng Ký Tư Vấn"}
         </button>
       </form>

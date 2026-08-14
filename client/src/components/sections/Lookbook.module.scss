@@ -2,19 +2,24 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: $space-6;
 
   @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (min-width: 1024px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
 }
 
 .card {
   position: relative;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 16 / 10; /* Widescreen 16:10 format ideal for landscape photos */
   overflow: hidden;
   border-radius: $radius-l;
+  background-color: $color-admin-surface-darkest;
   box-shadow: $shadow-sm;
   transition: transform $transition-default, box-shadow $transition-default;
 
@@ -29,15 +34,17 @@
   width: 100%;
 }
 
-// Hover-zoom: the photo itself scales up inside its clipped frame — the
-// card and label never move, only the image.
 .photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Fills the entire card frame edge-to-edge */
+  object-position: center;
   transform: scale(1);
   transition: transform 500ms ease-out;
 }
 
 .card:hover .photo {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
 .overlay {
@@ -50,24 +57,24 @@
 .contentOverlay {
   pointer-events: none;
   position: absolute;
-  bottom: 16px;
-  left: 16px;
-  right: 16px;
+  bottom: $space-4;
+  left: $space-4;
+  right: $space-4;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: $space-1;
 }
 
 .tag {
   font-family: $font-serif;
-  font-size: 1.125rem;
+  font-size: $text-lg;
   color: $color-paper;
   font-weight: 600;
   line-height: 1.2;
 }
 
 .cardTitle {
-  font-size: 0.875rem;
+  font-size: $text-sm;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
   white-space: nowrap;
@@ -76,6 +83,6 @@
 }
 
 .location {
-  font-size: 0.75rem;
+  font-size: $text-xs;
   color: rgba(255, 255, 255, 0.8);
 }

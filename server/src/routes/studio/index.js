@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { sanitizeSvg } from "../../utils/sanitizeSvg.js";
-import { uploadImage, publicUrlFor } from "../../utils/uploadImage.js";
+import { uploadImage, publicUrlFor, deleteImageFile } from "../../utils/uploadImage.js";
 
 export const studioRouter = Router();
 
@@ -49,28 +49,154 @@ studioRouter.post("/templates", verifyToken, requireAdmin, async (req, res) => {
 
 // PATCH /api/studio/templates/:id — admin only, update template
 studioRouter.patch("/templates/:id", verifyToken, requireAdmin, async (req, res) => {
-  const patch = { ...req.body };
+  const patch = { ...req.body, updated_at: new Date().toISOString() };
   if (patch.svg_base) {
     patch.svg_base = sanitizeSvg(patch.svg_base);
   }
 
-  const updated = await db.update("studio_templates", (t) => t.id === req.params.id, patch);
+  const updated = await db.update("studio_templates", (t) => String(t.id) === String(req.params.id), patch);
   if (!updated) {
     return res.status(404).json({ message: "Không tìm thấy template." });
   }
   res.json(updated);
 });
 
+function ensureUuid(id) {
+  if (!id || typeof id !== "string") return uuid();
+  const clean = id.replace(/^(tpl|slot|rule|mat|asset)-/, "");
+  if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(clean)) {
+    return clean;
+  }
+  return uuid();
+}
+
+// PUT /api/studio/templates/:id/publish — admin only, full atomic publish or draft save
+studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const rawTargetId = req.params.id;
+    const { name, thumbnail, svg_base, category, is_active, slots, rules, slot_config } = req.body ?? {};
+
+    if (!name || !svg_base) {
+      return res.status(400).json({ message: "Thiếu tên hoặc nội dung SVG của phông nền." });
+    }
+
+    const cleanSvg = sanitizeSvg(svg_base);
+    const validTargetUuid = ensureUuid(rawTargetId);
+    const templates = await db.get("studio_templates");
+
+    // Only match existing template by exact ID (never by name to prevent overwriting existing templates)
+    let existing = null;
+    if (rawTargetId !== "new") {
+      existing = templates.find(
+        (t) => String(t.id) === String(rawTargetId) || String(t.id) === validTargetUuid
+      );
+    }
+
+    const activeFlag = is_active !== undefined ? Boolean(is_active) : (existing ? Boolean(existing.is_active) : true);
+
+    let savedTemplate;
+    if (existing) {
+      savedTemplate = await db.update(
+        "studio_templates",
+        (t) => String(t.id) === String(existing.id),
+        {
+          name: String(name).trim(),
+          thumbnail: thumbnail ?? existing.thumbnail ?? null,
+          svg_base: cleanSvg,
+          category: category ?? existing.category ?? null,
+          is_active: activeFlag,
+          default_config: slot_config ?? existing.default_config ?? {},
+          updated_at: new Date().toISOString(),
+        }
+      );
+    } else {
+      savedTemplate = {
+        id: validTargetUuid,
+        name: String(name).trim(),
+        thumbnail: thumbnail ?? null,
+        svg_base: cleanSvg,
+        category: category ?? null,
+        is_active: activeFlag,
+        default_config: slot_config ?? {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      await db.insert("studio_templates", savedTemplate);
+    }
+
+    // Batch sync slot definitions for this template
+    if (Array.isArray(slots)) {
+      await db.remove("studio_slot_definitions", (s) => String(s.template_id) === String(savedTemplate.id));
+
+      for (const slot of slots) {
+        const slotRow = {
+          id: ensureUuid(slot.id),
+          template_id: savedTemplate.id,
+          slot_key: String(slot.slotKey || slot.slot_key).trim(),
+          label: String(slot.label).trim(),
+          slot_type: slot.slotType || slot.slot_type || "drape",
+          norm_x: Number(slot.normX ?? slot.norm_x ?? 0.5),
+          norm_y: Number(slot.normY ?? slot.norm_y ?? 0.5),
+          norm_width: slot.normWidth !== undefined ? Number(slot.normWidth) : slot.norm_width !== undefined ? Number(slot.norm_width) : null,
+          norm_height: slot.normHeight !== undefined ? Number(slot.normHeight) : slot.norm_height !== undefined ? Number(slot.norm_height) : null,
+          allow_scale: slot.allowScale ?? slot.allow_scale ?? true,
+          allow_rotate: slot.allowRotate ?? slot.allow_rotate ?? false,
+          mirror_x: slot.mirrorX ?? slot.mirror_x ?? false,
+          z_index: Number(slot.zIndex ?? slot.z_index ?? 0),
+          sort_order: Number(slot.sortOrder ?? slot.sort_order ?? 0),
+          required: slot.required ?? false,
+        };
+        await db.insert("studio_slot_definitions", slotRow);
+      }
+    }
+
+    // Batch sync slot rules for this template
+    if (Array.isArray(rules)) {
+      await db.remove("studio_slot_rules", (r) => String(r.template_id) === String(savedTemplate.id));
+
+      for (const rule of rules) {
+        const ruleRow = {
+          id: ensureUuid(rule.id),
+          template_id: savedTemplate.id,
+          rule_name: rule.ruleName || rule.rule_name || null,
+          condition_slot: rule.conditionSlot || rule.condition_slot,
+          condition_value: rule.conditionValue || rule.condition_value || {},
+          target_slot: rule.targetSlot || rule.target_slot,
+          action: rule.action,
+          action_value: rule.actionValue || rule.action_value || null,
+          priority: Number(rule.priority ?? 0),
+        };
+        await db.insert("studio_slot_rules", ruleRow);
+      }
+    }
+
+    res.json({
+      message: activeFlag ? "Đã xuất bản (Publish) template thành công!" : "Đã lưu nháp (Draft) template thành công!",
+      template: savedTemplate,
+    });
+  } catch (err) {
+    console.error("Error in publish/draft template endpoint:", err);
+    res.status(500).json({ message: "Lỗi hệ thống khi lưu template: " + (err.message || "Không thể truy vấn CSDL") });
+  }
+});
+
 // DELETE /api/studio/templates/:id — admin only, delete template (and cleanup associated slots/rules in DB)
 studioRouter.delete("/templates/:id", verifyToken, requireAdmin, async (req, res) => {
-  const removed = await db.remove("studio_templates", (t) => t.id === req.params.id);
+  const templates = await db.get("studio_templates");
+  const existing = templates.find((t) => String(t.id) === String(req.params.id));
+
+  const removed = await db.remove("studio_templates", (t) => String(t.id) === String(req.params.id));
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy template." });
   }
 
+  if (existing?.thumbnail) {
+    await deleteImageFile(existing.thumbnail);
+  }
+
   // Clean up associated slots and rules (app-level cascade for JSON DB mode)
-  await db.remove("studio_slot_definitions", (s) => s.template_id === req.params.id);
-  await db.remove("studio_slot_rules", (r) => r.template_id === req.params.id);
+  await db.remove("studio_slot_definitions", (s) => String(s.template_id) === String(req.params.id));
+  await db.remove("studio_slot_rules", (r) => String(r.template_id) === String(req.params.id));
 
   res.status(204).send();
 });
@@ -176,7 +302,7 @@ studioRouter.get("/assets/admin", verifyToken, requireAdmin, async (_req, res) =
   res.json(assets);
 });
 
-// POST /api/studio/assets — admin only, create asset (optional file upload or body)
+// POST /api/studio/assets — admin only, create or update asset (optional file upload or body)
 studioRouter.post("/assets", verifyToken, requireAdmin, uploadImage.single("svg"), async (req, res) => {
   const { asset_type, name, thumbnail, svg_data, color_hex, font_family, tags, is_active, dominant_colors } = req.body ?? {};
 
@@ -191,10 +317,27 @@ studioRouter.post("/assets", verifyToken, requireAdmin, uploadImage.single("svg"
     finalThumbnail = publicUrlFor(req, req.file);
   }
 
+  const cleanName = String(name).trim();
+  const assets = await db.get("studio_assets");
+  const existing = assets.find((a) => a.name === cleanName && a.asset_type === asset_type);
+
+  if (existing) {
+    const updated = await db.update("studio_assets", (a) => a.id === existing.id, {
+      thumbnail: finalThumbnail ?? existing.thumbnail ?? null,
+      svg_data: finalSvg ?? existing.svg_data ?? null,
+      color_hex: color_hex ?? existing.color_hex ?? null,
+      font_family: font_family ?? existing.font_family ?? null,
+      tags: Array.isArray(tags) ? tags : existing.tags ?? [],
+      is_active: is_active ?? existing.is_active ?? true,
+      updated_at: new Date().toISOString(),
+    });
+    return res.json(updated);
+  }
+
   const asset = {
     id: uuid(),
     asset_type,
-    name: String(name).trim(),
+    name: cleanName,
     thumbnail: finalThumbnail,
     svg_data: finalSvg,
     color_hex: color_hex ?? null,
@@ -212,27 +355,41 @@ studioRouter.post("/assets", verifyToken, requireAdmin, uploadImage.single("svg"
 
 // PATCH /api/studio/assets/:id — admin only, update asset
 studioRouter.patch("/assets/:id", verifyToken, requireAdmin, uploadImage.single("svg"), async (req, res) => {
+  const assets = await db.get("studio_assets");
+  const existing = assets.find((a) => String(a.id) === String(req.params.id));
+  if (!existing) {
+    return res.status(404).json({ message: "Không tìm thấy asset." });
+  }
+
   const patch = { ...req.body };
   if (patch.svg_data) {
     patch.svg_data = sanitizeSvg(patch.svg_data);
   }
   if (req.file) {
     patch.thumbnail = publicUrlFor(req, req.file);
+    if (existing.thumbnail && existing.thumbnail !== patch.thumbnail) {
+      await deleteImageFile(existing.thumbnail);
+    }
   }
 
-  const updated = await db.update("studio_assets", (a) => a.id === req.params.id, patch);
-  if (!updated) {
-    return res.status(404).json({ message: "Không tìm thấy asset." });
-  }
+  const updated = await db.update("studio_assets", (a) => String(a.id) === String(req.params.id), patch);
   res.json(updated);
 });
 
 // DELETE /api/studio/assets/:id — admin only, delete asset
 studioRouter.delete("/assets/:id", verifyToken, requireAdmin, async (req, res) => {
-  const removed = await db.remove("studio_assets", (a) => a.id === req.params.id);
+  const assets = await db.get("studio_assets");
+  const existing = assets.find((a) => String(a.id) === String(req.params.id));
+
+  const removed = await db.remove("studio_assets", (a) => String(a.id) === String(req.params.id));
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy asset." });
   }
+
+  if (existing?.thumbnail) {
+    await deleteImageFile(existing.thumbnail);
+  }
+
   res.status(204).send();
 });
 

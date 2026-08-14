@@ -1,42 +1,43 @@
 @use "@/styles/variables" as *;
+@use "@/styles/tokens" as *;
 @use "@/styles/admin-variables" as *;
 @use "@/styles/mixins" as *;
 
 .title {
   font-family: $font-serif;
-  font-size: 1.5rem;
+  font-size: $text-2xl;
   color: $admin-text;
 }
 
 .subtitle {
-  font-size: 0.875rem;
+  font-size: $text-sm;
   color: $admin-text-faint;
-  margin-top: 4px;
-  margin-bottom: 24px;
+  margin-top: $space-1;
+  margin-bottom: $space-6;
 }
 
 .status {
-  font-size: 0.875rem;
+  font-size: $text-sm;
   color: $admin-text-muted;
 }
 
 .error {
-  font-size: 0.8rem;
+  font-size: $text-xs;
   color: $admin-danger;
   background: $admin-danger-subtle;
   border-radius: $radius-s;
-  padding: 10px 14px;
-  margin-bottom: 16px;
+  padding: $space-3 $space-4;
+  margin-bottom: $space-4;
   cursor: pointer;
 }
 
 .layout {
   display: grid;
   grid-template-columns: 320px 1fr;
-  gap: 20px;
+  gap: $space-4;
   align-items: start;
 
-  @media (max-width: 900px) {
+  @media (max-width: 1023px) {
     grid-template-columns: 1fr;
   }
 }
@@ -45,14 +46,14 @@
   background: $admin-surface;
   border: 1px solid $admin-border;
   border-radius: $radius-m;
-  padding: 20px;
+  padding: $space-4;
   min-height: 200px;
 }
 
 .placeholder {
-  font-size: 0.85rem;
+  font-size: $text-sm;
   color: $admin-text-faint;
-  padding: 24px 0;
+  padding: $space-6 0;
   text-align: center;
 }
 
@@ -60,20 +61,20 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 16px;
-  margin-bottom: 16px;
+  gap: $space-3;
+  padding-bottom: $space-4;
+  margin-bottom: $space-4;
   border-bottom: 1px solid $admin-border;
 }
 
 .detailName {
   font-family: $font-serif;
-  font-size: 1.1rem;
+  font-size: $text-lg;
   color: $admin-text;
 }
 
 .detailMeta {
-  font-size: 0.8rem;
+  font-size: $text-xs;
   color: $admin-text-faint;
   margin-top: 2px;
 }
@@ -81,12 +82,12 @@
 .addProjectButton {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
+  gap: $space-2;
+  font-size: $text-xs;
   font-weight: 600;
   color: $admin-accent;
   background: $admin-accent-subtle;
-  padding: 8px 14px;
+  padding: $space-2 $space-4;
   border-radius: $radius-pill;
   flex-shrink: 0;
 
@@ -100,14 +101,14 @@
 .projectList {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: $space-1;
 }
 
 .projectItem {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: $space-3;
+  padding: $space-3;
   border-radius: $radius-s;
 
   &:hover {
@@ -143,8 +144,8 @@
 .projectTitle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.875rem;
+  gap: $space-2;
+  font-size: $text-sm;
   font-weight: 600;
   color: $admin-text;
 }
@@ -153,29 +154,29 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  font-size: 0.65rem;
+  font-size: $text-xs;
   font-weight: 600;
   color: $admin-warning;
   background: $admin-warning-subtle;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: $radius-pill;
 }
 
 .projectMeta {
-  font-size: 0.75rem;
+  font-size: $text-xs;
   color: $admin-text-faint;
   margin-top: 2px;
 }
 
 .projectActions {
   display: flex;
-  gap: 4px;
+  gap: $space-1;
   flex-shrink: 0;
 }
 
 .iconButton {
   color: $admin-text-faint;
-  padding: 6px;
+  padding: $space-2;
   border-radius: $radius-s;
 
   &:hover {

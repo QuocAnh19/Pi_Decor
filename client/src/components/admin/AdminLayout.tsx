@@ -1,16 +1,26 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, FolderKanban, MapPin, LogOut, ExternalLink, Palette, Layers, MessageSquare } from "lucide-react";
+import {
+  Squares2X2Icon,
+  UsersIcon,
+  FolderIcon,
+  MapPinIcon,
+  ArrowRightOnRectangleIcon,
+  ArrowTopRightOnSquareIcon,
+  SwatchIcon,
+  SquaresPlusIcon,
+  ChatBubbleLeftRightIcon,
+} from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
 import styles from "./AdminLayout.module.scss";
 
 const navItems = [
-  { to: "/admin", label: "Tổng quan", icon: LayoutDashboard, end: true },
-  { to: "/admin/leads", label: "Khách hàng", icon: Users, end: false },
-  { to: "/admin/projects", label: "Dự án", icon: FolderKanban, end: false },
-  { to: "/admin/venues", label: "Bản đồ", icon: MapPin, end: false },
-  { to: "/admin/materials", label: "Vật liệu", icon: Layers, end: false },
-  { to: "/admin/testimonials", label: "Đánh giá", icon: MessageSquare, end: false },
-  { to: "/admin/studio", label: "Studio Builder", icon: Palette, end: false },
+  { to: "/admin", label: "Tổng quan", icon: Squares2X2Icon, end: true },
+  { to: "/admin/leads", label: "Khách hàng", icon: UsersIcon, end: false },
+  { to: "/admin/projects", label: "Dự án", icon: FolderIcon, end: false },
+  { to: "/admin/venues", label: "Bản đồ", icon: MapPinIcon, end: false },
+  { to: "/admin/materials", label: "Vật liệu", icon: SquaresPlusIcon, end: false },
+  { to: "/admin/testimonials", label: "Đánh giá", icon: ChatBubbleLeftRightIcon, end: false },
+  { to: "/admin/studio", label: "Studio Builder", icon: SwatchIcon, end: false },
 ];
 
 /**
@@ -43,14 +53,14 @@ export function AdminLayout() {
               end={end}
               className={({ isActive }) => `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`}
             >
-              <Icon size={17} strokeWidth={1.75} />
+              <Icon className="h-4 w-4" style={{ width: 16, height: 16 }} />
               {label}
             </NavLink>
           ))}
         </nav>
 
         <a href="/" className={styles.viewSite}>
-          <ExternalLink size={15} strokeWidth={1.75} />
+          <ArrowTopRightOnSquareIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
           Xem web công khai
         </a>
       </aside>
@@ -59,7 +69,7 @@ export function AdminLayout() {
         <header className={styles.header}>
           <span className={styles.headerEmail}>{admin?.email}</span>
           <button type="button" className={styles.logoutButton} onClick={handleLogout}>
-            <LogOut size={15} strokeWidth={1.75} />
+            <ArrowRightOnRectangleIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
             Đăng xuất
           </button>
         </header>

@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+
 .shell {
   display: flex;
   flex-direction: column;
@@ -16,15 +18,15 @@
 }
 
 .title {
-  font-size: 22px;
+  font-size: $text-xl;
   font-weight: 700;
   color: #f8fafc;
-  font-family: "Playfair Display", serif;
+  font-family: $font-serif;
   margin: 0;
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: $text-sm;
   color: #94a3b8;
   margin-top: 4px;
 }
@@ -38,7 +40,7 @@
   border: none;
   border-radius: 8px;
   padding: 10px 18px;
-  font-size: 13px;
+  font-size: $text-sm;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
@@ -76,7 +78,7 @@
   border: 1px solid #334155;
   border-radius: 8px;
   color: #f8fafc;
-  font-size: 13px;
+  font-size: $text-sm;
   outline: none;
 
   &:focus {
@@ -90,7 +92,7 @@
   border: 1px solid #334155;
   border-radius: 8px;
   color: #f8fafc;
-  font-size: 13px;
+  font-size: $text-sm;
   outline: none;
   cursor: pointer;
 
@@ -112,7 +114,7 @@
   border: 1px solid #334155;
   background-color: #0f172a;
   color: #94a3b8;
-  font-size: 12px;
+  font-size: $text-xs;
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
@@ -138,7 +140,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 20px;
 }
 
@@ -161,15 +163,16 @@
 .cardImageWrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  background-color: #0f172a;
+  aspect-ratio: 16 / 9; /* Widescreen 16:9 ratio ideal for landscape photos */
+  background-color: #0b1120;
   overflow: hidden;
 }
 
 .cardImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Fills full card frame edge-to-edge */
+  object-position: center;
   transition: transform 0.3s ease;
 
   .card:hover & {
@@ -185,6 +188,7 @@
   display: flex;
   justify-content: space-between;
   pointer-events: none;
+  z-index: 2;
 }
 
 .categoryBadge {
@@ -192,14 +196,14 @@
   backdrop-filter: blur(4px);
   color: #38bdf8;
   border: 1px solid rgba(56, 189, 248, 0.4);
-  font-size: 11px;
+  font-size: $text-xs;
   font-weight: 700;
   padding: 3px 8px;
-  borderRadius: 6px;
+  border-radius: 6px;
 }
 
 .statusBadge {
-  font-size: 10px;
+  font-size: $text-xs;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 6px;
@@ -230,7 +234,7 @@
 }
 
 .cardTitle {
-  fontSize: 16px;
+  font-size: $text-base;
   font-weight: 700;
   color: #ffffff;
   margin: 0;
@@ -241,7 +245,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 11px;
+  font-size: $text-xs;
   color: #94a3b8;
 }
 
@@ -252,7 +256,7 @@
 }
 
 .cardDesc {
-  font-size: 12px;
+  font-size: $text-xs;
   color: #cbd5e1;
   line-height: 1.5;
   margin: 4px 0 8px 0;
@@ -282,7 +286,7 @@
   color: #cbd5e1;
   border-radius: 6px;
   padding: 6px 10px;
-  font-size: 12px;
+  font-size: $text-xs;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -324,8 +328,8 @@
   border: 1px solid #334155;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
   width: 100%;
-  max-width: 680px;
-  max-height: 90vh;
+  max-width: 980px;
+  max-height: 92vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -394,13 +398,23 @@
   grid-column: 1 / -1;
 }
 
+.imagePreviewBox {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 240px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #334155;
+  background-color: #0b1120;
+  margin-top: 8px;
+}
+
 .imagePreview {
   width: 100%;
-  height: 160px;
-  border-radius: 8px;
+  height: 100%;
   object-fit: cover;
-  border: 1px solid #334155;
-  margin-top: 6px;
+  object-position: center;
 }
 
 .uploadDropzone {
@@ -438,6 +452,217 @@
   color: #94a3b8;
 }
 
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.galleryItem {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #334155;
+  background-color: #0b1120;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    border-color: #38bdf8;
+    transform: translateY(-2px);
+  }
+}
+
+.galleryThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.galleryItemActions {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  .galleryItem:hover &,
+  .visualSlotTile:hover & {
+    opacity: 1;
+  }
+}
+
+.galleryActionBtn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.makeCoverBtn {
+  background-color: #38bdf8;
+  color: #0f172a;
+
+  &:hover {
+    background-color: #7dd3fc;
+  }
+}
+
+.deleteThumbBtn {
+  background-color: #ef4444;
+  color: #ffffff;
+
+  &:hover {
+    background-color: #f87171;
+  }
+}
+
+/* Interactive Visual Masonry Grid Slot Picker (4-column layout) */
+.visualSlotGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 130px;
+  gap: 14px;
+  margin-top: 12px;
+  background: #0b1120;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  width: 100%;
+
+  @media (max-width: 767px) {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 100px;
+    gap: 10px;
+  }
+}
+
+/* Span classes for 4-column layout (identical to ProjectAlbumModal) */
+.span1x1 {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.span2x1 {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+.span1x2 {
+  grid-column: span 1;
+  grid-row: span 2;
+}
+
+.span2x2 {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.span1x3 {
+  grid-column: span 1;
+  grid-row: span 3;
+}
+
+.span2x3 {
+  grid-column: span 2;
+  grid-row: span 3;
+}
+
+.span3x1 {
+  grid-column: span 3;
+  grid-row: span 1;
+}
+
+.span3x2 {
+  grid-column: span 3;
+  grid-row: span 2;
+}
+
+.span4x2 {
+  grid-column: span 4;
+  grid-row: span 2;
+}
+
+.span4x3 {
+  grid-column: span 4;
+  grid-row: span 3;
+}
+
+.visualSlotTile {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px dashed #334155;
+  background: #0f172a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.05);
+  }
+}
+
+.visualSlotFilled {
+  border-style: solid;
+  border-color: #334155;
+
+  &:hover {
+    border-color: #38bdf8;
+  }
+}
+
+.visualSlotEmpty {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.visualSlotLabel {
+  font-size: $text-xs;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.visualSlotHint {
+  font-size: $text-xs;
+  color: #64748b;
+}
+
+.visualSlotCoverBadge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  font-size: $text-xs;
+  font-weight: 700;
+  background: #f59e0b;
+  color: #0f172a;
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
 .modalFooter {
   padding: 16px 24px;
   border-top: 1px solid #334155;
@@ -452,7 +677,7 @@
   color: #94a3b8;
   border: none;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: $text-sm;
   font-weight: 600;
   cursor: pointer;
 
@@ -468,7 +693,7 @@
   color: #ffffff;
   border: none;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: $text-sm;
   font-weight: 600;
   cursor: pointer;
 

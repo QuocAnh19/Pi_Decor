@@ -1,0 +1,146 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+@use "@/styles/mixins" as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $admin-text;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: $admin-accent;
+  color: #ffffff;
+  border-radius: $radius-s;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.empty {
+  padding: 40px;
+  text-align: center;
+  color: $admin-text-faint;
+  border: 1px dashed $admin-border;
+  border-radius: $radius-m;
+  font-size: 0.875rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s ease;
+
+  &:hover {
+    border-color: $admin-accent;
+  }
+}
+
+.preview {
+  height: 140px;
+  background: $admin-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.swatch {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: $shadow-sm;
+}
+
+.body {
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $admin-text;
+}
+
+.badge {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: $radius-pill;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: $admin-surface-raised;
+  color: $admin-accent;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 8px 12px;
+  border-top: 1px solid $admin-border;
+  background: $admin-bg;
+}
+
+.iconButton {
+  background: transparent;
+  border: none;
+  color: $admin-text-muted;
+  padding: 6px;
+  border-radius: $radius-s;
+  cursor: pointer;
+
+  &:hover {
+    color: $admin-text;
+    background: $admin-surface-raised;
+  }
+}
+
+.iconButtonDanger:hover {
+  color: #ef4444;
+}

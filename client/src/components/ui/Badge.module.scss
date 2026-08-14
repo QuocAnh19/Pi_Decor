@@ -3,10 +3,12 @@
 .badge {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   border-radius: $radius-pill;
-  padding: 4px 12px;
+  padding: 4px 10px;
   font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .ink {
@@ -21,6 +23,25 @@
 }
 
 .accent {
-  background: $color-accent-subtle;
-  color: $color-accent;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.published {
+  background: rgba(22, 163, 74, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(22, 163, 74, 0.3);
+}
+
+.draft {
+  background: rgba(100, 116, 139, 0.15);
+  color: #cbd5e1;
+  border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }

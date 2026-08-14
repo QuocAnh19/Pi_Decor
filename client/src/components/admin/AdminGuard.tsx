@@ -1,21 +1,32 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../lib/authContext";
 
-/**
- * AdminGuard — wraps every /admin/* route (except /admin/login itself).
- *
- * Per §2 of PiDecor_AdminPanel.md this is UX only, not security: the real
- * protection is verifyToken + requireAdmin on the API. This just avoids
- * showing an empty admin shell before bouncing an unauthenticated visitor
- * back to the login page.
- */
 export function AdminGuard() {
   const { token, isReady } = useAuth();
   const location = useLocation();
 
-  // Wait for the localStorage read in authContext before deciding — avoids
-  // a redirect flash on refresh for an admin who *is* logged in.
-  if (!isReady) return null;
+  if (!isReady) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+          backgroundColor: "#0f172a",
+          color: "#f8fafc",
+          fontFamily: "sans-serif",
+          gap: "12px",
+        }}
+      >
+        <div style={{ fontSize: "28px" }}>🔐</div>
+        <p style={{ fontSize: "14px", color: "#94a3b8", margin: 0 }}>
+          Đang xác thực phiên đăng nhập Admin...
+        </p>
+      </div>
+    );
+  }
 
   if (!token) {
     return <Navigate to="/admin/login" replace state={{ from: location.pathname }} />;

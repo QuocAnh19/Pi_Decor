@@ -47,28 +47,11 @@
   margin-bottom: 28px;
 }
 
-.field {
+.fieldGroup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 0.8rem;
-  color: $admin-text-muted;
+  gap: 16px;
   margin-bottom: 16px;
-}
-
-.input {
-  border-radius: $radius-s;
-  border: 1px solid $admin-border;
-  background: $admin-bg;
-  padding: 10px 14px;
-  font-size: 0.875rem;
-  color: $admin-text;
-  font-family: inherit;
-
-  &:focus-visible {
-    outline: 2px solid $admin-accent;
-    outline-offset: 1px;
-  }
 }
 
 .error {

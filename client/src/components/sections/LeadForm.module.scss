@@ -5,72 +5,63 @@
   backdrop-filter: blur(12px);
   border: 1px solid rgba(232, 223, 216, 0.8);
   border-radius: 20px;
-  padding: 28px 24px;
+  padding: $space-6;
   box-shadow: 0 12px 36px -12px rgba(39, 22, 32, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
   transition: all 0.25s ease;
 }
 
 .formHeader {
-  margin-bottom: 20px;
+  margin-bottom: $space-4;
   text-align: left;
 }
 
 .formBadge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
+  gap: $space-2;
+  font-size: $text-xs;
   font-weight: 600;
   color: $color-accent;
   background: rgba(161, 92, 46, 0.08);
-  padding: 4px 12px;
+  padding: $space-1 $space-3;
   border-radius: $radius-pill;
-  margin-bottom: 6px;
+  margin-bottom: $space-2;
 }
 
 .formTitle {
   font-family: $font-serif;
-  font-size: 1.125rem;
+  font-size: $text-lg;
   font-weight: 600;
   color: $color-ink;
   margin: 0;
 }
 
 .formSub {
-  font-size: 0.8125rem;
+  font-size: $text-sm;
   color: $color-ink-muted;
-  margin-top: 4px;
+  margin-top: $space-1;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $space-4;
 }
 
 .gridRow {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: $space-4;
 
   @media (min-width: 640px) {
     grid-template-columns: 1fr 1fr;
   }
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.label {
-  display: flex;
+.labelSpan {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: $color-ink;
+  gap: $space-2;
 
   svg {
     color: $color-accent;
@@ -78,63 +69,19 @@
 }
 
 .optionalTag {
-  font-size: 0.75rem;
+  font-size: $text-xs;
   font-weight: 400;
   color: $color-ink-faint;
   margin-left: 2px;
 }
 
-.input,
-.select,
-.textarea {
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid $color-line;
-  background: #ffffff;
-  padding: 11px 14px;
-  font-size: 0.875rem;
-  color: $color-ink;
-  font-family: inherit;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-
-  &::placeholder {
-    color: $color-ink-faint;
-  }
-
-  &:hover {
-    border-color: rgba(161, 92, 46, 0.4);
-  }
-
-  &:focus {
-    outline: none;
-    border-color: $color-accent;
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(161, 92, 46, 0.12);
-  }
-}
-
-.select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a15c2e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px;
-}
-
-.textarea {
-  resize: vertical;
-  min-height: 90px;
-}
-
 .error {
-  font-size: 0.8125rem;
-  color: #dc2626;
-  background: rgba(220, 38, 38, 0.08);
-  border: 1px solid rgba(220, 38, 38, 0.2);
-  border-radius: 8px;
-  padding: 10px 14px;
+  font-size: $text-sm;
+  color: $color-danger;
+  background: rgba($color-danger, 0.08);
+  border: 1px solid rgba($color-danger, 0.2);
+  border-radius: $radius-s;
+  padding: $space-2 $space-3;
   margin: 0;
 }
 
@@ -142,14 +89,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: $space-2;
   width: 100%;
-  padding: 13px 24px;
+  padding: $space-3 $space-6;
   border-radius: $radius-pill;
   border: none;
   background: linear-gradient(135deg, $color-accent 0%, #884c24 100%);
   color: #ffffff;
-  font-size: 0.9375rem;
+  font-size: $text-sm;
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 6px 20px -4px rgba(161, 92, 46, 0.35);
@@ -173,7 +120,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 36px 24px;
+  padding: $space-8 $space-6;
   background: rgba(251, 247, 241, 0.95);
   border: 1px solid rgba(161, 92, 46, 0.25);
   border-radius: 20px;
@@ -190,19 +137,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: $space-4;
 }
 
 .successTitle {
   font-family: $font-serif;
-  font-size: 1.25rem;
+  font-size: $text-xl;
   font-weight: 600;
   color: $color-ink;
-  margin-bottom: 8px;
+  margin-bottom: $space-2;
 }
 
 .successText {
-  font-size: 0.875rem;
+  font-size: $text-sm;
   color: $color-ink-muted;
   line-height: 1.6;
   max-width: 320px;

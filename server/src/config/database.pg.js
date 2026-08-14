@@ -56,6 +56,13 @@ pool.on("error", (err) => {
   console.error("[pg pool] unexpected error on idle client:", err.message);
 });
 
+// Auto-ensure required columns exist on studio_templates
+pool.query(`
+  ALTER TABLE studio_templates ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
+  ALTER TABLE studio_templates ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+  ALTER TABLE studio_templates ADD COLUMN IF NOT EXISTS default_config jsonb NOT NULL DEFAULT '{}';
+`).catch(() => {});
+
 // ── Column allowlist per table ──────────────────────────────────────────
 // Every INSERT/UPDATE is built exclusively from these lists, so a request
 // body can never inject an arbitrary column name — only values are
@@ -73,7 +80,8 @@ const TABLES = {
     "created_at", "updated_at",
   ],
   services: [
-    "id", "title", "description", "image_url", "order",
+    "id", "brand", "title", "tagline", "description", "icon", "accent",
+    "items", "href", "cta_label", "featured", "cover", "order", "image_url",
     "created_at", "updated_at",
   ],
   venues: [
@@ -83,6 +91,7 @@ const TABLES = {
   projects: [
     "id", "venue_id", "title", "wedding_date", "style_tags", "cover_image",
     "gallery", "lead_id", "published", "created_at", "updated_at",
+    "location", "description", "budget", "status", "category_id", "tag",
   ],
   media_assets: [
     "id", "entity_type", "entity_id", "url", "provider", "public_id",
@@ -101,7 +110,7 @@ const TABLES = {
     "status", "source", "created_at", "updated_at",
   ],
   studio_templates: [
-    "id", "name", "thumbnail", "svg_base", "category", "is_active",
+    "id", "name", "thumbnail", "svg_base", "category", "is_active", "default_config",
     "created_at", "updated_at",
   ],
   studio_slot_definitions: [
@@ -128,7 +137,7 @@ const TABLES = {
 // params (it only auto-parses jsonb coming *back* from the database).
 const JSONB_COLUMNS = new Set([
   "design_snapshot", "layers", "gallery", "metadata", "items", "photos",
-  "tags", "dominant_colors", "condition_value", "action_value",
+  "tags", "dominant_colors", "condition_value", "action_value", "default_config",
 ]);
 
 function assertKnownTable(table) {
@@ -150,7 +159,9 @@ function serializeValue(col, value) {
 
 async function getAll(table) {
   assertKnownTable(table);
-  const { rows } = await pool.query(`select * from ${table} order by created_at asc`);
+  const hasCreatedAt = TABLES[table].includes("created_at");
+  const orderBy = hasCreatedAt ? " order by created_at asc" : "";
+  const { rows } = await pool.query(`select * from ${table}${orderBy}`);
   return rows;
 }
 

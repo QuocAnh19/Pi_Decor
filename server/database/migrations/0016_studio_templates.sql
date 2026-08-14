@@ -15,15 +15,18 @@
 -- ============================================================================
 
 create table if not exists studio_templates (
-  id          uuid primary key default gen_random_uuid(),
-  name        text not null,
-  thumbnail   text,
-  svg_base    text not null,   -- SVG string 800x600, sanitized before storing
-  category    text,
-  is_active   boolean not null default true,
-  created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
+  id              uuid primary key default gen_random_uuid(),
+  name            text not null,
+  thumbnail       text,
+  svg_base        text not null,   -- SVG string 800x600, sanitized before storing
+  category        text,
+  is_active       boolean not null default true,
+  default_config  jsonb not null default '{}',
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
 );
+
+alter table studio_templates add column if not exists default_config jsonb not null default '{}';
 
 comment on table studio_templates is
   'Studio canvas background templates.';

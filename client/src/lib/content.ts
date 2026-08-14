@@ -48,7 +48,7 @@ export const serviceCategories: ServiceCategory[] = [
     tagline: "Kiến tạo không gian — lưu giữ khoảnh khắc",
     description:
       "Từ lễ gia tiên ấm cúng đến sảnh tiệc lộng lẫy — tự tay phối vải, hoa, cổng cưới trên Studio trước khi chốt, hoặc để đội Pi Decor lo trọn gói.",
-    icon: "Heart",
+    icon: "MarriageIcon",
     accent: "wedding",
     items: ["Gia Tiên", "Nhà Hàng", "Ngoài Trời", "Nhà Rạp"],
     href: "/studio",
@@ -63,7 +63,7 @@ export const serviceCategories: ServiceCategory[] = [
     tagline: "Rực rỡ như tuổi thơ",
     description:
       "Đầy tháng, thôi nôi, sinh nhật và những buổi party nhỏ — decor ngọt ngào, đúng tông, đúng tuổi của con.",
-    icon: "PartyPopper",
+    icon: "KidsIcon",
     accent: "kids",
     items: ["Đầy Tháng", "Thôi Nôi", "Sinh Nhật", "Party"],
     ctaLabel: "Liên hệ tư vấn",
@@ -76,7 +76,7 @@ export const serviceCategories: ServiceCategory[] = [
     tagline: "Chuyên nghiệp, đúng dấu ấn doanh nghiệp",
     description:
       "Khai trương, lễ Tết, sum up cuối năm, team building — set up nhanh gọn, hình ảnh chỉn chu cho mọi quy mô sự kiện.",
-    icon: "Building2",
+    icon: "EventIcon",
     accent: "event",
     items: ["Khai Trương", "Lễ - Tết", "Sum Up", "Team Building"],
     ctaLabel: "Liên hệ tư vấn",
@@ -100,6 +100,21 @@ export const categoryPortfolio: CategoryPortfolioItem[] = [
     title: "Lễ gia tiên tông sen hồng",
     location: "Tư gia, Đà Nẵng",
     src: "/images/portfolio/piwedding-gia-tien-1.jpg",
+    gallery: [
+      "/images/portfolio/piwedding-gia-tien-2.jpg",
+      "/images/portfolio/piwedding-nha-hang-1.jpg",
+      "/images/portfolio/piwedding-nha-hang-2.jpg",
+      "/images/portfolio/piwedding-ngoai-troi-1.jpg",
+      "/images/portfolio/piwedding-ngoai-troi-2.jpg",
+      "/images/portfolio/piwedding-nha-rap-1.jpg",
+      "/images/portfolio/piwedding-nha-rap-2.jpg",
+      "/images/service-piwedding.png",
+      "/images/hero-collage-1.jpg",
+      "/images/hero-collage-2.jpg",
+      "/images/hero.jpg",
+      "/images/portfolio/piwedding-gia-tien-1.jpg",
+      "/images/portfolio/piwedding-nha-hang-1.jpg",
+    ],
   },
   {
     id: "pw-2",
@@ -166,6 +181,20 @@ export const categoryPortfolio: CategoryPortfolioItem[] = [
     title: "Đầy tháng bé Bống tông pastel",
     location: "Tư gia, Đà Nẵng",
     src: "/images/portfolio/pikids-day-thang-1.jpg",
+    gallery: [
+      "/images/portfolio/pikids-day-thang-2.jpg",
+      "/images/portfolio/pikids-thoi-noi-1.jpg",
+      "/images/portfolio/pikids-thoi-noi-2.jpg",
+      "/images/portfolio/pikids-sinh-nhat-1.jpg",
+      "/images/portfolio/pikids-party-1.jpg",
+      "/images/service-pikids.png",
+      "/images/hero-collage-1.jpg",
+      "/images/portfolio/pikids-day-thang-1.jpg",
+      "/images/portfolio/pikids-thoi-noi-1.jpg",
+      "/images/portfolio/pikids-party-1.jpg",
+      "/images/service-pikids.png",
+      "/images/hero-collage-2.jpg",
+    ],
   },
   {
     id: "pk-2",
@@ -216,6 +245,18 @@ export const categoryPortfolio: CategoryPortfolioItem[] = [
     title: "Khai trương showroom nội thất",
     location: "Đà Nẵng",
     src: "/images/portfolio/pievent-khai-truong-1.jpg",
+    gallery: [
+      "/images/portfolio/pievent-khai-truong-2.jpg",
+      "/images/portfolio/pievent-le-tet-1.jpg",
+      "/images/portfolio/pievent-sum-up-1.jpg",
+      "/images/portfolio/pievent-team-building-1.jpg",
+      "/images/service-pievent.png",
+      "/images/hero-collage-2.jpg",
+      "/images/hero.jpg",
+      "/images/portfolio/pievent-khai-truong-1.jpg",
+      "/images/portfolio/pievent-le-tet-1.jpg",
+      "/images/service-pievent.png",
+    ],
   },
   {
     id: "pe-2",
@@ -252,9 +293,9 @@ export const categoryPortfolio: CategoryPortfolioItem[] = [
 ];
 
 export const toolCategories: ToolCategory[] = [
-  { id: "fabric", label: "Vải Voan", icon: "Ribbon" },
-  { id: "flowers", label: "Cụm Hoa", icon: "Flower2" },
-  { id: "arch", label: "Cổng Hoa", icon: "DoorOpen" },
+  { id: "fabric", label: "Vải Voan", icon: "GiftIcon" },
+  { id: "flowers", label: "Cụm Hoa", icon: "SparklesIcon" },
+  { id: "arch", label: "Cổng Hoa", icon: "HomeIcon" },
 ];
 
 export const fabricSwatches: FabricSwatch[] = [

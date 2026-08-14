@@ -52,11 +52,14 @@ app.use("/api/auth/login", loginLimiter);
 // Routes are organized by business domain, not by CRUD verb — same
 // structure as Server/routes in the Ecovera reference project (Mục 2.4 /
 // 3.4 of the technical proposal), so each domain can evolve independently.
+import { projectsRouter } from "./routes/projects/index.js";
+
 app.use("/api/leads", leadsRouter);
 app.use("/api/designs", designsRouter);
 app.use("/api/materials", materialsRouter);
 app.use("/api/services", servicesRouter);
 app.use("/api/venues", venuesRouter);
+app.use("/api/projects", projectsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/quotations", quotationsRouter);
@@ -70,6 +73,9 @@ app.use((req, res) => {
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
   console.error(err);
+  if (err && err.code === "LIMIT_FIELD_VALUE") {
+    return res.status(400).json({ message: "Kích thước trường dữ liệu quá lớn." });
+  }
   const statusCode = err.http_code || err.status || (res.statusCode >= 400 ? res.statusCode : 500);
   res.status(statusCode).json({ message: err.message ?? "Lỗi máy chủ." });
 });

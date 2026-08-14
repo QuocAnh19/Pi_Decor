@@ -1,0 +1,28 @@
+@use "@/styles/variables" as *;
+
+.loading {
+  font-size: 0.875rem;
+  color: $color-ink-muted;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.map {
+  margin-top: 24px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: $color-accent;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}

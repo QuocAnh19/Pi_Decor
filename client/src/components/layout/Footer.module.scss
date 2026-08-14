@@ -12,7 +12,7 @@
 .grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 48px;
+  gap: $space-12;
 
   @media (min-width: 768px) {
     grid-template-columns: 1fr 1.2fr;
@@ -21,38 +21,38 @@
 
 .brand {
   font-family: $font-serif;
-  font-size: 1.125rem;
+  font-size: $text-lg;
   font-weight: 600;
   color: $color-ink;
 }
 
 .tagline {
-  margin-top: 12px;
+  margin-top: $space-3;
   max-width: 20rem;
-  font-size: 0.875rem;
+  font-size: $text-sm;
   line-height: 1.6;
   color: $color-ink-muted;
 }
 
 .linksGrid {
-  margin-top: 32px;
+  margin-top: $space-8;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  gap: $space-8;
 }
 
 .linksHeading {
-  font-size: 0.875rem;
+  font-size: $text-sm;
   font-weight: 600;
   color: $color-ink;
 }
 
 .linksList {
-  margin-top: 12px;
+  margin-top: $space-3;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 0.875rem;
+  gap: $space-2;
+  font-size: $text-sm;
   color: $color-ink-muted;
 }
 
@@ -65,20 +65,20 @@
 }
 
 .formHeading {
-  font-size: 0.875rem;
+  font-size: $text-sm;
   font-weight: 600;
   color: $color-ink;
 }
 
 .formWrap {
-  margin-top: 16px;
+  margin-top: $space-4;
 }
 
 .bottom {
-  margin-top: 48px;
+  margin-top: $space-12;
   border-top: 1px solid $color-line;
-  padding-top: 24px;
+  padding-top: $space-6;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: $text-xs;
   color: $color-ink-faint;
 }

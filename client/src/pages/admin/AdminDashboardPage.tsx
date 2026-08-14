@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, MapPin, Palette, Sparkles, ArrowRight } from "lucide-react";
+import {
+  UsersIcon,
+  MapPinIcon,
+  SwatchIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
 import { api } from "../../lib/api";
 import type { AdminSummary } from "../../lib/types";
@@ -13,11 +18,14 @@ import styles from "./AdminDashboardPage.module.scss";
 export function AdminDashboardPage() {
   const { token, admin } = useAuth();
   const [summary, setSummary] = useState<AdminSummary | null>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
 
   useEffect(() => {
     if (!token) return;
-    api.getSummary(token)
+    api
+      .getSummary(token)
       .then((summaryRes) => {
         setSummary(summaryRes);
         setStatus("ready");
@@ -30,14 +38,18 @@ export function AdminDashboardPage() {
       <h1 className={styles.title}>Chào {admin?.email?.split("@")[0]}</h1>
 
       {status === "loading" && <p className={styles.status}>Đang tải…</p>}
-      {status === "error" && <p className={styles.status}>Không tải được dữ liệu, thử tải lại trang.</p>}
+      {status === "error" && (
+        <p className={styles.status}>
+          Không tải được dữ liệu, thử tải lại trang.
+        </p>
+      )}
 
       {status === "ready" && summary && (
         <>
           <div className={styles.grid}>
             <Link to="/admin/leads" className={styles.card}>
               <div className={styles.cardIcon}>
-                <Users size={18} strokeWidth={1.75} />
+                <UsersIcon className="h-5 w-5" />
               </div>
               <p className={styles.cardValue}>{summary.leads_total}</p>
               <p className={styles.cardLabel}>Tổng số khách để lại thông tin</p>
@@ -45,7 +57,7 @@ export function AdminDashboardPage() {
 
             <Link to="/admin/leads" className={styles.card}>
               <div className={`${styles.cardIcon} ${styles.cardIconAccent}`}>
-                <Sparkles size={18} strokeWidth={1.75} />
+                <SparklesIcon className="h-5 w-5" />
               </div>
               <p className={styles.cardValue}>{summary.leads_new}</p>
               <p className={styles.cardLabel}>Lead mới, chưa liên hệ</p>
@@ -53,29 +65,31 @@ export function AdminDashboardPage() {
 
             <Link to="/admin/venues" className={styles.card}>
               <div className={styles.cardIcon}>
-                <MapPin size={18} strokeWidth={1.75} />
+                <MapPinIcon className="h-5 w-5" />
               </div>
               <p className={styles.cardValue}>{summary.venues_total}</p>
               <p className={styles.cardLabel}>Địa điểm trên Bản đồ</p>
             </Link>
 
-            <Link to="/admin/venues" className={styles.card}>
+            <Link to="/admin/projects" className={styles.card}>
               <div className={styles.cardIcon}>
-                <Palette size={18} strokeWidth={1.75} />
+                <SwatchIcon className="h-5 w-5" />
               </div>
-              <p className={styles.cardValue}>{summary.projects_published_total}</p>
+              <p className={styles.cardValue}>
+                {summary.projects_published_total}
+              </p>
               <p className={styles.cardLabel}>Dự án đã công khai</p>
             </Link>
           </div>
 
-          <div className={styles.quickLinks}>
+          {/* <div className={styles.quickLinks}>
             <Link to="/admin/leads" className={styles.quickLink}>
-              Xem danh sách khách hàng <ArrowRight size={14} />
+              Xem danh sách khách hàng <ArrowRightIcon className="h-4 w-4" />
             </Link>
             <Link to="/admin/venues" className={styles.quickLink}>
-              Quản lý Bản đồ dự án <ArrowRight size={14} />
+              Quản lý Bản đồ dự án <ArrowRightIcon className="h-4 w-4" />
             </Link>
-          </div>
+          </div> */}
         </>
       )}
     </div>

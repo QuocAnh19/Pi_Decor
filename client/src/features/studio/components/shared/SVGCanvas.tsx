@@ -84,7 +84,7 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
           const x = centerPos.x - slotWidth / 2
           const y = centerPos.y - slotHeight / 2
 
-          const state = slotConfig[slot.slotKey]
+          const state = slotConfig[slot.slotKey] || slotConfig[slot.id]
           const hasAsset = Boolean(state?.asset)
           const isLocked = Boolean(state?.locked)
           const asset = state?.asset

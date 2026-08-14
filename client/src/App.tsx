@@ -53,9 +53,8 @@ export default function App() {
           <Route path="venues" element={<AdminVenuesPage />} />
           <Route path="materials" element={<AdminMaterialsPage />} />
           <Route path="testimonials" element={<AdminTestimonialsPage />} />
+          <Route path="studio" element={<AdminStudioPage />} />
         </Route>
-        {/* Full-screen editor route for Admin Studio Builder (outside AdminLayout sidebar) */}
-        <Route path="studio" element={<AdminStudioPage />} />
       </Route>
     </Routes>
   );

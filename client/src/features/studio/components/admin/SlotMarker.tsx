@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
-import { SlotDefinition, SlotType } from '../../types'
+import { SlotDefinition } from '../../types'
 import { normalizedToSVG } from '../../utils/coordinates'
 
 export interface SlotMarkerProps {
@@ -13,25 +13,7 @@ export interface SlotMarkerProps {
   showDebugCoords?: boolean
 }
 
-const getSlotIcon = (type: SlotType): string => {
-  switch (type) {
-    case 'drape':
-      return '🪟'
-    case 'drape_detail':
-      return '🎗️'
-    case 'flower':
-      return '🌸'
-    case 'text_name':
-    case 'text_date':
-      return '✍️'
-    case 'color_accent':
-      return '🎨'
-    case 'prop':
-      return '📦'
-    default:
-      return '📍'
-  }
-}
+
 
 type HandleDirection = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 
@@ -57,8 +39,6 @@ export const SlotMarker: React.FC<SlotMarkerProps> = ({
 
   const deltaX = transform ? transform.x : 0
   const deltaY = transform ? transform.y : 0
-
-  const icon = getSlotIcon(slot.slotType)
 
   // Interactive Resizing Handle Handler
   const handleResizeStart = (
@@ -164,13 +144,11 @@ export const SlotMarker: React.FC<SlotMarkerProps> = ({
         height: `${heightPx}px`,
         transform: 'translate(-50%, -50%)',
         border: isSelected
-          ? '1.5px solid #38bdf8'
-          : showDebugCoords
-          ? '1.5px dashed rgba(244, 63, 94, 0.6)'
+          ? '1.5px dashed #38bdf8'
           : '1px dashed rgba(255, 255, 255, 0.25)',
-        backgroundColor: isSelected ? 'rgba(56, 189, 248, 0.04)' : 'transparent',
-        borderRadius: '8px',
-        boxShadow: isSelected ? '0 0 12px rgba(56, 189, 248, 0.3)' : 'none',
+        backgroundColor: isSelected ? 'rgba(56, 189, 248, 0.03)' : 'transparent',
+        borderRadius: '4px',
+        boxShadow: isSelected ? '0 0 8px rgba(56, 189, 248, 0.2)' : 'none',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -182,31 +160,6 @@ export const SlotMarker: React.FC<SlotMarkerProps> = ({
         transition: isDragging ? 'none' : 'box-shadow 0.2s ease, border-color 0.2s ease'
       }}
     >
-      {/* Small Badge Tag at Top Center */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '-10px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: isSelected ? '#38bdf8' : 'rgba(15, 23, 42, 0.85)',
-          color: isSelected ? '#0f172a' : '#cbd5e1',
-          border: `1px solid ${isSelected ? '#38bdf8' : '#334155'}`,
-          borderRadius: '12px',
-          padding: '1px 8px',
-          fontSize: '10px',
-          fontWeight: '600',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          whiteSpace: 'nowrap',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.4)',
-          pointerEvents: 'none'
-        }}
-      >
-        <span>{icon}</span>
-        <span>{slot.label}</span>
-      </div>
 
       {showDebugCoords && (
         <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.6)', fontFamily: 'monospace', position: 'absolute', bottom: '4px', pointerEvents: 'none' }}>

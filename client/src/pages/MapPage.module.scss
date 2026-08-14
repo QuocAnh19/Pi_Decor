@@ -9,7 +9,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.75rem;
+  font-size: $text-xs;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -26,7 +26,7 @@
 
 .subtitle {
   margin-top: 12px;
-  font-size: 1rem;
+  font-size: $text-base;
   line-height: 1.6;
   color: $color-ink-muted;
 }
@@ -34,14 +34,14 @@
 .status {
   padding: 48px 0;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: $text-sm;
   color: $color-ink-muted;
 }
 
 .explorer {
   height: 640px;
 
-  @media (max-width: 768px) {
+  @media (max-width: 767px) {
     height: 520px;
   }
 }

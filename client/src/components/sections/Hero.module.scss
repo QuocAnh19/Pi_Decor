@@ -83,7 +83,7 @@
 }
 
 .eyebrow {
-  font-size: 0.75rem;
+  font-size: $text-xs;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
@@ -91,7 +91,7 @@
 }
 
 .title {
-  margin-top: 20px;
+  margin-top: $space-4;
   max-width: 36rem;
   font-size: 2.75rem;
   line-height: 1.04;
@@ -113,34 +113,34 @@
 }
 
 .subtitle {
-  margin-top: 24px;
+  margin-top: $space-6;
   max-width: 28rem;
-  font-size: 1.125rem;
+  font-size: $text-lg;
   line-height: 1.6;
   color: rgba($color-paper, 0.85);
 }
 
 .script {
-  margin-top: 8px;
+  margin-top: $space-2;
   font-family: $font-script;
-  font-size: 1.25rem;
+  font-size: $text-xl;
   font-style: italic;
   color: $color-material-champagne;
 }
 
 .actions {
-  margin-top: 32px;
+  margin-top: $space-8;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 16px;
+  gap: $space-4;
 }
 
 .ctaPrimary {
   border-radius: $radius-pill;
   background: $color-accent;
-  padding: 14px 28px;
-  font-size: 0.875rem;
+  padding: $space-3 $space-6;
+  font-size: $text-sm;
   font-weight: 600;
   color: $color-paper;
   box-shadow: $shadow-sm;
@@ -153,8 +153,8 @@
 
 .ctaGhost {
   border-radius: $radius-pill;
-  padding: 14px 28px;
-  font-size: 0.875rem;
+  padding: $space-3 $space-6;
+  font-size: $text-sm;
   font-weight: 600;
   color: $color-paper;
   transition: color $transition-default;

@@ -71,7 +71,7 @@ export const TemplateSelectorModal: React.FC<TemplateSelectorModalProps> = ({
               style={{
                 fontSize: '22px',
                 fontWeight: '700',
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Fraunces', serif",
                 color: '#ffffff',
                 margin: 0
               }}

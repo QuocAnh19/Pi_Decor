@@ -6,6 +6,7 @@ import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { validate } from "../../middlewares/validate.js";
 import { loginSchema } from "../../schemas/auth.schema.js";
+import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 
 export const authRouter = Router();
 
@@ -124,4 +125,16 @@ authRouter.post("/logout", async (req, res) => {
     );
   }
   res.json({ message: "Đã đăng xuất thành công." });
+});
+
+// GET /api/auth/me — verify access token & return current admin profile
+authRouter.get("/me", verifyToken, requireAdmin, async (req, res) => {
+  const admins = await db.get("admins");
+  const admin = admins.find((a) => a.id === req.user?.sub);
+  if (!admin) {
+    return res.status(401).json({ message: "Tài khoản admin không tồn tại." });
+  }
+  res.json({
+    admin: { id: admin.id, email: admin.email },
+  });
 });

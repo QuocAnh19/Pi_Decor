@@ -1,7 +1,8 @@
 import { FormEvent, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
-import { Lock } from "lucide-react";
+import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
+import { Input } from "../../components/ui";
 import styles from "./AdminLoginPage.module.scss";
 
 /**
@@ -42,34 +43,32 @@ export function AdminLoginPage() {
     <div className={styles.page}>
       <form onSubmit={handleSubmit} className={styles.card}>
         <div className={styles.iconWrap}>
-          <Lock size={18} strokeWidth={1.75} />
+          <LockClosedIcon className="h-5 w-5" />
         </div>
         <h1 className={styles.title}>Đăng nhập quản trị</h1>
         <p className={styles.subtitle}>Pi Decor — khu vực nội bộ</p>
 
-        <label className={styles.field}>
-          <span>Email</span>
-          <input
+        <div className={styles.fieldGroup}>
+          <Input
+            label="Email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="username"
             required
-            className={styles.input}
+            placeholder="admin@pidecor.vn"
           />
-        </label>
 
-        <label className={styles.field}>
-          <span>Mật khẩu</span>
-          <input
+          <Input
+            label="Mật khẩu"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
             required
-            className={styles.input}
+            placeholder="••••••••"
           />
-        </label>
+        </div>
 
         {error && <p className={styles.error}>{error}</p>}
 

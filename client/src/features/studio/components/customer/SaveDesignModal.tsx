@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { X, Send, CheckCircle2 } from "lucide-react";
+import { XMarkIcon, PaperAirplaneIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { api } from "../../../../lib/api";
+import { Input, Textarea } from "../../../../components/ui";
 import type { SlotConfig } from "../../types";
 
 interface SaveDesignModalProps {
@@ -90,13 +91,13 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
             onClick={onClose}
             style={{ border: "none", background: "transparent", color: "#94a3b8", cursor: "pointer" }}
           >
-            <X size={20} />
+            <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
 
         {success ? (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
-            <CheckCircle2 size={48} color="#34d399" style={{ margin: "0 auto 12px" }} />
+            <CheckCircleIcon className="h-12 w-12" style={{ margin: "0 auto 12px", color: "#34d399" }} />
             <h4 style={{ fontSize: "16px", fontWeight: "700", color: "#34d399", marginBottom: "8px" }}>
               Đã gửi thông tin thiết kế thành công!
             </h4>
@@ -127,117 +128,46 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
 
             {error && <div style={{ color: "#ef4444", fontSize: "12px" }}>⚠️ {error}</div>}
 
-            <div>
-              <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>
-                Họ và tên *
-              </label>
-              <input
-                type="text"
-                placeholder="VD: Nguyễn Thu Hà"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  backgroundColor: "#0f172a",
-                  border: "1px solid #334155",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
+            <Input
+              label="Họ và tên"
+              required
+              type="text"
+              placeholder="VD: Nguyễn Thu Hà"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
 
-            <div>
-              <label style={{ fontSize: "12px", fontWeight: "600", display: "block", marginBottom: "4px" }}>
-                Số điện thoại *
-              </label>
-              <input
-                type="tel"
-                placeholder="VD: 0905 123 456"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  backgroundColor: "#0f172a",
-                  border: "1px solid #334155",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
+            <Input
+              label="Số điện thoại"
+              required
+              type="tel"
+              placeholder="VD: 0905 123 456"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
 
-            <div>
-              <label style={{ fontSize: "12px", display: "block", marginBottom: "4px", color: "#cbd5e1" }}>
-                Email (Không bắt buộc)
-              </label>
-              <input
-                type="email"
-                placeholder="VD: email@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  backgroundColor: "#0f172a",
-                  border: "1px solid #334155",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
+            <Input
+              label="Email (Không bắt buộc)"
+              type="email"
+              placeholder="VD: email@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-            <div>
-              <label style={{ fontSize: "12px", display: "block", marginBottom: "4px", color: "#cbd5e1" }}>
-                Ngày tổ chức dự kiến
-              </label>
-              <input
-                type="date"
-                value={weddingDate}
-                onChange={(e) => setWeddingDate(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  backgroundColor: "#0f172a",
-                  border: "1px solid #334155",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  boxSizing: "border-box",
-                }}
-              />
-            </div>
+            <Input
+              label="Ngày tổ chức dự kiến"
+              type="date"
+              value={weddingDate}
+              onChange={(e) => setWeddingDate(e.target.value)}
+            />
 
-            <div>
-              <label style={{ fontSize: "12px", display: "block", marginBottom: "4px", color: "#cbd5e1" }}>
-                Lời nhắn thêm
-              </label>
-              <textarea
-                placeholder="Yêu cầu bổ sung về hạng mục hay địa điểm..."
-                rows={2}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px 12px",
-                  backgroundColor: "#0f172a",
-                  border: "1px solid #334155",
-                  borderRadius: "8px",
-                  color: "#ffffff",
-                  fontSize: "13px",
-                  boxSizing: "border-box",
-                  resize: "vertical",
-                }}
-              />
-            </div>
+            <Textarea
+              label="Lời nhắn thêm"
+              placeholder="Yêu cầu bổ sung về hạng mục hay địa điểm..."
+              rows={2}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+            />
 
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "8px" }}>
               <button
@@ -271,7 +201,7 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
                   gap: "6px",
                 }}
               >
-                <Send size={14} />
+                <PaperAirplaneIcon className="h-4 w-4" />
                 {loading ? "Đang gửi..." : "Gửi thiết kế ngay"}
               </button>
             </div>

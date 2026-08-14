@@ -38,36 +38,6 @@
   margin-bottom: 16px;
 }
 
-.searchInput {
-  flex: 1;
-  max-width: 320px;
-  padding: 8px 12px;
-  border: 1px solid $admin-border;
-  border-radius: $radius-s;
-  background: $admin-surface;
-  color: $admin-text;
-  font-size: 0.85rem;
-
-  &:focus {
-    outline: none;
-    border-color: $admin-accent;
-  }
-}
-
-.statusSelect {
-  padding: 8px 12px;
-  border: 1px solid $admin-border;
-  border-radius: $radius-s;
-  background: $admin-surface;
-  color: $admin-text;
-  font-size: 0.85rem;
-
-  &:focus {
-    outline: none;
-    border-color: $admin-accent;
-  }
-}
-
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -102,4 +72,3 @@
     background: $admin-surface-raised;
   }
 }
-

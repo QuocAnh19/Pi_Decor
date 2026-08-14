@@ -129,6 +129,9 @@ export const api = {
   getMaterials: (category?: string) =>
     request<MaterialItem[]>(category ? `/materials?category=${encodeURIComponent(category)}` : "/materials"),
 
+  deleteMaterial: (id: string, token: string) =>
+    authRequest<void>(`/materials/${id}`, token, { method: "DELETE" }),
+
   getServices: () => request<unknown[]>("/services"),
 
   // ── Map Venues & Projects ───────────────────────────────────────────
@@ -145,20 +148,32 @@ export const api = {
   deleteVenue: (id: string, token: string) =>
     authRequest<void>(`/venues/${id}`, token, { method: "DELETE" }),
 
-  createProject: (venueId: string, payload: ProjectPayload, token: string) =>
+  getProjects: () => request<any[]>("/projects"),
+
+  createProject: (payload: FormData | object, token: string) => {
+    const isFormData = payload instanceof FormData;
+    return authRequest<any>("/projects", token, {
+      method: "POST",
+      body: isFormData ? payload : JSON.stringify(payload),
+    });
+  },
+
+  createVenueProject: (venueId: string, payload: ProjectPayload, token: string) =>
     authRequest<Project>(`/venues/${venueId}/projects`, token, {
       method: "POST",
       body: JSON.stringify(payload),
     }),
 
-  updateProject: (projectId: string, payload: Partial<ProjectPayload>, token: string) =>
-    authRequest<Project>(`/venues/projects/${projectId}`, token, {
+  updateProject: (projectId: string, payload: FormData | object, token: string) => {
+    const isFormData = payload instanceof FormData;
+    return authRequest<any>(`/projects/${projectId}`, token, {
       method: "PATCH",
-      body: JSON.stringify(payload),
-    }),
+      body: isFormData ? payload : JSON.stringify(payload),
+    });
+  },
 
   deleteProject: (projectId: string, token: string) =>
-    authRequest<void>(`/venues/projects/${projectId}`, token, { method: "DELETE" }),
+    authRequest<void>(`/projects/${projectId}`, token, { method: "DELETE" }),
 
   // ── Admin Auth & Dashboard Summary ─────────────────────────────────
   adminLogin: (payload: { email: string; password: string }) =>
@@ -178,6 +193,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ refresh_token: refreshToken }),
     }),
+
+  getMe: (token: string) => authRequest<{ admin: Admin }>("/auth/me", token),
 
   getSummary: (token: string) => authRequest<AdminSummary>("/admin/summary", token),
 
@@ -232,6 +249,26 @@ export const api = {
 
   createStudioTemplate: (payload: Partial<StudioTemplateRow>, token: string) =>
     authRequest<StudioTemplateRow>("/studio/templates", token, { method: "POST", body: JSON.stringify(payload) }),
+
+  publishStudioTemplate: (
+    id: string,
+    payload: {
+      name: string;
+      svg_base: string;
+      is_active?: boolean;
+      thumbnail?: string | null;
+      category?: string | null;
+      slots?: unknown[];
+      rules?: unknown[];
+      slot_config?: Record<string, unknown>;
+    },
+    token: string
+  ) =>
+    authRequest<{ message: string; template: StudioTemplateRow }>(
+      `/studio/templates/${id}/publish`,
+      token,
+      { method: "PUT", body: JSON.stringify(payload) }
+    ),
 
   updateStudioTemplate: (id: string, payload: Partial<StudioTemplateRow>, token: string) =>
     authRequest<StudioTemplateRow>(`/studio/templates/${id}`, token, { method: "PATCH", body: JSON.stringify(payload) }),

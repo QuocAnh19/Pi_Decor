@@ -1,69 +1,35 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../../lib/authContext";
-import { api } from "../../lib/api";
-import type { Lead, LeadStatus } from "../../lib/types";
-import { LeadTable } from "../../components/admin/LeadTable";
-import { LeadDetailDrawer } from "../../components/admin/LeadDetailDrawer";
+import { useLeads, LeadTable, LeadDetailDrawer } from "../../features/leads";
+import { SearchInput, Select } from "../../components/ui";
 import styles from "./AdminLeadsPage.module.scss";
 
+const STATUS_FILTER_OPTIONS = [
+  { value: "all", label: "Tất cả trạng thái" },
+  { value: "new", label: "Mới" },
+  { value: "contacted", label: "Đã liên hệ" },
+  { value: "closed", label: "Đã chốt" },
+];
+
 /**
- * /admin/leads — Tab "Khách hàng" with pagination & search.
+ * /admin/leads — Tab "Khách hàng" with pagination, status filter & search.
  */
 export function AdminLeadsPage() {
-  const { token } = useAuth();
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [total, setTotal] = useState<number>(0);
-  const [page, setPage] = useState<number>(1);
-  const [search, setSearch] = useState<string>("");
-  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  // Debounce search input (~300ms)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1); // Reset to page 1 on new search term
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  // Fetch leads when page, debouncedSearch, or statusFilter changes
-  useEffect(() => {
-    if (!token) return;
-    setStatus("loading");
-    api
-      .getLeads(token, {
-        page,
-        limit: 20,
-        q: debouncedSearch,
-        status: statusFilter,
-      })
-      .then((res) => {
-        setLeads(res.data);
-        setTotal(res.total);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, [token, page, debouncedSearch, statusFilter]);
-
-  async function handleStatusChange(id: string, newStatus: LeadStatus) {
-    if (!token) return;
-    const previous = leads;
-    setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status: newStatus } : l)));
-    try {
-      await api.updateLeadStatus(id, newStatus, token);
-    } catch (err) {
-      setLeads(previous);
-      setError(err instanceof Error ? err.message : "Không đổi được trạng thái, thử lại.");
-    }
-  }
-
-  const totalPages = Math.max(1, Math.ceil(total / 20));
-  const selected = leads.find((l) => l.id === selectedId) ?? null;
+  const {
+    leads,
+    total,
+    page,
+    setPage,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    updatingStatusId,
+    status,
+    selectedLead,
+    setSelectedLead,
+    error,
+    totalPages,
+    handleStatusChange,
+  } = useLeads();
 
   return (
     <div>
@@ -74,26 +40,23 @@ export function AdminLeadsPage() {
       </div>
 
       <div className={styles.filterControls}>
-        <input
-          type="text"
-          className={styles.searchInput}
-          placeholder="Tìm theo tên, SĐT, email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          className={styles.statusSelect}
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-        >
-          <option value="all">Tất cả trạng thái</option>
-          <option value="new">Mới</option>
-          <option value="contacted">Đã liên hệ</option>
-          <option value="closed">Đã chốt</option>
-        </select>
+        <div style={{ flex: 1, maxWidth: "320px" }}>
+          <SearchInput
+            placeholder="Tìm theo tên, SĐT, email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div style={{ minWidth: "160px" }}>
+          <Select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            options={STATUS_FILTER_OPTIONS}
+          />
+        </div>
       </div>
 
       {error && <p className={styles.error}>{error}</p>}
@@ -103,7 +66,12 @@ export function AdminLeadsPage() {
 
       {status === "ready" && (
         <>
-          <LeadTable leads={leads} onSelect={(lead) => setSelectedId(lead.id)} onStatusChange={handleStatusChange} />
+          <LeadTable
+            leads={leads}
+            updatingStatusId={updatingStatusId}
+            onSelect={(lead) => setSelectedLead(lead)}
+            onStatusChange={handleStatusChange}
+          />
 
           <div className={styles.pagination}>
             <span>
@@ -131,7 +99,12 @@ export function AdminLeadsPage() {
         </>
       )}
 
-      <LeadDetailDrawer lead={selected} onClose={() => setSelectedId(null)} onStatusChange={handleStatusChange} />
+      <LeadDetailDrawer
+        lead={selectedLead}
+        updatingStatusId={updatingStatusId}
+        onClose={() => setSelectedLead(null)}
+        onStatusChange={handleStatusChange}
+      />
     </div>
   );
 }

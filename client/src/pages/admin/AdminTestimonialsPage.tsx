@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Star, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { CheckCircleIcon, XCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { useAuth } from "../../lib/authContext";
 import { api } from "../../lib/api";
+import { Select } from "../../components/ui";
 import type { TestimonialItem } from "../../lib/types";
 import styles from "./AdminTestimonialsPage.module.scss";
 
@@ -102,18 +104,20 @@ export function AdminTestimonialsPage() {
       )}
 
       <div className={styles.filterBar}>
-        <label htmlFor="st-filter">Lọc theo trạng thái:</label>
-        <select
-          id="st-filter"
-          className={styles.statusFilter}
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="all">Tất cả</option>
-          <option value="pending">Chờ duyệt</option>
-          <option value="approved">Đã duyệt</option>
-          <option value="rejected">Từ chối</option>
-        </select>
+        <div style={{ minWidth: "200px" }}>
+          <Select
+            label="Lọc theo trạng thái:"
+            id="st-filter"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            options={[
+              { value: "all", label: "Tất cả" },
+              { value: "pending", label: "Chờ duyệt" },
+              { value: "approved", label: "Đã duyệt" },
+              { value: "rejected", label: "Từ chối" },
+            ]}
+          />
+        </div>
       </div>
 
       {status === "loading" && <p className={styles.status}>Đang tải danh sách đánh giá…</p>}
@@ -149,7 +153,7 @@ export function AdminTestimonialsPage() {
                     <td>
                       <div style={{ display: "flex", gap: "2px" }}>
                         {Array.from({ length: t.rating ?? 5 }).map((_, i) => (
-                          <Star key={i} size={13} fill="#f59e0b" color="#f59e0b" />
+                          <StarSolid key={i} className="h-3 w-3" style={{ width: 13, height: 13, color: "#f59e0b" }} />
                         ))}
                       </div>
                     </td>
@@ -171,7 +175,7 @@ export function AdminTestimonialsPage() {
                             disabled={updatingId === t.id}
                             title="Duyệt đánh giá"
                           >
-                            <CheckCircle size={14} style={{ display: "inline", marginRight: "4px" }} />
+                            <CheckCircleIcon className="h-3.5 w-3.5 inline mr-1" style={{ display: "inline", marginRight: "4px", width: 14, height: 14 }} />
                             {updatingId === t.id ? "Đang xử lý..." : "Duyệt"}
                           </button>
                         )}
@@ -183,7 +187,7 @@ export function AdminTestimonialsPage() {
                             disabled={updatingId === t.id}
                             title="Từ chối"
                           >
-                            <XCircle size={14} style={{ display: "inline", marginRight: "4px" }} />
+                            <XCircleIcon className="h-3.5 w-3.5 inline mr-1" style={{ display: "inline", marginRight: "4px", width: 14, height: 14 }} />
                             Từ chối
                           </button>
                         )}
@@ -194,7 +198,7 @@ export function AdminTestimonialsPage() {
                           disabled={updatingId === t.id}
                           title="Xoá"
                         >
-                          <Trash2 size={14} />
+                          <TrashIcon className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     </td>

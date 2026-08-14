@@ -124,6 +124,11 @@ leadsRouter.patch("/:id", verifyToken, requireAdmin, validate(updateLeadStatusSc
     return res.status(404).json({ message: "Không tìm thấy lead." });
   }
 
+  // If status is unchanged, return existing record without logging duplicate activity
+  if (existing.status === status) {
+    return res.json(existing);
+  }
+
   const oldStatus = existing.status;
   const updated = await db.update("leads", (l) => l.id === req.params.id, { status });
 

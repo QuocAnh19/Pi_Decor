@@ -2,7 +2,7 @@ export interface Service {
   id: string;
   title: string;
   description: string;
-  icon: string; // lucide-react icon name, resolved in ServiceCard
+  icon: string; // Heroicons icon name, resolved in ServiceCard
   href?: string;
 }
 
@@ -20,7 +20,7 @@ export interface ServiceCategory {
   title: string; // human section title, e.g. "Dấu mốc đầu đời"
   tagline: string;
   description: string;
-  icon: string; // lucide-react icon name
+  icon: string; // Heroicons icon name
   accent: ServiceAccent;
   items: string[]; // sub-services, e.g. ["Đầy tháng", "Thôi nôi", ...]
   href?: string; // e.g. "/studio" for PiWedding's Interactive Studio
@@ -35,6 +35,11 @@ export interface ServiceCategory {
  * tagged to exactly one of that category's `items` (e.g. "Thôi Nôi") so
  * the modal can filter "các dự án đã làm" by sub-service.
  */
+export interface GalleryItemObject {
+  url: string;
+  span?: string; // 'span2x3' | 'span1x2' | 'span2x1' | 'span2x2' | 'span1x1' | 'span3x2'
+}
+
 export interface CategoryPortfolioItem {
   id: string;
   categoryId: string; // ServiceCategory.id
@@ -43,6 +48,8 @@ export interface CategoryPortfolioItem {
   location?: string;
   /** Path relative to /public. Leave null until the real photo is dropped in. */
   src: string | null;
+  /** Array of secondary photo paths or objects with custom frame sizes. */
+  gallery?: (string | GalleryItemObject)[];
 }
 
 export interface FabricSwatch {
@@ -283,6 +290,7 @@ export interface StudioTemplateRow {
   svg_base: string;
   category: string | null;
   is_active: boolean;
+  default_config?: Record<string, any> | null;
   created_at: string;
   updated_at: string;
 }

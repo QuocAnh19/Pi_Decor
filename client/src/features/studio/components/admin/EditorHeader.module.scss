@@ -1,0 +1,150 @@
+@use "@/styles/variables" as *;
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: $color-admin-surface;
+  padding: 12px 20px;
+  border-bottom: 1px solid $color-admin-border;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.backBtn {
+  padding: 6px 12px;
+  background-color: $color-admin-border;
+  color: #f8fafc;
+  border: 1px solid $color-admin-border-light;
+  border-radius: 8px;
+  font-size: $text-xs;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: $color-admin-border-light;
+  }
+}
+
+.templateGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editingLabel {
+  font-size: $text-xs;
+  color: $color-admin-text-muted;
+  font-weight: 600;
+}
+
+.gridBtn {
+  padding: 6px 12px;
+  background-color: transparent;
+  color: $color-admin-text-muted;
+  border: 1px solid $color-admin-border-light;
+  border-radius: 8px;
+  font-size: $text-xs;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &.gridBtnActive {
+    background-color: $color-admin-border;
+    color: #f8fafc;
+  }
+}
+
+.statusBtn {
+  padding: 6px 12px;
+  background-color: rgba(100, 116, 139, 0.2);
+  border: 1px solid #64748b;
+  color: $color-admin-text-light;
+  border-radius: 8px;
+  font-size: $text-xs;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &.statusBtnActive {
+    background-color: rgba(16, 185, 129, 0.2);
+    border-color: $color-success;
+    color: #4ade80;
+  }
+}
+
+.saveDraftBtn {
+  padding: 6px 14px;
+  background-color: $color-admin-border;
+  color: #f8fafc;
+  border: 1px solid $color-admin-border-light;
+  border-radius: 8px;
+  font-size: $text-xs;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: $color-admin-border-light;
+  }
+}
+
+.publishBtn {
+  padding: 6px 14px;
+  background-color: $color-success;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: $text-xs;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.previewBtn {
+  padding: 6px 14px;
+  background-color: $color-admin-accent;
+  color: $color-admin-bg;
+  border: none;
+  border-radius: 8px;
+  font-size: $text-xs;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &.previewBtnActive {
+    background-color: $color-danger;
+    color: #ffffff;
+  }
+}

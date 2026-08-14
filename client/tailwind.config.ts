@@ -10,7 +10,7 @@ import type { Config } from "tailwindcss";
  * Studio Builder still matches the rest of Pi Decor exactly.
  */
 export default {
-  content: ["./src/components/studio-builder/**/*.{ts,tsx}"],
+  content: ["./src/**/*.{ts,tsx}"],
   corePlugins: {
     preflight: false,
   },

@@ -24,53 +24,44 @@ import { TemplateSelectorModal } from './TemplateSelectorModal'
 import { AddSlotModal } from '../admin/AddSlotModal'
 import { svgToNormalized } from '../../utils/coordinates'
 import { Asset, SlotDefinition, SlotConfig } from '../../types'
+import { api } from '../../../../lib/api'
+import { toStudioSlot, toStudioTemplate, toStudioRule } from '../../utils/adapters'
+import { Template } from '../../types'
 
 export interface CustomerEditorProps {
   templateId?: string
   overrideSlots?: SlotDefinition[]
   overrideSlotConfig?: SlotConfig
   overrideRules?: any[]
+  onBackToGallery?: () => void
 }
 
 export const CustomerEditor: React.FC<CustomerEditorProps> = ({
   templateId = 'tpl-classic-01',
   overrideSlots,
   overrideSlotConfig,
-  overrideRules
+  overrideRules,
+  onBackToGallery
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(templateId)
+  const [templateState, setTemplateState] = useState<Template>(
+    () => seedTemplates.find((t) => t.id === templateId) || seedTemplates[0]
+  )
   const [mode, setMode] = useState<'published' | 'scratch'>('published')
-  const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(true)
+  const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(false)
   const [isAddSlotOpen, setIsAddSlotOpen] = useState<boolean>(false)
   const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false)
   const [initialClickNorm, setInitialClickNorm] = useState<{ normX: number; normY: number } | undefined>(undefined)
 
-  // Load published template data from localStorage if available, fallback to seed data
-  const publishedKey = `pidecor_published_${selectedTemplateId}`
-  const publishedData = React.useMemo(() => {
-    try {
-      const saved = localStorage.getItem(publishedKey)
-      if (saved) return JSON.parse(saved)
-    } catch (e) {
-      console.warn('Failed to parse published template data:', e)
-    }
-    return null
-  }, [publishedKey])
-
-  const template = publishedData?.template || seedTemplates.find((t) => t.id === selectedTemplateId) || seedTemplates[0]
-  const initialSlots: SlotDefinition[] = overrideSlots || publishedData?.slots || seedSlots
+  const initialSlots: SlotDefinition[] = overrideSlots || seedSlots
   const assets: Asset[] = seedAssets
-  const rules = overrideRules || publishedData?.rules || curtainRules
+  const [rulesState, setRulesState] = useState<any[]>(() => overrideRules || curtainRules)
 
   // Get admin published slot configuration (or seed default)
-  const adminPresetConfig: SlotConfig = overrideSlotConfig || publishedData?.slotConfig || seedPublishedSlotConfig
+  const adminPresetConfig: SlotConfig = overrideSlotConfig || seedPublishedSlotConfig
 
   // Editable slot positions & dimensions for customer canvas fine-tuning
   const [editableSlots, setEditableSlots] = useState<SlotDefinition[]>(() => initialSlots)
-
-  useEffect(() => {
-    setEditableSlots(initialSlots)
-  }, [initialSlots])
 
   const handleSlotMove = (slotId: string, normX: number, normY: number) => {
     setEditableSlots((prev) =>
@@ -89,7 +80,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
     const newSlot: SlotDefinition = {
       ...slotData,
       id: `slot-${crypto.randomUUID().slice(0, 8)}`,
-      templateId: template.id
+      templateId: templateState.id
     }
     setEditableSlots((prev) => [...prev, newSlot])
     setActiveSlotKey(newSlot.slotKey)
@@ -108,9 +99,49 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
     setWholeConfig,
     lockedSlots,
     isDirty
-  } = useSlotDnD(editableSlots, rules, template.id, initialConfig)
+  } = useSlotDnD(editableSlots, rulesState, templateState.id, initialConfig)
 
   const [activeSlotKey, setActiveSlotKey] = useState<string | undefined>('drape-main')
+
+  useEffect(() => {
+    if (templateId) {
+      setSelectedTemplateId(templateId)
+    }
+  }, [templateId])
+
+  // Load published template data & slot config from API when available
+  useEffect(() => {
+    api
+      .getStudioTemplates()
+      .then(async (rows) => {
+        if (rows.length > 0) {
+          const matched = rows.find((r) => r.id === selectedTemplateId) || rows[0];
+
+          if (matched) {
+            setTemplateState(toStudioTemplate(matched));
+
+            if (matched.default_config && Object.keys(matched.default_config).length > 0) {
+              setWholeConfig(matched.default_config as SlotConfig);
+            }
+
+            try {
+              const sRows = await api.getStudioSlotDefinitions(matched.id);
+              if (sRows.length > 0) {
+                setEditableSlots(sRows.map(toStudioSlot));
+              }
+            } catch {}
+
+            try {
+              const rRows = await api.getStudioSlotRules(matched.id);
+              if (rRows.length > 0) {
+                setRulesState(rRows.map(toStudioRule));
+              }
+            } catch {}
+          }
+        }
+      })
+      .catch((err) => console.warn('Could not load studio templates for customer editor:', err));
+  }, [selectedTemplateId]);
 
   // Handle Mode & Template selection from modal
   const handleSelectOption = (chosenMode: 'published' | 'scratch', chosenTplId: string) => {
@@ -277,8 +308,8 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
         onClose={() => setIsSelectorOpen(false)}
         templates={seedTemplates}
         selectedTemplateId={selectedTemplateId}
-        hasPublishedData={Boolean(publishedData)}
-        publishedTemplateName={template.name}
+        hasPublishedData={true}
+        publishedTemplateName={templateState.name}
         onSelectOption={handleSelectOption}
       />
 
@@ -318,9 +349,31 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            {onBackToGallery && (
+              <button
+                type="button"
+                onClick={onBackToGallery}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: '#334155',
+                  color: '#f8fafc',
+                  border: '1px solid #475569',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                ← Chọn Mẫu Khác
+              </button>
+            )}
+
             <div>
-              <h1 style={{ fontSize: '18px', fontWeight: '700', fontFamily: "'Playfair Display', serif", color: '#ffffff', margin: 0 }}>
-                📌 {template.name}
+              <h1 style={{ fontSize: '18px', fontWeight: '700', fontFamily: "'Fraunces', serif", color: '#ffffff', margin: 0 }}>
+                📌 {templateState.name}
               </h1>
               <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', margin: 0 }}>
                 Trình thiết kế phông cưới • Click chọn hoặc kéo thả trực tiếp để tùy chỉnh vị trí &amp; kích thước
@@ -549,7 +602,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
           >
             {/* SVG Canvas Base */}
             <SVGCanvas
-              template={template}
+              template={templateState}
               slots={editableSlots}
               slotConfig={slotConfig}
               width={dimensions.width}

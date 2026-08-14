@@ -1,120 +1,34 @@
-import { useCallback, useEffect, useState } from "react";
-import { ImagePlus, Pencil, Trash2, Plus, EyeOff } from "lucide-react";
-import { useAuth } from "../../lib/authContext";
-import { api } from "../../lib/api";
-import type { Project, ProjectPayload, Venue, VenueDetail, VenuePayload } from "../../lib/types";
-import { VenueList } from "../../components/admin/VenueList";
-import { VenueForm } from "../../components/admin/VenueForm";
-import { ProjectForm } from "../../components/admin/ProjectForm";
+import { PhotoIcon, PencilIcon, TrashIcon, PlusIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useVenues, VenueList, VenueForm } from "../../features/venues";
+import { ProjectForm } from "../../features/projects";
 import styles from "./AdminVenuesPage.module.scss";
 
 /**
- * /admin/venues — Tab "Bản đồ" (M3 + M4 in the spec). Venue detail (and its
- * project list) is loaded through the public GET /api/venues/:id — the API
- * only ships admin write routes for this domain, not a separate admin read
- * route, and new projects default to published:true, so this stays in sync
- * with what admin just created without needing a new backend endpoint.
+ * /admin/venues — Tab "Bản đồ" (M3 + M4 in the spec).
  */
 export function AdminVenuesPage() {
-  const { token } = useAuth();
-  const [venues, setVenues] = useState<Venue[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [error, setError] = useState<string | null>(null);
-
-  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
-  const [selectedVenue, setSelectedVenue] = useState<VenueDetail | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-
-  const [venueFormOpen, setVenueFormOpen] = useState(false);
-  const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
-
-  const [projectFormOpen, setProjectFormOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-
-  const loadVenues = useCallback(() => {
-    return api
-      .getVenues()
-      .then((data) => {
-        setVenues(data);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, []);
-
-  useEffect(() => {
-    loadVenues();
-  }, [loadVenues]);
-
-  function loadVenueDetail(id: string) {
-    setDetailLoading(true);
-    api
-      .getVenue(id)
-      .then(setSelectedVenue)
-      .catch(() => setError("Không tải được chi tiết địa điểm."))
-      .finally(() => setDetailLoading(false));
-  }
-
-  function handleSelectVenue(venue: Venue) {
-    setSelectedVenueId(venue.id);
-    loadVenueDetail(venue.id);
-  }
-
-  // ── Venue CRUD ───────────────────────────────────────────────────────
-
-  async function handleVenueFormSubmit(payload: VenuePayload) {
-    if (!token) return;
-    if (editingVenue) {
-      await api.updateVenue(editingVenue.id, payload, token);
-    } else {
-      await api.createVenue(payload, token);
-    }
-    setVenueFormOpen(false);
-    setEditingVenue(null);
-    await loadVenues();
-    if (editingVenue && selectedVenueId === editingVenue.id) loadVenueDetail(editingVenue.id);
-  }
-
-  async function handleDeleteVenue(venue: Venue) {
-    if (!token) return;
-    if (!confirm(`Xoá địa điểm "${venue.name}"? Toàn bộ dự án bên trong cũng sẽ mất pin trên bản đồ.`)) return;
-    try {
-      await api.deleteVenue(venue.id, token);
-      if (selectedVenueId === venue.id) {
-        setSelectedVenueId(null);
-        setSelectedVenue(null);
-      }
-      await loadVenues();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Không xoá được địa điểm.");
-    }
-  }
-
-  // ── Project CRUD ─────────────────────────────────────────────────────
-
-  async function handleProjectFormSubmit(payload: ProjectPayload) {
-    if (!token || !selectedVenueId) return;
-    if (editingProject) {
-      await api.updateProject(editingProject.id, payload, token);
-    } else {
-      await api.createProject(selectedVenueId, payload, token);
-    }
-    setProjectFormOpen(false);
-    setEditingProject(null);
-    loadVenueDetail(selectedVenueId);
-    loadVenues(); // project_count on the list can change
-  }
-
-  async function handleDeleteProject(project: Project) {
-    if (!token || !selectedVenueId) return;
-    if (!confirm(`Xoá dự án "${project.title}"?`)) return;
-    try {
-      await api.deleteProject(project.id, token);
-      loadVenueDetail(selectedVenueId);
-      loadVenues();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Không xoá được dự án.");
-    }
-  }
+  const {
+    venues,
+    status,
+    error,
+    setError,
+    selectedVenueId,
+    selectedVenue,
+    detailLoading,
+    venueFormOpen,
+    setVenueFormOpen,
+    editingVenue,
+    setEditingVenue,
+    projectFormOpen,
+    setProjectFormOpen,
+    editingProject,
+    setEditingProject,
+    handleSelectVenue,
+    handleVenueFormSubmit,
+    handleDeleteVenue,
+    handleProjectFormSubmit,
+    handleDeleteProject,
+  } = useVenues();
 
   return (
     <div>
@@ -171,7 +85,7 @@ export function AdminVenuesPage() {
                       setProjectFormOpen(true);
                     }}
                   >
-                    <Plus size={14} strokeWidth={2} /> Thêm dự án
+                    <PlusIcon className="h-4 w-4" style={{ width: 16, height: 16 }} /> Thêm dự án
                   </button>
                 </div>
 
@@ -185,7 +99,7 @@ export function AdminVenuesPage() {
                           {project.cover_image ? (
                             <img src={project.cover_image} alt={project.title} className={styles.projectThumbImg} />
                           ) : (
-                            <ImagePlus size={16} strokeWidth={1.5} />
+                            <PhotoIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
                           )}
                         </div>
                         <div className={styles.projectBody}>
@@ -193,7 +107,7 @@ export function AdminVenuesPage() {
                             {project.title}
                             {!project.published && (
                               <span className={styles.unpublished}>
-                                <EyeOff size={11} strokeWidth={2} /> Ẩn
+                                <EyeSlashIcon className="h-3 w-3 inline" style={{ width: 12, height: 12 }} /> Ẩn
                               </span>
                             )}
                           </p>
@@ -212,7 +126,7 @@ export function AdminVenuesPage() {
                             }}
                             aria-label="Sửa"
                           >
-                            <Pencil size={14} strokeWidth={1.75} />
+                            <PencilIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
                           </button>
                           <button
                             type="button"
@@ -220,7 +134,7 @@ export function AdminVenuesPage() {
                             onClick={() => handleDeleteProject(project)}
                             aria-label="Xoá"
                           >
-                            <Trash2 size={14} strokeWidth={1.75} />
+                            <TrashIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
                           </button>
                         </div>
                       </li>

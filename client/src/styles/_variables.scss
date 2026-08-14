@@ -7,6 +7,9 @@
 // separate scale — they only ever appear inside the Studio's fabric picker.
 // ─────────────────────────────────────────────────────────────────────────
 
+@forward "tokens";
+@use "tokens" as *;
+
 // Base
 $color-paper: #fbf7f1; // page background
 $color-paper-dim: #f4eee3; // alternate section background
