@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { SlotDefinition, SlotType, getDefaultSlotDimensions } from "../../types";
+import {
+  SlotDefinition,
+  SlotType,
+  getDefaultSlotDimensions,
+} from "../../types";
 import { Modal, Input, Select } from "../../../../components/ui";
 import styles from "./AddSlotModal.module.scss";
 
@@ -13,10 +17,10 @@ export interface AddSlotModalProps {
 }
 
 const SLOT_TYPE_OPTIONS = [
-  { value: "drape", label: "🪟 Rèm nền (fabric / drape)" },
-  { value: "drape_detail", label: "🎗️ Rèm chi tiết (drape_detail)" },
-  { value: "flower", label: "🌸 Cụm hoa (flowers)" },
-  { value: "text_name", label: "✍️ Dãy chữ số (text_name)" },
+  { value: "drape", label: "Rèm nền" },
+  { value: "drape_detail", label: "Rèm chi tiết" },
+  { value: "flower", label: "Cụm hoa" },
+  { value: "text_name", label: "Dãy chữ số" },
 ];
 
 export const AddSlotModal: React.FC<AddSlotModalProps> = ({
@@ -53,12 +57,16 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
     }
 
     if (!/^[a-z0-9-]+$/.test(trimmedKey)) {
-      setErrorMessage("Slot Key chỉ được chứa chữ thường (a-z), số (0-9) và dấu gạch ngang (-)!");
+      setErrorMessage(
+        "Slot Key chỉ được chứa chữ thường (a-z), số (0-9) và dấu gạch ngang (-)!",
+      );
       return;
     }
 
     if (existingSlotKeys.includes(trimmedKey)) {
-      setErrorMessage(`Slot Key '${trimmedKey}' đã tồn tại trong template này!`);
+      setErrorMessage(
+        `Slot Key '${trimmedKey}' đã tồn tại trong template này!`,
+      );
       return;
     }
 
@@ -95,18 +103,16 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Thêm Slot Neo Mới"
+      title="Thêm slot mới"
       maxWidth="480px"
     >
       {errorMessage && (
-        <div className={styles.errorMessage}>
-          ⚠️ {errorMessage}
-        </div>
+        <div className={styles.errorMessage}>⚠️ {errorMessage}</div>
       )}
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <Input
-          label="Slot Key (Dạng kebab-case, ví dụ: flower-right)"
+          label="Slot key (Dạng kebab-case, ví dụ: flower-right)"
           type="text"
           placeholder="nhap-slot-key-moi"
           value={slotKey}
@@ -114,7 +120,7 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
         />
 
         <Input
-          label="Tên Hiển Thị (Label)"
+          label="Tên hiển thị"
           type="text"
           placeholder="VD: Cụm Hoa Bên Phải"
           value={label}
@@ -134,22 +140,15 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
             checked={required}
             onChange={(e) => setRequired(e.target.checked)}
           />
-          ⭐ Thành phần bắt buộc điền
+          Thành phần bắt buộc điền
         </label>
 
         <div className={styles.actions}>
-          <button
-            type="button"
-            onClick={onClose}
-            className={styles.cancelBtn}
-          >
+          <button type="button" onClick={onClose} className={styles.cancelBtn}>
             Hủy
           </button>
-          <button
-            type="submit"
-            className={styles.submitBtn}
-          >
-            ➕ Tạo Slot
+          <button type="submit" className={styles.submitBtn}>
+            Tạo Slot
           </button>
         </div>
       </form>

@@ -35,8 +35,6 @@ export function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className={styles.title}>Chào {admin?.email?.split("@")[0]}</h1>
-
       {status === "loading" && <p className={styles.status}>Đang tải…</p>}
       {status === "error" && (
         <p className={styles.status}>

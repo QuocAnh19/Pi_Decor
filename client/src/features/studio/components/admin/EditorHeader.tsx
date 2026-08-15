@@ -64,7 +64,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
             onClick={onBackToHome}
             className={styles.backBtn}
           >
-            <ArrowLeftIcon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Trang Chủ
+            <ArrowLeftIcon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Quay lại
           </button>
         )}
 
@@ -96,7 +96,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           type="button"
           onClick={onToggleGrid}
           className={`${styles.gridBtn} ${showGrid ? styles.gridBtnActive : ""}`}
-          title="Bật/Tắt Lưới căn chỉnh"
+          title="Bật/Tắt lưới căn chỉnh"
         >
           <Squares2X2Icon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Lưới
         </button>
@@ -124,7 +124,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           type="button"
           onClick={onSaveDraft}
           className={styles.saveDraftBtn}
-          title="Lưu nháp bản thiết kế hiện tại vào CSDL (Trạng thái ẩn với khách hàng)"
+          title="Lưu nháp bản thiết kế hiện tại"
         >
           <BookmarkIcon className="h-4 w-4" style={{ width: 14, height: 14, color: "#38bdf8" }} /> Lưu Nháp
         </button>
@@ -136,7 +136,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           className={styles.publishBtn}
           title="Xuất bản thiết kế này để khách hàng có thể chọn trên Studio"
         >
-          <CloudArrowUpIcon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Publish Template
+          <CloudArrowUpIcon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Xuất bản thiết kế
         </button>
 
         {/* Toggle Customer Preview */}
@@ -144,6 +144,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           type="button"
           onClick={onTogglePreview}
           className={`${styles.previewBtn} ${isPreviewMode ? styles.previewBtnActive : ""}`}
+          title="Xem thử giao diện tương tác phía khách hàng"
         >
           <EyeIcon className="h-4 w-4" style={{ width: 14, height: 14 }} />
           {isPreviewMode ? "Thoát Xem Thử" : "Xem Thử Khách"}

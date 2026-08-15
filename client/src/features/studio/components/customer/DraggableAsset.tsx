@@ -72,20 +72,56 @@ export const DraggableAsset: React.FC<DraggableAssetProps> = ({
       <div
         style={{
           width: '100%',
-          height: '60px',
+          height: '76px',
           borderRadius: '6px',
-          backgroundColor: asset.colorHex || '#0f172a',
+          backgroundColor: '#020617',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
-          border: '1px solid rgba(255,255,255,0.05)'
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          padding: '4px',
+          position: 'relative'
         }}
       >
-        {asset.svgData ? (
-          <svg viewBox="0 0 800 600" style={{ width: '100%', height: '100%' }}>
+        {asset.thumbnail ? (
+          <img
+            src={asset.thumbnail}
+            alt={asset.name}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              objectFit: 'contain',
+              display: 'block'
+            }}
+          />
+        ) : asset.svgData ? (
+          <svg
+            viewBox="0 0 800 600"
+            preserveAspectRatio="xMidYMid meet"
+            style={{
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: '100%',
+              height: '100%',
+              display: 'block'
+            }}
+          >
             <g dangerouslySetInnerHTML={{ __html: asset.svgData }} />
           </svg>
+        ) : asset.colorHex ? (
+          <div
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: asset.colorHex,
+              border: '2px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.4)'
+            }}
+          />
         ) : (
           <div style={{ color: '#ffffff', fontSize: '12px', fontWeight: 'bold' }}>
             {asset.name[0]}
@@ -109,7 +145,7 @@ export const DraggableAsset: React.FC<DraggableAssetProps> = ({
         </div>
 
         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
-          {asset.tags.map((tag) => (
+          {(asset.tags || []).map((tag) => (
             <span
               key={tag}
               style={{

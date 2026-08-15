@@ -30,7 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function initAuth() {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      // Clear any legacy persistent credentials in localStorage
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {}
+
+      const raw = sessionStorage.getItem(STORAGE_KEY);
       if (!raw) {
         setIsReady(true);
         return;
@@ -51,28 +56,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               try {
                 const refreshed = await api.refreshToken(parsed.refreshToken);
                 parsed.token = refreshed.token;
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
                 setToken(refreshed.token);
                 setRefreshToken(parsed.refreshToken);
                 setAdmin(parsed.admin);
               } catch {
-                localStorage.removeItem(STORAGE_KEY);
+                sessionStorage.removeItem(STORAGE_KEY);
                 setToken(null);
                 setRefreshToken(null);
                 setAdmin(null);
               }
             } else {
-              localStorage.removeItem(STORAGE_KEY);
+              sessionStorage.removeItem(STORAGE_KEY);
               setToken(null);
               setRefreshToken(null);
               setAdmin(null);
             }
           }
         } else {
-          localStorage.removeItem(STORAGE_KEY);
+          sessionStorage.removeItem(STORAGE_KEY);
         }
       } catch {
-        localStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(STORAGE_KEY);
       } finally {
         setIsReady(true);
       }
@@ -86,17 +91,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(res.token);
     if (res.refreshToken) setRefreshToken(res.refreshToken);
     setAdmin(res.admin);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(res));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(res));
   }
 
   function updateToken(newToken: string) {
     setToken(newToken);
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
         const parsed = JSON.parse(raw) as StoredAuth;
         parsed.token = newToken;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
       } catch {
         // ignore
       }
@@ -110,7 +115,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setRefreshToken(null);
     setAdmin(null);
-    localStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
   }
 
   const value = useMemo(

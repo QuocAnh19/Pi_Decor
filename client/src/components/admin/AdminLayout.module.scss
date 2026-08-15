@@ -17,15 +17,17 @@
   flex-shrink: 0;
   background: $admin-surface;
   border-right: 1px solid $admin-border;
-  padding: 24px 16px;
+  box-shadow: 2px 0 16px rgba(161, 92, 46, 0.05);
+  padding: 28px 16px;
 }
 
 .brand {
   font-family: $font-serif;
   font-size: $text-lg;
+  font-style: italic;
   color: $admin-text;
   padding: 0 8px;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
 }
 
 .brandTag {
@@ -50,8 +52,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: $radius-s;
+  padding: 10px 14px;
+  border-radius: $radius-pill;
   font-size: $text-sm;
   color: $admin-text-muted;
   transition: background-color $transition-default, color $transition-default;
@@ -65,12 +67,13 @@
 }
 
 .navLinkActive {
-  background: $admin-accent-subtle;
-  color: $admin-accent;
+  background: $admin-accent;
+  color: #fff;
+  font-weight: 600;
 
   &:hover {
-    background: $admin-accent-subtle;
-    color: $admin-accent;
+    background: $admin-accent-hover;
+    color: #fff;
   }
 }
 
@@ -101,10 +104,25 @@
 .header {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 16px;
   padding: 16px 32px;
+  background: $admin-surface;
   border-bottom: 1px solid $admin-border;
+}
+
+.headerTitle {
+  font-family: $font-serif;
+  font-size: $text-lg;
+  font-weight: 600;
+  color: $admin-text;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .headerEmail {

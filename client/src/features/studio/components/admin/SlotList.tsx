@@ -55,12 +55,13 @@ export const SlotList: React.FC<SlotListProps> = ({
             gap: "4px",
           }}
         >
-          ➕ Thêm Slot
+          Thêm Slot
         </button>
       </div>
 
       {/* Slots List */}
       <div
+        className="admin-scroll"
         style={{
           padding: "12px",
           overflowY: "auto",

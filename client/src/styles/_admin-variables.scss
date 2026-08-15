@@ -1,26 +1,40 @@
 @use "variables" as *;
 
 // ─────────────────────────────────────────────────────────────────────────
-// Palette for the admin area only (PiDecor_AdminPanel.md §5: "bảng màu trầm
-// /tối hơn để phân biệt rõ với web khách"). Spacing, radius, font tokens are
-// still pulled from _variables.scss / _mixins.scss — only color changes.
+// Palette for the admin area — REDESIGN (2026): moved off the old "trầm/tối"
+// dark theme onto the same soft, warm, poetic ("thơ mộng") world as the
+// public site. Admin still reads as its own space (white floating cards on
+// a warm cream wash, instead of the public site's flat paper/paper-dim
+// sections) but now shares one visual language with the client-facing
+// pages instead of contradicting it. Spacing, radius, font, shadow tokens
+// still come from _variables.scss / _mixins.scss — only color changes here.
 // ─────────────────────────────────────────────────────────────────────────
 
-$admin-bg: #17111a; // page background behind the layout
-$admin-surface: #211823; // sidebar / cards
-$admin-surface-raised: #2b1f2d; // hovered rows, modals
-$admin-border: #3a2c3b;
-$admin-text: #f3ece6;
-$admin-text-muted: #b3a3ab;
-$admin-text-faint: #837480;
+$admin-bg: $color-paper-dim; // #F4EEE3 — warm cream wash behind the shell
+$admin-surface: #FFFFFF; // sidebar / cards — clean white so they float softly on the cream bg
+$admin-surface-raised: $color-blush; // #F8E9E7 — hovered rows, active states, modals
+$admin-border: $color-line; // #E7DED0 — same soft hairline as the public site
+$admin-text: $color-ink; // #271620
+$admin-text-muted: $color-ink-muted; // #6E6259
+$admin-text-faint: $color-ink-faint; // #9C9186
 
 $admin-accent: $color-accent; // same brand accent, for continuity
 $admin-accent-hover: $color-accent-hover;
-$admin-accent-subtle: rgba(161, 92, 46, 0.18);
+$admin-accent-subtle: $color-accent-subtle; // #F1E4D8
 
-$admin-danger: #e0687a;
-$admin-danger-subtle: rgba(224, 104, 122, 0.14);
-$admin-success: #6fb083;
-$admin-success-subtle: rgba(111, 176, 131, 0.14);
-$admin-warning: #dcae5c;
-$admin-warning-subtle: rgba(220, 174, 92, 0.14);
+// Status colors pulled toward the material/pastel family instead of stock
+// red/green/amber — keeps even error & success states feeling handmade
+// and gentle rather than alarm-system harsh.
+$admin-danger: #B4586B; // muted rose (darkened material-rose for AA contrast)
+$admin-danger-subtle: #F7E4E6;
+$admin-success: #6E8F5C; // muted sage (darkened material-sage for AA contrast)
+$admin-success-subtle: #E7EEE1;
+$admin-warning: #B98A3E; // muted champagne (darkened material-champagne for AA contrast)
+$admin-warning-subtle: #F5EAD6;
+
+// Soft, warm shadow for white cards floating on the cream bg — the public
+// site's $shadow-* tokens use a near-black rgba which reads too harsh/heavy
+// against pure white; this uses the ink color but much lighter and warmer.
+$admin-shadow-card: 0 2px 8px rgba(161, 92, 46, 0.06), 0 1px 2px rgba(39, 22, 32, 0.04);
+$admin-shadow-card-hover: 0 12px 28px -8px rgba(161, 92, 46, 0.16), 0 2px 6px rgba(39, 22, 32, 0.05);
+$admin-shadow-modal: 0 30px 70px -20px rgba(39, 22, 32, 0.22);

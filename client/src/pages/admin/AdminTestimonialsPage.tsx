@@ -89,8 +89,6 @@ export function AdminTestimonialsPage() {
 
   return (
     <div>
-      <h1 className={styles.title}>Quản lý Đánh giá (Testimonials)</h1>
-
       {successMsg && (
         <div style={{ padding: "10px 16px", backgroundColor: "#065f46", color: "#34d399", borderRadius: "8px", marginBottom: "16px", fontSize: "14px", fontWeight: "600" }}>
           {successMsg}

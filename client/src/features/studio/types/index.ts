@@ -11,7 +11,7 @@ export interface Template {
   id: string
   name: string
   thumbnail?: string
-  svgBase: string          // SVG string, viewport 800×600
+  svgBase: string
   category?: string
   isActive: boolean
 }
@@ -19,11 +19,11 @@ export interface Template {
 export interface SlotDefinition {
   id: string
   templateId: string
-  slotKey: string          // "drape-main", "flower-left", ...
+  slotKey: string
   label: string
   slotType: SlotType
-  normX: number            // 0.0–1.0 — KHÔNG phải pixel
-  normY: number            // 0.0–1.0
+  normX: number
+  normY: number
   normWidth?: number
   normHeight?: number
   allowScale: boolean
@@ -42,8 +42,8 @@ export interface Asset {
   svgData?: string
   colorHex?: string
   fontFamily?: string
-  tags: string[]
-  isActive: boolean
+  tags?: string[]
+  isActive?: boolean
   dominantColors?: string[]
 }
 
@@ -62,6 +62,9 @@ export interface SlotRule {
 export interface SlotState {
   assetId?: string
   asset?: Asset
+  materialId?: string | null
+  materialImage?: string | null
+  colorHex?: string | null
   locked?: boolean
   lockedReason?: string
   colorOverride?: string        // primary hue hex e.g. "#E91E63"

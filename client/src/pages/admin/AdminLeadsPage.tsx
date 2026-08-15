@@ -9,9 +9,6 @@ const STATUS_FILTER_OPTIONS = [
   { value: "closed", label: "Đã chốt" },
 ];
 
-/**
- * /admin/leads — Tab "Khách hàng" with pagination, status filter & search.
- */
 export function AdminLeadsPage() {
   const {
     leads,
@@ -33,12 +30,6 @@ export function AdminLeadsPage() {
 
   return (
     <div>
-      <div className={styles.headerRow}>
-        <div>
-          <h1 className={styles.title}>Khách hàng</h1>
-        </div>
-      </div>
-
       <div className={styles.filterControls}>
         <div style={{ flex: 1, maxWidth: "320px" }}>
           <SearchInput

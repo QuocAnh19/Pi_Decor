@@ -18,9 +18,24 @@ const navItems = [
   { to: "/admin/leads", label: "Khách hàng", icon: UsersIcon, end: false },
   { to: "/admin/projects", label: "Dự án", icon: FolderIcon, end: false },
   { to: "/admin/venues", label: "Bản đồ", icon: MapPinIcon, end: false },
-  { to: "/admin/materials", label: "Vật liệu", icon: SquaresPlusIcon, end: false },
-  { to: "/admin/testimonials", label: "Đánh giá", icon: ChatBubbleLeftRightIcon, end: false },
-  { to: "/admin/studio", label: "Studio Builder", icon: SwatchIcon, end: false },
+  {
+    to: "/admin/materials",
+    label: "Vật liệu",
+    icon: SquaresPlusIcon,
+    end: false,
+  },
+  {
+    to: "/admin/testimonials",
+    label: "Đánh giá",
+    icon: ChatBubbleLeftRightIcon,
+    end: false,
+  },
+  {
+    to: "/admin/studio",
+    label: "Studio Builder",
+    icon: SwatchIcon,
+    end: false,
+  },
 ];
 
 /**
@@ -38,6 +53,11 @@ export function AdminLayout() {
     navigate("/");
   }
 
+  const pageTitle =
+    navItems.find(({ to, end }) =>
+      end ? location.pathname === to : location.pathname.startsWith(to),
+    )?.label ?? navItems[0].label;
+
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
@@ -51,7 +71,9 @@ export function AdminLayout() {
               key={to}
               to={to}
               end={end}
-              className={({ isActive }) => `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`}
+              className={({ isActive }) =>
+                `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+              }
             >
               <Icon className="h-4 w-4" style={{ width: 16, height: 16 }} />
               {label}
@@ -60,18 +82,32 @@ export function AdminLayout() {
         </nav>
 
         <a href="/" className={styles.viewSite}>
-          <ArrowTopRightOnSquareIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+          <ArrowTopRightOnSquareIcon
+            className="h-4 w-4"
+            style={{ width: 16, height: 16 }}
+          />
           Xem web công khai
         </a>
       </aside>
 
       <div className={styles.content}>
         <header className={styles.header}>
-          <span className={styles.headerEmail}>{admin?.email}</span>
-          <button type="button" className={styles.logoutButton} onClick={handleLogout}>
-            <ArrowRightOnRectangleIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            Đăng xuất
-          </button>
+          <h1 className={styles.headerTitle}>{pageTitle}</h1>
+
+          <div className={styles.headerRight}>
+            <span className={styles.headerEmail}>{admin?.email}</span>
+            <button
+              type="button"
+              className={styles.logoutButton}
+              onClick={handleLogout}
+            >
+              <ArrowRightOnRectangleIcon
+                className="h-4 w-4"
+                style={{ width: 16, height: 16 }}
+              />
+              Đăng xuất
+            </button>
+          </div>
         </header>
 
         <main className={styles.main}>

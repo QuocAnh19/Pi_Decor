@@ -133,7 +133,7 @@ export const CurtainColorFilterControl: React.FC<
             margin: 0,
           }}
         >
-          🎨 Bộ Lọc & Đổi Màu Rèm ({slotLabel})
+          Bộ Lọc & Đổi Màu Rèm ({slotLabel})
         </h3>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <div
@@ -164,7 +164,7 @@ export const CurtainColorFilterControl: React.FC<
         <label
           style={{ fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}
         >
-          ➕ Nhập mã màu tùy chọn (gõ mã hex hoặc chọn từ bảng màu):
+          Nhập mã màu tùy chọn (gõ mã hex hoặc chọn từ bảng màu):
         </label>
         <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
           {/* Real-time Text Input */}
@@ -225,7 +225,7 @@ export const CurtainColorFilterControl: React.FC<
             </span>
           </label>
 
-          <button
+          {/* <button
             type="button"
             onClick={handleAddCustomColors}
             style={{
@@ -241,7 +241,7 @@ export const CurtainColorFilterControl: React.FC<
             }}
           >
             Áp dụng
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -267,7 +267,7 @@ export const CurtainColorFilterControl: React.FC<
           <label
             style={{ fontSize: "11px", fontWeight: "600", color: "#38bdf8" }}
           >
-            🎚️ Sắc Độ / Độ Đậm Màu (Saturation):
+            Sắc Độ / Độ Đậm Màu:
           </label>
           <span
             style={{
@@ -336,9 +336,9 @@ export const CurtainColorFilterControl: React.FC<
       {customColors.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           <span
-            style={{ fontSize: "11px", fontWeight: "600", color: "#f43f5e" }}
+            style={{ fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}
           >
-            ✨ Mã màu bạn đã nhập ({customColors.length}):
+            Mã màu bạn đã nhập ({customColors.length}):
           </span>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
             {customColors.map((hex) => {
@@ -398,7 +398,7 @@ export const CurtainColorFilterControl: React.FC<
       {/* 4. Preset Color Chips */}
       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         <span style={{ fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}>
-          🏛️ Bảng màu rèm phông cưới tiêu chuẩn:
+          Bảng màu rèm phông cưới tiêu chuẩn:
         </span>
         <div
           style={{

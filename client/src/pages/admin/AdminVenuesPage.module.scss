@@ -45,9 +45,10 @@
 .detailPanel {
   background: $admin-surface;
   border: 1px solid $admin-border;
-  border-radius: $radius-m;
+  border-radius: $radius-l;
   padding: $space-4;
   min-height: 200px;
+  box-shadow: $admin-shadow-card;
 }
 
 .placeholder {

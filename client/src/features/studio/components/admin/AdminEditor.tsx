@@ -42,7 +42,7 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
     handlePublish,
     handleToggleActive,
     handleSlotPositionChange,
-    handleSlotDimensionsChange,
+    handleSlotUpdate,
     handleAddSlotClick,
     handleSlotAddSubmit,
     handleDeleteSlot,
@@ -218,7 +218,8 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
                 cursor: "pointer",
               }}
             >
-              Rules ({rules.length})
+              Rules 
+              {/* ({rules.length}) */}
             </button>
           </div>
 
@@ -253,11 +254,7 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
               showGrid={showGrid}
               onSlotSelect={(id) => setSelectedSlotId(id)}
               onSlotMove={(id, x, y) => handleSlotPositionChange(id, x, y)}
-              onSlotUpdate={(id, patch) => {
-                if (patch.normWidth !== undefined && patch.normHeight !== undefined) {
-                  handleSlotDimensionsChange(id, patch.normWidth, patch.normHeight);
-                }
-              }}
+              onSlotUpdate={handleSlotUpdate}
             />
           </div>
         </div>
@@ -267,20 +264,22 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
           style={{
             position: "sticky",
             top: "24px",
-            maxHeight: "calc(100vh - 140px)",
+            maxHeight: "calc(100vh - 48px)",
+            backgroundColor: "#1e293b",
+            borderRadius: "12px",
+            border: "1px solid #334155",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
         >
           <SlotProperties
             slot={selectedSlot}
             slotConfig={slotConfig}
-            onUpdate={(id, patch) => {
-              if (patch.normWidth !== undefined && patch.normHeight !== undefined) {
-                handleSlotDimensionsChange(id, patch.normWidth, patch.normHeight);
-              }
-            }}
+            onUpdate={handleSlotUpdate}
             onDelete={(id) => handleDeleteSlot(id)}
             onAssignMaterial={(mat, slot) => handleMaterialAssign(slot.slotKey, mat)}
-            onAssignColor={(key, hex) => handleColorHexChange(key, hex)}
+            onAssignColor={(key, hex, filterMode, saturation) => handleColorHexChange(key, hex, filterMode, saturation)}
           />
         </div>
       </div>

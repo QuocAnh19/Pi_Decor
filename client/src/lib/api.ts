@@ -57,7 +57,7 @@ async function authRequest<T>(path: string, token: string, options: RequestInit 
     });
   } catch (err: unknown) {
     if (err instanceof Error && (err.message.includes("401") || err.message.includes("Unauthorized"))) {
-      const raw = localStorage.getItem("pidecor_admin_auth");
+      const raw = sessionStorage.getItem("pidecor_admin_auth");
       if (raw) {
         try {
           const parsed = JSON.parse(raw);
@@ -67,14 +67,14 @@ async function authRequest<T>(path: string, token: string, options: RequestInit 
               body: JSON.stringify({ refresh_token: parsed.refreshToken }),
             });
             parsed.token = refreshRes.token;
-            localStorage.setItem("pidecor_admin_auth", JSON.stringify(parsed));
+            sessionStorage.setItem("pidecor_admin_auth", JSON.stringify(parsed));
             return await request<T>(path, {
               ...restOptions,
               headers: { Authorization: `Bearer ${refreshRes.token}`, ...headers },
             });
           }
         } catch {
-          localStorage.removeItem("pidecor_admin_auth");
+          sessionStorage.removeItem("pidecor_admin_auth");
         }
       }
     }

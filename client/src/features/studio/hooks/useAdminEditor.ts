@@ -18,6 +18,7 @@ import {
   SlotDefinition,
   SlotRule,
   SlotConfig,
+  Asset,
 } from "../types";
 import type { StudioTemplateRow, MaterialItem } from "../../../lib/types";
 
@@ -272,6 +273,13 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
     setIsDirty(true);
   };
 
+  const handleSlotUpdate = (slotId: string, patch: Partial<SlotDefinition>) => {
+    setSlots((prev) =>
+      prev.map((s) => (s.id === slotId ? { ...s, ...patch } : s)),
+    );
+    setIsDirty(true);
+  };
+
   const handleAddSlotClick = (normX?: number, normY?: number) => {
     if (normX !== undefined && normY !== undefined) {
       setInitialClickNorm({ normX, normY });
@@ -356,30 +364,71 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
   };
 
   const handleMaterialAssign = (slotKey: string, matOrId: MaterialItem | string) => {
-    const matId = typeof matOrId === "string" ? matOrId : matOrId.id;
-    const matImg = typeof matOrId === "string" ? undefined : matOrId.image_url;
+    const isMatObj = typeof matOrId !== "string";
+    const matId = isMatObj ? matOrId.id : matOrId;
+    const matImg = isMatObj ? matOrId.image_url : undefined;
+    const matName = isMatObj ? matOrId.name : "Vật liệu";
+    const matColor = isMatObj ? matOrId.color_hex : undefined;
+
+    const matchedSlot = slots.find((s) => s.slotKey === slotKey);
+    const slotType = matchedSlot?.slotType || "drape";
+
+    const synthesizedAsset: Asset = {
+      id: matId,
+      name: matName,
+      assetType: slotType,
+      thumbnail: matImg || undefined,
+      colorHex: matColor || undefined,
+      tags: isMatObj && matOrId.category ? [matOrId.category] : [],
+    };
+
     setSlotConfig((prev) => ({
       ...prev,
       [slotKey]: {
         ...prev[slotKey],
+        asset: synthesizedAsset,
+        assetId: matId,
         materialId: matId,
         materialImage: matImg,
-        colorHex: undefined,
+        colorHex: matColor,
       },
     }));
     setIsDirty(true);
+    showToast(`✓ Đã gán vật liệu "${matName}"`);
   };
 
-  const handleColorHexChange = (slotKey: string, colorHex: string) => {
-    setSlotConfig((prev) => ({
-      ...prev,
-      [slotKey]: {
-        ...prev[slotKey],
-        colorHex: colorHex,
-        materialId: undefined,
-        materialImage: undefined,
-      },
-    }));
+  const handleColorHexChange = (
+    slotKey: string,
+    colorHex: string,
+    filterMode?: "multiply_blend" | "flat_tint" | "color_map",
+    saturation?: number
+  ) => {
+    const matchedSlot = slots.find((s) => s.slotKey === slotKey);
+    const slotType = matchedSlot?.slotType || "drape";
+
+    setSlotConfig((prev) => {
+      const existing = prev[slotKey];
+      const updatedAsset: Asset = existing?.asset
+        ? { ...existing.asset, colorHex }
+        : {
+            id: `color-${Date.now()}`,
+            name: `Màu ${colorHex}`,
+            assetType: slotType,
+            colorHex,
+          };
+
+      return {
+        ...prev,
+        [slotKey]: {
+          ...existing,
+          colorOverride: colorHex,
+          colorHex,
+          filterMode: filterMode || existing?.filterMode || "multiply_blend",
+          colorSaturation: saturation !== undefined ? saturation : existing?.colorSaturation,
+          asset: updatedAsset,
+        },
+      };
+    });
     setIsDirty(true);
   };
 
@@ -411,6 +460,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
     handleToggleActive,
     handleSlotPositionChange,
     handleSlotDimensionsChange,
+    handleSlotUpdate,
     handleAddSlotClick,
     handleSlotAddSubmit,
     handleDeleteSlot,

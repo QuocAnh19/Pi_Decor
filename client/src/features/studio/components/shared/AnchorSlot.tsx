@@ -153,7 +153,7 @@ export const AnchorSlot: React.FC<AnchorSlotProps> = ({
       {/* Slot Content Display */}
       {isIncompatibleHover ? (
         <div style={{ color: '#f43f5e', fontSize: '11px', fontWeight: '600', textAlign: 'center' }}>
-          ❌ Sai loại slot
+          Sai loại slot
         </div>
       ) : hasAsset ? (
         <div style={{ textAlign: 'center', width: '100%', pointerEvents: 'none' }}>
@@ -170,7 +170,7 @@ export const AnchorSlot: React.FC<AnchorSlotProps> = ({
             {assignedAsset?.name}
           </div>
           <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '2px' }}>
-            ✓ Đã chọn
+            Đã chọn
           </div>
         </div>
       ) : (

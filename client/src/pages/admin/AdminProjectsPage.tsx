@@ -63,9 +63,6 @@ export function AdminProjectsPage() {
       <div className={styles.headerRow}>
         <div>
           <h1 className={styles.title}>Quản Lý Dự Án &amp; Bộ Sưu Tập</h1>
-          <p className={styles.subtitle}>
-            Tất cả các công trình trang trí đã hoàn thành của PiWedding, PiKids &amp; PiEvent
-          </p>
         </div>
 
         <button

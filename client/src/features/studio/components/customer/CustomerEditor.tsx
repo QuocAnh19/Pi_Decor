@@ -55,8 +55,47 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
   const [initialClickNorm, setInitialClickNorm] = useState<{ normX: number; normY: number } | undefined>(undefined)
 
   const initialSlots: SlotDefinition[] = overrideSlots || seedSlots
-  const assets: Asset[] = seedAssets
+  const [assetsList, setAssetsList] = useState<Asset[]>(seedAssets)
   const [rulesState, setRulesState] = useState<AnyRule[]>(() => overrideRules || curtainRules)
+
+  useEffect(() => {
+    api
+      .getMaterials()
+      .then((materials) => {
+        const materialAssets: Asset[] = materials.map((m) => {
+          const cat = (m.category || "").toLowerCase();
+          let assetType: Asset["assetType"] = "drape";
+          if (cat.includes("detail") || cat.includes("vắt") || cat === "drape_detail") {
+            assetType = "drape_detail";
+          } else if (cat.includes("hoa") || cat === "flowers" || cat === "flower") {
+            assetType = "flower";
+          } else if (cat.includes("chữ") || cat === "text_name" || cat === "text_date") {
+            assetType = "text_name";
+          }
+
+          return {
+            id: m.id,
+            name: m.name,
+            assetType,
+            thumbnail: m.image_url || undefined,
+            colorHex: m.color_hex || undefined,
+            tags: m.category ? [m.category] : [],
+            isActive: true,
+          };
+        });
+
+        setAssetsList((prev) => {
+          const merged = [...prev];
+          for (const ma of materialAssets) {
+            if (!merged.some((a) => a.id === ma.id)) {
+              merged.push(ma);
+            }
+          }
+          return merged;
+        });
+      })
+      .catch(() => {});
+  }, []);
 
   // Get admin published slot configuration (or seed default)
   const adminPresetConfig: SlotConfig = overrideSlotConfig || seedPublishedSlotConfig
@@ -645,7 +684,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
           {/* Right Column: Sidebar Customization Controls & Asset Picker */}
           <div className="no-scrollbar" style={{ position: 'sticky', top: '12px', height: 'calc(100vh - 80px)', overflowY: 'auto' }}>
             <AssetPicker
-              assets={assets}
+              assets={assetsList}
               activeSlotKey={activeSlotKey}
               slots={editableSlots}
               slotConfig={slotConfig}

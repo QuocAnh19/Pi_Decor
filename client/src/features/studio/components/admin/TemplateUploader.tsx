@@ -78,7 +78,7 @@ export const TemplateUploader: React.FC<TemplateUploaderProps> = ({
           transition: 'all 0.2s ease'
         }}
       >
-        <div style={{ fontSize: '18px', marginBottom: '2px' }}>🖼️</div>
+        {/* <div style={{ fontSize: '18px', marginBottom: '2px' }}>🖼️</div> */}
         <div style={{ fontSize: '12px', fontWeight: '700', color: '#f8fafc' }}>
           Đổi Khung Phông Nền SVG
         </div>

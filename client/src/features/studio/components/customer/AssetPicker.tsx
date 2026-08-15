@@ -73,13 +73,13 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       // 1. Tab filter
       let matchesTab = true
       if (activeTab === 'fabric') {
-        matchesTab = asset.assetType === 'drape'
+        matchesTab = asset.assetType === 'drape' || asset.assetType === 'fabric' as unknown
       } else if (activeTab === 'drape_detail') {
         matchesTab = asset.assetType === 'drape_detail'
       } else if (activeTab === 'flower') {
-        matchesTab = asset.assetType === 'flower'
+        matchesTab = asset.assetType === 'flower' || asset.assetType === 'flowers' as unknown
       } else if (activeTab === 'text') {
-        matchesTab = asset.assetType === 'text_name' || asset.assetType === 'text_date'
+        matchesTab = asset.assetType === 'text_name' || asset.assetType === 'text_date' || asset.assetType === 'text' as unknown
       }
 
       if (!matchesTab) return false
@@ -87,8 +87,9 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       // 2. Search filter
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim()
-        const matchesName = asset.name.toLowerCase().includes(query)
-        const matchesTags = asset.tags.some((t) => t.toLowerCase().includes(query))
+        const matchesName = (asset.name || '').toLowerCase().includes(query)
+        const tags = Array.isArray(asset.tags) ? asset.tags : []
+        const matchesTags = tags.some((t) => typeof t === 'string' && t.toLowerCase().includes(query))
         return matchesName || matchesTags
       }
 
@@ -100,7 +101,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
 
   return (
     <div
-      className="no-scrollbar"
+      className="admin-scroll"
       style={{
         backgroundColor: '#1e293b',
         borderRadius: '12px',
@@ -109,8 +110,6 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
         flexDirection: 'column',
         height: '100%',
         overflowY: 'auto',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none'
       }}
     >
       {/* Header & Tabs */}
@@ -191,7 +190,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
 
       {/* Asset Grid */}
       <div
-        className="no-scrollbar"
+        className="admin-scroll"
         style={{
           padding: '8px 16px 16px 16px',
           overflowY: 'auto',
@@ -200,8 +199,6 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
           gap: '10px',
           alignContent: 'start',
           flex: 1,
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
         }}
       >
         {filteredAssets.length > 0 ? (

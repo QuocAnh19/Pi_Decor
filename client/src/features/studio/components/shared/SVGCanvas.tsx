@@ -1,5 +1,5 @@
 import React from 'react'
-import { Template, SlotDefinition, SlotConfig } from '../../types'
+import { Template, SlotDefinition, SlotConfig, Asset } from '../../types'
 import { normalizedToSVG } from '../../utils/coordinates'
 import { AssetRenderer } from './AssetRenderer'
 
@@ -24,7 +24,6 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
   dragState = null,
   showBorders = false
 }) => {
-  // SVG logical viewport is strictly fixed at 800x600 coordinate system
   const VIEWPORT_WIDTH = 800
   const VIEWPORT_HEIGHT = 600
 
@@ -85,14 +84,30 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
           const y = centerPos.y - slotHeight / 2
 
           const state = slotConfig[slot.slotKey] || slotConfig[slot.id]
-          const hasAsset = Boolean(state?.asset)
           const isLocked = Boolean(state?.locked)
-          const asset = state?.asset
+
+          // Resolve asset object: Use state.asset or synthesize from material/color overrides
+          const resolvedAsset: Asset | undefined = state?.asset || (
+            (state?.materialImage || state?.materialId || state?.colorHex || state?.colorOverride)
+              ? {
+                  id: state.materialId || 'custom-mat',
+                  name: slot.label,
+                  assetType: slot.slotType,
+                  thumbnail: state.materialImage || undefined,
+                  colorHex: (state.colorHex || state.colorOverride) || undefined,
+                }
+              : undefined
+          )
+          const hasAsset = Boolean(resolvedAsset)
+
+          const mirrorTransform = slot.mirrorX
+            ? `translate(${centerPos.x}, ${centerPos.y}) scale(-1, 1) translate(${-centerPos.x}, ${-centerPos.y})`
+            : undefined
 
           return (
-            <g key={slot.id} id={`slot-group-${slot.slotKey}`}>
+            <g key={slot.id} id={`slot-group-${slot.slotKey}`} transform={mirrorTransform}>
               {/* Layer 1: Asset Rendering (bottom layer) */}
-              {hasAsset && asset && (
+              {hasAsset && resolvedAsset && (
                 <foreignObject
                   x={x}
                   y={y}
@@ -101,10 +116,10 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
                   style={{ overflow: 'visible', pointerEvents: 'none' }}
                 >
                   <AssetRenderer
-                    asset={asset}
+                    asset={resolvedAsset}
                     slotType={slot.slotType}
                     slotKey={slot.slotKey}
-                    colorOverride={state?.colorOverride}
+                    colorOverride={(state?.colorOverride || state?.colorHex) || undefined}
                     colorMap={state?.colorMap}
                     filterMode={state?.filterMode}
                     colorSaturation={state?.colorSaturation}
@@ -153,7 +168,7 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
                     fontFamily="'Inter', sans-serif"
                   >
                     {isLocked && '🔒 '}
-                    {hasAsset ? (asset?.name ?? slot.label) : slot.label}
+                    {hasAsset ? (resolvedAsset?.name ?? slot.label) : slot.label}
                   </text>
                 </g>
               )}

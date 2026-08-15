@@ -17,8 +17,6 @@ export function AdminMaterialsPage() {
 
   return (
     <div>
-      <h1 className={styles.title}>Quản lý Vật liệu (Materials)</h1>
-
       {error && (
         <div className={styles.error} onClick={() => setError(null)}>
           {error}
