@@ -26,21 +26,21 @@ export const SaveBar: React.FC<SaveBarProps> = ({
 
   const handleSaveDraftClick = () => {
     onSaveDraft()
-    showToast('💾 Đã lưu bản nháp vào bộ nhớ trình duyệt (localStorage)!')
+    showToast('Đã lưu bản nháp vào bộ nhớ trình duyệt (localStorage)!')
   }
 
   const handleSaveFinalClick = () => {
     onSaveFinal()
-    showToast('🚀 Đã gửi lưu thiết kế tới hệ thống server Pi Decor!')
+    showToast('Đã gửi lưu thiết kế tới hệ thống server Pi Decor!')
   }
 
   const handleExportPDFClick = () => {
     onExportPDF()
-    showToast('📄 Tính năng xuất file PDF báo giá chi tiết sắp ra mắt ở Milestone 5!')
+    showToast('Tính năng xuất file PDF báo giá chi tiết sắp ra mắt ở Milestone 5!')
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }}>
       {/* Toast Feedback */}
       {toastMessage && (
         <div
@@ -48,13 +48,13 @@ export const SaveBar: React.FC<SaveBarProps> = ({
             position: 'absolute',
             bottom: '50px',
             right: '0',
-            backgroundColor: '#0f172a',
-            color: '#f8fafc',
-            border: '1px solid #e11d48',
+            backgroundColor: '#271620',
+            color: '#fbf7f1',
+            border: '1px solid #a15c2e',
             borderRadius: '8px',
             padding: '10px 16px',
             fontSize: '12px',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
+            boxShadow: '0 10px 25px rgba(39, 22, 32, 0.2)',
             whiteSpace: 'nowrap',
             zIndex: 100,
             animation: 'fadeIn 0.2s ease-in-out'
@@ -69,20 +69,21 @@ export const SaveBar: React.FC<SaveBarProps> = ({
         onClick={handleSaveDraftClick}
         disabled={isSaving}
         style={{
-          padding: '8px 16px',
-          backgroundColor: '#334155',
-          color: '#f8fafc',
-          border: '1px solid #475569',
+          padding: '8px 14px',
+          backgroundColor: '#ffffff',
+          color: '#271620',
+          border: '1px solid #e7ded0',
           borderRadius: '8px',
-          fontSize: '13px',
-          fontWeight: '500',
+          fontSize: '12px',
+          fontWeight: '600',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
-          gap: '6px'
+          gap: '6px',
+          boxShadow: '0 1px 3px rgba(39, 22, 32, 0.04)'
         }}
       >
-        💾 Lưu nháp
+        Lưu nháp
       </button>
 
       {/* Save Final Design Button */}
@@ -90,46 +91,46 @@ export const SaveBar: React.FC<SaveBarProps> = ({
         onClick={handleSaveFinalClick}
         disabled={isSaving}
         style={{
-          padding: '8px 18px',
-          backgroundColor: '#e11d48',
+          padding: '8px 16px',
+          backgroundColor: '#a15c2e',
           color: '#ffffff',
           border: 'none',
           borderRadius: '8px',
-          fontSize: '13px',
-          fontWeight: '600',
+          fontSize: '12px',
+          fontWeight: '700',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           gap: '6px',
-          boxShadow: '0 4px 6px -1px rgba(225, 29, 72, 0.4)',
+          boxShadow: '0 2px 8px rgba(161, 92, 46, 0.25)',
           position: 'relative'
         }}
       >
         {isDirty && (
           <span
             style={{
-              width: '8px',
-              height: '8px',
+              width: '7px',
+              height: '7px',
               backgroundColor: '#fbbf24',
               borderRadius: '50%',
               display: 'inline-block'
             }}
           />
         )}
-        🚀 Lưu thiết kế
+        Lưu thiết kế
       </button>
 
       {/* Export PDF Stub Button */}
       <button
         onClick={handleExportPDFClick}
         style={{
-          padding: '8px 16px',
-          backgroundColor: '#0f172a',
-          color: '#94a3b8',
-          border: '1px solid #334155',
+          padding: '8px 14px',
+          backgroundColor: '#fbf7f1',
+          color: '#6e6259',
+          border: '1px solid #e7ded0',
           borderRadius: '8px',
-          fontSize: '13px',
-          fontWeight: '500',
+          fontSize: '12px',
+          fontWeight: '600',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',

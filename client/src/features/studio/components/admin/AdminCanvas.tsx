@@ -256,7 +256,7 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
               y1={0}
               x2={w / 2}
               y2={h}
-              stroke={isSnapUnlocked ? '#fbbf24' : '#38bdf8'}
+              stroke={isSnapUnlocked ? '#b98a3e' : '#a15c2e'}
               strokeWidth={1.5}
               strokeDasharray="4 4"
             />
@@ -266,15 +266,15 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
               width={isSnapUnlocked ? 150 : 100}
               height={20}
               rx={10}
-              fill={isSnapUnlocked ? '#fbbf24' : '#38bdf8'}
+              fill={isSnapUnlocked ? '#b98a3e' : '#a15c2e'}
             />
-            <text x={w / 2} y={23} textAnchor="middle" fill="#0f172a" fontSize={10} fontWeight="700">
+            <text x={w / 2} y={23} textAnchor="middle" fill="#ffffff" fontSize={10} fontWeight="700">
               {isSnapUnlocked ? 'Đã Mở Khóa Dính (Tự Do)' : 'Căn Giữa Ngang'}
             </text>
           </g>
         )}
 
-        {/* Vertical Center Guide Line (Horizontal Cyan Line at Y = 50%) */}
+        {/* Vertical Center Guide Line (Horizontal Line at Y = 50%) */}
         {isCenterV && (
           <g>
             <line
@@ -282,7 +282,7 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
               y1={h / 2}
               x2={w}
               y2={h / 2}
-              stroke={isSnapUnlocked ? '#fbbf24' : '#38bdf8'}
+              stroke={isSnapUnlocked ? '#b98a3e' : '#a15c2e'}
               strokeWidth={1.5}
               strokeDasharray="4 4"
             />
@@ -292,9 +292,9 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
               width={isSnapUnlocked ? 140 : 95}
               height={20}
               rx={10}
-              fill={isSnapUnlocked ? '#fbbf24' : '#38bdf8'}
+              fill={isSnapUnlocked ? '#b98a3e' : '#a15c2e'}
             />
-            <text x={isSnapUnlocked ? 82 : 60} y={h / 2 + 4} textAnchor="middle" fill="#0f172a" fontSize={10} fontWeight="700">
+            <text x={isSnapUnlocked ? 82 : 60} y={h / 2 + 4} textAnchor="middle" fill="#ffffff" fontSize={10} fontWeight="700">
               {isSnapUnlocked ? 'Mở Khóa Dính' : 'Căn Giữa Dọc'}
             </text>
           </g>
@@ -308,7 +308,7 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
             y1={0}
             x2={other.normX * w}
             y2={h}
-            stroke="#f43f5e"
+            stroke="#b4586b"
             strokeWidth={1.2}
             strokeDasharray="3 3"
           />
@@ -322,7 +322,7 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
             y1={other.normY * h}
             x2={w}
             y2={other.normY * h}
-            stroke="#f43f5e"
+            stroke="#b4586b"
             strokeWidth={1.2}
             strokeDasharray="3 3"
           />
@@ -346,11 +346,11 @@ export const AdminCanvas: React.FC<AdminCanvasProps> = ({
           width: '100%',
           maxWidth: '800px',
           aspectRatio: '800 / 600',
-          backgroundColor: '#0f172a',
-          borderRadius: '12px',
+          backgroundColor: '#ffffff',
+          borderRadius: '16px',
           overflow: 'hidden',
-          border: '1px solid #334155',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)',
+          border: '1px solid #e7ded0',
+          boxShadow: '0 12px 32px rgba(39, 22, 32, 0.08)',
           margin: '0 auto'
         }}
       >

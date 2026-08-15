@@ -21,9 +21,45 @@ export const seedTemplates: Template[] = [
     isActive: true,
     thumbnail:
       "https://images.unsplash.com/photo-1519741497674-611481863552?w=300",
-    svgBase: `<g id="background-frame">
-      <rect x="0" y="0" width="800" height="600" fill="#1e1e2d" />
-    </g>`,
+    svgBase: `
+  <g id="background-frame">
+    <defs>
+      <!-- Gradient chính: Tối góc trái chuyển sang sáng góc phải -->
+      <linearGradient id="bg-studio-gradient" x1="0%" y1="30%" x2="100%" y2="20%">
+        <stop offset="0%" stop-color="#1e2022" />
+        <stop offset="35%" stop-color="#3c3f44" />
+        <stop offset="70%" stop-color="#8a8d93" />
+        <stop offset="100%" stop-color="#e2e5ea" />
+      </linearGradient>
+
+      <!-- Vệt sáng mềm (Spotlight) phía trên bên phải -->
+      <radialGradient id="bg-spotlight" cx="85%" cy="15%" r="60%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+        <stop offset="50%" stop-color="#ffffff" stop-opacity="0.1" />
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+      </radialGradient>
+
+      <!-- Gradient bóng đổ mặt sàn phía dưới -->
+      <linearGradient id="floor-shadow" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#0b0c0d" stop-opacity="0.9" />
+        <stop offset="40%" stop-color="#1f2124" stop-opacity="0.6" />
+        <stop offset="100%" stop-color="#70747a" stop-opacity="0.3" />
+      </linearGradient>
+    </defs>
+
+    <!-- 1. Nền chuyển sắc chính -->
+    <rect x="0" y="0" width="800" height="600" fill="url(#bg-studio-gradient)" />
+
+    <!-- 2. Điểm tụ sáng (Spotlight highlight) góc phải -->
+    <rect x="0" y="0" width="800" height="600" fill="url(#bg-spotlight)" />
+
+    <!-- 3. Vệt đường chân trời/sàn tối -->
+    <rect x="0" y="495" width="800" height="15" fill="#0d0e10" opacity="0.85" />
+
+    <!-- 4. Mặt sàn phản chiếu phía dưới cùng -->
+    <rect x="0" y="510" width="800" height="90" fill="url(#floor-shadow)" />
+  </g>
+`,
   },
 ];
 

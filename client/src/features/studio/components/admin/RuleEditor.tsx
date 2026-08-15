@@ -94,28 +94,29 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
     <div style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      backgroundColor: 'rgba(39, 22, 32, 0.45)',
+      backdropFilter: 'blur(6px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 9999
     }}>
       <div style={{
-        backgroundColor: '#1e293b',
-        border: '1px solid #334155',
-        borderRadius: '12px',
+        backgroundColor: '#ffffff',
+        border: '1px solid #e7ded0',
+        borderRadius: '20px',
         width: '100%',
         maxWidth: '520px',
         padding: '24px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+        boxShadow: '0 25px 60px rgba(39, 22, 32, 0.15)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#f8fafc' }}>
+          <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#271620' }}>
             {rule ? '⚡ Chỉnh Sửa Quy Tắc Ràng Buộc' : '⚡ Thêm Quy Tắc Mới (Rule Builder)'}
           </h3>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '18px', cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: '#6e6259', fontSize: '18px', cursor: 'pointer' }}
           >
             ✕
           </button>
@@ -134,8 +135,8 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
           </div>
 
           {/* Condition Box */}
-          <div style={{ backgroundColor: '#0f172a', padding: '12px', borderRadius: '8px', border: '1px solid #334155' }}>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: '#fbbf24', marginBottom: '8px' }}>
+          <div style={{ backgroundColor: '#fbf7f1', padding: '14px', borderRadius: '10px', border: '1px solid #e7ded0' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: '#b98a3e', marginBottom: '8px' }}>
               1. Điều kiện (If Condition)
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
@@ -157,8 +158,8 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
           </div>
 
           {/* Action Box */}
-          <div style={{ backgroundColor: '#0f172a', padding: '12px', borderRadius: '8px', border: '1px solid #334155' }}>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: '#38bdf8', marginBottom: '8px' }}>
+          <div style={{ backgroundColor: '#fbf7f1', padding: '14px', borderRadius: '10px', border: '1px solid #e7ded0' }}>
+            <div style={{ fontSize: '12px', fontWeight: '700', color: '#a15c2e', marginBottom: '8px' }}>
               2. Hành động tác động (Then Action)
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
@@ -207,12 +208,12 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
               onClick={onClose}
               style={{
                 padding: '8px 16px',
-                backgroundColor: '#334155',
-                color: '#94a3b8',
-                border: 'none',
-                borderRadius: '6px',
+                backgroundColor: '#fbf7f1',
+                color: '#6e6259',
+                border: '1px solid #e7ded0',
+                borderRadius: '8px',
                 fontSize: '13px',
-                fontWeight: '500',
+                fontWeight: '600',
                 cursor: 'pointer'
               }}
             >
@@ -221,14 +222,15 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
             <button
               type="submit"
               style={{
-                padding: '8px 18px',
-                backgroundColor: '#e11d48',
+                padding: '8px 20px',
+                backgroundColor: '#a15c2e',
                 color: '#ffffff',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '8px',
                 fontSize: '13px',
-                fontWeight: '600',
-                cursor: 'pointer'
+                fontWeight: '700',
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(161, 92, 46, 0.25)'
               }}
             >
               💾 Lưu Quy Tắc

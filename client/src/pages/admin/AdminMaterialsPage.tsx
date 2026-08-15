@@ -4,9 +4,16 @@ import styles from "./AdminMaterialsPage.module.scss";
 export function AdminMaterialsPage() {
   const {
     materials,
+    filteredMaterials,
     status,
     error,
     setError,
+    searchQuery,
+    setSearchQuery,
+    selectedCategory,
+    setSelectedCategory,
+    viewMode,
+    setViewMode,
     formOpen,
     setFormOpen,
     editingMaterial,
@@ -28,7 +35,14 @@ export function AdminMaterialsPage() {
 
       {status === "ready" && (
         <MaterialList
-          materials={materials}
+          materials={filteredMaterials}
+          allMaterials={materials}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
           onAdd={() => {
             setEditingMaterial(null);
             setFormOpen(true);

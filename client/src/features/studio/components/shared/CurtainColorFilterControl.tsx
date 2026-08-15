@@ -108,13 +108,14 @@ export const CurtainColorFilterControl: React.FC<
   return (
     <div
       style={{
-        backgroundColor: "#1e293b",
-        borderRadius: "12px",
-        padding: "14px",
-        border: "1px solid #334155",
+        backgroundColor: "#ffffff",
+        borderRadius: "16px",
+        padding: "16px",
+        border: "1px solid #e7ded0",
         display: "flex",
         flexDirection: "column",
-        gap: "12px",
+        gap: "14px",
+        boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
       }}
     >
       {/* Title & Active Swatch Badge */}
@@ -129,7 +130,7 @@ export const CurtainColorFilterControl: React.FC<
           style={{
             fontSize: "13px",
             fontWeight: "700",
-            color: "#f8fafc",
+            color: "#271620",
             margin: 0,
           }}
         >
@@ -143,14 +144,14 @@ export const CurtainColorFilterControl: React.FC<
               borderRadius: "50%",
               backgroundColor: currentColorOverride,
               border: "1.5px solid #ffffff",
-              boxShadow: "0 0 4px rgba(0,0,0,0.5)",
+              boxShadow: "0 0 4px rgba(39, 22, 32, 0.2)",
             }}
           />
           <span
             style={{
               fontSize: "11px",
               fontFamily: "monospace",
-              color: "#38bdf8",
+              color: "#a15c2e",
               fontWeight: "700",
             }}
           >
@@ -162,7 +163,7 @@ export const CurtainColorFilterControl: React.FC<
       {/* 1. Custom Color Input Field & Clickable Color Picker */}
       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
         <label
-          style={{ fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}
+          style={{ fontSize: "11px", fontWeight: "600", color: "#6e6259" }}
         >
           Nhập mã màu tùy chọn (gõ mã hex hoặc chọn từ bảng màu):
         </label>
@@ -185,15 +186,16 @@ export const CurtainColorFilterControl: React.FC<
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "34px",
-              height: "34px",
-              borderRadius: "6px",
-              border: "1.5px solid #38bdf8",
+              width: "38px",
+              height: "38px",
+              borderRadius: "8px",
+              border: "1.5px solid #a15c2e",
               backgroundColor: currentColorOverride,
               cursor: "pointer",
               position: "relative",
               overflow: "hidden",
               flexShrink: 0,
+              boxShadow: "0 2px 6px rgba(161, 92, 46, 0.2)"
             }}
             title="Nhấp để chọn màu bất kỳ từ bảng màu"
           >
@@ -220,28 +222,10 @@ export const CurtainColorFilterControl: React.FC<
                 cursor: "pointer",
               }}
             />
-            <span style={{ fontSize: "14px", textShadow: "0 0 3px #000" }}>
+            <span style={{ fontSize: "14px", filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }}>
               🎨
             </span>
           </label>
-
-          {/* <button
-            type="button"
-            onClick={handleAddCustomColors}
-            style={{
-              padding: "8px 12px",
-              backgroundColor: "#e11d48",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "6px",
-              fontSize: "12px",
-              fontWeight: "600",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Áp dụng
-          </button> */}
         </div>
       </div>
 
@@ -251,10 +235,10 @@ export const CurtainColorFilterControl: React.FC<
           display: "flex",
           flexDirection: "column",
           gap: "6px",
-          backgroundColor: "#0f172a",
-          padding: "10px",
-          borderRadius: "8px",
-          border: "1px solid #334155",
+          backgroundColor: "#fbf7f1",
+          padding: "12px",
+          borderRadius: "10px",
+          border: "1px solid #e7ded0",
         }}
       >
         <div
@@ -265,7 +249,7 @@ export const CurtainColorFilterControl: React.FC<
           }}
         >
           <label
-            style={{ fontSize: "11px", fontWeight: "600", color: "#38bdf8" }}
+            style={{ fontSize: "11px", fontWeight: "700", color: "#a15c2e" }}
           >
             Sắc Độ / Độ Đậm Màu:
           </label>
@@ -274,7 +258,7 @@ export const CurtainColorFilterControl: React.FC<
               fontSize: "11px",
               fontFamily: "monospace",
               fontWeight: "700",
-              color: "#f8fafc",
+              color: "#271620",
             }}
           >
             {saturation}%
@@ -288,7 +272,7 @@ export const CurtainColorFilterControl: React.FC<
           step={5}
           value={saturation}
           onChange={(e) => handleSaturationChange(Number(e.target.value))}
-          style={{ width: "100%", cursor: "pointer", accentColor: "#38bdf8" }}
+          style={{ width: "100%", cursor: "pointer", accentColor: "#a15c2e" }}
         />
 
         {/* Quick Saturation Presets */}
@@ -297,7 +281,7 @@ export const CurtainColorFilterControl: React.FC<
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
             gap: "4px",
-            marginTop: "2px",
+            marginTop: "4px",
           }}
         >
           {[
@@ -311,19 +295,20 @@ export const CurtainColorFilterControl: React.FC<
               type="button"
               onClick={() => handleSaturationChange(preset.val)}
               style={{
-                padding: "4px 2px",
+                padding: "5px 2px",
                 border:
                   saturation === preset.val
-                    ? "1px solid #38bdf8"
-                    : "1px solid #334155",
-                borderRadius: "4px",
+                    ? "1px solid #a15c2e"
+                    : "1px solid #e7ded0",
+                borderRadius: "6px",
                 backgroundColor:
-                  saturation === preset.val ? "#0284c7" : "#1e293b",
-                color: "#ffffff",
+                  saturation === preset.val ? "#a15c2e" : "#ffffff",
+                color: saturation === preset.val ? "#ffffff" : "#6e6259",
                 fontSize: "10px",
                 fontWeight: "600",
                 cursor: "pointer",
                 textAlign: "center",
+                transition: "all 0.15s ease",
               }}
             >
               {preset.label}
@@ -336,7 +321,7 @@ export const CurtainColorFilterControl: React.FC<
       {customColors.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           <span
-            style={{ fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}
+            style={{ fontSize: "11px", fontWeight: "600", color: "#6e6259" }}
           >
             Mã màu bạn đã nhập ({customColors.length}):
           </span>
@@ -356,13 +341,14 @@ export const CurtainColorFilterControl: React.FC<
                     padding: "5px 10px",
                     borderRadius: "14px",
                     border: isSelected
-                      ? "2px solid #38bdf8"
-                      : "1px solid #475569",
-                    backgroundColor: isSelected ? "#0f172a" : "#334155",
-                    color: "#ffffff",
+                      ? "2px solid #a15c2e"
+                      : "1px solid #e7ded0",
+                    backgroundColor: isSelected ? "#fdf7f5" : "#ffffff",
+                    color: "#271620",
                     fontSize: "11px",
                     fontFamily: "monospace",
                     cursor: "pointer",
+                    boxShadow: isSelected ? "0 2px 6px rgba(161, 92, 46, 0.15)" : "none",
                   }}
                 >
                   <div
@@ -371,7 +357,7 @@ export const CurtainColorFilterControl: React.FC<
                       height: "12px",
                       borderRadius: "50%",
                       backgroundColor: hex,
-                      border: "1px solid rgba(255,255,255,0.4)",
+                      border: "1px solid rgba(39,22,32,0.2)",
                     }}
                   />
                   <span>{hex}</span>
@@ -379,7 +365,7 @@ export const CurtainColorFilterControl: React.FC<
                     onClick={(e) => handleRemoveCustomColor(hex, e)}
                     style={{
                       marginLeft: "4px",
-                      color: "#ef4444",
+                      color: "#b4586b",
                       fontWeight: "bold",
                       fontSize: "12px",
                       padding: "0 2px",
@@ -397,7 +383,7 @@ export const CurtainColorFilterControl: React.FC<
 
       {/* 4. Preset Color Chips */}
       <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-        <span style={{ fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}>
+        <span style={{ fontSize: "11px", fontWeight: "600", color: "#6e6259" }}>
           Bảng màu rèm phông cưới tiêu chuẩn:
         </span>
         <div
@@ -419,31 +405,34 @@ export const CurtainColorFilterControl: React.FC<
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  padding: "6px 8px",
-                  borderRadius: "6px",
+                  padding: "8px 10px",
+                  borderRadius: "8px",
                   border: isSelected
-                    ? "2px solid #38bdf8"
-                    : "1px solid #334155",
-                  backgroundColor: isSelected ? "#0f172a" : "#1e293b",
-                  color: "#f8fafc",
+                    ? "2px solid #a15c2e"
+                    : "1px solid #e7ded0",
+                  backgroundColor: isSelected ? "#fdf7f5" : "#fbf7f1",
+                  color: "#271620",
                   cursor: "pointer",
                   textAlign: "left",
+                  transition: "all 0.15s ease",
+                  boxShadow: isSelected ? "0 2px 6px rgba(161, 92, 46, 0.12)" : "none",
                 }}
               >
                 <div
                   style={{
-                    width: "14px",
-                    height: "14px",
+                    width: "16px",
+                    height: "16px",
                     borderRadius: "50%",
                     backgroundColor: p.hex,
-                    border: "1px solid rgba(255,255,255,0.3)",
+                    border: "1.5px solid rgba(255,255,255,0.8)",
+                    boxShadow: "0 1px 3px rgba(39,22,32,0.15)",
                     flexShrink: 0,
                   }}
                 />
                 <span
                   style={{
                     fontSize: "11px",
-                    fontWeight: isSelected ? "700" : "400",
+                    fontWeight: isSelected ? "700" : "500",
                   }}
                 >
                   {p.name}

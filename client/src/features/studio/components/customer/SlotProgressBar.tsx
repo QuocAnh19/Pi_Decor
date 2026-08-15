@@ -16,18 +16,18 @@ export const SlotProgressBar: React.FC<SlotProgressBarProps> = ({ slots, slotCon
   const percent = totalSlots > 0 ? Math.round((filledSlotsCount / totalSlots) * 100) : 0
   const isComplete = requiredSlots.length > 0 ? filledRequiredCount === requiredSlots.length : percent === 100
 
-  let barColor = '#f59e0b' // amber
+  let barColor = '#b3733b' // warm honey
   if (isComplete) {
-    barColor = '#10b981' // emerald green
+    barColor = '#47663b' // sage green
   } else if (percent < 30) {
-    barColor = '#64748b' // slate
+    barColor = '#9c9186' // taupe
   }
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', width: '100%' }}>
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '600', marginBottom: '6px' }}>
-          <span style={{ color: '#f8fafc' }}>
+          <span style={{ color: '#271620' }}>
             🎯 Tiến độ thiết kế: <strong style={{ color: barColor }}>{filledSlotsCount} / {totalSlots} thành phần</strong>
           </span>
           <span style={{ color: barColor }}>{percent}%</span>
@@ -38,10 +38,10 @@ export const SlotProgressBar: React.FC<SlotProgressBarProps> = ({ slots, slotCon
           style={{
             width: '100%',
             height: '8px',
-            backgroundColor: '#0f172a',
+            backgroundColor: '#f4eee3',
             borderRadius: '4px',
             overflow: 'hidden',
-            border: '1px solid #334155'
+            border: '1px solid #e7ded0'
           }}
         >
           <div
@@ -59,9 +59,9 @@ export const SlotProgressBar: React.FC<SlotProgressBarProps> = ({ slots, slotCon
       {isComplete && (
         <span
           style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            color: '#10b981',
-            border: '1px solid #10b981',
+            backgroundColor: '#eef4ea',
+            color: '#47663b',
+            border: '1px solid #c5dfbb',
             borderRadius: '6px',
             padding: '4px 10px',
             fontSize: '11px',

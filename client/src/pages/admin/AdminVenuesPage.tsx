@@ -9,9 +9,14 @@ import styles from "./AdminVenuesPage.module.scss";
 export function AdminVenuesPage() {
   const {
     venues,
+    filteredVenues,
     status,
     error,
     setError,
+    searchQuery,
+    setSearchQuery,
+    selectedType,
+    setSelectedType,
     selectedVenueId,
     selectedVenue,
     detailLoading,
@@ -32,6 +37,15 @@ export function AdminVenuesPage() {
 
   return (
     <div>
+      <div className={styles.headerRow}>
+        <div>
+          <h1 className={styles.title}>Quản Lý Khách Hàng &amp; Báo Giá</h1>
+          <p className={styles.subtitle}>
+            Theo dõi thông tin liên hệ, tiến độ tư vấn và xuất báo giá PDF cho khách hàng
+          </p>
+        </div>
+      </div>
+      
       {error && (
         <p className={styles.error} onClick={() => setError(null)}>
           {error}
@@ -44,7 +58,12 @@ export function AdminVenuesPage() {
       {status === "ready" && (
         <div className={styles.layout}>
           <VenueList
-            venues={venues}
+            venues={filteredVenues}
+            allVenues={venues}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedType={selectedType}
+            onTypeChange={setSelectedType}
             selectedId={selectedVenueId}
             onSelect={handleSelectVenue}
             onAdd={() => {

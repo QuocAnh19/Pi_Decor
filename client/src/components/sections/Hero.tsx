@@ -86,7 +86,22 @@ export function Hero() {
           <Link to="/studio" className={styles.ctaPrimary}>
             Vào Studio thiết kế
           </Link>
-          <a href="#services" className={styles.ctaGhost}>
+          <a
+            href="#services"
+            onClick={(e) => {
+              e.preventDefault();
+              const elem = document.getElementById("services");
+              if (elem) {
+                const navOffset = 110;
+                const elemPos = elem.getBoundingClientRect().top + window.pageYOffset;
+                window.scrollTo({
+                  top: Math.max(0, elemPos - navOffset),
+                  behavior: "smooth",
+                });
+              }
+            }}
+            className={styles.ctaGhost}
+          >
             Xem dịch vụ ↓
           </a>
         </div>

@@ -14,14 +14,14 @@ export function AdminGuard() {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          backgroundColor: "#0f172a",
-          color: "#f8fafc",
-          fontFamily: "sans-serif",
+          backgroundColor: "#f4eee3",
+          color: "#271620",
+          fontFamily: "'Be Vietnam Pro', sans-serif",
           gap: "12px",
         }}
       >
         <div style={{ fontSize: "28px" }}>🔐</div>
-        <p style={{ fontSize: "14px", color: "#94a3b8", margin: 0 }}>
+        <p style={{ fontSize: "14px", color: "#6e6259", margin: 0 }}>
           Đang xác thực phiên đăng nhập Admin...
         </p>
       </div>

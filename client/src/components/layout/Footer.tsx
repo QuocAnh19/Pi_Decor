@@ -37,8 +37,8 @@ export function Footer() {
                     Địa chỉ: 372 Trần Đại Nghĩa, Hòa Hải, Ngũ Hành Sơn, Đà Nẵng,
                     Việt Nam
                   </li>
-                  <li>Email: hello@pidecor.vn</li>
-                  <li>Hotline: +84 000 000 000</li>
+                  <li>Email: pidecor@gmail.com</li>
+                  <li>Hotline: +84 789 241 260</li>
                   {/* <li>Instagram · Facebook · TikTok</li> */}
                 </ul>
               </div>

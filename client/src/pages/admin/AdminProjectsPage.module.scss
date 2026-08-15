@@ -20,10 +20,10 @@
 }
 
 .title {
+  font-family: $font-serif;
   font-size: $text-xl;
   font-weight: 700;
   color: $admin-text;
-  font-family: $font-serif;
   margin: 0;
 }
 
@@ -33,25 +33,33 @@
   margin-top: 4px;
 }
 
-.addButton {
-  display: flex;
+.addButton,
+.addBtn {
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background-color: $admin-accent;
   color: #ffffff;
   border: none;
   border-radius: $radius-pill;
-  padding: 10px 18px;
-  font-size: $text-sm;
-  font-weight: 600;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(161, 92, 46, 0.25);
-  transition: all 0.15s ease;
+  box-shadow: 0 4px 14px rgba(161, 92, 46, 0.28);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
 
   &:hover {
     background-color: $admin-accent-hover;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(161, 92, 46, 0.32);
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(161, 92, 46, 0.36);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(161, 92, 46, 0.24);
   }
 }
 
@@ -542,22 +550,27 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: 130px;
-  gap: 14px;
+  grid-auto-flow: dense;
+  gap: 12px;
   margin-top: 12px;
   background: $admin-bg;
-  padding: 16px;
+  padding: 14px;
   border-radius: $radius-l;
   border: 1px solid $admin-border;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 
   @media (max-width: 767px) {
     grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 100px;
+    grid-auto-rows: 110px;
     gap: 10px;
+    padding: 10px;
   }
 }
 
-/* Span classes for 4-column layout (identical to ProjectAlbumModal) */
+/* Span classes for 4-column layout */
 .span1x1 {
   grid-column: span 1;
   grid-row: span 1;
@@ -599,13 +612,31 @@
 }
 
 .span4x2 {
-  grid-column: span 4;
+  grid-column: 1 / -1;
   grid-row: span 2;
 }
 
 .span4x3 {
-  grid-column: span 4;
+  grid-column: 1 / -1;
   grid-row: span 3;
+}
+
+@media (max-width: 767px) {
+  .span1x1,
+  .span1x2,
+  .span1x3 {
+    grid-column: span 1;
+  }
+
+  .span2x1,
+  .span2x2,
+  .span2x3,
+  .span3x1,
+  .span3x2,
+  .span4x2,
+  .span4x3 {
+    grid-column: 1 / -1;
+  }
 }
 
 .visualSlotTile {
@@ -616,6 +647,9 @@
   background: $admin-surface;
   cursor: pointer;
   transition: all 0.15s ease;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 
   &:hover {
     border-color: $admin-accent;
@@ -626,10 +660,19 @@
 .visualSlotFilled {
   border-style: solid;
   border-color: $admin-border;
+  background: #ffffff;
 
   &:hover {
     border-color: $admin-accent;
   }
+}
+
+.galleryThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
 .visualSlotEmpty {
@@ -643,31 +686,108 @@
   padding: 6px;
   text-align: center;
   color: $admin-text-faint;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .visualSlotLabel {
   font-size: $text-xs;
   font-weight: 600;
   color: $admin-text-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .visualSlotHint {
-  font-size: $text-xs;
+  font-size: 10px;
   color: $admin-text-faint;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .visualSlotCoverBadge {
   position: absolute;
   top: 6px;
   left: 6px;
-  z-index: 2;
-  font-size: $text-xs;
+  z-index: 3;
+  font-size: 10px;
   font-weight: 700;
   background: $admin-warning;
   color: #ffffff;
   padding: 2px 6px;
   border-radius: $radius-s;
   box-shadow: 0 2px 4px rgba(39, 22, 32, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.visualSlotIndexBadge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 3;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(39, 22, 32, 0.72);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: $radius-s;
+}
+
+.galleryItemActions {
+  position: absolute;
+  inset: 0;
+  background: rgba(39, 22, 32, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  z-index: 4;
+  transition: opacity 0.15s ease;
+
+  .visualSlotTile:hover & {
+    opacity: 1;
+  }
+}
+
+.galleryActionBtn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: $radius-s;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.makeCoverBtn {
+  background-color: $admin-accent;
+  color: #ffffff;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+  }
+}
+
+.deleteThumbBtn {
+  background-color: $admin-danger;
+  color: #ffffff;
+
+  &:hover {
+    background-color: #C97188;
+  }
 }
 
 .modalFooter {

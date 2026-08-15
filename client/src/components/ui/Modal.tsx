@@ -10,6 +10,8 @@ export interface ModalProps {
   maxWidth?: string;
   variant?: "modal" | "drawer";
   className?: string;
+  showCloseButton?: boolean;
+  bodyPadding?: boolean;
 }
 
 export function Modal({
@@ -20,7 +22,31 @@ export function Modal({
   maxWidth = "640px",
   variant = "modal",
   className = "",
+  showCloseButton = true,
+  bodyPadding = true,
 }: ModalProps) {
+  // Lock outside body scroll when modal is open
+  useEffect(() => {
+    if (!isOpen) {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+      return;
+    }
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [isOpen]);
+
+  // Handle Esc key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -38,20 +64,37 @@ export function Modal({
       <>
         <div className={styles.backdrop} onClick={onClose} />
         <aside className={`${styles.drawer} ${className}`} style={{ maxWidth }}>
-          {title && (
+          {title ? (
             <div className={styles.header}>
               <div className={styles.title}>{title}</div>
+              {showCloseButton && (
+                <button
+                  type="button"
+                  className={styles.closeButton}
+                  onClick={onClose}
+                  aria-label="Đóng bảng"
+                  title="Đóng (Esc)"
+                >
+                  <XMarkIcon style={{ width: 20, height: 20 }} />
+                </button>
+              )}
+            </div>
+          ) : (
+            showCloseButton && (
               <button
                 type="button"
-                className={styles.closeButton}
+                className={styles.closeButtonFloating}
                 onClick={onClose}
-                aria-label="Đóng"
+                aria-label="Đóng bảng"
+                title="Đóng (Esc)"
               >
                 <XMarkIcon style={{ width: 20, height: 20 }} />
               </button>
-            </div>
+            )
           )}
-          <div className={styles.body}>{children}</div>
+          <div className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}>
+            {children}
+          </div>
         </aside>
       </>
     );
@@ -64,20 +107,37 @@ export function Modal({
         style={{ maxWidth }}
         onClick={(e) => e.stopPropagation()}
       >
-        {title && (
+        {title ? (
           <div className={styles.header}>
             <div className={styles.title}>{title}</div>
+            {showCloseButton && (
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={onClose}
+                aria-label="Đóng cửa sổ"
+                title="Đóng (Esc)"
+              >
+                <XMarkIcon style={{ width: 20, height: 20 }} />
+              </button>
+            )}
+          </div>
+        ) : (
+          showCloseButton && (
             <button
               type="button"
-              className={styles.closeButton}
+              className={styles.closeButtonFloating}
               onClick={onClose}
-              aria-label="Đóng"
+              aria-label="Đóng cửa sổ"
+              title="Đóng (Esc)"
             >
               <XMarkIcon style={{ width: 20, height: 20 }} />
             </button>
-          </div>
+          )
         )}
-        <div className={styles.body}>{children}</div>
+        <div className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}>
+          {children}
+        </div>
       </div>
     </div>
   );

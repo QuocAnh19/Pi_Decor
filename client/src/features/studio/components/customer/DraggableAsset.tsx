@@ -33,16 +33,16 @@ export const DraggableAsset: React.FC<DraggableAssetProps> = ({
       {...attributes}
       onClick={onClick}
       style={{
-        backgroundColor: isUsed ? 'rgba(30, 41, 59, 0.9)' : '#1e293b',
-        border: `1px solid ${isUsed ? '#34d399' : '#334155'}`,
-        borderRadius: '10px',
+        backgroundColor: isUsed ? '#fdf7f5' : '#ffffff',
+        border: `1.5px solid ${isUsed ? '#a15c2e' : '#e7ded0'}`,
+        borderRadius: '12px',
         padding: '12px',
         cursor: 'grab',
         display: 'flex',
         flexDirection: 'column',
         gap: '8px',
         transition: 'all 0.15s ease',
-        boxShadow: isUsed ? '0 0 10px rgba(52, 211, 153, 0.15)' : '0 2px 4px rgba(0,0,0,0.2)',
+        boxShadow: isUsed ? '0 2px 8px rgba(161, 92, 46, 0.15)' : '0 2px 8px rgba(39, 22, 32, 0.04)',
         userSelect: 'none',
         position: 'relative',
         ...style
@@ -55,13 +55,13 @@ export const DraggableAsset: React.FC<DraggableAssetProps> = ({
             position: 'absolute',
             top: '6px',
             right: '6px',
-            backgroundColor: 'rgba(52, 211, 153, 0.2)',
-            color: '#34d399',
+            backgroundColor: '#eef4ea',
+            color: '#47663b',
             fontSize: '9px',
             fontWeight: 'bold',
             padding: '2px 6px',
             borderRadius: '4px',
-            border: '1px solid #34d399'
+            border: '1px solid #c5dfbb'
           }}
         >
           Đã dùng
@@ -73,13 +73,13 @@ export const DraggableAsset: React.FC<DraggableAssetProps> = ({
         style={{
           width: '100%',
           height: '76px',
-          borderRadius: '6px',
-          backgroundColor: '#020617',
+          borderRadius: '8px',
+          backgroundColor: '#fbf7f1',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          border: '1px solid #e7ded0',
           padding: '4px',
           position: 'relative'
         }}
@@ -118,12 +118,12 @@ export const DraggableAsset: React.FC<DraggableAssetProps> = ({
               height: '40px',
               borderRadius: '50%',
               backgroundColor: asset.colorHex,
-              border: '2px solid rgba(255, 255, 255, 0.3)',
-              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.4)'
+              border: '2px solid rgba(255, 255, 255, 0.8)',
+              boxShadow: '0 2px 6px rgba(39, 22, 32, 0.15)'
             }}
           />
         ) : (
-          <div style={{ color: '#ffffff', fontSize: '12px', fontWeight: 'bold' }}>
+          <div style={{ color: '#271620', fontSize: '12px', fontWeight: 'bold' }}>
             {asset.name[0]}
           </div>
         )}
@@ -135,7 +135,7 @@ export const DraggableAsset: React.FC<DraggableAssetProps> = ({
           style={{
             fontSize: '12px',
             fontWeight: '600',
-            color: '#f8fafc',
+            color: '#271620',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis'
@@ -150,8 +150,9 @@ export const DraggableAsset: React.FC<DraggableAssetProps> = ({
               key={tag}
               style={{
                 fontSize: '9px',
-                backgroundColor: '#334155',
-                color: '#94a3b8',
+                backgroundColor: '#f4eee3',
+                color: '#6e6259',
+                border: '1px solid #e7ded0',
                 padding: '2px 6px',
                 borderRadius: '4px'
               }}

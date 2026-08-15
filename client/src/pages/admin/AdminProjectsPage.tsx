@@ -62,15 +62,19 @@ export function AdminProjectsPage() {
     <div>
       <div className={styles.headerRow}>
         <div>
-          <h1 className={styles.title}>Quản Lý Dự Án &amp; Bộ Sưu Tập</h1>
+          <h1 className={styles.title}>Quản Lý Khách Hàng &amp; Báo Giá</h1>
+          <p className={styles.subtitle}>
+            Theo dõi thông tin liên hệ, tiến độ tư vấn và xuất báo giá PDF cho khách hàng
+          </p>
         </div>
 
         <button
+          type="button"
           onClick={handleOpenAddModal}
-          className={styles.addBtn}
-          style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}
+          className={styles.addButton}
         >
-          <PlusIcon className="h-4 w-4" style={{ width: 16, height: 16 }} /> Thêm Dự Án Mới
+          <PlusIcon className="h-4 w-4" style={{ width: 18, height: 18 }} />
+          <span>Thêm Dự Án Mới</span>
         </button>
       </div>
 
@@ -123,10 +127,10 @@ export function AdminProjectsPage() {
             style={{
               display: "flex",
               gap: "4px",
-              backgroundColor: "#0f172a",
-              padding: "3px",
+              backgroundColor: "#ffffff",
+              padding: "4px",
               borderRadius: "8px",
-              border: "1px solid #334155",
+              border: "1px solid #e7ded0",
             }}
           >
             <button
@@ -135,11 +139,12 @@ export function AdminProjectsPage() {
                 padding: "6px 10px",
                 border: "none",
                 borderRadius: "6px",
-                backgroundColor: viewMode === "grid" ? "#38bdf8" : "transparent",
-                color: viewMode === "grid" ? "#0f172a" : "#94a3b8",
+                backgroundColor: viewMode === "grid" ? "#a15c2e" : "transparent",
+                color: viewMode === "grid" ? "#ffffff" : "#6e6259",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
+                transition: "all 0.15s ease",
               }}
               title="Xem dạng lưới"
             >
@@ -151,11 +156,12 @@ export function AdminProjectsPage() {
                 padding: "6px 10px",
                 border: "none",
                 borderRadius: "6px",
-                backgroundColor: viewMode === "table" ? "#38bdf8" : "transparent",
-                color: viewMode === "table" ? "#0f172a" : "#94a3b8",
+                backgroundColor: viewMode === "table" ? "#a15c2e" : "transparent",
+                color: viewMode === "table" ? "#ffffff" : "#6e6259",
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
+                transition: "all 0.15s ease",
               }}
               title="Xem dạng bảng"
             >
@@ -237,7 +243,7 @@ export function AdminProjectsPage() {
                   <span className={styles.metaItem}>
                     <MapPinIcon
                       className="h-3.5 w-3.5 inline"
-                      style={{ color: "#38bdf8", width: 14, height: 14 }}
+                      style={{ color: "#a15c2e", width: 14, height: 14 }}
                     />{" "}
                     {proj.location}
                   </span>
@@ -245,7 +251,7 @@ export function AdminProjectsPage() {
                     <span className={styles.metaItem}>
                       <CalendarIcon
                         className="h-3.5 w-3.5 inline"
-                        style={{ color: "#94a3b8", width: 14, height: 14 }}
+                        style={{ color: "#6e6259", width: 14, height: 14 }}
                       />{" "}
                       {proj.date}
                     </span>
@@ -258,8 +264,8 @@ export function AdminProjectsPage() {
                   <div
                     style={{
                       fontSize: "11px",
-                      color: "#fbbf24",
-                      fontWeight: "600",
+                      color: "#b98a3e",
+                      fontWeight: "700",
                       display: "flex",
                       alignItems: "center",
                       gap: "3px",
@@ -279,13 +285,13 @@ export function AdminProjectsPage() {
                           : "Đặt làm dự án nổi bật"
                       }
                       style={{
-                        color: proj.status === "featured" ? "#f59e0b" : "#94a3b8",
+                        color: proj.status === "featured" ? "#b98a3e" : "#6e6259",
                       }}
                     >
                       {proj.status === "featured" ? (
-                        <StarSolid className="h-3.5 w-3.5" style={{ color: "#f59e0b", width: 14, height: 14 }} />
+                        <StarSolid className="h-3.5 w-3.5" style={{ color: "#b98a3e", width: 14, height: 14 }} />
                       ) : (
-                        <StarIcon className="h-3.5 w-3.5" style={{ color: "#94a3b8", width: 14, height: 14 }} />
+                        <StarIcon className="h-3.5 w-3.5" style={{ color: "#6e6259", width: 14, height: 14 }} />
                       )}
                     </button>
 
@@ -314,9 +320,10 @@ export function AdminProjectsPage() {
         /* Table View */
         <div
           style={{
-            backgroundColor: "#1e293b",
-            borderRadius: "12px",
-            border: "1px solid #334155",
+            backgroundColor: "#ffffff",
+            borderRadius: "16px",
+            border: "1px solid #e7ded0",
+            boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
             overflow: "hidden",
           }}
         >
@@ -324,28 +331,39 @@ export function AdminProjectsPage() {
             style={{
               width: "100%",
               borderCollapse: "collapse",
-              fontSize: "14px",
-              color: "#f8fafc",
+              fontSize: "13px",
+              color: "#271620",
             }}
           >
             <thead>
               <tr
                 style={{
-                  backgroundColor: "#0f172a",
-                  borderBottom: "1px solid #334155",
+                  backgroundColor: "#fbf7f1",
+                  borderBottom: "1px solid #e7ded0",
                   textAlign: "left",
+                  color: "#6e6259",
+                  fontSize: "12px",
+                  fontWeight: "700",
                 }}
               >
-                <th style={{ padding: "12px 16px" }}>Hình ảnh &amp; Dự án</th>
-                <th style={{ padding: "12px 16px" }}>Phân mục</th>
-                <th style={{ padding: "12px 16px" }}>Địa điểm</th>
-                <th style={{ padding: "12px 16px" }}>Trạng thái</th>
-                <th style={{ padding: "12px 16px", textAlign: "right" }}>Thao tác</th>
+                <th style={{ padding: "14px 16px" }}>Hình ảnh &amp; Dự án</th>
+                <th style={{ padding: "14px 16px" }}>Phân mục</th>
+                <th style={{ padding: "14px 16px" }}>Địa điểm</th>
+                <th style={{ padding: "14px 16px" }}>Trạng thái</th>
+                <th style={{ padding: "14px 16px", textAlign: "right" }}>Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {filteredProjects.map((proj) => (
-                <tr key={proj.id} style={{ borderBottom: "1px solid #334155" }}>
+                <tr
+                  key={proj.id}
+                  style={{
+                    borderBottom: "1px solid #e7ded0",
+                    transition: "background-color 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fdf7f5")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                >
                   <td
                     style={{
                       padding: "12px 16px",
@@ -358,17 +376,21 @@ export function AdminProjectsPage() {
                       src={proj.src}
                       alt={proj.title}
                       style={{
-                        width: "50px",
-                        height: "40px",
+                        width: "54px",
+                        height: "42px",
                         objectFit: "cover",
-                        borderRadius: "6px",
+                        borderRadius: "8px",
+                        border: "1px solid #e7ded0",
+                      }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = SAMPLE_STOCK_IMAGES[0];
                       }}
                     />
                     <div>
-                      <div style={{ fontWeight: "700", color: "#ffffff" }}>
+                      <div style={{ fontWeight: "700", color: "#271620", fontSize: "14px" }}>
                         {proj.title}
                       </div>
-                      <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+                      <div style={{ fontSize: "12px", color: "#6e6259", marginTop: "2px" }}>
                         {proj.description?.slice(0, 50)}...
                       </div>
                     </div>
@@ -378,7 +400,7 @@ export function AdminProjectsPage() {
                       #{getCategoryLabel(proj.categoryId)} • {proj.tag}
                     </span>
                   </td>
-                  <td style={{ padding: "12px 16px", color: "#cbd5e1" }}>
+                  <td style={{ padding: "12px 16px", color: "#6e6259", fontWeight: "500" }}>
                     {proj.location}
                   </td>
                   <td style={{ padding: "12px 16px" }}>
@@ -409,12 +431,14 @@ export function AdminProjectsPage() {
                       <button
                         onClick={() => handleOpenEditModal(proj)}
                         className={styles.iconBtn}
+                        title="Chỉnh sửa dự án"
                       >
-                        <PencilSquareIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
+                        <PencilSquareIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} /> Sửa
                       </button>
                       <button
                         onClick={() => handleDeleteProject(proj.id)}
                         className={`${styles.iconBtn} ${styles.dangerBtn}`}
+                        title="Xóa dự án"
                       >
                         <TrashIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
                       </button>

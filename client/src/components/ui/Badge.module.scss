@@ -23,25 +23,25 @@
 }
 
 .accent {
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: $color-accent-subtle;
+  color: $color-accent;
+  border: 1px solid rgba($color-accent, 0.3);
 }
 
 .published {
-  background: rgba(22, 163, 74, 0.15);
-  color: #4ade80;
-  border: 1px solid rgba(22, 163, 74, 0.3);
+  background: #e7eee1;
+  color: #436a32;
+  border: 1px solid rgba(67, 106, 50, 0.3);
 }
 
 .draft {
-  background: rgba(100, 116, 139, 0.15);
-  color: #cbd5e1;
-  border: 1px solid rgba(100, 116, 139, 0.3);
+  background: $color-paper-dim;
+  color: $color-ink-muted;
+  border: 1px solid $color-line;
 }
 
 .warning {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: #f5ead6;
+  color: #8e631d;
+  border: 1px solid rgba(142, 99, 29, 0.3);
 }

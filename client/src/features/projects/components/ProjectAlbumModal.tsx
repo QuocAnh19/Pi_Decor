@@ -104,6 +104,15 @@ export function ProjectAlbumModal({ project, onClose }: ProjectAlbumModalProps) 
     };
   }, [project, lightboxIndex, handleLightboxPrev, handleLightboxNext]);
 
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const orig = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = orig;
+    };
+  }, [lightboxIndex]);
+
   if (!project) return null;
 
   const headerTitle = (

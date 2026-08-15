@@ -1,712 +1,441 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from "react";
+import { Template, SlotDefinition, SlotConfig, Asset } from "../../types";
+import type { StudioTemplateRow, MaterialItem } from "../../../../lib/types";
 import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  closestCenter,
-  DragStartEvent,
-  DragEndEvent
-} from '@dnd-kit/core'
+  seedTemplates,
+  seedSlots,
+  seedPublishedSlotConfig,
+} from "../../data/seed/templates";
+import { toStudioTemplate, toStudioSlot } from "../../utils/adapters";
+import { api } from "../../../../lib/api";
 
-import { seedTemplates, seedSlots, seedAssets, seedPublishedSlotConfig } from '../../data/seed/templates'
-import { curtainRules } from '../../rules/curtainRules'
-import { useSlotDnD } from '../../hooks/useSlotDnD'
-import { SVGCanvas } from '../shared/SVGCanvas'
-import { SlotMarker } from '../admin/SlotMarker'
-import { AssetPicker } from './AssetPicker'
-import { DraggableAsset } from './DraggableAsset'
-import { SaveBar } from './SaveBar'
-import { SaveDesignModal } from './SaveDesignModal'
-import { TemplateSelectorModal } from './TemplateSelectorModal'
-import { AddSlotModal } from '../admin/AddSlotModal'
-import { svgToNormalized } from '../../utils/coordinates'
-import { Asset, SlotDefinition, SlotConfig } from '../../types'
-import { AnyRule } from '../../rules'
-import { api } from '../../../../lib/api'
-import { toStudioSlot, toStudioTemplate, toStudioRule } from '../../utils/adapters'
-import { Template } from '../../types'
+import { EditorHeader } from "../admin/EditorHeader";
+import { SlotList } from "../admin/SlotList";
+import { AdminCanvas } from "../admin/AdminCanvas";
+import { SlotProperties } from "../admin/SlotProperties";
+import { AddSlotModal } from "../admin/AddSlotModal";
+import { SaveDesignModal } from "./SaveDesignModal";
 
 export interface CustomerEditorProps {
-  templateId?: string
-  overrideSlots?: SlotDefinition[]
-  overrideSlotConfig?: SlotConfig
-  overrideRules?: AnyRule[]
-  onBackToGallery?: () => void
+  templateId?: string;
+  overrideSlots?: SlotDefinition[];
+  overrideSlotConfig?: SlotConfig;
+  overrideRules?: any[];
+  onBackToGallery?: () => void;
 }
 
 export const CustomerEditor: React.FC<CustomerEditorProps> = ({
-  templateId = 'tpl-classic-01',
+  templateId = "tpl-classic-01",
   overrideSlots,
   overrideSlotConfig,
-  overrideRules,
-  onBackToGallery
+  onBackToGallery,
 }) => {
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(templateId)
-  const [templateState, setTemplateState] = useState<Template>(
+  const [template, setTemplate] = useState<Template>(
     () => seedTemplates.find((t) => t.id === templateId) || seedTemplates[0]
-  )
-  const [mode, setMode] = useState<'published' | 'scratch'>('published')
-  const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(false)
-  const [isAddSlotOpen, setIsAddSlotOpen] = useState<boolean>(false)
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false)
-  const [initialClickNorm, setInitialClickNorm] = useState<{ normX: number; normY: number } | undefined>(undefined)
+  );
+  const [allTemplates, setAllTemplates] = useState<StudioTemplateRow[]>([]);
+  const [slots, setSlots] = useState<SlotDefinition[]>(() => overrideSlots || seedSlots);
+  const [slotConfig, setSlotConfig] = useState<SlotConfig>(
+    () => overrideSlotConfig || seedPublishedSlotConfig
+  );
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(
+    () => (overrideSlots && overrideSlots[0]?.id) || seedSlots[0]?.id || null
+  );
 
-  const initialSlots: SlotDefinition[] = overrideSlots || seedSlots
-  const [assetsList, setAssetsList] = useState<Asset[]>(seedAssets)
-  const [rulesState, setRulesState] = useState<AnyRule[]>(() => overrideRules || curtainRules)
+  // Store the exact original template, slots, and preset config of the selected template
+  const originalTemplateRef = React.useRef<Template>(
+    seedTemplates.find((t) => t.id === templateId) || seedTemplates[0]
+  );
+  const originalSlotsRef = React.useRef<SlotDefinition[]>(overrideSlots || seedSlots);
+  const originalConfigRef = React.useRef<SlotConfig>(
+    overrideSlotConfig || seedPublishedSlotConfig
+  );
 
-  useEffect(() => {
-    api
-      .getMaterials()
-      .then((materials) => {
-        const materialAssets: Asset[] = materials.map((m) => {
-          const cat = (m.category || "").toLowerCase();
-          let assetType: Asset["assetType"] = "drape";
-          if (cat.includes("detail") || cat.includes("vắt") || cat === "drape_detail") {
-            assetType = "drape_detail";
-          } else if (cat.includes("hoa") || cat === "flowers" || cat === "flower") {
-            assetType = "flower";
-          } else if (cat.includes("chữ") || cat === "text_name" || cat === "text_date") {
-            assetType = "text_name";
-          }
+  const [showGrid, setShowGrid] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [isAddSlotModalOpen, setIsAddSlotModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-          return {
-            id: m.id,
-            name: m.name,
-            assetType,
-            thumbnail: m.image_url || undefined,
-            colorHex: m.color_hex || undefined,
-            tags: m.category ? [m.category] : [],
-            isActive: true,
-          };
-        });
-
-        setAssetsList((prev) => {
-          const merged = [...prev];
-          for (const ma of materialAssets) {
-            if (!merged.some((a) => a.id === ma.id)) {
-              merged.push(ma);
-            }
-          }
-          return merged;
-        });
-      })
-      .catch(() => {});
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((curr) => (curr === msg ? null : curr));
+    }, 3000);
   }, []);
 
-  // Get admin published slot configuration (or seed default)
-  const adminPresetConfig: SlotConfig = overrideSlotConfig || seedPublishedSlotConfig
-
-  // Editable slot positions & dimensions for customer canvas fine-tuning
-  const [editableSlots, setEditableSlots] = useState<SlotDefinition[]>(() => initialSlots)
-
-  const handleSlotMove = (slotId: string, normX: number, normY: number) => {
-    setEditableSlots((prev) =>
-      prev.map((s) => (s.id === slotId ? { ...s, normX, normY } : s))
-    )
-  }
-
-  const handleSlotUpdate = (slotId: string, patch: Partial<SlotDefinition>) => {
-    setEditableSlots((prev) =>
-      prev.map((s) => (s.id === slotId ? { ...s, ...patch } : s))
-    )
-  }
-
-  // Add new Slot for customer
-  const handleAddSlot = (slotData: Omit<SlotDefinition, 'id' | 'templateId'>) => {
-    const newSlot: SlotDefinition = {
-      ...slotData,
-      id: `slot-${crypto.randomUUID().slice(0, 8)}`,
-      templateId: templateState.id
-    }
-    setEditableSlots((prev) => [...prev, newSlot])
-    setActiveSlotKey(newSlot.slotKey)
-  }
-
-  // Initial config based on mode selection: admin preset vs blank scratch
-  const initialConfig = mode === 'published' ? adminPresetConfig : {}
-
-  const {
-    slotConfig,
-    activeAsset,
-    setActiveAsset,
-    assignAsset,
-    assignColor,
-    resetConfig,
-    setWholeConfig,
-    lockedSlots,
-    isDirty
-  } = useSlotDnD(editableSlots, rulesState, templateState.id, initialConfig)
-
-  const [activeSlotKey, setActiveSlotKey] = useState<string | undefined>('drape-main')
-
-  useEffect(() => {
-    if (templateId) {
-      setSelectedTemplateId(templateId)
-    }
-  }, [templateId])
-
-  // Load published template data & slot config from API when available
+  // Fetch available templates from API
   useEffect(() => {
     api
       .getStudioTemplates()
-      .then(async (rows) => {
-        if (rows.length > 0) {
-          const matched = rows.find((r) => r.id === selectedTemplateId) || rows[0];
+      .then((rows) => {
+        if (Array.isArray(rows) && rows.length > 0) {
+          setAllTemplates(rows);
+          const matched = rows.find((r) => r.id === templateId);
+          if (matched && !overrideSlots) {
+            const tpl = toStudioTemplate(matched);
+            setTemplate(tpl);
+            originalTemplateRef.current = tpl;
 
-          if (matched) {
-            setTemplateState(toStudioTemplate(matched));
+            const initialConfig =
+              matched.default_config && Object.keys(matched.default_config).length > 0
+                ? (matched.default_config as SlotConfig)
+                : {};
+            setSlotConfig(initialConfig);
+            originalConfigRef.current = initialConfig;
 
-            if (matched.default_config && Object.keys(matched.default_config).length > 0) {
-              setWholeConfig(matched.default_config as SlotConfig);
-            }
-
-            try {
-              const sRows = await api.getStudioSlotDefinitions(matched.id);
-              if (sRows.length > 0) {
-                setEditableSlots(sRows.map(toStudioSlot));
-              }
-            } catch {}
-
-            try {
-              const rRows = await api.getStudioSlotRules(matched.id);
-              if (rRows.length > 0) {
-                setRulesState(rRows.map(toStudioRule));
-              }
-            } catch {}
+            api
+              .getStudioSlotDefinitions(matched.id)
+              .then((sRows) => {
+                if (sRows.length > 0) {
+                  const mapped = sRows.map(toStudioSlot);
+                  setSlots(mapped);
+                  originalSlotsRef.current = mapped;
+                  setSelectedSlotId(mapped[0]?.id || null);
+                }
+              })
+              .catch(() => {});
           }
         }
       })
-      .catch((err) => console.warn('Could not load studio templates for customer editor:', err));
-  }, [selectedTemplateId]);
+      .catch(() => {});
+  }, [templateId, overrideSlots]);
 
-  // Handle Mode & Template selection from modal
-  const handleSelectOption = (chosenMode: 'published' | 'scratch', chosenTplId: string) => {
-    setMode(chosenMode)
-    setSelectedTemplateId(chosenTplId)
-    setIsSelectorOpen(false)
+  // Handle template selection from header dropdown
+  const handleSelectTemplate = async (newId: string) => {
+    const matched = allTemplates.find((t) => t.id === newId);
+    if (matched) {
+      const tpl = toStudioTemplate(matched);
+      setTemplate(tpl);
+      originalTemplateRef.current = tpl;
 
-    // Always reset slot positions & sizes back to clean initial template layout
-    setEditableSlots(initialSlots)
+      const initialConfig =
+        matched.default_config && Object.keys(matched.default_config).length > 0
+          ? (matched.default_config as SlotConfig)
+          : {};
+      setSlotConfig(initialConfig);
+      originalConfigRef.current = initialConfig;
 
-    if (chosenMode === 'published') {
-      const pubKey = `pidecor_published_${chosenTplId}`
-      let targetAdminConfig = seedPublishedSlotConfig
       try {
-        const savedPub = localStorage.getItem(pubKey)
-        if (savedPub) {
-          const parsed = JSON.parse(savedPub)
-          if (parsed.slotConfig) targetAdminConfig = parsed.slotConfig
+        const sRows = await api.getStudioSlotDefinitions(matched.id);
+        if (sRows.length > 0) {
+          const mapped = sRows.map(toStudioSlot);
+          setSlots(mapped);
+          originalSlotsRef.current = mapped;
+          setSelectedSlotId(mapped[0]?.id || null);
+        } else {
+          setSlots(seedSlots);
+          originalSlotsRef.current = seedSlots;
+          setSelectedSlotId(seedSlots[0]?.id || null);
         }
-      } catch (e) {
-        console.warn('Failed to parse published template on mode select', e)
+      } catch {
+        setSlots(seedSlots);
+        originalSlotsRef.current = seedSlots;
+        setSelectedSlotId(seedSlots[0]?.id || null);
       }
-      setWholeConfig(targetAdminConfig)
+      showToast(`Đã chuyển sang mẫu: ${matched.name}`);
     } else {
-      // Clear everything back to initial blank state for new design from scratch
-      resetConfig()
-    }
-  }
-
-  // Double click canvas to add slot at click position
-  const handleDoubleClickCanvas = (normX: number, normY: number) => {
-    setInitialClickNorm({ normX, normY })
-    setIsAddSlotOpen(true)
-  }
-
-  // Ref & dimensions tracking for responsive canvas overlay placement
-  const canvasContainerRef = useRef<HTMLDivElement>(null)
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
-
-  useEffect(() => {
-    const el = canvasContainerRef.current
-    if (!el) return
-
-    const updateDimensions = () => {
-      const rect = el.getBoundingClientRect()
-      if (rect.width > 0) {
-        const aspectHeight = Math.round(rect.width * (600 / 800))
-        setDimensions({ width: rect.width, height: aspectHeight })
+      const seed = seedTemplates.find((t) => t.id === newId);
+      if (seed) {
+        setTemplate(seed);
+        originalTemplateRef.current = seed;
+        setSlots(seedSlots);
+        originalSlotsRef.current = seedSlots;
+        setSlotConfig(seedPublishedSlotConfig);
+        originalConfigRef.current = seedPublishedSlotConfig;
+        setSelectedSlotId(seedSlots[0]?.id || null);
+        showToast(`Đã chuyển sang mẫu: ${seed.name}`);
       }
     }
+  };
 
-    updateDimensions()
-    const observer = new ResizeObserver(updateDimensions)
-    observer.observe(el)
+  // Handle slot drag & position adjustments
+  const handleSlotPositionChange = (slotId: string, normX: number, normY: number) => {
+    setSlots((prev) =>
+      prev.map((s) => (s.id === slotId ? { ...s, normX, normY } : s))
+    );
+  };
 
-    return () => observer.disconnect()
-  }, [])
+  const handleSlotUpdate = (slotId: string, patch: Partial<SlotDefinition>) => {
+    setSlots((prev) =>
+      prev.map((s) => (s.id === slotId ? { ...s, ...patch } : s))
+    );
+  };
 
-  // Dnd Sensors configuration
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 6 }
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 150, tolerance: 6 }
-    })
-  )
+  // Handle customer adding new custom slot
+  const handleSlotAddSubmit = (newSlotData: Omit<SlotDefinition, "id" | "templateId">) => {
+    const newSlot: SlotDefinition = {
+      ...newSlotData,
+      id: `slot-${crypto.randomUUID().slice(0, 8)}`,
+      templateId: template.id,
+    };
+    setSlots((prev) => [...prev, newSlot]);
+    setSelectedSlotId(newSlot.id);
+    setIsAddSlotModalOpen(false);
+    showToast(`✓ Đã thêm vị trí "${newSlot.label}" vào phông cưới`);
+  };
 
-  const [dragDelta, setDragDelta] = useState<{ x: number; y: number } | null>(null)
+  // Handle customer deleting slot
+  const handleDeleteSlot = (slotId: string) => {
+    const slotToDelete = slots.find((s) => s.id === slotId);
+    if (!slotToDelete) return;
 
-  const handleDragStart = (event: DragStartEvent) => {
-    const slotId = event.active.id as string
-    const targetSlot = editableSlots.find((s) => s.id === slotId)
-    if (targetSlot) {
-      setActiveSlotKey(targetSlot.slotKey)
-    }
-    const draggedAsset = event.active.data.current?.asset as Asset | undefined
-    if (draggedAsset) {
-      setActiveAsset(draggedAsset)
-    }
-    setDragDelta(null)
-  }
+    setSlots((prev) => prev.filter((s) => s.id !== slotId));
+    setSlotConfig((prev) => {
+      const copy = { ...prev };
+      delete copy[slotToDelete.slotKey];
+      delete copy[slotId];
+      return copy;
+    });
 
-  const handleDragMove = (event: any) => {
-    setDragDelta(event.delta)
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over, delta } = event
-    setDragDelta(null)
-    setActiveAsset(null)
-
-    // Handle Slot Marker dragging (customer fine-tuning slot position on canvas)
-    const activeSlotData = active.data.current?.slot as SlotDefinition | undefined
-    if (activeSlotData && (delta.x !== 0 || delta.y !== 0) && dimensions.width > 0) {
-      const startPxX = activeSlotData.normX * dimensions.width
-      const startPxY = activeSlotData.normY * dimensions.height
-      const endPxX = startPxX + delta.x
-      const endPxY = startPxY + delta.y
-      const newNorm = svgToNormalized(endPxX, endPxY, dimensions.width, dimensions.height)
-      handleSlotMove(activeSlotData.id, newNorm.x, newNorm.y)
-      return
-    }
-
-    if (!over) return
-
-    const draggedAsset = active.data.current?.asset as Asset | undefined
-    const slotKey = over.id as string
-    const targetSlot = editableSlots.find((s) => s.slotKey === slotKey)
-
-    if (!draggedAsset || !targetSlot) return
-    if (draggedAsset.assetType !== targetSlot.slotType) {
-      return
-    }
-    if (lockedSlots.has(slotKey)) {
-      return
-    }
-
-    assignAsset(slotKey, draggedAsset)
-    setActiveSlotKey(slotKey)
-  }
-
-  // Handle asset click from AssetPicker
-  const handleAssetClick = (asset: Asset, targetSlotKey?: string) => {
-    const slotToAssign = targetSlotKey || activeSlotKey
-    if (!slotToAssign) return
-
-    const targetSlot = editableSlots.find((s) => s.slotKey === slotToAssign)
-    if (!targetSlot) return
-
-    if (asset.assetType !== targetSlot.slotType) {
-      const suitableSlot = editableSlots.find((s) => s.slotType === asset.assetType && !lockedSlots.has(s.slotKey))
-      if (suitableSlot) {
-        assignAsset(suitableSlot.slotKey, asset)
-        setActiveSlotKey(suitableSlot.slotKey)
-      } else {
-        alert(`Mẫu '${asset.name}' không phù hợp với slot đang chọn (${targetSlot.label})`)
+    setSelectedSlotId((prevId) => {
+      if (prevId === slotId) {
+        const remaining = slots.filter((s) => s.id !== slotId);
+        return remaining[0]?.id || null;
       }
-      return
+      return prevId;
+    });
+
+    showToast(`✓ Đã xoá vị trí "${slotToDelete.label}"`);
+  };
+
+  // Assign material from database (Flower, Drape, Fabric, Board, etc.)
+  const handleMaterialAssign = (slotKey: string, matOrId: MaterialItem | string) => {
+    const isMatObj = typeof matOrId !== "string";
+    const matId = isMatObj ? matOrId.id : matOrId;
+    const matImg = isMatObj ? matOrId.image_url : undefined;
+    const matName = isMatObj ? matOrId.name : "Vật liệu";
+    const matColor = isMatObj ? matOrId.color_hex : undefined;
+
+    const matchedSlot = slots.find((s) => s.slotKey === slotKey);
+    const slotType = matchedSlot?.slotType || "drape";
+    const isDrape = slotType === "drape" || slotType === "drape_detail";
+
+    const synthesizedAsset: Asset = {
+      id: matId,
+      name: matName,
+      assetType: slotType,
+      thumbnail: matImg || undefined,
+      colorHex: matColor || undefined,
+      tags: isMatObj && matOrId.category ? [matOrId.category] : [],
+    };
+
+    setSlotConfig((prev) => {
+      const existing = prev[slotKey] || {};
+      return {
+        ...prev,
+        [slotKey]: {
+          ...existing,
+          asset: synthesizedAsset,
+          assetId: matId,
+          materialId: matId,
+          materialImage: matImg,
+          colorHex: matColor,
+          colorOverride: isDrape ? existing.colorOverride : undefined,
+        },
+      };
+    });
+    showToast(`✓ Đã gắn mẫu "${matName}" vào ${matchedSlot?.label || slotKey}`);
+  };
+
+  // Assign custom color / tint / filter mode to drape
+  const handleColorHexChange = (
+    slotKey: string,
+    hex: string,
+    filterMode?: "multiply_blend" | "flat_tint" | "color_map",
+    saturation?: number
+  ) => {
+    setSlotConfig((prev) => ({
+      ...prev,
+      [slotKey]: {
+        ...prev[slotKey],
+        colorOverride: hex,
+        filterMode: filterMode || prev[slotKey]?.filterMode || "multiply_blend",
+        colorSaturation: saturation ?? prev[slotKey]?.colorSaturation ?? 100,
+      },
+    }));
+  };
+
+  // Add custom text / monogram asset
+  const handleAddCustomAsset = (asset: Omit<Asset, "id">) => {
+    const selectedSlot = slots.find((s) => s.id === selectedSlotId);
+    if (!selectedSlot) return;
+
+    const fullAsset: Asset = {
+      ...asset,
+      id: `custom-${Date.now().toString().slice(-6)}`,
+    };
+
+    setSlotConfig((prev) => ({
+      ...prev,
+      [selectedSlot.slotKey]: {
+        ...prev[selectedSlot.slotKey],
+        customAsset: fullAsset,
+        asset: fullAsset,
+      },
+    }));
+    showToast(`Đã cập nhật chữ: ${asset.name}`);
+  };
+
+  // Reset to original preset of the CURRENT template
+  const handleReset = () => {
+    const isConfirmed = window.confirm(
+      `Bạn có chắc muốn đặt lại toàn bộ màu sắc, vật liệu và vị trí về thiết kế ban đầu của mẫu "${template.name}"?`
+    );
+    if (isConfirmed) {
+      setTemplate(originalTemplateRef.current);
+      setSlots(JSON.parse(JSON.stringify(originalSlotsRef.current)));
+      setSlotConfig(JSON.parse(JSON.stringify(originalConfigRef.current)));
+      setSelectedSlotId(originalSlotsRef.current[0]?.id || null);
+      showToast(`Đã khôi phục về thiết kế gốc ban đầu của mẫu "${template.name}"!`);
     }
+  };
 
-    if (lockedSlots.has(slotToAssign)) {
-      alert(`Slot ${targetSlot.label} đang bị khóa bởi quy tắc rèm đỏ đô!`)
-      return
-    }
-
-    assignAsset(slotToAssign, asset)
-    setActiveSlotKey(slotToAssign)
-  }
-
-  const selectedSlot = editableSlots.find((s) => s.slotKey === activeSlotKey)
+  const selectedSlot = slots.find((s) => s.id === selectedSlotId) || null;
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      onDragStart={handleDragStart}
-      onDragMove={handleDragMove}
-      onDragEnd={handleDragEnd}
+    <div
+      className="no-scrollbar"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+        backgroundColor: "#f4eee3",
+        color: "#271620",
+        padding: "16px 24px",
+        gap: "16px",
+        boxSizing: "border-box",
+      }}
     >
-      {/* Template Selector Modal */}
-      <TemplateSelectorModal
-        isOpen={isSelectorOpen}
-        onClose={() => setIsSelectorOpen(false)}
-        templates={seedTemplates}
-        selectedTemplateId={selectedTemplateId}
-        hasPublishedData={true}
-        publishedTemplateName={templateState.name}
-        onSelectOption={handleSelectOption}
-      />
-
-      {/* Add Slot Modal for Customer */}
-      <AddSlotModal
-        isOpen={isAddSlotOpen}
-        onClose={() => setIsAddSlotOpen(false)}
-        onAdd={handleAddSlot}
-        existingSlots={editableSlots}
-        existingSlotKeys={editableSlots.map((s) => s.slotKey)}
-        initialNormPos={initialClickNorm}
-      />
-
-      <div
-        className="no-scrollbar"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          backgroundColor: '#0f172a',
-          color: '#f8fafc',
-          padding: '12px 20px',
-          gap: '12px',
-          boxSizing: 'border-box'
-        }}
-      >
-        {/* Header Bar */}
-        <header
+      {toastMessage && (
+        <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: '#1e293b',
-            padding: '10px 18px',
-            borderRadius: '12px',
-            border: '1px solid #334155'
+            position: "fixed",
+            top: "20px",
+            right: "20px",
+            maxWidth: "380px",
+            backgroundColor: "#271620",
+            color: "#fbf7f1",
+            border: "1px solid #a15c2e",
+            borderRadius: "8px",
+            padding: "10px 16px",
+            fontSize: "13px",
+            fontWeight: "600",
+            boxShadow: "0 10px 25px rgba(39, 22, 32, 0.2)",
+            zIndex: 9999,
+            pointerEvents: "none",
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            {onBackToGallery && (
-              <button
-                type="button"
-                onClick={onBackToGallery}
-                style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#334155',
-                  color: '#f8fafc',
-                  border: '1px solid #475569',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                ← Chọn Mẫu Khác
-              </button>
-            )}
+          {toastMessage}
+        </div>
+      )}
 
-            <div>
-              <h1 style={{ fontSize: '18px', fontWeight: '700', fontFamily: "'Fraunces', serif", color: '#ffffff', margin: 0 }}>
-                📌 {templateState.name}
-              </h1>
-              <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px', margin: 0 }}>
-                Trình thiết kế phông cưới • Click chọn hoặc kéo thả trực tiếp để tùy chỉnh vị trí &amp; kích thước
-              </p>
-            </div>
+      {/* Header Controls */}
+      <EditorHeader
+        template={template}
+        allTemplates={allTemplates}
+        isDirty={false}
+        isPreviewMode={isPreviewMode}
+        showGrid={showGrid}
+        mode="customer"
+        onBackToHome={onBackToGallery}
+        onSelectTemplate={handleSelectTemplate}
+        onToggleGrid={() => setShowGrid(!showGrid)}
+        onTogglePreview={() => setIsPreviewMode(!isPreviewMode)}
+        onSaveDesign={() => setIsSaveModalOpen(true)}
+        onReset={handleReset}
+      />
 
-            {/* Current Mode Badge Indicator */}
-            <div
-              style={{
-                backgroundColor: mode === 'published' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(251, 191, 36, 0.15)',
-                border: mode === 'published' ? '1px solid #38bdf8' : '1px solid #fbbf24',
-                color: mode === 'published' ? '#38bdf8' : '#fbbf24',
-                fontSize: '11px',
-                fontWeight: '700',
-                padding: '4px 10px',
-                borderRadius: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <span>{mode === 'published' ? '🌟 Mẫu Admin Xuất Bản' : '🎨 Tự Thiết Kế Mới'}</span>
-            </div>
-          </div>
+      {/* Main Customer 3-Column Studio Workspace */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "320px 1fr 340px",
+          gap: "20px",
+          flex: 1,
+          alignItems: "start",
+        }}
+      >
+        {/* Left Column: Friendly Slot List */}
+        <div
+          style={{
+            height: "calc(100vh - 100px)",
+            maxHeight: "calc(100vh - 100px)",
+          }}
+        >
+          <SlotList
+            slots={slots}
+            selectedSlotId={selectedSlotId}
+            onSelect={(id) => setSelectedSlotId(id)}
+            onAddSlot={() => setIsAddSlotModalOpen(true)}
+            mode="customer"
+            slotConfig={slotConfig}
+          />
+        </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {/* Choose Template / Mode Button */}
-            <button
-              onClick={() => setIsSelectorOpen(true)}
-              style={{
-                padding: '6px 12px',
-                backgroundColor: '#38bdf8',
-                color: '#0f172a',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                fontWeight: '700',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px'
-              }}
-            >
-              <span>📂</span> Đổi Mẫu / Chế Độ
-            </button>
-
-            {/* Switch Mode Actions */}
-            {mode === 'published' ? (
-              <button
-                onClick={() => {
-                  setMode('scratch')
-                  setEditableSlots(initialSlots)
-                  resetConfig()
-                }}
-                style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#334155',
-                  color: '#cbd5e1',
-                  border: '1px solid #475569',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  fontWeight: '500'
-                }}
-                title="Đưa mọi thứ về trạng thái ban đầu lúc chưa set để tự thiết kế mới"
-              >
-                🧹 Xóa Hết (Tự Thiết Kế Mới)
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setMode('published')
-                  setEditableSlots(initialSlots)
-                  setWholeConfig(adminPresetConfig)
-                }}
-                style={{
-                  padding: '6px 12px',
-                  backgroundColor: '#334155',
-                  color: '#38bdf8',
-                  border: '1px solid #38bdf8',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  fontWeight: '600'
-                }}
-                title="Tải lại toàn bộ thiết kế trọn bộ mà admin đã set sẵn"
-              >
-                ✨ Khôi Phục Mẫu Admin
-              </button>
-            )}
-
-            <SaveBar
-              onSaveDraft={() => console.log('Draft saved to localStorage')}
-              onSaveFinal={() => setIsSaveModalOpen(true)}
-              onExportPDF={() => console.log('Export PDF triggered')}
-              isDirty={isDirty}
-            />
-          </div>
-        </header>
-
-        {/* Save Design Modal */}
-        <SaveDesignModal
-          isOpen={isSaveModalOpen}
-          onClose={() => setIsSaveModalOpen(false)}
-          slotConfig={slotConfig}
-        />
-
-        {/* Main Work Area: 3-Column Layout (Left Slots Sidebar | Center Demo Canvas | Right Customizer Inspector) */}
-        <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr 340px', gap: '16px', flex: 1, alignItems: 'start' }}>
-          {/* Left Column: Component Slots List (Layers Sidebar) */}
-          <div
-            className="no-scrollbar"
-            style={{
-              backgroundColor: '#1e293b',
-              borderRadius: '12px',
-              border: '1px solid #334155',
-              padding: '12px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              position: 'sticky',
-              top: '12px',
-              maxHeight: 'calc(100vh - 80px)',
-              overflowY: 'auto'
-            }}
-          >
-            <div style={{ borderBottom: '1px solid #334155', paddingBottom: '8px', marginBottom: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
-                  <span>🧩</span> Thành Phần Phông
-                </h3>
-                <p style={{ fontSize: '10px', color: '#94a3b8', marginTop: '2px', margin: 0 }}>
-                  Click tùy chỉnh hoặc thêm slot
-                </p>
-              </div>
-
-              {/* Customer Add Slot Button */}
-              <button
-                onClick={() => {
-                  setInitialClickNorm(undefined)
-                  setIsAddSlotOpen(true)
-                }}
-                style={{
-                  backgroundColor: '#38bdf8',
-                  color: '#0f172a',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '4px 8px',
-                  fontSize: '11px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-                title="Thêm vị trí/slot mới vào thiết kế"
-              >
-                ➕ Thêm Slot
-              </button>
-            </div>
-
-            {editableSlots.map((slot) => {
-              const isSelected = slot.slotKey === activeSlotKey
-              const state = slotConfig[slot.slotKey]
-              const hasAsset = Boolean(state?.asset)
-              const icon = slot.slotType === 'drape' ? '🪟' : slot.slotType === 'drape_detail' ? '🎗️' : slot.slotType === 'flower' ? '🌸' : '✍️'
-
-              return (
-                <button
-                  key={slot.id}
-                  onClick={() => setActiveSlotKey(slot.slotKey)}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'start',
-                    gap: '4px',
-                    padding: '10px 12px',
-                    borderRadius: '8px',
-                    border: isSelected ? '1.5px solid #38bdf8' : '1px solid #334155',
-                    backgroundColor: isSelected ? '#0f172a' : '#1e293b',
-                    color: isSelected ? '#38bdf8' : '#cbd5e1',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s ease',
-                    boxShadow: isSelected ? '0 0 12px rgba(56, 189, 248, 0.25)' : 'none'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%' }}>
-                    <span style={{ fontSize: '14px' }}>{icon}</span>
-                    <span style={{ fontSize: '12px', fontWeight: isSelected ? '700' : '600', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {slot.label}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '10px', color: hasAsset ? '#6ee7b7' : '#94a3b8', paddingLeft: '20px' }}>
-                    {hasAsset ? `✓ ${state?.asset?.name}` : '• Chưa chọn mẫu (Trống)'}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Center Column: Canvas Container & Interactive Slot Overlays */}
-          <div
-            ref={canvasContainerRef}
-            onDoubleClick={(e) => {
-              if (canvasContainerRef.current) {
-                const rect = canvasContainerRef.current.getBoundingClientRect()
-                const clickX = e.clientX - rect.left
-                const clickY = e.clientY - rect.top
-                const normX = Math.round((clickX / rect.width) * 100) / 100
-                const normY = Math.round((clickY / rect.height) * 100) / 100
-                handleDoubleClickCanvas(normX, normY)
-              }
-            }}
-            style={{
-              position: 'relative',
-              width: '100%',
-              maxWidth: '800px',
-              aspectRatio: '800 / 600',
-              backgroundColor: '#1e293b',
-              borderRadius: '12px',
-              overflow: 'hidden',
-              border: '1px solid #334155',
-              margin: '0 auto',
-              cursor: 'crosshair'
-            }}
-            title="Nhấp kép vào canvas để thêm Slot mới tại vị trí con trỏ"
-          >
-            {/* SVG Canvas Base */}
-            <SVGCanvas
-              template={templateState}
-              slots={editableSlots}
+        {/* Middle Column: Interactive SVG Canvas */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ flex: 1, minHeight: "520px" }}>
+            <AdminCanvas
+              template={template}
+              slots={slots}
               slotConfig={slotConfig}
-              width={dimensions.width}
-              height={dimensions.height}
-              dragState={dragDelta && selectedSlot ? { slotId: selectedSlot.id, delta: dragDelta } : null}
-            />
-
-            {/* Interactive Slot Overlay Markers */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                pointerEvents: 'none'
-              }}
-            >
-              {editableSlots.map((slot: SlotDefinition) => {
-                const isSelected = slot.slotKey === activeSlotKey
-
-                return (
-                  <div key={slot.id} style={{ pointerEvents: 'auto' }}>
-                    <SlotMarker
-                      slot={slot}
-                      canvasWidth={dimensions.width}
-                      canvasHeight={dimensions.height}
-                      isSelected={isSelected}
-                      onClick={() => setActiveSlotKey(slot.slotKey)}
-                      onResize={handleSlotUpdate}
-                      showDebugCoords={false}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Right Column: Sidebar Customization Controls & Asset Picker */}
-          <div className="no-scrollbar" style={{ position: 'sticky', top: '12px', height: 'calc(100vh - 80px)', overflowY: 'auto' }}>
-            <AssetPicker
-              assets={assetsList}
-              activeSlotKey={activeSlotKey}
-              slots={editableSlots}
-              slotConfig={slotConfig}
-              onAssetClick={handleAssetClick}
-              onApplyColor={(hex, filterMode, saturation) => {
-                if (activeSlotKey) {
-                  assignColor(activeSlotKey, hex, filterMode, saturation)
-                }
-              }}
+              selectedSlotId={isPreviewMode ? null : selectedSlotId}
+              showGrid={showGrid && !isPreviewMode}
+              onSlotSelect={(id) => setSelectedSlotId(id)}
+              onSlotMove={(id, x, y) => handleSlotPositionChange(id, x, y)}
+              onSlotUpdate={handleSlotUpdate}
             />
           </div>
         </div>
+
+        {/* Right Column: Customer Slot Properties (Color Tint, Materials, Names) */}
+        <div
+          style={{
+            position: "sticky",
+            top: "16px",
+            height: "calc(100vh - 100px)",
+            maxHeight: "calc(100vh - 100px)",
+            backgroundColor: "#ffffff",
+            borderRadius: "16px",
+            border: "1px solid #e7ded0",
+            boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          <SlotProperties
+            slot={selectedSlot}
+            slotConfig={slotConfig}
+            mode="customer"
+            onUpdate={handleSlotUpdate}
+            onDelete={handleDeleteSlot}
+            onAssignMaterial={(mat, slot) => handleMaterialAssign(slot.slotKey, mat)}
+            onAssignColor={(key, hex, filterMode, saturation) =>
+              handleColorHexChange(key, hex, filterMode, saturation)
+            }
+            onAddAsset={handleAddCustomAsset}
+          />
+        </div>
       </div>
 
-      {/* Floating Drag Overlay */}
-      <DragOverlay>
-        {activeAsset ? (
-          <div style={{ transform: 'scale(0.75)', transformOrigin: 'top left' }}>
-            <DraggableAsset asset={activeAsset} isBeingDragged />
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
-  )
-}
+      {/* Add Slot Modal for Customer */}
+      <AddSlotModal
+        isOpen={isAddSlotModalOpen}
+        onClose={() => setIsAddSlotModalOpen(false)}
+        onAdd={handleSlotAddSubmit}
+        existingSlots={slots}
+        existingSlotKeys={slots.map((s) => s.slotKey)}
+        mode="customer"
+      />
+
+      {/* Save Design & Get Consultation Quote Modal */}
+      <SaveDesignModal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        slotConfig={slotConfig}
+      />
+    </div>
+  );
+};

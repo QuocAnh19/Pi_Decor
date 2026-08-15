@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { PhotoIcon, ArrowRightIcon, MapPinIcon, XMarkIcon, CalendarIcon } from "@heroicons/react/24/outline";
@@ -13,6 +13,15 @@ interface VenuePopupCardProps {
 
 export function VenuePopupCard({ venue, loading, onClose }: VenuePopupCardProps) {
   const [zoomImg, setZoomImg] = useState<string | null>(null);
+
+  // Lock outside body scroll when venue popup or zoom is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
   if (loading || !venue) {
     return createPortal(

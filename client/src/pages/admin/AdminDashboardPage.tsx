@@ -16,7 +16,7 @@ import styles from "./AdminDashboardPage.module.scss";
  * Pulls counts directly from GET /api/admin/summary.
  */
 export function AdminDashboardPage() {
-  const { token, admin } = useAuth();
+  const { token } = useAuth();
   const [summary, setSummary] = useState<AdminSummary | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
@@ -35,6 +35,16 @@ export function AdminDashboardPage() {
 
   return (
     <div>
+      <div className={styles.headerRow}>
+        <div>
+          <h1 className={styles.title}>Quản Lý Khách Hàng &amp; Báo Giá</h1>
+          <p className={styles.subtitle}>
+            Theo dõi thông tin liên hệ, tiến độ tư vấn và xuất báo giá PDF cho
+            khách hàng
+          </p>
+        </div>
+      </div>
+
       {status === "loading" && <p className={styles.status}>Đang tải…</p>}
       {status === "error" && (
         <p className={styles.status}>

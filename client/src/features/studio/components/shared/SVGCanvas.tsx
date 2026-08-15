@@ -85,19 +85,22 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
 
           const state = slotConfig[slot.slotKey] || slotConfig[slot.id]
           const isLocked = Boolean(state?.locked)
+          const isDrape = slot.slotType === "drape" || slot.slotType === "drape_detail"
+          const activeColorOverride = (isDrape ? (state?.colorOverride || state?.colorHex) : undefined) || undefined
 
-          // Resolve asset object: Use state.asset or synthesize from material/color overrides
-          const resolvedAsset: Asset | undefined = state?.asset || (
-            (state?.materialImage || state?.materialId || state?.colorHex || state?.colorOverride)
+          // Resolve asset object: Use state.asset, state.customAsset, or synthesize from material/color overrides
+          const resolvedAsset: Asset | undefined =
+            state?.asset ||
+            state?.customAsset ||
+            (state?.materialImage || state?.materialId || state?.colorHex || (isDrape && state?.colorOverride)
               ? {
-                  id: state.materialId || 'custom-mat',
+                  id: state.materialId || state.assetId || 'custom-mat',
                   name: slot.label,
                   assetType: slot.slotType,
                   thumbnail: state.materialImage || undefined,
-                  colorHex: (state.colorHex || state.colorOverride) || undefined,
+                  colorHex: state.colorHex || (isDrape ? state.colorOverride : undefined),
                 }
-              : undefined
-          )
+              : undefined)
           const hasAsset = Boolean(resolvedAsset)
 
           const mirrorTransform = slot.mirrorX
@@ -119,7 +122,7 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
                     asset={resolvedAsset}
                     slotType={slot.slotType}
                     slotKey={slot.slotKey}
-                    colorOverride={(state?.colorOverride || state?.colorHex) || undefined}
+                    colorOverride={activeColorOverride}
                     colorMap={state?.colorMap}
                     filterMode={state?.filterMode}
                     colorSaturation={state?.colorSaturation}

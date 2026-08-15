@@ -17,28 +17,80 @@
 }
 
 .heading {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.9375rem;
+  font-weight: 700;
   color: $admin-text;
+  display: flex;
+  align-items: center;
 }
 
 .addButton {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
-  border-radius: $radius-s;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: $radius-pill;
   background: $admin-accent;
   color: #ffffff;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: opacity 0.15s ease;
+  box-shadow: 0 2px 6px rgba(161, 92, 46, 0.2);
+  transition: all 0.15s ease;
 
   &:hover {
-    opacity: 0.9;
+    background: $admin-accent-hover;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(161, 92, 46, 0.3);
   }
+}
+
+.tabsRow {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.tabBtn {
+  padding: 4px 10px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: $admin-bg;
+  color: $admin-text-muted;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: $admin-text-faint;
+    color: $admin-text;
+  }
+}
+
+.tabBtnActive {
+  background: $admin-accent;
+  color: #ffffff;
+  border-color: $admin-accent;
+
+  &:hover {
+    background: $admin-accent-hover;
+    color: #ffffff;
+  }
+}
+
+.typeBadge {
+  display: inline-block;
+  background: #f1e4d8;
+  color: #a15c2e;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: $radius-pill;
 }
 
 .empty {

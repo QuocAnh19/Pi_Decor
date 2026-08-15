@@ -9,8 +9,9 @@ import { MaterialPickerForSlot } from "./MaterialPickerForSlot";
 export interface SlotPropertiesProps {
   slot: SlotDefinition | null;
   slotConfig?: SlotConfig;
+  mode?: "admin" | "customer";
   onUpdate: (slotId: string, patch: Partial<SlotDefinition>) => void;
-  onDelete: (slotId: string) => void;
+  onDelete?: (slotId: string) => void;
   onAddAsset?: (
     asset: Omit<Asset, "id">,
     assignToCurrentSlot?: boolean,
@@ -31,21 +32,32 @@ const SLOT_TYPE_OPTIONS = [
   { value: "text_name", label: "Dãy chữ số (text_name)" },
 ];
 
+const friendlyTypeLabel: Record<string, string> = {
+  drape: "Rèm nền",
+  drape_detail: "Lụa vắt mềm",
+  flower: "Cụm hoa trang trí",
+  text_name: "Tên dâu rể",
+  text_date: "Ngày cưới",
+};
+
 export const SlotProperties: React.FC<SlotPropertiesProps> = ({
   slot,
   slotConfig = {},
+  mode = "admin",
   onUpdate,
   onDelete,
   onAddAsset,
   onAssignMaterial,
   onAssignColor,
 }) => {
+  const isCustomer = mode === "customer";
+
   if (!slot) {
     return (
       <div
         style={{
           padding: "24px",
-          color: "#94a3b8",
+          color: "#6e6259",
           fontSize: "14px",
           textAlign: "center",
           display: "flex",
@@ -56,20 +68,24 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
           gap: "8px",
         }}
       >
-        <p style={{ margin: 0, fontWeight: "600", color: "#f8fafc" }}>
-          Chưa chọn Slot neo nào
+        <p style={{ margin: 0, fontWeight: "600", color: "#271620" }}>
+          {isCustomer ? "Chưa chọn vị trí trang trí nào" : "Chưa chọn Slot neo nào"}
         </p>
-        <p style={{ margin: 0, fontSize: "12px", color: "#64748b" }}>
-          Nhấp vào một Slot trên Canvas hoặc danh sách bên trái để chỉnh sửa toạ
-          độ, vật liệu và kích thước.
+        <p style={{ margin: 0, fontSize: "12px", color: "#9c9186" }}>
+          {isCustomer
+            ? "Nhấp vào một vị trí trên phông cưới hoặc danh sách bên trái để chọn phối màu và hoa."
+            : "Nhấp vào một Slot trên Canvas hoặc danh sách bên trái để chỉnh sửa toạ độ, vật liệu và kích thước."}
         </p>
       </div>
     );
   }
 
   const handleDeleteClick = () => {
+    if (!onDelete) return;
     const isConfirmed = window.confirm(
-      `Bạn có chắc chắn muốn xoá Slot '${slot.label || slot.slotKey}'? Thao tác này sẽ xoá luôn các Rule liên quan.`,
+      isCustomer
+        ? `Bạn có chắc muốn xoá vị trí "${slot.label}" này khỏi phông cưới?`
+        : `Bạn có chắc chắn muốn xoá Slot '${slot.label || slot.slotKey}'? Thao tác này sẽ xoá luôn các Rule liên quan.`
     );
     if (isConfirmed) {
       onDelete(slot.id);
@@ -78,97 +94,127 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
 
   return (
     <div
-      className="admin-scroll"
+      className="custom-scroll"
       style={{
         display: "flex",
         flexDirection: "column",
         gap: "16px",
-        padding: "16px",
-        color: "#f8fafc",
+        padding: "16px 16px 32px 16px",
+        color: "#271620",
+        flex: 1,
+        minHeight: 0,
         height: "100%",
         overflowY: "auto",
+        overscrollBehavior: "contain",
       }}
     >
       {/* Header Slot Info */}
-      <div style={{ borderBottom: "1px solid #334155", paddingBottom: "12px" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <span
+      <div style={{ borderBottom: "1px solid #e7ded0", paddingBottom: "12px" }}>
+        {isCustomer ? (
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span style={{ fontSize: "15px", fontWeight: "700", color: "#271620" }}>
+                {slot.label}
+              </span>
+              <span
+                style={{
+                  fontSize: "11px",
+                  backgroundColor: "#f4eee3",
+                  color: "#a15c2e",
+                  padding: "3px 10px",
+                  borderRadius: "9999px",
+                  fontWeight: "700",
+                }}
+              >
+                {friendlyTypeLabel[slot.slotType] || slot.slotType}
+              </span>
+            </div>
+            <p style={{ fontSize: "11px", color: "#6e6259", margin: "4px 0 0" }}>
+              Tùy chỉnh chất liệu, dải màu và phối cảnh chi tiết
+            </p>
+          </div>
+        ) : (
+          <div
             style={{
-              fontSize: "12px",
-              fontFamily: "monospace",
-              backgroundColor: "#0f172a",
-              color: "#38bdf8",
-              padding: "2px 8px",
-              borderRadius: "4px",
-              border: "1px solid #334155",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            KEY: {slot.slotKey}
-          </span>
-          <span style={{ fontSize: "12px", color: "#94a3b8" }}>
-            Thứ tự: #{slot.sortOrder}
-          </span>
-        </div>
+            <span
+              style={{
+                fontSize: "12px",
+                fontFamily: "monospace",
+                backgroundColor: "#f1e4d8",
+                color: "#a15c2e",
+                padding: "3px 8px",
+                borderRadius: "6px",
+                border: "1px solid rgba(161, 92, 46, 0.2)",
+                fontWeight: "700",
+              }}
+            >
+              KEY: {slot.slotKey}
+            </span>
+            <span style={{ fontSize: "12px", color: "#6e6259", fontWeight: "600" }}>
+              Thứ tự: #{slot.sortOrder}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Label Edit */}
-      <div>
-        <Input
-          label="Tên hiển thị"
-          type="text"
-          value={slot.label}
-          onChange={(e) => onUpdate(slot.id, { label: e.target.value })}
-        />
-      </div>
+      {/* Admin Only: Label Edit & Slot Type */}
+      {!isCustomer && (
+        <>
+          <div>
+            <Input
+              label="Tên hiển thị"
+              type="text"
+              value={slot.label}
+              onChange={(e) => onUpdate(slot.id, { label: e.target.value })}
+            />
+          </div>
 
-      {/* Slot Type */}
-      <div>
-        <Select
-          label="Loại slot"
-          value={slot.slotType}
-          onChange={(e) =>
-            onUpdate(slot.id, { slotType: e.target.value as SlotType })
-          }
-          options={SLOT_TYPE_OPTIONS}
-        />
-      </div>
+          <div>
+            <Select
+              label="Loại slot"
+              value={slot.slotType}
+              onChange={(e) =>
+                onUpdate(slot.id, { slotType: e.target.value as SlotType })
+              }
+              options={SLOT_TYPE_OPTIONS}
+            />
+          </div>
+        </>
+      )}
 
-      {/* Normalized Coordinate Inputs */}
+      {/* Quick Alignment Tools Grid */}
       <div
         style={{
-          backgroundColor: "#0f172a",
-          padding: "12px",
-          borderRadius: "8px",
-          border: "1px solid #334155",
+          backgroundColor: "#fbf7f1",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          border: "1px solid #e7ded0",
           display: "flex",
           flexDirection: "column",
           gap: "8px",
         }}
       >
-        <div
+        <span
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            fontSize: "11px",
+            fontWeight: "700",
+            color: "#6e6259",
+            display: "block",
           }}
         >
-          <span
-            style={{ fontSize: "12px", fontWeight: "600", color: "#38bdf8" }}
-          >
-            Toạ độ chuẩn hoá (0.00 – 1.00)
-          </span>
-          {/* <span style={{ fontSize: "10px", color: "#94a3b8" }}>
-            W: {Math.round((slot.normWidth ?? 0.2) * 800)}px • H:{" "}
-            {Math.round((slot.normHeight ?? 0.2) * 600)}px
-          </span> */}
-        </div>
-
+          Căn chỉnh vị trí nhanh:
+        </span>
         <div
           style={{
             display: "grid",
@@ -176,131 +222,146 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
             gap: "8px",
           }}
         >
-          <Input
-            label="X (Tâm ngang 0–1):"
-            type="number"
-            min="0"
-            max="1"
-            step="0.01"
-            value={slot.normX}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              if (!isNaN(val)) {
-                onUpdate(slot.id, { normX: Math.max(0, Math.min(1, val)) });
-              }
-            }}
-          />
-
-          <Input
-            label="Y (Tâm dọc 0–1):"
-            type="number"
-            min="0"
-            max="1"
-            step="0.01"
-            value={slot.normY}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              if (!isNaN(val)) {
-                onUpdate(slot.id, { normY: Math.max(0, Math.min(1, val)) });
-              }
-            }}
-          />
-
-          <Input
-            label="Rộng W (0.05–1.0):"
-            type="number"
-            min="0.05"
-            max="1.0"
-            step="0.05"
-            value={slot.normWidth ?? 0.2}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              if (!isNaN(val)) {
-                onUpdate(slot.id, {
-                  normWidth: Math.max(0.05, Math.min(1.0, val)),
-                });
-              }
-            }}
-          />
-
-          <Input
-            label="Cao H (0.05–1.0):"
-            type="number"
-            min="0.05"
-            max="1.0"
-            step="0.05"
-            value={slot.normHeight ?? 0.2}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value);
-              if (!isNaN(val)) {
-                onUpdate(slot.id, {
-                  normHeight: Math.max(0.05, Math.min(1.0, val)),
-                });
-              }
-            }}
-          />
-        </div>
-
-        {/* Professional Quick Alignment Tools Grid */}
-        <div style={{ marginTop: "8px" }}>
-          <span
+          <button
+            type="button"
+            title="Căn giữa trục ngang (X = 0.50)"
+            onClick={() => onUpdate(slot.id, { normX: 0.5 })}
             style={{
+              padding: "6px 8px",
               fontSize: "11px",
               fontWeight: "700",
-              color: "#94a3b8",
-              display: "block",
-              marginBottom: "6px",
+              backgroundColor: "#ffffff",
+              color: "#a15c2e",
+              border: "1px solid #e7ded0",
+              borderRadius: "6px",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
             }}
           >
-            Căn chỉnh nhanh:
-          </span>
+            ↔ Căn Giữa Ngang
+          </button>
+
+          <button
+            type="button"
+            title="Căn giữa trục dọc (Y = 0.50)"
+            onClick={() => onUpdate(slot.id, { normY: 0.5 })}
+            style={{
+              padding: "6px 8px",
+              fontSize: "11px",
+              fontWeight: "700",
+              backgroundColor: "#ffffff",
+              color: "#a15c2e",
+              border: "1px solid #e7ded0",
+              borderRadius: "6px",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+            }}
+          >
+            ↕ Căn Giữa Dọc
+          </button>
+        </div>
+      </div>
+
+      {/* Admin Only: Normalized Coordinate Inputs */}
+      {!isCustomer && (
+        <div
+          style={{
+            backgroundColor: "#fbf7f1",
+            padding: "14px",
+            borderRadius: "10px",
+            border: "1px solid #e7ded0",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span
+              style={{ fontSize: "12px", fontWeight: "700", color: "#a15c2e" }}
+            >
+              Toạ độ chuẩn hoá (0.00 – 1.00)
+            </span>
+          </div>
+
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "6px",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "8px",
             }}
           >
-            <button
-              type="button"
-              title="Căn giữa trục ngang (X = 0.50)"
-              onClick={() => onUpdate(slot.id, { normX: 0.5 })}
-              style={{
-                padding: "6px 4px",
-                fontSize: "11px",
-                fontWeight: "700",
-                backgroundColor: "#0f172a",
-                color: "#38bdf8",
-                border: "1px solid #38bdf8",
-                borderRadius: "6px",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
+            <Input
+              label="X (Tâm ngang 0–1):"
+              type="number"
+              min="0"
+              max="1"
+              step="0.01"
+              value={slot.normX}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val)) {
+                  onUpdate(slot.id, { normX: Math.max(0, Math.min(1, val)) });
+                }
               }}
-            >
-              Giữa Ngang
-            </button>
+            />
 
-            <button
-              type="button"
-              title="Căn giữa trục dọc (Y = 0.50)"
-              onClick={() => onUpdate(slot.id, { normY: 0.5 })}
-              style={{
-                padding: "6px 4px",
-                fontSize: "11px",
-                fontWeight: "700",
-                backgroundColor: "#0f172a",
-                color: "#38bdf8",
-                border: "1px solid #38bdf8",
-                borderRadius: "6px",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
+            <Input
+              label="Y (Tâm dọc 0–1):"
+              type="number"
+              min="0"
+              max="1"
+              step="0.01"
+              value={slot.normY}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val)) {
+                  onUpdate(slot.id, { normY: Math.max(0, Math.min(1, val)) });
+                }
               }}
-            >
-              Giữa Dọc
-            </button>
+            />
+
+            <Input
+              label="Rộng W (0.05–1.0):"
+              type="number"
+              min="0.05"
+              max="1.0"
+              step="0.05"
+              value={slot.normWidth ?? 0.2}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val)) {
+                  onUpdate(slot.id, {
+                    normWidth: Math.max(0.05, Math.min(1.0, val)),
+                  });
+                }
+              }}
+            />
+
+            <Input
+              label="Cao H (0.05–1.0):"
+              type="number"
+              min="0.05"
+              max="1.0"
+              step="0.05"
+              value={slot.normHeight ?? 0.2}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val)) {
+                  onUpdate(slot.id, {
+                    normHeight: Math.max(0.05, Math.min(1.0, val)),
+                  });
+                }
+              }}
+            />
           </div>
         </div>
-      </div>
+      )}
 
       {/* Material Picker for Selected Slot (Select from Database) */}
       {onAssignMaterial && (
@@ -310,17 +371,24 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
         />
       )}
 
-      {/* Embedded Live Text Customizer in Admin Panel */}
+      {/* Embedded Live Text Customizer in Panel */}
       {(slot.slotType === "text_name" || slot.slotType === "text_date") &&
         onAddAsset && (
           <div>
             <TextAssetCustomizer
+              key={`text-customizer-${slot.id}-${slot.slotKey}`}
+              existingAsset={
+                slotConfig[slot.slotKey]?.customAsset ||
+                slotConfig[slot.slotKey]?.asset ||
+                slotConfig[slot.id]?.customAsset ||
+                slotConfig[slot.id]?.asset
+              }
               onApply={(customAsset) => onAddAsset(customAsset, true)}
             />
           </div>
         )}
 
-      {/* Curtain Color Picker & Filter Control for Active Drape Asset (Admin Panel) */}
+      {/* Curtain Color Picker & Filter Control for Active Drape Asset */}
       {(slot.slotType === "drape" || slot.slotType === "drape_detail") && (
         <CurtainColorFilterControl
           slotLabel={slot.label}
@@ -339,139 +407,110 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
         />
       )}
 
-      {/* Checkbox Options */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        <label
+      {/* Admin Only: Advanced Checkboxes & Z-Index & Delete */}
+      {!isCustomer && (
+        <>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "13px",
+                color: "#271620",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={Boolean(slot.required)}
+                onChange={(e) => onUpdate(slot.id, { required: e.target.checked })}
+              />
+              Slot bắt buộc
+            </label>
+
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "13px",
+                color: "#271620",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={Boolean(slot.allowScale)}
+                onChange={(e) =>
+                  onUpdate(slot.id, { allowScale: e.target.checked })
+                }
+              />
+              Cho phép thu phóng
+            </label>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: "12px",
+            }}
+          >
+            <Input
+              label="Z-Index (0-10)"
+              type="number"
+              min="0"
+              max="10"
+              value={slot.zIndex}
+              onChange={(e) =>
+                onUpdate(slot.id, { zIndex: parseInt(e.target.value) || 0 })
+              }
+            />
+
+            <Input
+              label="Sort Order"
+              type="number"
+              value={slot.sortOrder}
+              onChange={(e) =>
+                onUpdate(slot.id, { sortOrder: parseInt(e.target.value) || 0 })
+              }
+            />
+          </div>
+        </>
+      )}
+
+      {/* Delete Slot Button (Available for both Admin & Customer) */}
+      {onDelete && (
+        <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "13px",
-            color: "#f8fafc",
-            cursor: "pointer",
+            marginTop: "16px",
+            paddingTop: "16px",
+            paddingBottom: "16px",
+            borderTop: "1px solid #e7ded0",
+            flexShrink: 0,
           }}
         >
-          <input
-            type="checkbox"
-            checked={Boolean(slot.required)}
-            onChange={(e) => onUpdate(slot.id, { required: e.target.checked })}
-          />
-          Slot bắt buộc
-        </label>
-
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "13px",
-            color: "#f8fafc",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={Boolean(slot.allowScale)}
-            onChange={(e) =>
-              onUpdate(slot.id, { allowScale: e.target.checked })
-            }
-          />
-          Cho phép thu phóng
-        </label>
-
-        {/* <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "13px",
-            color: "#f8fafc",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={Boolean(slot.allowRotate)}
-            onChange={(e) =>
-              onUpdate(slot.id, { allowRotate: e.target.checked })
-            }
-          />
-          🔄 Cho Phép Xoay (Rotate)
-        </label> */}
-
-        {/* <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            fontSize: "13px",
-            color: "#f8fafc",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={Boolean(slot.mirrorX)}
-            onChange={(e) => onUpdate(slot.id, { mirrorX: e.target.checked })}
-          />
-          🪞 Lật Ngang Đối Xứng (Mirror X)
-        </label> */}
-      </div>
-
-      {/* Z-Index & Sort Order */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
-          gap: "12px",
-        }}
-      >
-        <Input
-          label="Z-Index (0-10)"
-          type="number"
-          min="0"
-          max="10"
-          value={slot.zIndex}
-          onChange={(e) =>
-            onUpdate(slot.id, { zIndex: parseInt(e.target.value) || 0 })
-          }
-        />
-
-        <Input
-          label="Sort Order"
-          type="number"
-          value={slot.sortOrder}
-          onChange={(e) =>
-            onUpdate(slot.id, { sortOrder: parseInt(e.target.value) || 0 })
-          }
-        />
-      </div>
-
-      {/* Delete Slot Button */}
-      <div
-        style={{
-          marginTop: "auto",
-          paddingTop: "16px",
-          borderTop: "1px solid #334155",
-        }}
-      >
-        <button
-          onClick={handleDeleteClick}
-          style={{
-            width: "100%",
-            padding: "10px",
-            backgroundColor: "rgba(225, 29, 72, 0.15)",
-            border: "1px solid #e11d48",
-            borderRadius: "6px",
-            color: "#e11d48",
-            fontSize: "14px",
-            fontWeight: "600",
-            cursor: "pointer",
-          }}
-        >
-          Xoá slot này
-        </button>
-      </div>
+          <button
+            onClick={handleDeleteClick}
+            style={{
+              width: "100%",
+              padding: "11px",
+              backgroundColor: "#faebea",
+              border: "1.5px solid #b4586b",
+              borderRadius: "8px",
+              color: "#b4586b",
+              fontSize: "13px",
+              fontWeight: "700",
+              cursor: "pointer",
+              transition: "all 0.15s ease",
+              boxShadow: "0 2px 6px rgba(180, 88, 107, 0.12)",
+            }}
+          >
+            {isCustomer ? `🗑️ Xoá "${slot.label}" khỏi phông` : "🗑️ Xoá slot này"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

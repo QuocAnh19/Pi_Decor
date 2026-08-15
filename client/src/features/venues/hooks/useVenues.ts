@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../../../lib/authContext";
 import { api } from "../../../lib/api";
 import type { Project, ProjectPayload, Venue, VenueDetail, VenuePayload } from "../../../lib/types";
@@ -8,6 +8,9 @@ export function useVenues() {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedType, setSelectedType] = useState("all");
 
   const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
   const [selectedVenue, setSelectedVenue] = useState<VenueDetail | null>(null);
@@ -32,6 +35,22 @@ export function useVenues() {
   useEffect(() => {
     loadVenues();
   }, [loadVenues]);
+
+  const filteredVenues = useMemo(() => {
+    return venues.filter((venue) => {
+      if (selectedType !== "all" && venue.type !== selectedType) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchName = venue.name?.toLowerCase().includes(q);
+        const matchCity = venue.city?.toLowerCase().includes(q);
+        const matchAddr = venue.address?.toLowerCase().includes(q);
+        if (!matchName && !matchCity && !matchAddr) return false;
+      }
+      return true;
+    });
+  }, [venues, selectedType, searchQuery]);
 
   const loadVenueDetail = useCallback((id: string) => {
     setDetailLoading(true);
@@ -104,9 +123,14 @@ export function useVenues() {
 
   return {
     venues,
+    filteredVenues,
     status,
     error,
     setError,
+    searchQuery,
+    setSearchQuery,
+    selectedType,
+    setSelectedType,
     selectedVenueId,
     selectedVenue,
     detailLoading,

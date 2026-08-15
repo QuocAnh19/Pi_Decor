@@ -52,6 +52,8 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
     handleSvgUpload,
     handleMaterialAssign,
     handleColorHexChange,
+    handleAddCustomAsset,
+    handleUpdateTemplateName,
   } = useAdminEditor({ templateId });
 
   if (isPreviewMode) {
@@ -114,8 +116,8 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
         display: "flex",
         flexDirection: "column",
         minHeight: "100vh",
-        backgroundColor: "#0f172a",
-        color: "#f8fafc",
+        backgroundColor: "#f4eee3",
+        color: "#271620",
         padding: "16px 24px",
         gap: "16px",
         boxSizing: "border-box",
@@ -128,14 +130,14 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
             top: "20px",
             right: "20px",
             maxWidth: "380px",
-            backgroundColor: "#0f172a",
-            color: "#f8fafc",
-            border: "1px solid #38bdf8",
+            backgroundColor: "#271620",
+            color: "#fbf7f1",
+            border: "1px solid #a15c2e",
             borderRadius: "8px",
             padding: "10px 16px",
             fontSize: "13px",
             fontWeight: "600",
-            boxShadow: "0 10px 25px -5px rgba(0,0,0,0.5)",
+            boxShadow: "0 10px 25px rgba(39, 22, 32, 0.2)",
             zIndex: 9999,
             whiteSpace: "nowrap",
             overflow: "hidden",
@@ -161,6 +163,7 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
         onToggleActive={handleToggleActive}
         onTogglePreview={() => setIsPreviewMode(true)}
         onToggleGrid={() => setShowGrid(!showGrid)}
+        onUpdateTemplateName={handleUpdateTemplateName}
       />
 
       {/* Main Admin 3-Column Layout */}
@@ -174,16 +177,29 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
         }}
       >
         {/* Left Column: Template SVG Upload, Slot & Rule Tabs */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <TemplateUploader onUploadBase={handleSvgUpload} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "16px",
+            height: "calc(100vh - 100px)",
+            maxHeight: "calc(100vh - 100px)",
+            position: "sticky",
+            top: "16px",
+          }}
+        >
+          <div style={{ flexShrink: 0 }}>
+            <TemplateUploader onUploadBase={handleSvgUpload} />
+          </div>
 
           <div
             style={{
               display: "flex",
-              backgroundColor: "#1e293b",
+              backgroundColor: "#ffffff",
               padding: "4px",
               borderRadius: "8px",
-              border: "1px solid #334155",
+              border: "1px solid #e7ded0",
+              flexShrink: 0,
             }}
           >
             <button
@@ -194,11 +210,12 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
                 padding: "6px",
                 border: "none",
                 borderRadius: "6px",
-                backgroundColor: activeTab === "slots" ? "#e11d48" : "transparent",
-                color: activeTab === "slots" ? "#ffffff" : "#94a3b8",
+                backgroundColor: activeTab === "slots" ? "#a15c2e" : "transparent",
+                color: activeTab === "slots" ? "#ffffff" : "#6e6259",
                 fontSize: "12px",
                 fontWeight: "600",
                 cursor: "pointer",
+                transition: "all 0.15s ease",
               }}
             >
               Slots ({slots.length})
@@ -211,11 +228,12 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
                 padding: "6px",
                 border: "none",
                 borderRadius: "6px",
-                backgroundColor: activeTab === "rules" ? "#e11d48" : "transparent",
-                color: activeTab === "rules" ? "#ffffff" : "#94a3b8",
+                backgroundColor: activeTab === "rules" ? "#a15c2e" : "transparent",
+                color: activeTab === "rules" ? "#ffffff" : "#6e6259",
                 fontSize: "12px",
                 fontWeight: "600",
                 cursor: "pointer",
+                transition: "all 0.15s ease",
               }}
             >
               Rules 
@@ -223,7 +241,7 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
             </button>
           </div>
 
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
             {activeTab === "slots" ? (
               <SlotList
                 slots={slots}
@@ -263,11 +281,13 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
         <div
           style={{
             position: "sticky",
-            top: "24px",
-            maxHeight: "calc(100vh - 48px)",
-            backgroundColor: "#1e293b",
-            borderRadius: "12px",
-            border: "1px solid #334155",
+            top: "16px",
+            height: "calc(100vh - 100px)",
+            maxHeight: "calc(100vh - 100px)",
+            backgroundColor: "#ffffff",
+            borderRadius: "16px",
+            border: "1px solid #e7ded0",
+            boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -280,6 +300,7 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
             onDelete={(id) => handleDeleteSlot(id)}
             onAssignMaterial={(mat, slot) => handleMaterialAssign(slot.slotKey, mat)}
             onAssignColor={(key, hex, filterMode, saturation) => handleColorHexChange(key, hex, filterMode, saturation)}
+            onAddAsset={handleAddCustomAsset}
           />
         </div>
       </div>

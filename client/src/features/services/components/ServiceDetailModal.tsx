@@ -46,6 +46,8 @@ export function ServiceDetailModal({
   const Icon = resolveIcon(category.icon);
   const rootClass = `${accentClass[category.accent]}`;
 
+  
+
   return (
     <>
       <Modal
@@ -53,14 +55,23 @@ export function ServiceDetailModal({
         onClose={onClose}
         maxWidth="880px"
         className={rootClass}
+        bodyPadding={false}
       >
         <div className={styles.hero}>
-          <MediaSlot
-            src={category.cover}
-            alt={category.title}
-            label={`Bìa ${category.brand}`}
-            className={styles.heroMedia}
-          />
+          {category.cover ? (
+            <img
+              src={category.cover}
+              alt={category.title}
+              className={styles.heroImage}
+            />
+          ) : (
+            <MediaSlot
+              src={category.cover}
+              alt={category.title}
+              label={`Bìa ${category.brand}`}
+              className={styles.heroMedia}
+            />
+          )}
           <span className={styles.heroScrim} aria-hidden="true" />
           <div className={styles.heroContent}>
             <span className={styles.badge}>

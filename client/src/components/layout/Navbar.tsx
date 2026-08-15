@@ -33,6 +33,23 @@ export function Navbar() {
     }
   };
 
+  // Handle nav link click with smooth offset scroll
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("/#") && location.pathname === "/") {
+      e.preventDefault();
+      const targetId = href.replace("/#", "");
+      const elem = document.getElementById(targetId);
+      if (elem) {
+        const navOffset = 110;
+        const elemPos = elem.getBoundingClientRect().top + window.pageYOffset;
+        window.scrollTo({
+          top: Math.max(0, elemPos - navOffset),
+          behavior: "smooth",
+        });
+      }
+    }
+  };
+
   // Studio and the map page both sit over real content immediately, not a
   // full-bleed hero image, so they skip the transparent-to-solid transition.
   const solid = scrolled || isSubPage;
@@ -52,7 +69,12 @@ export function Navbar() {
           ) : (
             links.map((l) =>
               l.href.startsWith("/#") ? (
-                <a key={l.href} href={l.href} className={styles.navLink}>
+                <a
+                  key={l.href}
+                  href={l.href}
+                  onClick={(e) => handleNavClick(e, l.href)}
+                  className={styles.navLink}
+                >
                   {l.label}
                 </a>
               ) : (

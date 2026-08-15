@@ -87,7 +87,7 @@ export function LeadForm() {
       <div className={styles.formHeader}>
         <h3 className={styles.formTitle}>Để lại thông tin tư vấn</h3>
         <p className={styles.formSub}>
-          Pi Decor sẽ gọi điện hỗ trợ bạn lên concept &amp; dự toán chi phí.
+          Pi Decor sẽ liên hệ hỗ trợ bạn lên concept &amp; dự toán chi phí.
         </p>
       </div>
 
@@ -99,7 +99,7 @@ export function LeadForm() {
             type="text"
             label={
               <span className={styles.labelSpan}>
-                <UserIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Họ và tên *
+                <UserIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Họ và tên
               </span>
             }
             placeholder="VD: Nguyễn Văn A"
@@ -111,7 +111,7 @@ export function LeadForm() {
             type="tel"
             label={
               <span className={styles.labelSpan}>
-                <PhoneIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Số điện thoại *
+                <PhoneIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Số điện thoại
               </span>
             }
             placeholder="VD: 0905 123 456"
@@ -126,7 +126,7 @@ export function LeadForm() {
           label={
             <span className={styles.labelSpan}>
               <EnvelopeIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Email{" "}
-              <span className={styles.optionalTag}>(Không bắt buộc)</span>
+              {/* <span className={styles.optionalTag}>(Không bắt buộc)</span> */}
             </span>
           }
           placeholder="VD: email@example.com"
@@ -162,7 +162,7 @@ export function LeadForm() {
           label={
             <span className={styles.labelSpan}>
               <ChatBubbleLeftRightIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Ý tưởng hoặc ghi chú thêm{" "}
-              <span className={styles.optionalTag}>(Không bắt buộc)</span>
+              {/* <span className={styles.optionalTag}>(Không bắt buộc)</span> */}
             </span>
           }
           placeholder="VD: Mong muốn tông màu pastel, tiệc ngoài trời, khoảng 200 khách..."

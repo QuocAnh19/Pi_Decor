@@ -60,8 +60,8 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
       style={{
         position: "fixed",
         inset: 0,
-        backgroundColor: "rgba(15, 23, 42, 0.75)",
-        backdropFilter: "blur(4px)",
+        backgroundColor: "rgba(39, 22, 32, 0.45)",
+        backdropFilter: "blur(6px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -72,24 +72,24 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
     >
       <div
         style={{
-          backgroundColor: "#1e293b",
-          borderRadius: "16px",
-          border: "1px solid #38bdf8",
+          backgroundColor: "#ffffff",
+          borderRadius: "20px",
+          border: "1px solid #e7ded0",
           width: "100%",
           maxWidth: "480px",
-          padding: "24px",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.8)",
-          color: "#f8fafc",
+          padding: "26px",
+          boxShadow: "0 25px 60px rgba(39, 22, 32, 0.15)",
+          color: "#271620",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-          <h3 style={{ fontSize: "18px", fontWeight: "700", color: "#38bdf8", margin: 0 }}>
-            🚀 Lưu & Đăng Ký Tư Vấn Thiết Kế
+          <h3 style={{ fontSize: "18px", fontWeight: "700", fontFamily: "'Fraunces', serif", color: "#271620", margin: 0 }}>
+            Lưu &amp; Đăng Ký Tư Vấn Thiết Kế
           </h3>
           <button
             onClick={onClose}
-            style={{ border: "none", background: "transparent", color: "#94a3b8", cursor: "pointer" }}
+            style={{ border: "none", background: "transparent", color: "#6e6259", cursor: "pointer" }}
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
@@ -97,24 +97,25 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
 
         {success ? (
           <div style={{ textAlign: "center", padding: "20px 0" }}>
-            <CheckCircleIcon className="h-12 w-12" style={{ margin: "0 auto 12px", color: "#34d399" }} />
-            <h4 style={{ fontSize: "16px", fontWeight: "700", color: "#34d399", marginBottom: "8px" }}>
+            <CheckCircleIcon className="h-12 w-12" style={{ margin: "0 auto 12px", color: "#47663b" }} />
+            <h4 style={{ fontSize: "16px", fontWeight: "700", color: "#47663b", marginBottom: "8px" }}>
               Đã gửi thông tin thiết kế thành công!
             </h4>
-            <p style={{ fontSize: "13px", color: "#cbd5e1", lineHeight: 1.5 }}>
+            <p style={{ fontSize: "13px", color: "#6e6259", lineHeight: 1.5 }}>
               Pi Decor đã ghi nhận phối cảnh của bạn. Đội ngũ chuyên viên sẽ liên hệ lại qua SĐT để báo giá chi tiết.
             </p>
             <button
               onClick={onClose}
               style={{
                 marginTop: "16px",
-                padding: "8px 20px",
-                backgroundColor: "#38bdf8",
-                color: "#0f172a",
+                padding: "10px 24px",
+                backgroundColor: "#a15c2e",
+                color: "#ffffff",
                 border: "none",
                 borderRadius: "8px",
                 fontWeight: "700",
                 cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(161, 92, 46, 0.25)"
               }}
             >
               Hoàn tất
@@ -122,11 +123,11 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>
+            <p style={{ fontSize: "12px", color: "#6e6259", margin: 0 }}>
               Nhập thông tin của bạn để Pi Decor lưu bản phối cảnh Studio này và liên hệ tư vấn báo giá.
             </p>
 
-            {error && <div style={{ color: "#ef4444", fontSize: "12px" }}>⚠️ {error}</div>}
+            {error && <div style={{ color: "#b4586b", fontSize: "12px" }}>⚠️ {error}</div>}
 
             <Input
               label="Họ và tên"
@@ -147,7 +148,7 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
             />
 
             <Input
-              label="Email (Không bắt buộc)"
+              label="Email"
               type="email"
               placeholder="VD: email@example.com"
               value={email}
@@ -176,10 +177,12 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
                 disabled={loading}
                 style={{
                   padding: "8px 16px",
-                  backgroundColor: "#334155",
-                  color: "#94a3b8",
-                  border: "none",
+                  backgroundColor: "#fbf7f1",
+                  color: "#6e6259",
+                  border: "1px solid #e7ded0",
                   borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: "600",
                   cursor: "pointer",
                 }}
               >
@@ -190,15 +193,17 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
                 disabled={loading}
                 style={{
                   padding: "8px 20px",
-                  backgroundColor: "#e11d48",
+                  backgroundColor: "#a15c2e",
                   color: "#ffffff",
                   border: "none",
                   borderRadius: "8px",
                   fontWeight: "700",
+                  fontSize: "13px",
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
+                  boxShadow: "0 2px 8px rgba(161, 92, 46, 0.25)"
                 }}
               >
                 <PaperAirplaneIcon className="h-4 w-4" />

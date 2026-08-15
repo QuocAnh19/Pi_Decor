@@ -19,6 +19,11 @@
   border-right: 1px solid $admin-border;
   box-shadow: 2px 0 16px rgba(161, 92, 46, 0.05);
   padding: 28px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .brand {

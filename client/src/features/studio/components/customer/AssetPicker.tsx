@@ -101,21 +101,24 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
 
   return (
     <div
-      className="admin-scroll"
+      className="no-scrollbar"
       style={{
-        backgroundColor: '#1e293b',
-        borderRadius: '12px',
-        border: '1px solid #334155',
+        backgroundColor: '#ffffff',
+        borderRadius: '16px',
+        border: '1px solid #e7ded0',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
         overflowY: 'auto',
+        boxShadow: '0 4px 16px rgba(39, 22, 32, 0.04)',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
       }}
     >
       {/* Header & Tabs */}
-      <div style={{ padding: '16px', borderBottom: '1px solid #334155' }}>
-        <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#f8fafc', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span>🎨</span> Thư Viện Mẫu & Tùy Chỉnh
+      <div style={{ padding: '16px', borderBottom: '1px solid #e7ded0' }}>
+        <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#271620', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span></span> Thư Viện Mẫu & Tùy Chỉnh
         </h3>
 
         {/* Search Input */}
@@ -128,7 +131,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
         </div>
 
         {/* Tab Buttons */}
-        <div style={{ display: 'flex', gap: '4px', backgroundColor: '#0f172a', padding: '4px', borderRadius: '8px' }}>
+        <div style={{ display: 'flex', gap: '4px', backgroundColor: '#f4eee3', padding: '4px', borderRadius: '8px', border: '1px solid #e7ded0' }}>
           {(
             [
               { id: 'all', label: 'Tất cả' },
@@ -148,10 +151,11 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
                 fontWeight: '600',
                 border: 'none',
                 borderRadius: '6px',
-                backgroundColor: activeTab === tab.id ? '#38bdf8' : 'transparent',
-                color: activeTab === tab.id ? '#0f172a' : '#94a3b8',
+                backgroundColor: activeTab === tab.id ? '#a15c2e' : 'transparent',
+                color: activeTab === tab.id ? '#ffffff' : '#6e6259',
                 cursor: 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.15s ease',
+                boxShadow: activeTab === tab.id ? '0 1px 3px rgba(161, 92, 46, 0.25)' : 'none'
               }}
             >
               {tab.label}
@@ -183,14 +187,14 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
       )}
 
       {/* Preset Asset Gallery Header */}
-      <div style={{ padding: '12px 16px 4px 16px', fontSize: '12px', fontWeight: '700', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: '14px 16px 6px 16px', fontSize: '12px', fontWeight: '700', color: '#6e6259', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span>📦 Danh Sách Mẫu Có Sẵn:</span>
-        <span style={{ fontSize: '10px', color: '#64748b' }}>Click để áp dụng</span>
+        <span style={{ fontSize: '10px', color: '#9c9186' }}>Click để áp dụng</span>
       </div>
 
       {/* Asset Grid */}
       <div
-        className="admin-scroll"
+        className="no-scrollbar"
         style={{
           padding: '8px 16px 16px 16px',
           overflowY: 'auto',
@@ -199,6 +203,8 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
           gap: '10px',
           alignContent: 'start',
           flex: 1,
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
         }}
       >
         {filteredAssets.length > 0 ? (
@@ -211,7 +217,7 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
             />
           ))
         ) : (
-          <div style={{ gridColumn: 'span 2', textAlign: 'center', color: '#64748b', padding: '24px 0', fontSize: '12px' }}>
+          <div style={{ gridColumn: 'span 2', textAlign: 'center', color: '#9c9186', padding: '24px 0', fontSize: '12px' }}>
             Không tìm thấy mẫu phù hợp
           </div>
         )}

@@ -14,13 +14,21 @@ export interface AddSlotModalProps {
   existingSlots?: SlotDefinition[];
   existingSlotKeys: string[];
   initialNormPos?: { normX: number; normY: number };
+  mode?: "admin" | "customer";
 }
 
-const SLOT_TYPE_OPTIONS = [
-  { value: "drape", label: "Rèm nền" },
-  { value: "drape_detail", label: "Rèm chi tiết" },
-  { value: "flower", label: "Cụm hoa" },
-  { value: "text_name", label: "Dãy chữ số" },
+const ADMIN_SLOT_TYPE_OPTIONS = [
+  { value: "drape", label: "Rèm nền (drape)" },
+  { value: "drape_detail", label: "Rèm chi tiết (drape_detail)" },
+  { value: "flower", label: "Cụm hoa (flower)" },
+  { value: "text_name", label: "Dãy chữ số (text_name)" },
+];
+
+const CUSTOMER_SLOT_TYPE_OPTIONS = [
+  { value: "flower", label: "🌸 Cụm hoa trang trí" },
+  { value: "drape_detail", label: "🎀 Dải lụa vắt mềm" },
+  { value: "text_name", label: "✍️ Bảng tên Cô Dâu & Chú Rể" },
+  { value: "drape", label: "🪟 Rèm vải nền" },
 ];
 
 export const AddSlotModal: React.FC<AddSlotModalProps> = ({
@@ -30,10 +38,12 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
   existingSlots = [],
   existingSlotKeys,
   initialNormPos,
+  mode = "admin",
 }) => {
+  const isCustomer = mode === "customer";
   const [slotKey, setSlotKey] = useState("");
   const [label, setLabel] = useState("");
-  const [slotType, setSlotType] = useState<SlotType>("drape");
+  const [slotType, setSlotType] = useState<SlotType>(isCustomer ? "flower" : "drape");
   const [required, setRequired] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -41,38 +51,57 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
     if (isOpen) {
       setSlotKey("");
       setLabel("");
-      setSlotType("drape");
+      setSlotType(isCustomer ? "flower" : "drape");
       setRequired(false);
       setErrorMessage("");
     }
-  }, [isOpen]);
+  }, [isOpen, isCustomer]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const trimmedKey = slotKey.trim().toLowerCase();
-    if (!trimmedKey) {
-      setErrorMessage("Vui lòng nhập Slot Key!");
-      return;
-    }
+    let finalKey = slotKey.trim().toLowerCase();
 
-    if (!/^[a-z0-9-]+$/.test(trimmedKey)) {
-      setErrorMessage(
-        "Slot Key chỉ được chứa chữ thường (a-z), số (0-9) và dấu gạch ngang (-)!",
-      );
-      return;
-    }
+    if (isCustomer) {
+      // Auto generate friendly unique key for customer
+      if (!finalKey) {
+        const prefix = slotType === "flower" ? "flower" : slotType === "drape_detail" ? "drape-sub" : slotType;
+        const uniqueNum = Date.now().toString().slice(-4);
+        finalKey = `${prefix}-${uniqueNum}`;
+      }
+      if (!label.trim()) {
+        const defaultNames: Record<string, string> = {
+          flower: "Cụm hoa mới",
+          drape_detail: "Dải lụa vắt mới",
+          text_name: "Bảng tên mới",
+          drape: "Rèm nền mới",
+        };
+        setLabel(defaultNames[slotType] || "Vị trí mới");
+      }
+    } else {
+      if (!finalKey) {
+        setErrorMessage("Vui lòng nhập Slot Key!");
+        return;
+      }
 
-    if (existingSlotKeys.includes(trimmedKey)) {
-      setErrorMessage(
-        `Slot Key '${trimmedKey}' đã tồn tại trong template này!`,
-      );
-      return;
-    }
+      if (!/^[a-z0-9-]+$/.test(finalKey)) {
+        setErrorMessage(
+          "Slot Key chỉ được chứa chữ thường (a-z), số (0-9) và dấu gạch ngang (-)!",
+        );
+        return;
+      }
 
-    if (!label.trim()) {
-      setErrorMessage("Vui lòng nhập Tên hiển thị!");
-      return;
+      if (existingSlotKeys.includes(finalKey)) {
+        setErrorMessage(
+          `Slot Key '${finalKey}' đã tồn tại trong template này!`,
+        );
+        return;
+      }
+
+      if (!label.trim()) {
+        setErrorMessage("Vui lòng nhập Tên hiển thị!");
+        return;
+      }
     }
 
     const sameTypeSlot = existingSlots.find((s) => s.slotType === slotType);
@@ -80,9 +109,11 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
     const normWidth = sameTypeSlot?.normWidth ?? defaultDims.normWidth;
     const normHeight = sameTypeSlot?.normHeight ?? defaultDims.normHeight;
 
+    const finalLabel = label.trim() || (slotType === "flower" ? "Cụm hoa trang trí" : "Vị trí mới");
+
     onAdd({
-      slotKey: trimmedKey,
-      label: label.trim(),
+      slotKey: finalKey,
+      label: finalLabel,
       slotType,
       normX: initialNormPos?.normX ?? 0.5,
       normY: initialNormPos?.normY ?? 0.5,
@@ -93,7 +124,7 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
       mirrorX: false,
       zIndex: sameTypeSlot?.zIndex ?? 5,
       sortOrder: existingSlotKeys.length + 1,
-      required,
+      required: isCustomer ? false : required,
     });
 
     onClose();
@@ -103,7 +134,7 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Thêm slot mới"
+      title={isCustomer ? "✨ Thêm Vị Trí Trang Trí Mới" : "Thêm slot mới"}
       maxWidth="480px"
     >
       {errorMessage && (
@@ -111,44 +142,48 @@ export const AddSlotModal: React.FC<AddSlotModalProps> = ({
       )}
 
       <form onSubmit={handleSubmit} className={styles.form}>
-        <Input
-          label="Slot key (Dạng kebab-case, ví dụ: flower-right)"
-          type="text"
-          placeholder="nhap-slot-key-moi"
-          value={slotKey}
-          onChange={(e) => setSlotKey(e.target.value)}
+        <Select
+          label="Loại Hạng Mục Trang Trí"
+          value={slotType}
+          onChange={(e) => setSlotType(e.target.value as SlotType)}
+          options={isCustomer ? CUSTOMER_SLOT_TYPE_OPTIONS : ADMIN_SLOT_TYPE_OPTIONS}
         />
 
         <Input
-          label="Tên hiển thị"
+          label={isCustomer ? "Tên gọi vị trí (Tùy chọn)" : "Tên hiển thị"}
           type="text"
-          placeholder="VD: Cụm Hoa Bên Phải"
+          placeholder={isCustomer ? "VD: Cụm hoa góc dưới, Dải lụa phụ..." : "VD: Cụm Hoa Bên Phải"}
           value={label}
           onChange={(e) => setLabel(e.target.value)}
         />
 
-        <Select
-          label="Loại Slot"
-          value={slotType}
-          onChange={(e) => setSlotType(e.target.value as SlotType)}
-          options={SLOT_TYPE_OPTIONS}
-        />
+        {!isCustomer && (
+          <>
+            <Input
+              label="Slot key (Dạng kebab-case, ví dụ: flower-right)"
+              type="text"
+              placeholder="nhap-slot-key-moi"
+              value={slotKey}
+              onChange={(e) => setSlotKey(e.target.value)}
+            />
 
-        <label className={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={required}
-            onChange={(e) => setRequired(e.target.checked)}
-          />
-          Thành phần bắt buộc điền
-        </label>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={required}
+                onChange={(e) => setRequired(e.target.checked)}
+              />
+              Thành phần bắt buộc điền
+            </label>
+          </>
+        )}
 
         <div className={styles.actions}>
           <button type="button" onClick={onClose} className={styles.cancelBtn}>
             Hủy
           </button>
           <button type="submit" className={styles.submitBtn}>
-            Tạo Slot
+            {isCustomer ? "+ Thêm Vào Phông" : "Tạo Slot"}
           </button>
         </div>
       </form>

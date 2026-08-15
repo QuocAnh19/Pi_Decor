@@ -62,6 +62,7 @@ export interface SlotRule {
 export interface SlotState {
   assetId?: string
   asset?: Asset
+  customAsset?: Asset
   materialId?: string | null
   materialImage?: string | null
   colorHex?: string | null

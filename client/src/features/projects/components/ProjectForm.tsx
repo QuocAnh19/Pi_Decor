@@ -242,10 +242,10 @@ export function ProjectForm(props: ProjectFormProps) {
       isOpen
       onClose={onCancel}
       title={project ? "Chỉnh Sửa Dự Án" : "Thêm Dự Án Mới"}
-      maxWidth="840px"
+      maxWidth="920px"
     >
-      <form onSubmit={handleSubmit}>
-        <div className={styles.modalBody} style={{ maxHeight: "75vh", overflowY: "auto", paddingRight: "8px" }}>
+      <form onSubmit={handleSubmit} style={{ width: "100%", maxWidth: "100%", overflowX: "hidden" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxHeight: "76vh", overflowY: "auto", overflowX: "hidden", paddingRight: "4px" }}>
           {isSimpleMode && (
             <div
               style={{
@@ -361,7 +361,7 @@ export function ProjectForm(props: ProjectFormProps) {
             {/* Multi-Image Album Slot Picker */}
             <div
               className={`${styles.formGroup} ${styles.formFull}`}
-              style={{ marginTop: "8px", borderTop: "1px solid #334155", paddingTop: "16px" }}
+              style={{ marginTop: "8px", borderTop: "1px solid #e7ded0", paddingTop: "16px" }}
             >
               <input
                 type="file"
@@ -372,15 +372,15 @@ export function ProjectForm(props: ProjectFormProps) {
               />
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <label style={{ fontSize: "13px", fontWeight: "700", color: "#38bdf8", margin: 0 }}>
+                <label style={{ fontSize: "13px", fontWeight: "700", color: "#a15c2e", margin: 0 }}>
                   Bộ ảnh album dự án
                 </label>
-                <span style={{ fontSize: "11px", color: galleryUrls.length >= 10 ? "#f59e0b" : "#10b981", fontWeight: "600" }}>
+                <span style={{ fontSize: "11px", color: galleryUrls.length >= 10 ? "#b3733b" : "#47663b", fontWeight: "600" }}>
                   {galleryUrls.filter(Boolean).length} / 10 ảnh (Tối đa 10 ảnh)
                 </span>
               </div>
 
-              <p style={{ fontSize: "11px", color: "#94a3b8", margin: "4px 0 12px 0" }}>
+              <p style={{ fontSize: "11px", color: "#6e6259", margin: "4px 0 12px 0" }}>
                 Bấm trực tiếp vào từng vị trí Khung ảnh bên dưới để chọn ảnh tải lên.
               </p>
 
@@ -413,15 +413,17 @@ export function ProjectForm(props: ProjectFormProps) {
                           position: "absolute",
                           bottom: "6px",
                           left: "6px",
-                          zIndex: 3,
-                          backgroundColor: "rgba(15, 23, 42, 0.85)",
-                          color: "#38bdf8",
-                          border: "1px solid #334155",
+                          zIndex: 5,
+                          backgroundColor: "rgba(255, 255, 255, 0.92)",
+                          color: "#a15c2e",
+                          border: "1px solid #e7ded0",
                           borderRadius: "4px",
                           fontSize: "9px",
-                          fontWeight: "600",
+                          fontWeight: "700",
                           padding: "2px 4px",
                           cursor: "pointer",
+                          boxShadow: "0 1px 4px rgba(39, 22, 32, 0.08)",
+                          maxWidth: "calc(100% - 12px)",
                         }}
                       >
                         <option value="span2x3">Hero Đại Diện (2x3)</option>
@@ -456,7 +458,7 @@ export function ProjectForm(props: ProjectFormProps) {
                             <button
                               type="button"
                               className={`${styles.galleryActionBtn} ${styles.makeCoverBtn}`}
-                              style={{ backgroundColor: "#0284c7", color: "#fff" }}
+                              style={{ backgroundColor: "#a15c2e", color: "#fff" }}
                               onClick={() => handleSlotClick(idx)}
                               title="Thay đổi ảnh khác"
                             >
@@ -474,9 +476,9 @@ export function ProjectForm(props: ProjectFormProps) {
                         </>
                       ) : (
                         <div className={styles.visualSlotEmpty}>
-                          <PlusIcon className="h-5 w-5" style={{ color: "#38bdf8" }} />
+                          <PlusIcon className="h-5 w-5" style={{ color: "#a15c2e" }} />
                           <span className={styles.visualSlotLabel}>{slotDesc.label}</span>
-                          <span className={styles.visualSlotHint}>Bấm chọn ảnh hoặc chọn size</span>
+                          <span className={styles.visualSlotHint}>Bấm chọn ảnh</span>
                         </div>
                       )}
                     </div>
@@ -491,19 +493,21 @@ export function ProjectForm(props: ProjectFormProps) {
                   disabled={galleryUrls.length >= 10 || activeSlotCount >= 10}
                   className={styles.cancelBtn}
                   style={{
-                    backgroundColor: "#0f172a",
-                    border: "1px solid #334155",
-                    color: galleryUrls.length >= 10 || activeSlotCount >= 10 ? "#64748b" : "#38bdf8",
-                    padding: "6px 12px",
+                    backgroundColor: "#fbf7f1",
+                    border: "1px solid #e7ded0",
+                    color: galleryUrls.length >= 10 || activeSlotCount >= 10 ? "#9c9186" : "#a15c2e",
+                    padding: "6px 14px",
                     fontSize: "12px",
+                    fontWeight: "600",
+                    borderRadius: "8px",
                     cursor: galleryUrls.length >= 10 || activeSlotCount >= 10 ? "not-allowed" : "pointer",
                   }}
                 >
                   + Thêm Vị Trí Khung Ảnh Mới (Tối Đa 10)
                 </button>
 
-                <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px", color: "#94a3b8" }}>
-                  <CloudArrowUpIcon className="h-4 w-4" style={{ color: "#38bdf8" }} />
+                <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "12px", color: "#6e6259" }}>
+                  <CloudArrowUpIcon className="h-4 w-4" style={{ color: "#a15c2e" }} />
                   <u>Hoặc chọn tải lên cùng lúc nhiều tệp ảnh</u>
                   <input
                     type="file"

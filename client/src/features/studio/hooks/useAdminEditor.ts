@@ -58,6 +58,14 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
     }, 3000);
   }, []);
 
+  const handleUpdateTemplateName = useCallback((newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed) return;
+    setTemplate((prev) => ({ ...prev, name: trimmed }));
+    setIsDirty(true);
+    showToast(`Đã đổi tên mẫu thành "${trimmed}"`);
+  }, [showToast]);
+
   const handleCreateNewTemplate = useCallback(() => {
     const newId = crypto.randomUUID();
     const uniqueSuffix = Date.now().toString().slice(-4);
@@ -372,6 +380,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
 
     const matchedSlot = slots.find((s) => s.slotKey === slotKey);
     const slotType = matchedSlot?.slotType || "drape";
+    const isDrape = slotType === "drape" || slotType === "drape_detail";
 
     const synthesizedAsset: Asset = {
       id: matId,
@@ -382,17 +391,21 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
       tags: isMatObj && matOrId.category ? [matOrId.category] : [],
     };
 
-    setSlotConfig((prev) => ({
-      ...prev,
-      [slotKey]: {
-        ...prev[slotKey],
-        asset: synthesizedAsset,
-        assetId: matId,
-        materialId: matId,
-        materialImage: matImg,
-        colorHex: matColor,
-      },
-    }));
+    setSlotConfig((prev) => {
+      const existing = prev[slotKey] || {};
+      return {
+        ...prev,
+        [slotKey]: {
+          ...existing,
+          asset: synthesizedAsset,
+          assetId: matId,
+          materialId: matId,
+          materialImage: matImg,
+          colorHex: matColor,
+          colorOverride: isDrape ? existing.colorOverride : undefined,
+        },
+      };
+    });
     setIsDirty(true);
     showToast(`✓ Đã gán vật liệu "${matName}"`);
   };
@@ -430,6 +443,27 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
       };
     });
     setIsDirty(true);
+  };
+
+  const handleAddCustomAsset = (asset: Omit<Asset, "id">) => {
+    const selectedSlot = slots.find((s) => s.id === selectedSlotId);
+    if (!selectedSlot) return;
+
+    const fullAsset: Asset = {
+      ...asset,
+      id: `custom-${Date.now().toString().slice(-6)}`,
+    };
+
+    setSlotConfig((prev) => ({
+      ...prev,
+      [selectedSlot.slotKey]: {
+        ...prev[selectedSlot.slotKey],
+        customAsset: fullAsset,
+        asset: fullAsset,
+      },
+    }));
+    setIsDirty(true);
+    showToast(`✓ Đã cập nhật chữ: ${asset.name}`);
   };
 
   return {
@@ -470,5 +504,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
     handleSvgUpload,
     handleMaterialAssign,
     handleColorHexChange,
+    handleAddCustomAsset,
+    handleUpdateTemplateName,
   };
 };

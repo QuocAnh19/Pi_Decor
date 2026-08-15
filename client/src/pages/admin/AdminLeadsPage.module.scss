@@ -1,51 +1,188 @@
 @use "@/styles/variables" as *;
 @use "@/styles/admin-variables" as *;
+@use "@/styles/mixins" as *;
 
 .headerRow {
-  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $admin-border;
+  margin-bottom: 20px;
 }
 
 .title {
   font-family: $font-serif;
-  font-size: 1.5rem;
+  font-size: $text-xl;
+  font-weight: 700;
   color: $admin-text;
+  margin: 0;
 }
 
 .subtitle {
-  font-size: 0.875rem;
+  font-size: $text-sm;
   color: $admin-text-faint;
   margin-top: 4px;
 }
 
 .status {
-  font-size: 0.875rem;
+  font-size: $text-sm;
   color: $admin-text-muted;
+  padding: 40px;
+  text-align: center;
 }
 
 .error {
-  font-size: 0.8rem;
+  font-size: 13px;
   color: $admin-danger;
   background: $admin-danger-subtle;
+  border: 1px solid rgba($admin-danger, 0.3);
   border-radius: $radius-s;
-  padding: 10px 14px;
+  padding: 10px 16px;
   margin-bottom: 16px;
 }
 
-.filterControls {
+/* Filter Bar */
+.filterBar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: $admin-surface;
+  padding: 16px;
+  border-radius: $radius-l;
+  border: 1px solid $admin-border;
+  box-shadow: $admin-shadow-card;
+  margin-bottom: 20px;
+}
+
+.searchRow {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.tabButton {
+  padding: 6px 14px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background-color: $admin-bg;
+  color: $admin-text-muted;
+  font-size: $text-xs;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $admin-text;
+    border-color: $admin-text-faint;
+  }
+}
+
+.tabActive {
+  background-color: $admin-accent;
+  color: #ffffff;
+  border-color: $admin-accent;
+  font-weight: 700;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+    color: #ffffff;
+  }
+}
+
+/* Grid View */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.leadCard {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-l;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: $admin-shadow-card;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: $admin-accent;
+    box-shadow: $admin-shadow-card-hover;
+  }
+}
+
+.leadCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.leadName {
+  font-size: 15px;
+  font-weight: 700;
+  color: $admin-text;
+}
+
+.leadDate {
+  font-size: 11px;
+  color: $admin-text-faint;
+}
+
+.leadContactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: $admin-text-muted;
+  margin-bottom: 12px;
+}
+
+.leadCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid $admin-border;
+  gap: 8px;
+}
+
+.snapshotBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: $admin-accent;
+  background: $admin-accent-subtle;
+  padding: 2px 8px;
+  border-radius: $radius-pill;
 }
 
 .pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
+  margin-top: 20px;
+  padding-top: 14px;
   border-top: 1px solid $admin-border;
-  font-size: 0.85rem;
+  font-size: 13px;
   color: $admin-text-muted;
 }
 
@@ -55,13 +192,15 @@
 }
 
 .pageBtn {
-  padding: 6px 14px;
+  padding: 6px 16px;
   border: 1px solid $admin-border;
-  border-radius: $radius-s;
+  border-radius: $radius-pill;
   background: $admin-surface;
   color: $admin-text;
-  font-size: 0.8rem;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s ease;
 
   &:disabled {
     opacity: 0.4;
@@ -69,6 +208,8 @@
   }
 
   &:not(:disabled):hover {
-    background: $admin-surface-raised;
+    background: $admin-accent-subtle;
+    border-color: $admin-accent;
+    color: $admin-accent;
   }
 }

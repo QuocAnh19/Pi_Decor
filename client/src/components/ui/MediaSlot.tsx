@@ -1,21 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import styles from "./MediaSlot.module.scss";
-
-/**
- * MediaSlot — the single place in the codebase that knows how to display a
- * "real photo" position.
- *
- * - If `src` is set AND the file loads successfully → renders the real
- *   photo/video, full-bleed, object-cover, ready for hover-zoom/parallax.
- * - If `src` is missing OR the file 404s (i.e. you haven't dropped the file
- *   in yet) → renders an unmistakable placeholder with the exact filename,
- *   folder, and aspect ratio it expects.
- *
- * Handoff workflow for real Pi Decor photos/video:
- *   1. Drop the file into `public/images/` using the filename shown below.
- *   2. Nothing else to change — this component picks it up automatically.
- */
 
 export interface MediaSlotProps {
   /** Path relative to /public, e.g. "/images/hero.jpg" */
@@ -45,6 +30,11 @@ export function MediaSlot({
   priority = false,
 }: MediaSlotProps) {
   const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
   const showReal = Boolean(src) && !failed;
 
   return (

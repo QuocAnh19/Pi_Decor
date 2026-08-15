@@ -1,13 +1,15 @@
 @use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: $color-admin-surface;
+  background-color: $admin-surface;
   padding: 12px 20px;
-  border-bottom: 1px solid $color-admin-border;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid $admin-border;
+  border-radius: 16px;
+  box-shadow: $admin-shadow-card;
 }
 
 .leftSection {
@@ -24,9 +26,9 @@
 
 .backBtn {
   padding: 6px 12px;
-  background-color: $color-admin-border;
-  color: #f8fafc;
-  border: 1px solid $color-admin-border-light;
+  background-color: $admin-bg;
+  color: $admin-text;
+  border: 1px solid $admin-border;
   border-radius: 8px;
   font-size: $text-xs;
   font-weight: 600;
@@ -37,7 +39,8 @@
   transition: all 0.15s ease;
 
   &:hover {
-    background-color: $color-admin-border-light;
+    background-color: $admin-surface-raised;
+    border-color: $admin-accent;
   }
 }
 
@@ -49,15 +52,15 @@
 
 .editingLabel {
   font-size: $text-xs;
-  color: $color-admin-text-muted;
+  color: $admin-text-muted;
   font-weight: 600;
 }
 
 .gridBtn {
   padding: 6px 12px;
   background-color: transparent;
-  color: $color-admin-text-muted;
-  border: 1px solid $color-admin-border-light;
+  color: $admin-text-muted;
+  border: 1px solid $admin-border;
   border-radius: 8px;
   font-size: $text-xs;
   font-weight: 600;
@@ -65,18 +68,20 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: all 0.15s ease;
 
   &.gridBtnActive {
-    background-color: $color-admin-border;
-    color: #f8fafc;
+    background-color: $admin-accent-subtle;
+    color: $admin-accent;
+    border-color: $admin-accent;
   }
 }
 
 .statusBtn {
   padding: 6px 12px;
-  background-color: rgba(100, 116, 139, 0.2);
-  border: 1px solid #64748b;
-  color: $color-admin-text-light;
+  background-color: $admin-bg;
+  border: 1px solid $admin-border;
+  color: $admin-text-muted;
   border-radius: 8px;
   font-size: $text-xs;
   font-weight: 600;
@@ -84,19 +89,20 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: all 0.15s ease;
 
   &.statusBtnActive {
-    background-color: rgba(16, 185, 129, 0.2);
-    border-color: $color-success;
-    color: #4ade80;
+    background-color: $admin-success-subtle;
+    border-color: $admin-success;
+    color: $admin-success;
   }
 }
 
 .saveDraftBtn {
   padding: 6px 14px;
-  background-color: $color-admin-border;
-  color: #f8fafc;
-  border: 1px solid $color-admin-border-light;
+  background-color: $admin-surface;
+  color: $admin-text;
+  border: 1px solid $admin-border;
   border-radius: 8px;
   font-size: $text-xs;
   font-weight: 600;
@@ -107,13 +113,13 @@
   transition: all 0.15s ease;
 
   &:hover {
-    background-color: $color-admin-border-light;
+    background-color: $admin-surface-raised;
   }
 }
 
 .publishBtn {
   padding: 6px 14px;
-  background-color: $color-success;
+  background-color: $admin-accent;
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -123,18 +129,19 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 8px rgba(161, 92, 46, 0.25);
+  transition: all 0.15s ease;
 
   &:hover {
-    filter: brightness(1.1);
+    background-color: $admin-accent-hover;
   }
 }
 
 .previewBtn {
   padding: 6px 14px;
-  background-color: $color-admin-accent;
-  color: $color-admin-bg;
-  border: none;
+  background-color: $admin-accent-subtle;
+  color: $admin-accent;
+  border: 1px solid rgba($admin-accent, 0.3);
   border-radius: 8px;
   font-size: $text-xs;
   font-weight: 700;
@@ -142,9 +149,11 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: all 0.15s ease;
 
   &.previewBtnActive {
-    background-color: $color-danger;
+    background-color: $admin-danger;
     color: #ffffff;
+    border-color: $admin-danger;
   }
 }
