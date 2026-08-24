@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
+import { JWT_SECRET, JWT_EXPIRES_IN } from "../../config/auth.js";
 import { validate } from "../../middlewares/validate.js";
 import { loginSchema } from "../../schemas/auth.schema.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
@@ -44,17 +45,10 @@ authRouter.post("/login", validate(loginSchema), async (req, res) => {
     return res.status(401).json({ message: "Sai email hoặc mật khẩu." });
   }
 
-  const jwtSecret = process.env.JWT_SECRET ?? "dev-secret";
-  if (process.env.NODE_ENV === "production" && jwtSecret === "dev-secret") {
-    console.warn(
-      "[SECURITY WARNING] Auth: JWT_SECRET đang dùng 'dev-secret' mặc định trong môi trường Production."
-    );
-  }
-
   const token = jwt.sign(
     { sub: admin.id, email: admin.email, role: "admin" },
-    jwtSecret,
-    { expiresIn: process.env.JWT_EXPIRES_IN ?? "8h" }
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
   );
 
   const rawRefreshToken = crypto.randomBytes(40).toString("hex");
@@ -103,11 +97,10 @@ authRouter.post("/refresh", async (req, res) => {
     return res.status(401).json({ message: "Tài khoản admin không tồn tại." });
   }
 
-  const jwtSecret = process.env.JWT_SECRET ?? "dev-secret";
   const token = jwt.sign(
     { sub: admin.id, email: admin.email, role: "admin" },
-    jwtSecret,
-    { expiresIn: process.env.JWT_EXPIRES_IN ?? "8h" }
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
   );
 
   res.json({ token });

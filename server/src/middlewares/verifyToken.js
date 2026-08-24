@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "../config/auth.js";
 
 /**
  * verifyToken / requireAdmin
@@ -16,7 +17,7 @@ export function verifyToken(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET ?? "dev-secret");
+    req.user = jwt.verify(token, JWT_SECRET);
     next();
   } catch {
     return res.status(401).json({ message: "Token không hợp lệ hoặc đã hết hạn." });
