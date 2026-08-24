@@ -1,7 +1,11 @@
+import { useEffect } from "react";
 import {
   ChatBubbleBottomCenterTextIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { Container, Section, SectionHeader } from "../../../components/ui/Layout";
@@ -21,12 +25,91 @@ export function TestimonialsSection() {
     setVisibleCount,
     isModalOpen,
     setIsModalOpen,
-    lightboxImg,
-    setLightboxImg,
+    lightbox,
+    setLightbox,
     loadReviews,
   } = useTestimonials();
 
   const isExpanded = visibleCount >= reviews.length;
+
+  // 1. Lock outside page scroll when lightbox is open
+  useEffect(() => {
+    if (!lightbox) {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+      return;
+    }
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [lightbox]);
+
+  // 2. Keyboard navigation (ArrowLeft, ArrowRight, Escape)
+  useEffect(() => {
+    if (!lightbox) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setLightbox(null);
+      } else if (e.key === "ArrowRight" && lightbox.photos.length > 1) {
+        setLightbox((prev) =>
+          prev
+            ? {
+                ...prev,
+                currentIndex: (prev.currentIndex + 1) % prev.photos.length,
+              }
+            : null
+        );
+      } else if (e.key === "ArrowLeft" && lightbox.photos.length > 1) {
+        setLightbox((prev) =>
+          prev
+            ? {
+                ...prev,
+                currentIndex:
+                  (prev.currentIndex - 1 + prev.photos.length) %
+                  prev.photos.length,
+              }
+            : null
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightbox, setLightbox]);
+
+  const handlePrev = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setLightbox((prev) =>
+      prev
+        ? {
+            ...prev,
+            currentIndex:
+              (prev.currentIndex - 1 + prev.photos.length) % prev.photos.length,
+          }
+        : null
+    );
+  };
+
+  const handleNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setLightbox((prev) =>
+      prev
+        ? {
+            ...prev,
+            currentIndex: (prev.currentIndex + 1) % prev.photos.length,
+          }
+        : null
+    );
+  };
 
   return (
     <Section tone="blush">
@@ -71,14 +154,20 @@ export function TestimonialsSection() {
 
                   {t.photos && t.photos.length > 0 && (
                     <div className={styles.photosRow}>
-                      {t.photos.slice(0, 3).map((photoUrl: string, pIdx: number) => (
+                      {t.photos.map((photoUrl: string, pIdx: number) => (
                         <img
                           key={pIdx}
                           src={photoUrl}
-                          alt={`Ảnh đánh giá ${pIdx + 1}`}
+                          alt={`Ảnh đánh giá ${pIdx + 1} của ${t.author}`}
                           className={styles.photoThumb}
-                          onClick={() => setLightboxImg(photoUrl)}
-                          title="Click để phóng to ảnh"
+                          onClick={() =>
+                            setLightbox({
+                              photos: t.photos,
+                              currentIndex: pIdx,
+                              author: t.author,
+                            })
+                          }
+                          title="Click để xem phóng to ảnh"
                         />
                       ))}
                     </div>
@@ -126,32 +215,84 @@ export function TestimonialsSection() {
         onSuccess={loadReviews}
       />
 
-      {lightboxImg && (
-        <div className={styles.lightboxOverlay} onClick={() => setLightboxImg(null)}>
-          <div style={{ position: "relative" }} onClick={(e) => e.stopPropagation()}>
-            <img src={lightboxImg} alt="Phóng to" className={styles.lightboxImg} />
+      {/* Lightbox Viewer with Body Scroll Lock & Arrow Navigation */}
+      {lightbox && lightbox.photos.length > 0 && (
+        <div className={styles.lightboxOverlay} onClick={() => setLightbox(null)}>
+          {/* Top Info Bar */}
+          <div className={styles.lightboxTopBar} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.lightboxInfo}>
+              <span className={styles.lightboxAuthor}>
+                {lightbox.author ? `Đánh giá từ ${lightbox.author}` : "Hình ảnh thực tế"}
+              </span>
+              {lightbox.photos.length > 1 && (
+                <span className={styles.lightboxCounter}>
+                  {lightbox.currentIndex + 1} / {lightbox.photos.length}
+                </span>
+              )}
+            </div>
+
             <button
               type="button"
-              onClick={() => setLightboxImg(null)}
-              style={{
-                position: "absolute",
-                top: "-16px",
-                right: "-16px",
-                backgroundColor: "#ffffff",
-                color: "#0f172a",
-                border: "none",
-                borderRadius: "50%",
-                width: "36px",
-                height: "36px",
-                fontSize: "18px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-              }}
+              className={styles.lightboxCloseBtn}
+              onClick={() => setLightbox(null)}
+              title="Đóng (Esc)"
+              aria-label="Đóng"
             >
-              ✕
+              <XMarkIcon style={{ width: 22, height: 22 }} />
             </button>
           </div>
+
+          {/* Main Image Display with Left/Right Arrows */}
+          <div className={styles.lightboxMain} onClick={(e) => e.stopPropagation()}>
+            {lightbox.photos.length > 1 && (
+              <button
+                type="button"
+                className={`${styles.lightboxNavBtn} ${styles.lightboxNavBtnPrev}`}
+                onClick={handlePrev}
+                title="Ảnh trước (Mũi tên trái ←)"
+                aria-label="Ảnh trước"
+              >
+                <ChevronLeftIcon style={{ width: 26, height: 26 }} />
+              </button>
+            )}
+
+            <div className={styles.lightboxImgWrapper}>
+              <img
+                src={lightbox.photos[lightbox.currentIndex]}
+                alt={`Ảnh đánh giá ${lightbox.currentIndex + 1}`}
+                className={styles.lightboxImg}
+              />
+            </div>
+
+            {lightbox.photos.length > 1 && (
+              <button
+                type="button"
+                className={`${styles.lightboxNavBtn} ${styles.lightboxNavBtnNext}`}
+                onClick={handleNext}
+                title="Ảnh tiếp theo (Mũi tên phải →)"
+                aria-label="Ảnh tiếp theo"
+              >
+                <ChevronRightIcon style={{ width: 26, height: 26 }} />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom Thumbnails Strip */}
+          {lightbox.photos.length > 1 && (
+            <div className={styles.lightboxThumbs} onClick={(e) => e.stopPropagation()}>
+              {lightbox.photos.map((url, idx) => (
+                <img
+                  key={idx}
+                  src={url}
+                  alt={`Thumbnail ${idx + 1}`}
+                  className={`${styles.lightboxThumb} ${
+                    idx === lightbox.currentIndex ? styles.lightboxThumbActive : ""
+                  }`}
+                  onClick={() => setLightbox((prev) => (prev ? { ...prev, currentIndex: idx } : null))}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </Section>

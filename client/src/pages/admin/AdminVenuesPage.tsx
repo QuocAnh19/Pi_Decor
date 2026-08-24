@@ -1,4 +1,12 @@
-import { PhotoIcon, PencilIcon, TrashIcon, PlusIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { useMemo } from "react";
+import {
+  PhotoIcon,
+  PencilIcon,
+  TrashIcon,
+  PlusIcon,
+  EyeSlashIcon,
+} from "@heroicons/react/24/outline";
+import { SearchInput, Select } from "../../components/ui";
 import { useVenues, VenueList, VenueForm } from "../../features/venues";
 import { ProjectForm } from "../../features/projects";
 import styles from "./AdminVenuesPage.module.scss";
@@ -35,25 +43,102 @@ export function AdminVenuesPage() {
     handleDeleteProject,
   } = useVenues();
 
+  const counts = useMemo(() => {
+    return {
+      all: venues.length,
+      hotel: venues.filter((v) => v.type === "hotel").length,
+      restaurant: venues.filter((v) => v.type === "restaurant").length,
+      resort: venues.filter((v) => v.type === "resort").length,
+      "sảnh tiệc": venues.filter((v) => v.type === "sảnh tiệc").length,
+    };
+  }, [venues]);
+
+  const typeTabs = [
+    { id: "all", label: `Tất cả (${counts.all})` },
+    { id: "hotel", label: `Khách sạn (${counts.hotel})` },
+    { id: "restaurant", label: `Nhà hàng (${counts.restaurant})` },
+    { id: "resort", label: `Resort (${counts.resort})` },
+    { id: "sảnh tiệc", label: `Sảnh tiệc (${counts["sảnh tiệc"]})` },
+  ];
+
+  const typeSelectOptions = [
+    { value: "all", label: `Tất cả loại hình (${counts.all})` },
+    { value: "hotel", label: `Khách sạn (${counts.hotel})` },
+    { value: "restaurant", label: `Nhà hàng (${counts.restaurant})` },
+    { value: "resort", label: `Resort (${counts.resort})` },
+    { value: "sảnh tiệc", label: `Sảnh tiệc (${counts["sảnh tiệc"]})` },
+  ];
+
   return (
     <div>
       <div className={styles.headerRow}>
         <div>
-          <h1 className={styles.title}>Quản Lý Khách Hàng &amp; Báo Giá</h1>
+          <h1 className={styles.title}>Bản Đồ Phân Bổ Dự Án</h1>
           <p className={styles.subtitle}>
-            Theo dõi thông tin liên hệ, tiến độ tư vấn và xuất báo giá PDF cho khách hàng
+            Trực quan hóa vị trí công trình, mật độ khách hàng và khu vực hoạt
+            động trên bản đồ
           </p>
         </div>
+        <button
+          type="button"
+          className={styles.addVenueButton}
+          onClick={() => {
+            setEditingVenue(null);
+            setVenueFormOpen(true);
+          }}
+        >
+          <PlusIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+          Thêm Địa Điểm Mới
+        </button>
       </div>
-      
+
       {error && (
         <p className={styles.error} onClick={() => setError(null)}>
           {error}
         </p>
       )}
 
-      {status === "loading" && <p className={styles.status}>Đang tải…</p>}
-      {status === "error" && <p className={styles.status}>Không tải được danh sách địa điểm.</p>}
+      {/* Unified Filter & Search Bar */}
+      <div className={styles.filterBar}>
+        <div className={styles.searchRow}>
+          <div style={{ flex: 1, minWidth: "240px" }}>
+            <SearchInput
+              placeholder="Tìm kiếm theo tên địa điểm, địa chỉ, thành phố..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div style={{ minWidth: "180px" }}>
+            <Select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              options={typeSelectOptions}
+            />
+          </div>
+        </div>
+
+        {/* Type Filter Buttons */}
+        <div className={styles.tabsRow}>
+          {typeTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSelectedType(tab.id)}
+              className={`${styles.tabButton} ${
+                selectedType === tab.id ? styles.tabActive : ""
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {status === "loading" && <p className={styles.status}>Đang tải danh sách địa điểm…</p>}
+      {status === "error" && (
+        <p className={styles.status}>Không tải được danh sách địa điểm, vui lòng thử lại.</p>
+      )}
 
       {status === "ready" && (
         <div className={styles.layout}>
@@ -79,10 +164,14 @@ export function AdminVenuesPage() {
 
           <div className={styles.detailPanel}>
             {!selectedVenueId && (
-              <p className={styles.placeholder}>Chọn một địa điểm bên trái để xem và quản lý dự án.</p>
+              <p className={styles.placeholder}>
+                Chọn một địa điểm bên trái để xem và quản lý danh sách dự án.
+              </p>
             )}
 
-            {selectedVenueId && detailLoading && <p className={styles.placeholder}>Đang tải dự án…</p>}
+            {selectedVenueId && detailLoading && (
+              <p className={styles.placeholder}>Đang tải dự án…</p>
+            )}
 
             {selectedVenueId && !detailLoading && selectedVenue && (
               <>
@@ -102,21 +191,34 @@ export function AdminVenuesPage() {
                       setProjectFormOpen(true);
                     }}
                   >
-                    <PlusIcon className="h-4 w-4" style={{ width: 16, height: 16 }} /> Thêm dự án
+                    <PlusIcon
+                      className="h-4 w-4"
+                      style={{ width: 16, height: 16 }}
+                    />{" "}
+                    Thêm dự án
                   </button>
                 </div>
 
                 {selectedVenue.projects.length === 0 ? (
-                  <p className={styles.placeholder}>Chưa có dự án nào tại địa điểm này.</p>
+                  <p className={styles.placeholder}>
+                    Chưa có dự án nào tại địa điểm này. Hãy bấm "Thêm dự án" để tạo mới!
+                  </p>
                 ) : (
                   <ul className={styles.projectList}>
                     {selectedVenue.projects.map((project) => (
                       <li key={project.id} className={styles.projectItem}>
                         <div className={styles.projectThumb}>
                           {project.cover_image ? (
-                            <img src={project.cover_image} alt={project.title} className={styles.projectThumbImg} />
+                            <img
+                              src={project.cover_image}
+                              alt={project.title}
+                              className={styles.projectThumbImg}
+                            />
                           ) : (
-                            <PhotoIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+                            <PhotoIcon
+                              className="h-4 w-4"
+                              style={{ width: 16, height: 16 }}
+                            />
                           )}
                         </div>
                         <div className={styles.projectBody}>
@@ -124,13 +226,18 @@ export function AdminVenuesPage() {
                             {project.title}
                             {!project.published && (
                               <span className={styles.unpublished}>
-                                <EyeSlashIcon className="h-3 w-3 inline" style={{ width: 12, height: 12 }} /> Ẩn
+                                <EyeSlashIcon
+                                  className="h-3 w-3 inline"
+                                  style={{ width: 12, height: 12 }}
+                                />{" "}
+                                Ẩn
                               </span>
                             )}
                           </p>
                           <p className={styles.projectMeta}>
                             {project.wedding_date ?? "Chưa rõ ngày"}
-                            {project.style_tags.length > 0 && ` · ${project.style_tags.map((t) => `#${t}`).join(" ")}`}
+                            {project.style_tags.length > 0 &&
+                              ` · ${project.style_tags.map((t) => `#${t}`).join(" ")}`}
                           </p>
                         </div>
                         <div className={styles.projectActions}>
@@ -141,17 +248,23 @@ export function AdminVenuesPage() {
                               setEditingProject(project);
                               setProjectFormOpen(true);
                             }}
-                            aria-label="Sửa"
+                            title="Sửa dự án"
                           >
-                            <PencilIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+                            <PencilIcon
+                              className="h-4 w-4"
+                              style={{ width: 16, height: 16 }}
+                            />
                           </button>
                           <button
                             type="button"
                             className={`${styles.iconButton} ${styles.iconButtonDanger}`}
                             onClick={() => handleDeleteProject(project)}
-                            aria-label="Xoá"
+                            title="Xoá dự án"
                           >
-                            <TrashIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+                            <TrashIcon
+                              className="h-4 w-4"
+                              style={{ width: 16, height: 16 }}
+                            />
                           </button>
                         </div>
                       </li>

@@ -59,6 +59,19 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
           display: 'block'
         }}
       >
+        <style>
+          {`
+            .is-capturing-snapshot .slot-border-overlay,
+            .is-capturing-snapshot .slot-badge-overlay,
+            [data-capturing="true"] .slot-border-overlay,
+            [data-capturing="true"] .slot-badge-overlay {
+              display: none !important;
+              opacity: 0 !important;
+              visibility: hidden !important;
+            }
+          `}
+        </style>
+
         {/* Render Base Template Layer */}
         <g
           id="template-svg-base"
@@ -133,6 +146,8 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
               {/* Layer 2: Slot Border Overlay (Rendered ONLY if showBorders is true) */}
               {showBorders && (
                 <rect
+                  data-no-snapshot="true"
+                  className="slot-border-overlay"
                   x={x}
                   y={y}
                   width={slotWidth}
@@ -149,7 +164,7 @@ export const SVGCanvas: React.FC<SVGCanvasProps> = ({
 
               {/* Layer 3: Label & Status Badge (Rendered ONLY if showBorders is true & slot is empty or locked) */}
               {showBorders && (!hasAsset || isLocked) && (
-                <g transform={`translate(${centerPos.x}, ${centerPos.y})`} style={{ pointerEvents: 'none' }}>
+                <g data-no-snapshot="true" className="slot-badge-overlay" transform={`translate(${centerPos.x}, ${centerPos.y})`} style={{ pointerEvents: 'none' }}>
                   <rect
                     x={-slotWidth / 2 + 10}
                     y={-14}

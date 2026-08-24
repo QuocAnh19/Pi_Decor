@@ -1,6 +1,4 @@
-import { useMemo } from "react";
-import { PencilIcon, TrashIcon, PlusIcon, MapPinIcon, BuildingOffice2Icon } from "@heroicons/react/24/outline";
-import { SearchInput } from "../../../components/ui";
+import { PencilIcon, TrashIcon, PlusIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import type { Venue, VenueType } from "../../../lib/types";
 import styles from "./VenueList.module.scss";
 
@@ -27,70 +25,26 @@ interface VenueListProps {
 
 export function VenueList({
   venues,
-  allVenues,
-  searchQuery,
-  onSearchChange,
-  selectedType,
-  onTypeChange,
   selectedId,
   onSelect,
   onAdd,
   onEdit,
   onDelete,
 }: VenueListProps) {
-  const counts = useMemo(() => {
-    return {
-      all: allVenues.length,
-      hotel: allVenues.filter((v) => v.type === "hotel").length,
-      restaurant: allVenues.filter((v) => v.type === "restaurant").length,
-      resort: allVenues.filter((v) => v.type === "resort").length,
-      "sảnh tiệc": allVenues.filter((v) => v.type === "sảnh tiệc").length,
-    };
-  }, [allVenues]);
-
-  const typeTabs = [
-    { id: "all", label: `Tất cả (${counts.all})` },
-    { id: "hotel", label: `Khách sạn (${counts.hotel})` },
-    { id: "restaurant", label: `Nhà hàng (${counts.restaurant})` },
-    { id: "resort", label: `Resort (${counts.resort})` },
-    { id: "sảnh tiệc", label: `Sảnh tiệc (${counts["sảnh tiệc"]})` },
-  ];
-
   return (
     <div className={styles.wrap}>
       <div className={styles.headerRow}>
         <p className={styles.heading}>
-          <BuildingOffice2Icon className="h-4 w-4 inline mr-1.5" style={{ width: 18, height: 18, color: "#a15c2e", display: "inline", marginRight: "6px" }} />
-          Địa điểm ({venues.length})
+          <span>Danh sách địa điểm</span>
+          <span className={styles.countBadge}>{venues.length}</span>
         </p>
         <button type="button" className={styles.addButton} onClick={onAdd}>
-          <PlusIcon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Thêm venue
+          <PlusIcon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Thêm mới
         </button>
       </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        <SearchInput
-          placeholder="Tìm tên, địa chỉ, thành phố..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-        />
-      </div>
-
-      <div className={styles.tabsRow}>
-        {typeTabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => onTypeChange(tab.id)}
-            className={`${styles.tabBtn} ${selectedType === tab.id ? styles.tabBtnActive : ""}`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
       {venues.length === 0 ? (
-        <p className={styles.empty}>Không tìm thấy địa điểm nào phù hợp.</p>
+        <p className={styles.empty}>Không tìm thấy địa điểm nào phù hợp bộ lọc.</p>
       ) : (
         <ul className={styles.list}>
           {venues.map((venue) => (
@@ -105,7 +59,9 @@ export function VenueList({
                 <div className={styles.itemBody}>
                   <p className={styles.itemName}>{venue.name}</p>
                   <p className={styles.itemMeta}>
-                    <span className={styles.typeBadge}>{typeLabel[venue.type]}</span> · {venue.city ?? "—"} · {venue.project_count} dự án
+                    <span className={styles.typeBadge}>{typeLabel[venue.type] || venue.type}</span>
+                    {venue.city ? ` · ${venue.city}` : ""}
+                    <span> · {venue.project_count} dự án</span>
                   </p>
                 </div>
                 <div className={styles.itemActions}>

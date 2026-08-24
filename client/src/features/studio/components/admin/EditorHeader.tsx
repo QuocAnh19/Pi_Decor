@@ -19,7 +19,6 @@ export interface EditorHeaderProps {
   template: Template;
   allTemplates: StudioTemplateRow[];
   isDirty: boolean;
-  isPreviewMode: boolean;
   showGrid: boolean;
   mode?: "admin" | "customer";
   onBackToHome?: () => void;
@@ -27,7 +26,6 @@ export interface EditorHeaderProps {
   onSaveDraft?: () => void;
   onPublish?: () => void;
   onToggleActive?: () => void;
-  onTogglePreview: () => void;
   onToggleGrid: () => void;
   onSaveDesign?: () => void;
   onReset?: () => void;
@@ -38,7 +36,6 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   template,
   allTemplates,
   isDirty,
-  isPreviewMode,
   showGrid,
   mode = "admin",
   onBackToHome,
@@ -46,7 +43,6 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   onSaveDraft,
   onPublish,
   onToggleActive,
-  onTogglePreview,
   onToggleGrid,
   onSaveDesign,
   onReset,
@@ -236,11 +232,11 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
             </Badge>
           )}
 
-          {isCustomer && (
+          {/* {isCustomer && (
             <Badge tone="accent">
               ✨ Studio Phối Cảnh
             </Badge>
-          )}
+          )} */}
         </div>
       </div>
 
@@ -311,7 +307,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
             type="button"
             onClick={onSaveDraft}
             className={styles.saveDraftBtn}
-            title="Lưu nháp bản thiết kế hiện tại"
+            title="Lưu nháp bản thiết kế hiện tại và cập nhật ảnh đại diện"
           >
             <BookmarkIcon className="h-4 w-4" style={{ width: 14, height: 14, color: "#38bdf8" }} /> Lưu Nháp
           </button>
@@ -323,24 +319,11 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
             type="button"
             onClick={onPublish}
             className={styles.publishBtn}
-            title="Xuất bản thiết kế này để khách hàng có thể chọn trên Studio"
+            title="Xuất bản thiết kế và cập nhật ảnh đại diện lên Studio"
           >
             <CloudArrowUpIcon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Xuất bản thiết kế
           </button>
         )}
-
-        {/* Toggle Preview (Both Admin & Customer) */}
-        <button
-          type="button"
-          onClick={onTogglePreview}
-          className={`${styles.previewBtn} ${isPreviewMode ? styles.previewBtnActive : ""}`}
-          title={isCustomer ? "Ẩn khung chọn để ngắm trọn vẹn phông cưới" : "Xem thử giao diện tương tác phía khách hàng"}
-        >
-          <EyeIcon className="h-4 w-4" style={{ width: 14, height: 14 }} />
-          {isPreviewMode
-            ? isCustomer ? "Tiếp Tục Chỉnh Sửa" : "Thoát Xem Thử"
-            : isCustomer ? "Chiêm Ngưỡng Toàn Cảnh" : "Xem Thử Khách"}
-        </button>
       </div>
     </div>
   );

@@ -256,7 +256,7 @@ export const CustomerTemplateGallery: React.FC<CustomerTemplateGalleryProps> = (
                     }}
                   >
                     <SparklesIcon style={{ width: "16px", height: "16px" }} />
-                    <span>✨ Tùy Chỉnh Thiết Kế Mẫu Này</span>
+                    <span>Tùy Chỉnh Thiết Kế Mẫu Này</span>
                   </button>
                 </div>
               </div>

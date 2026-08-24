@@ -5,33 +5,36 @@
 .empty {
   font-size: $text-sm;
   color: $admin-text-faint;
-  padding: 32px;
+  padding: 48px;
   text-align: center;
   border: 1px dashed $admin-border;
-  border-radius: $radius-m;
+  border-radius: $radius-l;
+  background: #ffffff;
 }
 
 .tableWrap {
-  background: $admin-surface;
+  background: #ffffff;
   border: 1px solid $admin-border;
-  border-radius: $radius-m;
+  border-radius: $radius-l;
   overflow-x: auto;
+  box-shadow: $admin-shadow-card;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $text-sm;
+  font-size: 13px;
   white-space: nowrap;
 
   th {
     text-align: left;
-    font-weight: 500;
-    color: $admin-text-faint;
+    font-weight: 700;
+    color: $admin-text-muted;
     text-transform: uppercase;
-    font-size: $text-xs;
-    letter-spacing: 0.06em;
-    padding: 12px 16px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    padding: 14px 16px;
+    background: $admin-bg;
     border-bottom: 1px solid $admin-border;
   }
 
@@ -43,56 +46,110 @@
   }
 }
 
-.row:last-child td {
-  border-bottom: none;
-}
+.row {
+  transition: background-color 0.15s ease;
 
-.row:hover td {
-  background: $admin-surface-raised;
+  &:hover td {
+    background: #fdf7f5;
+  }
+
+  &:last-child td {
+    border-bottom: none;
+  }
 }
 
 .dim {
   color: $admin-text-muted;
+  font-size: 12px;
+}
+
+.phone {
+  font-weight: 600;
+  color: $admin-text;
 }
 
 .email {
   color: $admin-text-faint;
-  font-size: $text-xs;
+  font-size: 11px;
 }
 
-.nameButton {
-  font-weight: 600;
+.nameText {
+  font-family: $font-sans;
+  font-weight: 700;
+  font-size: 14px;
   color: $admin-text;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-underline-offset: 3px;
-  transition: text-decoration-color $transition-default;
-
-  &:hover {
-    text-decoration-color: $admin-accent;
-  }
-
-  @include focus-ring;
 }
 
 .snapshotTag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: $text-xs;
+  font-size: 11px;
+  font-weight: 700;
   color: $admin-accent;
   background: $admin-accent-subtle;
   padding: 3px 8px;
   border-radius: $radius-pill;
+  border: 1px solid rgba(161, 92, 46, 0.2);
+}
+
+.actionsCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.quoteBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(161, 92, 46, 0.3);
+  background: $admin-accent-subtle;
+  color: $admin-accent;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-accent;
+    color: #ffffff;
+    border-color: $admin-accent;
+    transform: translateY(-1px);
+  }
+}
+
+.detailBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: #ffffff;
+  color: $admin-text;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-bg;
+    border-color: $admin-accent;
+    color: $admin-accent;
+  }
 }
 
 .statusSelect {
   border-radius: $radius-pill;
   border: 1px solid $admin-border;
-  background: $admin-surface-raised;
-  padding: 5px 12px;
-  font-size: $text-xs;
-  font-weight: 600;
+  background: #ffffff;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
   color: $admin-text;
   cursor: pointer;
 
@@ -101,15 +158,18 @@
 
 .statusNew {
   color: $admin-warning;
-  border-color: rgba($admin-warning, 0.4);
+  background: #fdfaf3;
+  border-color: rgba($admin-warning, 0.5);
 }
 
 .statusContacted {
   color: $admin-accent;
-  border-color: rgba($admin-accent, 0.4);
+  background: #faf4ee;
+  border-color: rgba($admin-accent, 0.5);
 }
 
 .statusClosed {
   color: $admin-success;
-  border-color: rgba($admin-success, 0.4);
+  background: #f4f8f1;
+  border-color: rgba($admin-success, 0.5);
 }

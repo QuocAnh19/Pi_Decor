@@ -155,6 +155,7 @@ export const SlotMarker: React.FC<SlotMarkerProps> = ({
         justifyContent: 'center',
         cursor: isDragging ? 'grabbing' : 'grab',
         opacity: isDragging ? 0.75 : 1,
+        pointerEvents: 'auto',
         userSelect: 'none',
         zIndex: isSelected ? 30 : slot.zIndex + 10,
         transition: isDragging ? 'none' : 'box-shadow 0.2s ease, border-color 0.2s ease'

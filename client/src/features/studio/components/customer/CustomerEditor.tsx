@@ -52,7 +52,6 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
   );
 
   const [showGrid, setShowGrid] = useState(false);
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isAddSlotModalOpen, setIsAddSlotModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -335,13 +334,11 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
         template={template}
         allTemplates={allTemplates}
         isDirty={false}
-        isPreviewMode={isPreviewMode}
         showGrid={showGrid}
         mode="customer"
         onBackToHome={onBackToGallery}
         onSelectTemplate={handleSelectTemplate}
         onToggleGrid={() => setShowGrid(!showGrid)}
-        onTogglePreview={() => setIsPreviewMode(!isPreviewMode)}
         onSaveDesign={() => setIsSaveModalOpen(true)}
         onReset={handleReset}
       />
@@ -380,8 +377,8 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
               template={template}
               slots={slots}
               slotConfig={slotConfig}
-              selectedSlotId={isPreviewMode ? null : selectedSlotId}
-              showGrid={showGrid && !isPreviewMode}
+              selectedSlotId={selectedSlotId}
+              showGrid={showGrid}
               onSlotSelect={(id) => setSelectedSlotId(id)}
               onSlotMove={(id, x, y) => handleSlotPositionChange(id, x, y)}
               onSlotUpdate={handleSlotUpdate}

@@ -152,14 +152,17 @@ export type LeadStatus = "new" | "contacted" | "closed";
  * UI (LeadDetailDrawer) renders defensively around missing pieces.
  */
 export interface DesignSnapshot {
-  baseFabric: { style?: string; color?: string; hex?: string } | null;
-  valance: { style?: string; color?: string; enabled?: boolean } | null;
-  flowers: Record<string, { slot: string; shape: string; tone: string } | null>;
-  details: {
-    monogram: { enabled: boolean; text: string };
-    ribbon: boolean;
-    lights: boolean;
+  preview_image?: string;
+  thumbnail?: string;
+  baseFabric?: { style?: string; color?: string; hex?: string } | null;
+  valance?: { style?: string; color?: string; enabled?: boolean } | null;
+  flowers?: Record<string, { slot: string; shape: string; tone: string } | null>;
+  details?: {
+    monogram?: { enabled: boolean; text: string };
+    ribbon?: boolean;
+    lights?: boolean;
   };
+  [key: string]: unknown;
 }
 
 export interface Lead {

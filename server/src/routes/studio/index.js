@@ -4,6 +4,7 @@ import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { sanitizeSvg } from "../../utils/sanitizeSvg.js";
 import { uploadImage, publicUrlFor, deleteImageFile } from "../../utils/uploadImage.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export const studioRouter = Router();
 
@@ -94,6 +95,24 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req
 
     const activeFlag = is_active !== undefined ? Boolean(is_active) : (existing ? Boolean(existing.is_active) : true);
 
+    let finalThumbnail = thumbnail;
+    if (thumbnail && typeof thumbnail === "string" && thumbnail.startsWith("data:image/")) {
+      if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+        try {
+          const uploadRes = await cloudinary.uploader.upload(thumbnail, {
+            folder: "pidecor/templates",
+            resource_type: "image",
+          });
+          finalThumbnail = uploadRes.secure_url;
+          if (existing?.thumbnail && existing.thumbnail !== finalThumbnail) {
+            await deleteImageFile(existing.thumbnail);
+          }
+        } catch (err) {
+          console.error("Failed to upload template thumbnail to Cloudinary, keeping payload as-is:", err?.message || err);
+        }
+      }
+    }
+
     let savedTemplate;
     if (existing) {
       savedTemplate = await db.updateById(
@@ -101,7 +120,7 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req
         existing.id,
         {
           name: String(name).trim(),
-          thumbnail: thumbnail ?? existing.thumbnail ?? null,
+          thumbnail: finalThumbnail !== undefined ? finalThumbnail : (existing.thumbnail ?? null),
           svg_base: cleanSvg,
           category: category ?? existing.category ?? null,
           is_active: activeFlag,
@@ -113,7 +132,7 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req
       savedTemplate = {
         id: validTargetUuid,
         name: String(name).trim(),
-        thumbnail: thumbnail ?? null,
+        thumbnail: finalThumbnail ?? null,
         svg_base: cleanSvg,
         category: category ?? null,
         is_active: activeFlag,

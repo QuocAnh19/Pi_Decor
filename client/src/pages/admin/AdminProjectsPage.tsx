@@ -62,9 +62,9 @@ export function AdminProjectsPage() {
     <div>
       <div className={styles.headerRow}>
         <div>
-          <h1 className={styles.title}>Quản Lý Khách Hàng &amp; Báo Giá</h1>
+          <h1 className={styles.title}>Quản Lý Hồ Sơ Dự Án</h1>
           <p className={styles.subtitle}>
-            Theo dõi thông tin liên hệ, tiến độ tư vấn và xuất báo giá PDF cho khách hàng
+            Theo dõi tiến độ triển khai, trạng thái thi công và danh mục công trình đang thực hiện
           </p>
         </div>
 

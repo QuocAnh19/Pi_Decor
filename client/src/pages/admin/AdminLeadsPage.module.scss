@@ -19,12 +19,16 @@
   font-weight: 700;
   color: $admin-text;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .subtitle {
   font-size: $text-sm;
   color: $admin-text-faint;
   margin-top: 4px;
+  margin-bottom: 0;
 }
 
 .status {
@@ -104,24 +108,23 @@
 /* Grid View */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
 }
 
 .leadCard {
-  background: $admin-surface;
+  background: #ffffff;
   border: 1px solid $admin-border;
   border-radius: $radius-l;
-  padding: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: $admin-shadow-card;
-  cursor: pointer;
+  cursor: default;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
     border-color: $admin-accent;
     box-shadow: $admin-shadow-card-hover;
   }
@@ -132,10 +135,12 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 12px;
+  gap: 8px;
 }
 
 .leadName {
-  font-size: 15px;
+  font-family: $font-serif;
+  font-size: 16px;
   font-weight: 700;
   color: $admin-text;
 }
@@ -148,10 +153,10 @@
 .leadContactInfo {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 13px;
   color: $admin-text-muted;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .leadCardFooter {
@@ -161,6 +166,56 @@
   padding-top: 12px;
   border-top: 1px solid $admin-border;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.leadCardActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cardQuoteBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(161, 92, 46, 0.3);
+  background: $admin-accent-subtle;
+  color: $admin-accent;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-accent;
+    color: #ffffff;
+    border-color: $admin-accent;
+    transform: translateY(-1px);
+  }
+}
+
+.cardDetailBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: #ffffff;
+  color: $admin-text;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-bg;
+    border-color: $admin-accent;
+    color: $admin-accent;
+  }
 }
 
 .snapshotBadge {
@@ -171,16 +226,17 @@
   font-weight: 700;
   color: $admin-accent;
   background: $admin-accent-subtle;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: $radius-pill;
+  border: 1px solid rgba(161, 92, 46, 0.2);
 }
 
 .pagination {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 20px;
-  padding-top: 14px;
+  margin-top: 24px;
+  padding-top: 16px;
   border-top: 1px solid $admin-border;
   font-size: 13px;
   color: $admin-text-muted;
@@ -195,7 +251,7 @@
   padding: 6px 16px;
   border: 1px solid $admin-border;
   border-radius: $radius-pill;
-  background: $admin-surface;
+  background: #ffffff;
   color: $admin-text;
   font-size: 12px;
   font-weight: 600;

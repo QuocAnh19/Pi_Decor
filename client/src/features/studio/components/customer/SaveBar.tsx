@@ -26,7 +26,7 @@ export const SaveBar: React.FC<SaveBarProps> = ({
 
   const handleSaveDraftClick = () => {
     onSaveDraft()
-    showToast('Đã lưu bản nháp vào bộ nhớ trình duyệt (localStorage)!')
+    showToast('Đã lưu bản nháp thiết kế thành công!')
   }
 
   const handleSaveFinalClick = () => {
@@ -137,7 +137,7 @@ export const SaveBar: React.FC<SaveBarProps> = ({
           gap: '6px'
         }}
       >
-        📄 Xuất PDF
+        Xuất PDF
       </button>
     </div>
   )

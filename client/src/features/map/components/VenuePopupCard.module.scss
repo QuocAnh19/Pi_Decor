@@ -4,9 +4,9 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  z-index: 9000;
-  background: rgba(20, 10, 14, 0.5);
-  backdrop-filter: blur(4px);
+  z-index: 8000;
+  background: rgba(20, 10, 14, 0.55);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,7 +16,7 @@
 
 .modalCard {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   max-height: 85vh;
   background: $color-paper;
   border-radius: $radius-l;
@@ -32,12 +32,19 @@
   from {
     opacity: 0;
   }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes popIn {
   from {
     opacity: 0;
     transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -48,12 +55,14 @@
   padding: 20px 24px;
   border-bottom: 1px solid $color-line;
   background: $color-paper-dim;
+  gap: 16px;
 }
 
 .titleGroup {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
 }
 
 .venueBadge {
@@ -61,15 +70,15 @@
   align-items: center;
   gap: 4px;
   font-size: $text-xs;
-  font-weight: 600;
+  font-weight: 700;
   color: $color-accent;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .name {
   font-family: $font-serif;
-  font-size: $text-xl;
+  font-size: 1.35rem;
   font-weight: 700;
   color: $color-ink;
   margin: 0;
@@ -79,20 +88,29 @@
   font-size: $text-sm;
   color: $color-ink-muted;
   margin: 0;
+  line-height: 1.4;
 }
 
 .closeBtn {
-  background: transparent;
-  border: none;
-  color: $color-ink-muted;
-  padding: 4px;
+  background: $color-paper;
+  border: 1px solid $color-line;
+  color: $color-ink;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
   transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(39, 22, 32, 0.06);
 
   &:hover {
-    color: $color-ink;
-    background: rgba(0, 0, 0, 0.05);
+    background: $color-accent;
+    color: #ffffff;
+    border-color: $color-accent;
+    transform: scale(1.05);
   }
 }
 
@@ -103,10 +121,15 @@
 }
 
 .sectionTitle {
-  font-size: $text-sm;
-  font-weight: 600;
-  color: $color-ink-muted;
-  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: $color-ink;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .empty {
@@ -114,14 +137,17 @@
   color: $color-ink-faint;
   line-height: 1.6;
   text-align: center;
-  padding: 24px 0;
+  padding: 32px 16px;
+  background: $color-paper-dim;
+  border-radius: $radius-m;
+  border: 1px dashed $color-line;
 }
 
 .loading {
   font-size: $text-sm;
   color: $color-ink-muted;
   text-align: center;
-  padding: 24px 0;
+  padding: 32px 0;
 }
 
 .projectList {
@@ -135,60 +161,103 @@
 
 .projectCard {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
-  padding: 10px;
+  padding: 12px 14px;
   border-radius: $radius-m;
   border: 1px solid $color-line;
   background: $color-paper;
-  transition: border-color 0.15s ease;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  position: relative;
 
   &:hover {
     border-color: $color-accent;
+    background: #fdf7f5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(161, 92, 46, 0.12);
+
+    .viewProjectBtn {
+      background: $color-accent;
+      color: #ffffff;
+      border-color: $color-accent;
+    }
   }
 }
 
 .thumbWrap {
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
   border-radius: $radius-s;
   overflow: hidden;
   background: $color-paper-dim;
+  border: 1px solid $color-line;
   flex-shrink: 0;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .thumbImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.25s ease;
+
+  .projectCard:hover & {
+    transform: scale(1.06);
+  }
 }
 
 .projectInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
 .projectTitle {
-  font-size: $text-sm;
-  font-weight: 600;
+  font-family: $font-serif;
+  font-size: 15px;
+  font-weight: 700;
   color: $color-ink;
   margin: 0;
+  line-height: 1.3;
 }
 
 .projectMeta {
-  font-size: $text-xs;
-  color: $color-ink-muted;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: $color-accent;
+  font-weight: 600;
 }
 
 .projectTags {
-  font-size: $text-xs;
+  font-size: 11px;
+  color: $color-ink-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.viewProjectBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid $color-line;
+  background: $color-paper-dim;
   color: $color-accent;
-  font-weight: 500;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
 }
 
 .footer {
@@ -203,16 +272,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: $radius-pill;
   background: $color-accent;
   color: #ffffff;
   font-size: $text-sm;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
-  transition: opacity 0.15s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(161, 92, 46, 0.25);
 
   &:hover {
-    opacity: 0.9;
+    background: $color-accent-hover;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(161, 92, 46, 0.35);
   }
 }

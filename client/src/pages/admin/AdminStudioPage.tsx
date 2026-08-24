@@ -147,7 +147,6 @@ export function AdminStudioPage() {
       <div className={styles.headerRow}>
         <div>
           <h1 className={styles.title}>
-            <PhotoIcon className="h-6 w-6" style={{ width: 26, height: 26, color: "#a15c2e" }} />
             Quản Lý Mẫu Thiết Kế Studio
           </h1>
           <p className={styles.subtitle}>

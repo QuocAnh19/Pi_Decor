@@ -7,6 +7,7 @@ import {
   toStudioAsset,
   toStudioRule,
 } from "../utils/adapters";
+import { captureStudioThumbnail } from "../utils/captureThumbnail";
 import {
   seedTemplates,
   seedSlots,
@@ -193,11 +194,22 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
 
   const handlePublish = async () => {
     try {
+      let thumbnailData = template.thumbnail;
+      try {
+        const captured = await captureStudioThumbnail();
+        if (captured) {
+          thumbnailData = captured;
+        }
+      } catch (captureErr) {
+        console.warn("Could not capture preview thumbnail:", captureErr);
+      }
+
       if (token) {
         const res = await api.publishStudioTemplate(
           template.id,
           {
             name: template.name,
+            thumbnail: thumbnailData,
             svg_base: template.svgBase,
             is_active: true,
             category: template.category ?? null,
@@ -208,11 +220,22 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
           token,
         );
         const savedId = res?.template?.id || template.id;
-        setTemplate((prev) => ({ ...prev, id: savedId, isActive: true }));
+        const savedThumbnail = res?.template?.thumbnail || thumbnailData;
+        setTemplate((prev) => ({
+          ...prev,
+          id: savedId,
+          isActive: true,
+          thumbnail: savedThumbnail,
+        }));
         setIsDirty(false);
-        showToast("Đã xuất bản template và lưu thành công!");
+        showToast("Đã xuất bản template và cập nhật ảnh đại diện thành công!");
         loadTemplatesFromAPI(savedId);
       } else {
+        setTemplate((prev) => ({
+          ...prev,
+          isActive: true,
+          thumbnail: thumbnailData,
+        }));
         setIsDirty(false);
         showToast("Đã lưu thiết kế!");
       }
@@ -226,11 +249,22 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
 
   const handleSaveDraft = async () => {
     try {
+      let thumbnailData = template.thumbnail;
+      try {
+        const captured = await captureStudioThumbnail();
+        if (captured) {
+          thumbnailData = captured;
+        }
+      } catch (captureErr) {
+        console.warn("Could not capture preview thumbnail:", captureErr);
+      }
+
       if (token) {
         const res = await api.publishStudioTemplate(
           template.id,
           {
             name: template.name,
+            thumbnail: thumbnailData,
             svg_base: template.svgBase,
             is_active: false,
             category: template.category ?? null,
@@ -241,12 +275,22 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
           token,
         );
         const savedId = res?.template?.id || template.id;
-        setTemplate((prev) => ({ ...prev, id: savedId, isActive: false }));
+        const savedThumbnail = res?.template?.thumbnail || thumbnailData;
+        setTemplate((prev) => ({
+          ...prev,
+          id: savedId,
+          isActive: false,
+          thumbnail: savedThumbnail,
+        }));
         setIsDirty(false);
-        showToast("✓ Đã lưu nháp template thành công vào CSDL!");
+        showToast("✓ Đã lưu nháp template và cập nhật ảnh đại diện vào CSDL!");
         loadTemplatesFromAPI(savedId);
       } else {
-        setTemplate((prev) => ({ ...prev, isActive: false }));
+        setTemplate((prev) => ({
+          ...prev,
+          isActive: false,
+          thumbnail: thumbnailData,
+        }));
         setIsDirty(false);
         showToast("✓ Đã lưu nháp template!");
       }
@@ -255,6 +299,50 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
       showToast(
         `Lỗi lưu nháp: ${err instanceof Error ? err.message : "Không thể lưu bản nháp"}`,
       );
+    }
+  };
+
+  const handleCaptureThumbnail = async () => {
+    try {
+      showToast("Đang chụp ảnh đại diện...");
+      const captured = await captureStudioThumbnail();
+      if (!captured) {
+        showToast("Không chụp được ảnh canvas.");
+        return;
+      }
+
+      if (token) {
+        const res = await api.publishStudioTemplate(
+          template.id,
+          {
+            name: template.name,
+            thumbnail: captured,
+            svg_base: template.svgBase,
+            is_active: template.isActive,
+            category: template.category ?? null,
+            slots,
+            rules,
+            slot_config: slotConfig as Record<string, unknown>,
+          },
+          token,
+        );
+        const savedThumbnail = res?.template?.thumbnail || captured;
+        setTemplate((prev) => ({
+          ...prev,
+          thumbnail: savedThumbnail,
+        }));
+        showToast("✓ Đã chụp và cập nhật ảnh đại diện mới thành công!");
+        loadTemplatesFromAPI(template.id);
+      } else {
+        setTemplate((prev) => ({
+          ...prev,
+          thumbnail: captured,
+        }));
+        showToast("✓ Đã chụp ảnh đại diện!");
+      }
+    } catch (err) {
+      console.error("Failed to capture thumbnail:", err);
+      showToast("Lỗi khi lưu ảnh đại diện.");
     }
   };
 
@@ -491,6 +579,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
     handleSelectTemplate,
     handleSaveDraft,
     handlePublish,
+    handleCaptureThumbnail,
     handleToggleActive,
     handleSlotPositionChange,
     handleSlotDimensionsChange,

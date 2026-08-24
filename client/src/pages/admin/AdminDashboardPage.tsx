@@ -37,10 +37,9 @@ export function AdminDashboardPage() {
     <div>
       <div className={styles.headerRow}>
         <div>
-          <h1 className={styles.title}>Quản Lý Khách Hàng &amp; Báo Giá</h1>
+          <h1 className={styles.title}>Bảng Điều Khiển Tổng Quan</h1>
           <p className={styles.subtitle}>
-            Theo dõi thông tin liên hệ, tiến độ tư vấn và xuất báo giá PDF cho
-            khách hàng
+            Nắm bắt nhanh chỉ số hiệu suất, tiến độ dự án và hoạt động kinh doanh nổi bật
           </p>
         </div>
       </div>

@@ -6,11 +6,13 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   CalendarDaysIcon,
+  DocumentTextIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
-import { useLeads, LeadTable, LeadDetailDrawer } from "../../features/leads";
+import { useLeads, LeadTable, LeadDetailDrawer, QuotationModal } from "../../features/leads";
 import { SearchInput, Select } from "../../components/ui";
 import { formatDate } from "../../lib/formatters";
-import type { LeadStatus } from "../../lib/types";
+import type { Lead, LeadStatus } from "../../lib/types";
 import styles from "./AdminLeadsPage.module.scss";
 
 const STATUS_FILTER_OPTIONS = [
@@ -46,6 +48,7 @@ export function AdminLeadsPage() {
   } = useLeads();
 
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
+  const [quotingLead, setQuotingLead] = useState<Lead | null>(null);
 
   const statusTabs = [
     { id: "all", label: `Tất cả (${total})` },
@@ -54,14 +57,29 @@ export function AdminLeadsPage() {
     { id: "closed", label: "Đã chốt" },
   ];
 
+  const handleOpenQuotation = (lead: Lead) => {
+    setSelectedLead(null);
+    setQuotingLead(lead);
+  };
+
+  const handleBackToDetail = () => {
+    if (quotingLead) {
+      const current = quotingLead;
+      setQuotingLead(null);
+      setSelectedLead(current);
+    }
+  };
+
   return (
     <div>
       {/* Header Row */}
       <div className={styles.headerRow}>
         <div>
-          <h1 className={styles.title}>Quản Lý Khách Hàng &amp; Báo Giá</h1>
+          <h1 className={styles.title}>
+            Quản Lý Khách Hàng &amp; Báo Giá
+          </h1>
           <p className={styles.subtitle}>
-            Theo dõi thông tin liên hệ, tiến độ tư vấn và xuất báo giá PDF cho khách hàng
+            Theo dõi thông tin liên hệ, nhu cầu tư vấn và lập báo giá chi tiết xuất file PDF cho khách hàng
           </p>
         </div>
       </div>
@@ -100,7 +118,7 @@ export function AdminLeadsPage() {
               border: "1px solid #e7ded0",
             }}
           >
-            {/* Nút bên trái: Xem dạng bảng */}
+            {/* Nút bên trái: Xem dạng thẻ */}
             <button
               type="button"
               onClick={() => setViewMode("grid")}
@@ -115,12 +133,12 @@ export function AdminLeadsPage() {
                 alignItems: "center",
                 transition: "all 0.15s ease",
               }}
-              title="Xem dạng bảng"
+              title="Xem dạng thẻ"
             >
-              <ListBulletIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+              <Squares2X2Icon className="h-4 w-4" style={{ width: 16, height: 16 }} />
             </button>
 
-            {/* Nút bên phải: Xem dạng list / thẻ */}
+            {/* Nút bên phải: Xem dạng bảng */}
             <button
               type="button"
               onClick={() => setViewMode("table")}
@@ -135,9 +153,9 @@ export function AdminLeadsPage() {
                 alignItems: "center",
                 transition: "all 0.15s ease",
               }}
-              title="Xem dạng danh sách (thẻ)"
+              title="Xem dạng bảng"
             >
-              <Squares2X2Icon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+              <ListBulletIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
             </button>
           </div>
         </div>
@@ -173,6 +191,7 @@ export function AdminLeadsPage() {
               updatingStatusId={updatingStatusId}
               onSelect={(lead) => setSelectedLead(lead)}
               onStatusChange={handleStatusChange}
+              onOpenQuotation={handleOpenQuotation}
             />
           ) : (
             <div className={styles.grid}>
@@ -180,7 +199,6 @@ export function AdminLeadsPage() {
                 <div
                   key={lead.id}
                   className={styles.leadCard}
-                  onClick={() => setSelectedLead(lead)}
                 >
                   <div>
                     <div className={styles.leadCardHeader}>
@@ -189,35 +207,57 @@ export function AdminLeadsPage() {
                     </div>
 
                     <div className={styles.leadContactInfo}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <PhoneIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14, color: "#a15c2e" }} />
-                        <span>{lead.phone}</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <PhoneIcon className="h-3.5 w-3.5" style={{ width: 15, height: 15, color: "#a15c2e" }} />
+                        <span style={{ fontWeight: 600, color: "#271620" }}>{lead.phone}</span>
                       </div>
                       {lead.email && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <EnvelopeIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14, color: "#6e6259" }} />
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <EnvelopeIcon className="h-3.5 w-3.5" style={{ width: 15, height: 15, color: "#6e6259" }} />
                           <span>{lead.email}</span>
                         </div>
                       )}
                       {lead.wedding_date && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "#a15c2e", fontWeight: "600" }}>
-                          <CalendarDaysIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                          <span>Ngày cưới: {formatDate(lead.wedding_date)}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#a15c2e", fontWeight: "600" }}>
+                          <CalendarDaysIcon className="h-3.5 w-3.5" style={{ width: 15, height: 15 }} />
+                          <span>Ngày tiệc: {formatDate(lead.wedding_date)}</span>
                         </div>
                       )}
                     </div>
                   </div>
 
                   <div className={styles.leadCardFooter}>
-                    {lead.design_snapshot ? (
-                      <span className={styles.snapshotBadge}>
-                        <SparklesIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} /> Có thiết kế
-                      </span>
-                    ) : (
-                      <span style={{ fontSize: "11px", color: "#9c9186" }}>Tư vấn dịch vụ</span>
-                    )}
+                    <div>
+                      {lead.design_snapshot ? (
+                        <span className={styles.snapshotBadge}>
+                          <SparklesIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} /> Studio 3D
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: "11px", color: "#9c9186" }}>Tư vấn dịch vụ</span>
+                      )}
+                    </div>
 
-                    <div onClick={(e) => e.stopPropagation()}>
+                    <div className={styles.leadCardActions}>
+                      <button
+                        type="button"
+                        className={styles.cardQuoteBtn}
+                        onClick={() => handleOpenQuotation(lead)}
+                        title="Lập báo giá"
+                      >
+                        <DocumentTextIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
+                        <span>Báo giá</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={styles.cardDetailBtn}
+                        onClick={() => setSelectedLead(lead)}
+                        title="Xem chi tiết thông tin khách hàng"
+                      >
+                        <EyeIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
+                        <span>Chi tiết</span>
+                      </button>
+
                       <Select
                         fullWidth={false}
                         value={lead.status}
@@ -261,12 +301,24 @@ export function AdminLeadsPage() {
         </>
       )}
 
+      {/* Lead Detail Drawer */}
       <LeadDetailDrawer
         lead={selectedLead}
         updatingStatusId={updatingStatusId}
         onClose={() => setSelectedLead(null)}
         onStatusChange={handleStatusChange}
+        onOpenQuotation={handleOpenQuotation}
       />
+
+      {/* Quotation Modal — Rendered only when quoting, eliminating overlapping conflicts */}
+      {quotingLead && (
+        <QuotationModal
+          lead={quotingLead}
+          onClose={() => setQuotingLead(null)}
+          onSaved={() => {}}
+          onBackToDetail={handleBackToDetail}
+        />
+      )}
     </div>
   );
 }

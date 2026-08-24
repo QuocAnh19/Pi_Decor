@@ -30,9 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function initAuth() {
-      // Clear any legacy persistent credentials in localStorage
+      // Ensure localStorage contains no sensitive data or drafts
       try {
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.clear();
       } catch {}
 
       const raw = sessionStorage.getItem(STORAGE_KEY);
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAdmin(null);
     sessionStorage.removeItem(STORAGE_KEY);
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.clear();
     } catch {}
   }
 

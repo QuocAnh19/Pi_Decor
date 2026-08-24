@@ -5,6 +5,8 @@ import {
   ArrowDownTrayIcon,
   BookmarkIcon,
   CheckCircleIcon,
+  ArrowLeftIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -20,9 +22,16 @@ interface QuotationModalProps {
   quotation?: Quotation | null;
   onClose: () => void;
   onSaved: () => void;
+  onBackToDetail?: () => void;
 }
 
-export function QuotationModal({ lead, quotation: initialQuotation, onClose, onSaved }: QuotationModalProps) {
+export function QuotationModal({
+  lead,
+  quotation: initialQuotation,
+  onClose,
+  onSaved,
+  onBackToDetail,
+}: QuotationModalProps) {
   const { token } = useAuth();
   const pdfRef = useRef<HTMLDivElement>(null);
 
@@ -31,7 +40,7 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
 
   const [items, setItems] = useState<Omit<QuotationItem, "subtotal">[]>([
-    { description: "Gói trang trí cưới hỏi cao cấp", quantity: 1, unit_price: 15000000 },
+    { description: "Gói trang trí cưới hỏi cao cấp Pi Decor", quantity: 1, unit_price: 15000000 },
   ]);
   const [discount, setDiscount] = useState<number>(0);
   const [validUntil, setValidUntil] = useState<string>("");
@@ -132,7 +141,7 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
         saved = await api.createQuotation(payload, token);
       }
       setCurrentQuotation(saved);
-      setSaveSuccessMsg("Đã lưu nháp");
+      setSaveSuccessMsg("Đã lưu nháp bảng báo giá thành công!");
       onSaved();
       setTimeout(() => setSaveSuccessMsg(null), 4000);
     } catch (err) {
@@ -157,7 +166,7 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`bao-gia-${currentQuotation?.quotation_number ?? "moi"}.pdf`);
+      pdf.save(`bao-gia-${currentQuotation?.quotation_number ?? "pi-decor"}.pdf`);
     } catch (err) {
       console.error("Lỗi xuất PDF:", err);
       alert("Không thể tạo file PDF, vui lòng thử lại.");
@@ -166,13 +175,22 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
     }
   }
 
-  const modalTitle = currentQuotation
-    ? `Lập & Lưu Báo Giá (${currentQuotation.quotation_number})`
-    : "Báo Giá Dịch Vụ Pi Decor";
+  const modalTitle = (
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <DocumentTextIcon className="h-5 w-5" style={{ width: 22, height: 22, color: "#a15c2e" }} />
+      <span>{currentQuotation ? `Lập & Lưu Báo Giá (${currentQuotation.quotation_number})` : "Lập Báo Giá Chi Tiết Dịch Vụ Pi Decor"}</span>
+    </div>
+  );
 
   return (
     <>
-      <Modal isOpen onClose={onClose} title={modalTitle} maxWidth="960px">
+      <Modal
+        isOpen
+        onClose={onClose}
+        title={modalTitle}
+        maxWidth="960px"
+        closeOnBackdropClick={false}
+      >
         {fetchingDraft && <p className={styles.fetchingNotice}>Đang kiểm tra dữ liệu báo giá đã lưu...</p>}
         {error && <div className={styles.errorBanner}>{error}</div>}
         {saveSuccessMsg && (
@@ -184,14 +202,14 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
 
         <div className={styles.metaGrid}>
           <Input
-            label="Tên Khách Hàng / SĐT"
+            label="Khách hàng & Liên hệ"
             type="text"
-            value={`${lead.name} — ${lead.phone}`}
+            value={`${lead.name} — ${lead.phone}${lead.wedding_date ? ` (Tiệc: ${new Date(lead.wedding_date).toLocaleDateString("vi-VN")})` : ""}`}
             disabled
           />
 
           <Input
-            label="Hạn Hiệu Lực Báo Giá"
+            label="Hạn hiệu lực báo giá"
             type="date"
             value={validUntil}
             onChange={(e) => setValidUntil(e.target.value)}
@@ -202,7 +220,7 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
           <div className={styles.sectionHeader}>
             <h4>Danh sách hạng mục thi công trang trí</h4>
             <button type="button" className={styles.addItemBtn} onClick={handleAddItem}>
-              <PlusIcon className="h-4 w-4" style={{ width: 16, height: 16 }} /> + Thêm Dòng Hạng Mục
+              <PlusIcon className="h-4 w-4" style={{ width: 16, height: 16 }} /> Thêm Hạng Mục Mới
             </button>
           </div>
 
@@ -212,7 +230,7 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
                 <tr>
                   <th className={styles.colDesc}>Hạng mục / Mô tả</th>
                   <th className={styles.colQty}>Số lượng</th>
-                  <th className={styles.colPrice}>Đơn giá (đ)</th>
+                  <th className={styles.colPrice}>Đơn giá (VNĐ)</th>
                   <th className={styles.colSubtotal}>Thành tiền</th>
                   <th className={styles.colAction}></th>
                 </tr>
@@ -226,7 +244,7 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
                         <Input
                           type="text"
                           value={item.description}
-                          placeholder="VD: Cổng hoa tươi lối vào, Backdrop chụp hình, Bộ bàn ghế gia tiên..."
+                          placeholder="VD: Cổng hoa tươi, Backdrop chụp hình, Bộ bàn ghế gia tiên..."
                           onChange={(e) => handleItemChange(idx, "description", e.target.value)}
                         />
                       </td>
@@ -273,7 +291,7 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
 
         <div className={styles.metaGrid}>
           <Input
-            label="Chiết khấu / Giảm giá (đ)"
+            label="Chiết khấu / Giảm giá (VNĐ)"
             type="number"
             min="0"
             step="100000"
@@ -281,7 +299,7 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
             onChange={(e) => setDiscount(Number(e.target.value))}
           />
           <Input
-            label="Ghi chú & Điều khoản báo giá"
+            label="Ghi chú & Điều khoản đính kèm"
             type="text"
             placeholder="VD: Đã bao gồm chi phí vận chuyển & nhân công lắp đặt trọn gói..."
             value={notes}
@@ -291,30 +309,52 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
 
         <div className={styles.summaryBox}>
           <div className={styles.summaryRow}>
-            <span>Tạm tính:</span>
+            <span>Tạm tính các hạng mục:</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>
           {discount > 0 && (
             <div className={styles.summaryRow}>
-              <span>Chiết khấu giảm giá:</span>
+              <span>Chiết khấu ưu đãi:</span>
               <span className={styles.discountText}>-{formatCurrency(discount)}</span>
             </div>
           )}
           <div className={`${styles.summaryRow} ${styles.totalRow}`}>
-            <span>TỔNG CỘNG THANH TOÁN:</span>
+            <span>TỔNG CỘNG BÁO GIÁ:</span>
             <span>{formatCurrency(total)}</span>
           </div>
         </div>
 
         <div className={styles.footer}>
           <div className={styles.leftActions}>
-            <button type="button" className={styles.pdfBtn} onClick={handleExportPDF} disabled={exportingPdf}>
+            {onBackToDetail && (
+              <button
+                type="button"
+                className={styles.backToDetailBtn}
+                onClick={onBackToDetail}
+              >
+                <ArrowLeftIcon className="h-4 w-4" style={{ width: 15, height: 15 }} />
+                <span>Xem Thông Tin Khách Hàng</span>
+              </button>
+            )}
+            <button
+              type="button"
+              className={styles.pdfBtn}
+              onClick={handleExportPDF}
+              disabled={exportingPdf}
+            >
               <ArrowDownTrayIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-              {exportingPdf ? "Đang tạo PDF..." : "Xuất File PDF / In"}
+              <span>{exportingPdf ? "Đang xuất PDF..." : "Xuất File PDF"}</span>
             </button>
           </div>
 
           <div className={styles.rightActions}>
+            <button
+              type="button"
+              className={styles.cancelBtn}
+              onClick={onClose}
+            >
+              Đóng
+            </button>
             <button
               type="button"
               className={styles.saveDraftBtn}
@@ -322,31 +362,32 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
               disabled={loading}
             >
               <BookmarkIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-              {loading ? "Đang lưu nháp..." : "Lưu Nháp Báo Giá"}
+              <span>{loading ? "Đang lưu..." : "Lưu Báo Giá"}</span>
             </button>
           </div>
         </div>
       </Modal>
 
+      {/* Printable Sheet for html2canvas & jsPDF */}
       <div className={styles.pdfContainer} ref={pdfRef}>
         <div className={styles.pdfHeader}>
           <div className={styles.pdfBrand}>
             <h1>PI DECOR</h1>
-            <p>Trang trí Tiệc cưới &amp; Sự kiện chuyên nghiệp</p>
+            <p>Trang trí Tiệc cưới &amp; Sự kiện Nghệ thuật</p>
             <p>Hotline: 090 123 4567 — Website: pidecor.vn</p>
           </div>
           <div className={styles.pdfMeta}>
             <h2>BÁO GIÁ DỊCH VỤ</h2>
-            <p>Mã: {currentQuotation?.quotation_number ?? "BG-2026-XXXX"}</p>
+            <p>Mã số: {currentQuotation?.quotation_number ?? "BG-2026-XXXX"}</p>
             <p>Ngày lập: {new Date().toLocaleDateString("vi-VN")}</p>
           </div>
         </div>
 
         <div className={styles.pdfCustomer}>
           <p><strong>Khách hàng:</strong> {lead.name}</p>
-          <p><strong>Điện thoại:</strong> {lead.phone}</p>
+          <p><strong>Số điện thoại:</strong> {lead.phone}</p>
           {lead.email && <p><strong>Email:</strong> {lead.email}</p>}
-          {lead.wedding_date && <p><strong>Ngày dự kiến:</strong> {new Date(lead.wedding_date).toLocaleDateString("vi-VN")}</p>}
+          {lead.wedding_date && <p><strong>Ngày tổ chức:</strong> {new Date(lead.wedding_date).toLocaleDateString("vi-VN")}</p>}
         </div>
 
         <table className={styles.pdfTable}>
@@ -388,13 +429,13 @@ export function QuotationModal({ lead, quotation: initialQuotation, onClose, onS
         </div>
 
         {notes && (
-          <div style={{ marginBottom: "20px", fontSize: "13px", color: "#475569" }}>
+          <div style={{ marginBottom: "20px", fontSize: "13px", color: "#6e6259" }}>
             <strong>Ghi chú:</strong> {notes}
           </div>
         )}
 
         <div className={styles.pdfFooter}>
-          <p>Cảm ơn Quý khách đã tin tưởng và lựa chọn Pi Decor!</p>
+          <p>Cảm ơn Quý khách đã tin tưởng và đồng hành cùng Pi Decor!</p>
         </div>
       </div>
     </>

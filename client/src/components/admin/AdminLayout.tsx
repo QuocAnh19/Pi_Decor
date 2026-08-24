@@ -38,12 +38,6 @@ const navItems = [
   },
 ];
 
-/**
- * AdminLayout — sidebar + header, deliberately not reusing the public
- * Navbar/Footer (§5 of the spec: "khác hẳn Navbar/Footer khách"). Rendered
- * only for authenticated admin routes; App.tsx never mounts this alongside
- * the public site's chrome.
- */
 export function AdminLayout() {
   const { admin, logout } = useAuth();
   const navigate = useNavigate();

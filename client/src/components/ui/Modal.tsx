@@ -1,5 +1,5 @@
-import { useEffect, ReactNode } from "react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState, ReactNode } from "react";
+import { XMarkIcon, ChevronDoubleUpIcon } from "@heroicons/react/24/outline";
 import styles from "./Modal.module.scss";
 
 export interface ModalProps {
@@ -11,7 +11,9 @@ export interface ModalProps {
   variant?: "modal" | "drawer";
   className?: string;
   showCloseButton?: boolean;
+  showScrollTopButton?: boolean;
   bodyPadding?: boolean;
+  closeOnBackdropClick?: boolean;
 }
 
 export function Modal({
@@ -23,13 +25,19 @@ export function Modal({
   variant = "modal",
   className = "",
   showCloseButton = true,
+  showScrollTopButton = true,
   bodyPadding = true,
+  closeOnBackdropClick = true,
 }: ModalProps) {
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+
   // Lock outside body scroll when modal is open
   useEffect(() => {
     if (!isOpen) {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
+      setCanScrollUp(false);
       return;
     }
 
@@ -57,12 +65,28 @@ export function Modal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
+  const handleBodyScroll = () => {
+    if (bodyRef.current) {
+      setCanScrollUp(bodyRef.current.scrollTop > 60);
+    }
+  };
+
+  const handleScrollTop = () => {
+    if (bodyRef.current) {
+      bodyRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   if (!isOpen) return null;
 
   if (variant === "drawer") {
     return (
       <>
-        <div className={styles.backdrop} onClick={onClose} />
+        <div
+          className={styles.backdrop}
+          onClick={closeOnBackdropClick ? onClose : undefined}
+          style={{ cursor: closeOnBackdropClick ? "pointer" : "default" }}
+        />
         <aside className={`${styles.drawer} ${className}`} style={{ maxWidth }}>
           {title ? (
             <div className={styles.header}>
@@ -92,19 +116,41 @@ export function Modal({
               </button>
             )
           )}
-          <div className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}>
+
+          <div
+            ref={bodyRef}
+            onScroll={handleBodyScroll}
+            className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}
+          >
             {children}
           </div>
+
+          {/* Floating Scroll to Top button at bottom-right of popup */}
+          {showScrollTopButton && canScrollUp && (
+            <button
+              type="button"
+              className={styles.bottomScrollTopBtn}
+              onClick={handleScrollTop}
+              title="Cuộn lên đầu trang popup"
+              aria-label="Cuộn lên đầu trang popup"
+            >
+              <ChevronDoubleUpIcon style={{ width: 20, height: 20 }} />
+            </button>
+          )}
         </aside>
       </>
     );
   }
 
   return (
-    <div className={styles.backdrop} onClick={onClose}>
+    <div
+      className={styles.backdrop}
+      onClick={closeOnBackdropClick ? onClose : undefined}
+      style={{ cursor: closeOnBackdropClick ? "pointer" : "default" }}
+    >
       <div
         className={`${styles.modal} ${className}`}
-        style={{ maxWidth }}
+        style={{ maxWidth, cursor: "default" }}
         onClick={(e) => e.stopPropagation()}
       >
         {title ? (
@@ -135,9 +181,27 @@ export function Modal({
             </button>
           )
         )}
-        <div className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}>
+
+        <div
+          ref={bodyRef}
+          onScroll={handleBodyScroll}
+          className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}
+        >
           {children}
         </div>
+
+        {/* Floating Scroll to Top button at bottom-right of popup */}
+        {showScrollTopButton && canScrollUp && (
+          <button
+            type="button"
+            className={styles.bottomScrollTopBtn}
+            onClick={handleScrollTop}
+            title="Cuộn lên đầu trang popup"
+            aria-label="Cuộn lên đầu trang popup"
+          >
+            <ChevronDoubleUpIcon style={{ width: 20, height: 20 }} />
+          </button>
+        )}
       </div>
     </div>
   );

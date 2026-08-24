@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { XMarkIcon, PaperAirplaneIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import { api } from "../../../../lib/api";
 import { Input, Textarea } from "../../../../components/ui";
+import { captureStudioThumbnail } from "../../utils/captureThumbnail";
 import type { SlotConfig } from "../../types";
 
 interface SaveDesignModalProps {
@@ -38,13 +39,24 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
     setError(null);
 
     try {
+      let previewImage: string | undefined = undefined;
+      try {
+        const captured = await captureStudioThumbnail();
+        if (captured) previewImage = captured;
+      } catch (capErr) {
+        console.warn("Could not capture customer preview:", capErr);
+      }
+
       await api.submitLead({
         name: name.trim(),
         phone: phone.trim(),
         email: email.trim() || undefined,
         wedding_date: weddingDate || undefined,
         message: message.trim() ? `[Lưu thiết kế Studio]\n${message.trim()}` : "[Lưu thiết kế Studio]",
-        design_snapshot: slotConfig,
+        design_snapshot: {
+          ...slotConfig,
+          ...(previewImage ? { preview_image: previewImage } : {}),
+        },
       });
 
       setSuccess(true);

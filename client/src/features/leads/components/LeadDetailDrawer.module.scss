@@ -2,188 +2,58 @@
 @use "@/styles/admin-variables" as *;
 @use "@/styles/mixins" as *;
 
-.backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 40;
-}
-
-.drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  max-width: 520px;
-  background: $color-admin-surface;
-  border-left: 1px solid $color-admin-border;
-  z-index: 41;
+.headerContent {
   display: flex;
   flex-direction: column;
-  box-shadow: $shadow-lg;
-  font-family: $font-sans;
-  color: #f8fafc;
-}
-
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  padding: 20px 24px;
-  border-bottom: 1px solid $color-admin-border;
-  background: $color-admin-bg;
+  gap: 2px;
 }
 
 .eyebrow {
-  font-size: 0.75rem;
-  color: $color-admin-text-muted;
+  font-size: 11px;
+  font-weight: 600;
+  color: $admin-text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .name {
   font-family: $font-serif;
-  font-size: 1.35rem;
+  font-size: 20px;
   font-weight: 700;
-  color: #ffffff;
-  margin-top: 4px;
+  color: $admin-text;
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .userIcon {
-  color: $color-admin-accent;
-  width: 24px;
-  height: 24px;
-}
-
-.closeButton {
-  color: $color-admin-text-muted;
-  padding: 6px;
-  border-radius: $radius-s;
-  background: rgba(255, 255, 255, 0.05);
-
-  &:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  @include focus-ring;
-}
-
-.body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  color: $admin-accent;
+  width: 22px;
+  height: 22px;
 }
 
 .section {
-  background: $color-admin-surface-darkest;
-  border: 1px solid $color-admin-border;
-  border-radius: 12px;
-  padding: 16px;
+  background: #ffffff;
+  border: 1px solid $admin-border;
+  border-radius: $radius-l;
+  padding: 18px;
+  box-shadow: $admin-shadow-card;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .sectionTitle {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
+  gap: 8px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: $color-admin-accent;
-  margin-bottom: 14px;
-}
-
-.contactRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.875rem;
-  color: $color-admin-text-light;
-  padding: 8px 0;
-  border-bottom: 1px solid $color-admin-surface;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.contactIcon {
-  color: $color-admin-accent;
-  width: 16px;
-  height: 16px;
-}
-
-.quickActionBtns {
-  display: flex;
-  gap: 6px;
-}
-
-.quickActionBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-decoration: none;
-  background: $color-admin-accent-hover;
-  color: #ffffff;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: $color-admin-accent;
-    color: $color-admin-bg;
-  }
-}
-
-.quickActionBtnZalo {
-  background: #0068ff;
-  color: #ffffff;
-
-  &:hover {
-    background: #2680ff;
-  }
-}
-
-.eventTypeBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: 99px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  background: rgba($color-warning, 0.15);
-  color: $color-warning;
-  border: 1px solid rgba($color-warning, 0.3);
-}
-
-.formValueCard {
-  background: $color-admin-bg;
-  border: 1px solid $color-admin-surface;
-  border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 0.875rem;
-  color: $color-admin-text-light;
-  line-height: 1.6;
-}
-
-.dateText {
-  font-weight: 600;
-  color: $color-warning;
-}
-
-.emptyNotes {
+  color: $admin-accent;
   margin: 0;
-  color: $color-admin-text-muted;
 }
 
 .infoGrid {
@@ -192,22 +62,96 @@
   gap: 10px;
 }
 
+.contactRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  font-size: 13px;
+  color: $admin-text;
+}
+
+.contactIcon {
+  color: $admin-accent;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.contactValue {
+  font-weight: 600;
+  color: $admin-text;
+}
+
+.contactActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: $radius-pill;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  background: $admin-accent;
+  color: #ffffff;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-accent-hover;
+    transform: translateY(-1px);
+  }
+}
+
+.eventTypeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: $radius-pill;
+  font-size: 12px;
+  font-weight: 700;
+  background: $admin-accent-subtle;
+  color: $admin-accent;
+  border: 1px solid rgba(161, 92, 46, 0.2);
+}
+
+.formValueCard {
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: $admin-text;
+  line-height: 1.6;
+}
+
+.dateText {
+  font-weight: 700;
+  color: $admin-accent;
+  font-size: 14px;
+}
+
+.emptyNotes {
+  margin: 0;
+  color: $admin-text-faint;
+  font-style: italic;
+  font-size: 12px;
+}
+
 .infoItem {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .infoLabel {
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 600;
-  color: $color-admin-text-muted;
-}
-
-.infoValue {
-  font-size: 0.875rem;
-  color: #f8fafc;
-  font-weight: 500;
+  color: $admin-text-muted;
 }
 
 .statusButtons {
@@ -217,183 +161,134 @@
 
 .statusButton {
   flex: 1;
-  padding: 8px;
-  border-radius: $radius-s;
-  border: 1px solid $color-admin-border;
-  font-size: 0.8rem;
-  color: $color-admin-text-muted;
+  padding: 8px 12px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: $admin-bg;
+  font-size: 12px;
+  font-weight: 600;
+  color: $admin-text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.15s ease;
 
   &:hover {
-    border-color: $color-admin-border-light;
+    border-color: $admin-accent;
+    color: $admin-accent;
+    background: $admin-surface;
   }
 
   @include focus-ring;
 }
 
 .statusButtonActive {
-  background: rgba($color-admin-accent, 0.18);
-  border-color: $color-admin-accent;
-  color: $color-admin-accent;
-  font-weight: 600;
+  background: $admin-accent;
+  border-color: $admin-accent;
+  color: #ffffff;
+  font-weight: 700;
+
+  &:hover {
+    background: $admin-accent-hover;
+    color: #ffffff;
+  }
+}
+
+.statusNewActive {
+  background: $admin-warning;
+  border-color: $admin-warning;
+  color: #ffffff;
+}
+
+.statusClosedActive {
+  background: $admin-success;
+  border-color: $admin-success;
+  color: #ffffff;
 }
 
 .createQuoteBtn {
   width: 100%;
-  padding: 10px;
-  background: $color-admin-accent;
-  color: $color-admin-bg;
-  border: 1px solid $color-admin-accent;
-  border-radius: $radius-s;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  padding: 12px 18px;
+  background: $admin-accent;
+  color: #ffffff;
+  border: none;
+  border-radius: $radius-pill;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transition: all 0.15s ease;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(161, 92, 46, 0.28);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: $color-admin-accent-hover;
-    border-color: $color-admin-accent-hover;
-    color: #ffffff;
+    background: $admin-accent-hover;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(161, 92, 46, 0.36);
   }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.snapshotContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .snapshotRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.8125rem;
-  padding: 8px 0;
-  border-bottom: 1px solid $color-admin-border;
-
-  &:last-child {
-    border-bottom: none;
-  }
+  gap: 12px;
+  font-size: 13px;
+  padding: 8px 12px;
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  border-radius: $radius-s;
 }
 
 .swatch {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
 .snapshotLabel {
-  color: $color-admin-text-muted;
+  color: $admin-text-muted;
+  font-weight: 600;
+  font-size: 12px;
+  width: 90px;
   flex-shrink: 0;
-  width: 92px;
 }
 
 .snapshotValue {
-  color: #f8fafc;
-}
-
-.timelineList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.timelineItem {
-  display: flex;
-  gap: 10px;
-  padding: 10px 12px;
-  background: $color-admin-bg;
-  border: 1px solid $color-admin-border;
-  border-radius: $radius-s;
-  font-size: 0.8125rem;
-}
-
-.timelineIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: $color-admin-surface;
-  color: $color-admin-accent;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.timelineBody {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.timelineHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.timelineType {
+  color: $admin-text;
   font-weight: 600;
-  color: #f8fafc;
-  font-size: 0.8rem;
 }
 
-.timelineTime {
-  font-size: 0.7rem;
-  color: $color-admin-text-muted;
-}
-
-.timelineContent {
-  color: $color-admin-text-muted;
-  line-height: 1.4;
-  margin-top: 2px;
-}
-
-.noteForm {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.noteTextarea {
-  width: 100%;
-  min-height: 64px;
-  padding: 8px 10px;
-  border: 1px solid $color-admin-border;
-  border-radius: $radius-s;
-  background: $color-admin-bg;
-  color: #f8fafc;
-  font-size: 0.8125rem;
-  font-family: inherit;
-  resize: vertical;
-
-  &:focus {
-    outline: none;
-    border-color: $color-admin-accent;
-  }
-}
-
-.noteSubmitBtn {
-  align-self: flex-end;
-  padding: 6px 14px;
-  background: $color-admin-accent;
-  color: #ffffff;
-  border: none;
-  border-radius: $radius-s;
-  font-size: 0.75rem;
+.bottomCloseBtn {
+  padding: 8px 18px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: #ffffff;
+  color: $admin-text;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: all 0.15s ease;
 
   &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background: $admin-bg;
+    border-color: $admin-accent;
+    color: $admin-accent;
   }
 }

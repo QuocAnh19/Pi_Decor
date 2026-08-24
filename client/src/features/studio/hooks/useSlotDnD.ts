@@ -21,29 +21,13 @@ export interface UseSlotDnDReturn {
   isDirty: boolean
 }
 
-const STORAGE_PREFIX = 'pidecor_draft_'
-
 export function useSlotDnD(
   slots: SlotDefinition[],
   rules: AnyRule[],
-  templateId: string,
+  _templateId: string,
   initialConfig: SlotConfig = {}
 ): UseSlotDnDReturn {
-  const storageKey = `${STORAGE_PREFIX}${templateId}`
-
-  // Load initial state from localStorage if available, fallback to initialConfig
-  const [slotConfig, setSlotConfig] = useState<SlotConfig>(() => {
-    try {
-      const saved = localStorage.getItem(storageKey)
-      if (saved) {
-        return JSON.parse(saved)
-      }
-    } catch (e) {
-      console.warn('Failed to parse draft from localStorage', e)
-    }
-    return initialConfig
-  })
-
+  const [slotConfig, setSlotConfig] = useState<SlotConfig>(initialConfig)
   const [activeAsset, setActiveAsset] = useState<Asset | null>(null)
   const [isDirty, setIsDirty] = useState<boolean>(false)
 
@@ -58,18 +42,12 @@ export function useSlotDnD(
     return locked
   }, [slotConfig])
 
-  // Debounced persistence to localStorage
+  // Sync if initialConfig updates from DB
   useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(slotConfig))
-      } catch (e) {
-        console.warn('Failed to save draft to localStorage', e)
-      }
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [slotConfig, storageKey])
+    if (initialConfig && Object.keys(initialConfig).length > 0) {
+      setSlotConfig(initialConfig)
+    }
+  }, [initialConfig])
 
   // Set whole config directly (e.g. applying admin preset or clearing to blank)
   const setWholeConfig = useCallback((newConfig: SlotConfig) => {
@@ -209,13 +187,8 @@ export function useSlotDnD(
   // Reset config
   const resetConfig = useCallback(() => {
     setSlotConfig({})
-    try {
-      localStorage.removeItem(storageKey)
-    } catch (e) {
-      console.warn('Failed to clear draft from localStorage', e)
-    }
     setIsDirty(false)
-  }, [storageKey])
+  }, [])
 
   return {
     slotConfig,

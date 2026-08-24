@@ -154,14 +154,12 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
         template={template}
         allTemplates={allTemplates}
         isDirty={isDirty}
-        isPreviewMode={isPreviewMode}
         showGrid={showGrid}
         onBackToHome={onBackToHome}
         onSelectTemplate={handleSelectTemplate}
         onSaveDraft={handleSaveDraft}
         onPublish={handlePublish}
         onToggleActive={handleToggleActive}
-        onTogglePreview={() => setIsPreviewMode(true)}
         onToggleGrid={() => setShowGrid(!showGrid)}
         onUpdateTemplateName={handleUpdateTemplateName}
       />
