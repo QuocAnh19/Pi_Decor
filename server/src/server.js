@@ -1,5 +1,10 @@
 // server/src/server.js
 import "dotenv/config";
+import { validateEnv } from "./config/env.js";
+
+// Validate mandatory environment variables before binding to port
+validateEnv();
+
 import { app } from "./app.js";
 import { pool } from "./config/database.js";
 
