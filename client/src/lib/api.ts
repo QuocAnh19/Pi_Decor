@@ -27,6 +27,21 @@ import type {
  */
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
 
+/**
+ * Custom error class returned on non-2xx HTTP responses.
+ * Provides the HTTP status code for reliable status-based branching (e.g. 401 token refresh).
+ */
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    Object.setPrototypeOf(this, ApiError.prototype);
+  }
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const { headers, ...restOptions } = options;
   const isFormData = restOptions.body instanceof FormData;
@@ -40,7 +55,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.message ?? `Request failed (${res.status})`);
+    throw new ApiError(body.message ?? `Request failed (${res.status})`, res.status);
   }
   // DELETE endpoints reply 204 with no body.
   if (res.status === 204) return undefined as T;
@@ -56,7 +71,7 @@ async function authRequest<T>(path: string, token: string, options: RequestInit 
       headers: { Authorization: `Bearer ${token}`, ...headers },
     });
   } catch (err: unknown) {
-    if (err instanceof Error && (err.message.includes("401") || err.message.includes("Unauthorized"))) {
+    if (err instanceof ApiError && err.status === 401) {
       const raw = sessionStorage.getItem("pidecor_admin_auth");
       if (raw) {
         try {
@@ -225,7 +240,7 @@ export const api = {
       });
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || "Gửi đánh giá thất bại.");
+        throw new ApiError(errorData.message || "Gửi đánh giá thất bại.", res.status);
       }
       return res.json() as Promise<TestimonialItem>;
     }
