@@ -1,3 +1,25 @@
+# Environment variables
 *.env
+*.local
+
+# Dependencies
 node_modules/
-database/**
+
+# Build & distribution outputs
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+
+# OS & Editor files
+.DS_Store
+.vscode/
+.idea/
+
+# Local file uploads
+server/uploads/
+
+# Runtime Database JSON fallback
+server/src/data/db.json
