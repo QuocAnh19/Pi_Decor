@@ -1,21 +1,22 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { pool } from "./config/database.js";
+import { loginLimiter } from "./middlewares/rateLimiters.js";
 import { leadsRouter } from "./routes/leads/index.js";
 import { designsRouter } from "./routes/designs/index.js";
 import { materialsRouter } from "./routes/materials/index.js";
 import { servicesRouter } from "./routes/services/index.js";
 import { venuesRouter } from "./routes/venues/index.js";
+import { projectsRouter } from "./routes/projects/index.js";
 import { authRouter } from "./routes/auth/index.js";
 import { adminRouter } from "./routes/admin/index.js";
 import { quotationsRouter } from "./routes/quotations/index.js";
 import { testimonialsRouter } from "./routes/testimonials/index.js";
 import { studioRouter } from "./routes/studio/index.js";
-import { pool } from "./config/database.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -57,15 +58,11 @@ app.get("/api/health", async (_req, res) => {
   }
 });
 
-import { loginLimiter } from "./middlewares/rateLimiters.js";
-
 app.use("/api/auth/login", loginLimiter);
 
 // Routes are organized by business domain, not by CRUD verb — same
 // structure as Server/routes in the Ecovera reference project (Mục 2.4 /
 // 3.4 of the technical proposal), so each domain can evolve independently.
-import { projectsRouter } from "./routes/projects/index.js";
-
 app.use("/api/leads", leadsRouter);
 app.use("/api/designs", designsRouter);
 app.use("/api/materials", materialsRouter);
