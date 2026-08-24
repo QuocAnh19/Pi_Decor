@@ -1,5 +1,4 @@
-import { toJpeg } from 'html-to-image';
-import html2canvas from 'html2canvas';
+import { toJpeg, toPng } from 'html-to-image';
 
 export interface CaptureOptions {
   quality?: number;
@@ -10,7 +9,7 @@ export interface CaptureOptions {
 /**
  * Captures a clean snapshot/thumbnail of the Studio canvas.
  * Guaranteed to completely hide slot borders, badges, debug coordinates, and guide lines.
- * Features dual-engine fallback (html-to-image -> html2canvas) for 100% reliability.
+ * Uses html-to-image for optimal SVG rendering, sharp quality, and lightweight bundle size.
  */
 export async function captureStudioThumbnail(
   target?: HTMLElement | string | null,
@@ -56,65 +55,56 @@ export async function captureStudioThumbnail(
   node.setAttribute('data-capturing', 'true');
 
   try {
-    // 2. Primary Engine: html-to-image
+    const filter = (domNode: HTMLElement) => {
+      const classList = domNode?.classList;
+      if (
+        classList?.contains('slot-marker') ||
+        classList?.contains('guide-line') ||
+        classList?.contains('slot-border-overlay') ||
+        classList?.contains('slot-badge-overlay') ||
+        domNode?.getAttribute?.('data-no-snapshot') === 'true'
+      ) {
+        return false;
+      }
+      return true;
+    };
+
+    // Primary: toJpeg
     try {
       const dataUrl = await toJpeg(node, {
         quality,
         pixelRatio: 1.2,
         cacheBust: false,
-        filter: (domNode: HTMLElement) => {
-          const classList = domNode?.classList;
-          if (
-            classList?.contains('slot-marker') ||
-            classList?.contains('guide-line') ||
-            classList?.contains('slot-border-overlay') ||
-            classList?.contains('slot-badge-overlay') ||
-            domNode?.getAttribute?.('data-no-snapshot') === 'true'
-          ) {
-            return false;
-          }
-          return true;
-        },
+        filter,
         backgroundColor: '#0f172a',
       });
 
       if (dataUrl && dataUrl.length > 100) {
         return dataUrl;
       }
-    } catch (err) {
-      console.warn('[captureStudioThumbnail] html-to-image failed, trying html2canvas fallback:', err);
+    } catch (jpegErr) {
+      console.warn('[captureStudioThumbnail] toJpeg failed, attempting toPng fallback:', jpegErr);
     }
 
-    // 3. Secondary Engine: html2canvas Fallback
+    // Fallback: toPng
     try {
-      const canvas = await html2canvas(node, {
+      const pngDataUrl = await toPng(node, {
+        pixelRatio: 1.2,
+        cacheBust: false,
+        filter,
         backgroundColor: '#0f172a',
-        scale: 1,
-        logging: false,
-        useCORS: true,
-        ignoreElements: (element) => {
-          const classList = element?.classList;
-          return (
-            classList?.contains('slot-marker') ||
-            classList?.contains('guide-line') ||
-            classList?.contains('slot-border-overlay') ||
-            classList?.contains('slot-badge-overlay') ||
-            element?.getAttribute?.('data-no-snapshot') === 'true'
-          );
-        },
       });
 
-      const fallbackDataUrl = canvas.toDataURL('image/jpeg', quality);
-      if (fallbackDataUrl && fallbackDataUrl.length > 100) {
-        return fallbackDataUrl;
+      if (pngDataUrl && pngDataUrl.length > 100) {
+        return pngDataUrl;
       }
-    } catch (err2) {
-      console.error('[captureStudioThumbnail] All snapshot methods failed:', err2);
+    } catch (pngErr) {
+      console.error('[captureStudioThumbnail] toPng fallback also failed:', pngErr);
     }
 
     return '';
   } finally {
-    // 4. Guaranteed restoration of all borders and markers for editor
+    // 2. Guaranteed restoration of all borders and markers for editor
     node.classList.remove('is-capturing-snapshot');
     node.removeAttribute('data-capturing');
 

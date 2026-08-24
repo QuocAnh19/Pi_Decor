@@ -8,7 +8,7 @@ import {
   ArrowLeftIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
-import html2canvas from "html2canvas";
+import { toPng } from "html-to-image";
 import jsPDF from "jspdf";
 import { useAuth } from "../../../lib/authContext";
 import { api } from "../../../lib/api";
@@ -155,15 +155,22 @@ export function QuotationModal({
     if (!pdfRef.current) return;
     setExportingPdf(true);
     try {
-      const canvas = await html2canvas(pdfRef.current, {
-        scale: 2,
-        useCORS: true,
+      const imgData = await toPng(pdfRef.current, {
+        pixelRatio: 2,
         backgroundColor: "#ffffff",
+        cacheBust: false,
       });
-      const imgData = canvas.toDataURL("image/png");
+
+      const img = new Image();
+      img.src = imgData;
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = (e) => reject(e);
+      });
+
       const pdf = new jsPDF("p", "mm", "a4");
       const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const pdfHeight = (img.height * pdfWidth) / img.width;
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
       pdf.save(`bao-gia-${currentQuotation?.quotation_number ?? "pi-decor"}.pdf`);
