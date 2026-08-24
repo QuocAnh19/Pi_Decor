@@ -26,7 +26,7 @@ export function evaluateRules(
 
   let accumulatedPatch: SlotConfigPatch = {}
   // Create a working copy of slotConfig to allow subsequent rules to see updates
-  let currentConfig: SlotConfig = { ...slotConfig }
+  const currentConfig: SlotConfig = { ...slotConfig }
 
   for (const rule of sortedRules) {
     if (!rule) continue

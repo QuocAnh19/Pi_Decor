@@ -33,7 +33,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ensure localStorage contains no sensitive data or drafts
       try {
         localStorage.clear();
-      } catch {}
+      } catch (e) {
+        // localStorage not available or error clearing
+      }
 
       const raw = sessionStorage.getItem(STORAGE_KEY);
       if (!raw) {
@@ -108,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function logout() {
+  const logout = useCallback(() => {
     if (refreshToken) {
       api.logout(refreshToken).catch(() => {});
     }
@@ -118,12 +120,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem(STORAGE_KEY);
     try {
       localStorage.clear();
-    } catch {}
-  }
+    } catch (e) {
+      // localStorage not available or error clearing
+    }
+  }, [refreshToken]);
 
   const value = useMemo(
     () => ({ token, refreshToken, admin, isReady, login, logout, updateToken }),
-    [token, refreshToken, admin, isReady]
+    [token, refreshToken, admin, isReady, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

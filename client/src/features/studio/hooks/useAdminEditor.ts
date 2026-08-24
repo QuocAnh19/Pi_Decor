@@ -117,12 +117,16 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
                   setSlots(sRows.map(toStudioSlot));
                   setSelectedSlotId(sRows[0].id);
                 }
-              } catch {}
+              } catch (e) {
+                // slot definitions not found or error loading, keep defaults
+              }
 
               try {
                 const rRows = await api.getStudioSlotRules(matched.id);
                 setRules(rRows.map(toStudioRule));
-              } catch {}
+              } catch (e) {
+                // slot rules not found or error loading, keep defaults
+              }
 
               return;
             }

@@ -167,7 +167,7 @@ export const DrapeColorCustomizer: React.FC<DrapeColorCustomizerProps> = ({
 
   // Clean display name by stripping away any repetitive trailing (#hex) brackets
   const rawName = activeAsset ? activeAsset.name : selectedPalette.name
-  const cleanDisplayName = rawName.replace(/\s*\(\#[a-fA-F0-9]{3,8}\)/gi, '').trim()
+  const cleanDisplayName = rawName.replace(/\s*\(#[a-fA-F0-9]{3,8}\)/gi, '').trim()
 
   // Core generator for procedural SVG drape
   const generateProceduralSVG = (activeHex: string): string => {
