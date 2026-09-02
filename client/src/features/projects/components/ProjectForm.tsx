@@ -7,6 +7,7 @@ import {
   CATEGORY_TAG_OPTIONS,
   ASYMMETRIC_SLOT_DESCS,
   SAMPLE_STOCK_IMAGES,
+  PRICE_TIER_OPTIONS,
 } from "../types";
 import styles from "../../../pages/admin/AdminProjectsPage.module.scss";
 
@@ -58,6 +59,7 @@ export function ProjectForm(props: ProjectFormProps) {
     date: project?.wedding_date ?? project?.date ?? new Date().toISOString().split("T")[0],
     budget: project?.budget ?? "Thỏa thuận",
     status: project?.published === false ? "draft" : project?.status ?? "active",
+    priceTier: project?.priceTier ?? "standard",
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -211,7 +213,16 @@ export function ProjectForm(props: ProjectFormProps) {
     setSubmitting(true);
     try {
       if (props.venueName !== undefined) {
-        await props.onSubmit(formData as any);
+        const payload: ProjectPayload = {
+          title: formData.title.trim(),
+          wedding_date: formData.date || null,
+          style_tags: [formData.categoryId, formData.tag],
+          cover_image: formData.src,
+          gallery: (formData.gallery as any[]) || [],
+          published: formData.status !== "draft",
+          price_tier: formData.priceTier || "standard",
+        };
+        await props.onSubmit(payload);
       } else {
         await props.onSubmit(
           formData,
@@ -326,6 +337,15 @@ export function ProjectForm(props: ProjectFormProps) {
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                 options={STATUS_OPTIONS}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <Select
+                label="Hạng Mục Giá"
+                value={formData.priceTier}
+                onChange={(e) => setFormData({ ...formData, priceTier: e.target.value as any })}
+                options={PRICE_TIER_OPTIONS}
               />
             </div>
 
