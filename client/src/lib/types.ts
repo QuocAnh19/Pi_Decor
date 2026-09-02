@@ -129,6 +129,7 @@ export interface Project {
   status?: string | null;
   category_id?: string | null;
   tag?: string | null;
+  price_tier?: "standard" | "premium" | null;
   created_at?: string;
 }
 
@@ -212,6 +213,7 @@ export interface ProjectPayload {
   gallery?: string[];
   lead_id?: string | null;
   published?: boolean;
+  price_tier?: "standard" | "premium" | null;
 }
 
 // ── Lead Activities Timeline ─────────────────────────────────────────────
