@@ -125,6 +125,19 @@ export const api = {
     return authRequest<PaginatedLeadsResponse>(`/leads${queryStr ? `?${queryStr}` : ""}`, token);
   },
 
+  getLead: (id: string, token: string) =>
+    authRequest<Lead>(`/leads/${id}`, token),
+
+  updateLead: (
+    id: string,
+    payload: { status?: LeadStatus; design_snapshot?: unknown },
+    token: string
+  ) =>
+    authRequest<Lead>(`/leads/${id}`, token, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
   updateLeadStatus: (id: string, status: LeadStatus, token: string) =>
     authRequest<Lead>(`/leads/${id}`, token, {
       method: "PATCH",

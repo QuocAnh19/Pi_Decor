@@ -21,6 +21,7 @@ export interface EditorHeaderProps {
   isDirty: boolean;
   showGrid: boolean;
   mode?: "admin" | "customer";
+  editingLead?: any;
   onBackToHome?: () => void;
   onSelectTemplate: (templateId: string) => void;
   onSaveDraft?: () => void;
@@ -30,6 +31,8 @@ export interface EditorHeaderProps {
   onSaveDesign?: () => void;
   onReset?: () => void;
   onUpdateTemplateName?: (newName: string) => void;
+  onAdminSaveLeadDesign?: () => void;
+  onBackToLeads?: () => void;
 }
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
@@ -38,6 +41,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   isDirty,
   showGrid,
   mode = "admin",
+  editingLead,
   onBackToHome,
   onSelectTemplate,
   onSaveDraft,
@@ -47,6 +51,8 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   onSaveDesign,
   onReset,
   onUpdateTemplateName,
+  onAdminSaveLeadDesign,
+  onBackToLeads,
 }) => {
   const isCustomer = mode === "customer";
   const [isEditingName, setIsEditingName] = useState(false);
@@ -232,11 +238,24 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
             </Badge>
           )}
 
-          {/* {isCustomer && (
-            <Badge tone="accent">
-              ✨ Studio Phối Cảnh
-            </Badge>
-          )} */}
+          {editingLead && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                backgroundColor: "rgba(161, 92, 46, 0.12)",
+                border: "1px solid rgba(161, 92, 46, 0.35)",
+                borderRadius: "8px",
+                padding: "4px 12px",
+                fontSize: "12px",
+                fontWeight: "700",
+                color: "#a15c2e",
+              }}
+            >
+              <span>🎯 Khách hàng: {editingLead.name} ({editingLead.phone})</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -264,21 +283,52 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           </button>
         )}
 
-        {/* Customer: Save Design & Get Quote Button */}
-        {isCustomer && onSaveDesign && (
-          <button
-            type="button"
-            onClick={onSaveDesign}
-            className={styles.publishBtn}
-            title="Lưu thiết kế của bạn và gửi yêu cầu tư vấn báo giá"
-            style={{
-              backgroundColor: "#a15c2e",
-              color: "#ffffff",
-              boxShadow: "0 4px 14px rgba(161, 92, 46, 0.3)",
-            }}
-          >
-            <SparklesIcon className="h-4 w-4" style={{ width: 16, height: 16 }} /> Lưu Thiết Kế &amp; Báo Giá
-          </button>
+        {/* If editing a Lead: Show Admin Save Lead Design Button & Back Button */}
+        {editingLead ? (
+          <>
+            {onBackToLeads && (
+              <button
+                type="button"
+                onClick={onBackToLeads}
+                className={styles.saveDraftBtn}
+                title="Quay lại danh sách khách hàng"
+              >
+                <ArrowLeftIcon className="h-4 w-4" style={{ width: 14, height: 14 }} /> Quay lại Leads
+              </button>
+            )}
+            {onAdminSaveLeadDesign && (
+              <button
+                type="button"
+                onClick={onAdminSaveLeadDesign}
+                className={styles.publishBtn}
+                title="Lưu bản phối cảnh vừa tinh chỉnh cho khách hàng này"
+                style={{
+                  backgroundColor: "#a15c2e",
+                  color: "#ffffff",
+                  boxShadow: "0 4px 14px rgba(161, 92, 46, 0.3)",
+                }}
+              >
+                <BookmarkIcon className="h-4 w-4" style={{ width: 16, height: 16 }} /> Lưu Cho Khách Hàng
+              </button>
+            )}
+          </>
+        ) : (
+          /* Normal Customer: Save Design & Get Quote Button */
+          isCustomer && onSaveDesign && (
+            <button
+              type="button"
+              onClick={onSaveDesign}
+              className={styles.publishBtn}
+              title="Lưu thiết kế của bạn và gửi yêu cầu tư vấn báo giá"
+              style={{
+                backgroundColor: "#a15c2e",
+                color: "#ffffff",
+                boxShadow: "0 4px 14px rgba(161, 92, 46, 0.3)",
+              }}
+            >
+              <SparklesIcon className="h-4 w-4" style={{ width: 16, height: 16 }} /> Lưu Thiết Kế &amp; Báo Giá
+            </button>
+          )
         )}
 
         {/* Admin: Toggle Active Status */}

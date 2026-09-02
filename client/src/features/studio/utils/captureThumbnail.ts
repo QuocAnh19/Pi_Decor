@@ -194,7 +194,7 @@ export async function generateBrandedDesignImage(
       // Brand Title
       ctx.fillStyle = "#fbf7f1";
       ctx.font = `bold ${Math.round(20 * scale)}px "Fraunces", Georgia, serif`;
-      ctx.fillText("PI DECOR • STUDIO PHỐI CẢNH TIỆC CƯỚI", padX, imgHeight + Math.round(footerHeight * 0.2));
+      ctx.fillText("PI DECOR", padX, imgHeight + Math.round(footerHeight * 0.2));
 
       // Subtitle details
       ctx.fillStyle = "#f1dedb";
@@ -244,7 +244,7 @@ export async function generateBrandedDesignImage(
       ctx.font = `600 ${Math.round(12 * scale)}px "Be Vietnam Pro", sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("✦ Pi Decor Studio", tagPadX - tagWidth / 2, tagPadY + tagHeight / 2);
+      ctx.fillText("Pi Decor", tagPadX - tagWidth / 2, tagPadY + tagHeight / 2);
 
       try {
         const result = canvas.toDataURL("image/jpeg", 0.94);

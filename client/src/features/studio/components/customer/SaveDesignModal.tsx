@@ -14,7 +14,9 @@ interface SaveDesignModalProps {
   isOpen: boolean;
   onClose: () => void;
   slotConfig: SlotConfig;
+  templateId?: string;
   templateName?: string;
+  slots?: any[];
 }
 
 function triggerDownload(dataUrl: string, fileName: string) {
@@ -30,7 +32,9 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
   isOpen,
   onClose,
   slotConfig,
+  templateId = "tpl-classic-01",
   templateName = "Phối cảnh tiệc cưới",
+  slots = [],
 }) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -80,7 +84,7 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
 
       setExportedImageUrl(finalPreviewImage || null);
 
-      // 3. Submit lead to database
+      // 3. Submit lead to database with rich design snapshot
       await api.submitLead({
         name: name.trim(),
         phone: phone.trim(),
@@ -88,8 +92,14 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
         wedding_date: weddingDate || undefined,
         message: message.trim() ? `[Lưu thiết kế Studio]\n${message.trim()}` : "[Lưu thiết kế Studio]",
         design_snapshot: {
+          template_id: templateId,
+          template_name: templateName,
+          slot_config: slotConfig,
+          custom_slots: slots,
           ...slotConfig,
           ...(finalPreviewImage ? { preview_image: finalPreviewImage } : {}),
+          saved_by: "customer",
+          saved_at: new Date().toISOString(),
         },
       });
 

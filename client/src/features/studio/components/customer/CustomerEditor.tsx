@@ -9,6 +9,11 @@ import {
 import { toStudioTemplate, toStudioSlot } from "../../utils/adapters";
 import { api } from "../../../../lib/api";
 
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../../lib/authContext";
+import { captureStudioThumbnail, generateBrandedDesignImage } from "../../utils/captureThumbnail";
+import type { Lead } from "../../../../lib/types";
+
 import { EditorHeader } from "../admin/EditorHeader";
 import { SlotList } from "../admin/SlotList";
 import { AdminCanvas } from "../admin/AdminCanvas";
@@ -21,6 +26,7 @@ export interface CustomerEditorProps {
   overrideSlots?: SlotDefinition[];
   overrideSlotConfig?: SlotConfig;
   overrideRules?: any[];
+  editingLead?: Lead | null;
   onBackToGallery?: () => void;
 }
 
@@ -28,8 +34,11 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
   templateId = "tpl-classic-01",
   overrideSlots,
   overrideSlotConfig,
+  editingLead,
   onBackToGallery,
 }) => {
+  const navigate = useNavigate();
+  const { token } = useAuth();
   const [template, setTemplate] = useState<Template>(
     () => seedTemplates.find((t) => t.id === templateId) || seedTemplates[0]
   );
@@ -290,6 +299,53 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
     }
   };
 
+  // Admin save updated design snapshot for this lead
+  const handleAdminSaveLeadDesign = async () => {
+    if (!editingLead || !token) return;
+    try {
+      showToast("Đang lưu bản cập nhật phối cảnh...");
+      const rawCapture = await captureStudioThumbnail();
+      let brandedImage = rawCapture;
+      if (rawCapture) {
+        try {
+          brandedImage = await generateBrandedDesignImage(rawCapture, {
+            customerName: editingLead.name,
+            phone: editingLead.phone,
+            weddingDate: editingLead.wedding_date ? String(editingLead.wedding_date) : "",
+            templateName: template.name,
+            hotline: "0789 241 260",
+            website: "pidecor.vn",
+            address: "372 Trần Đại Nghĩa, Đà Nẵng",
+          });
+        } catch (capErr) {
+          console.warn("Branding generation failed, using raw capture:", capErr);
+        }
+      }
+
+      await api.updateLead(
+        editingLead.id,
+        {
+          design_snapshot: {
+            template_id: template.id,
+            template_name: template.name,
+            slot_config: slotConfig,
+            custom_slots: slots,
+            ...slotConfig,
+            preview_image: brandedImage || rawCapture,
+            saved_by: "admin",
+            saved_at: new Date().toISOString(),
+          },
+        },
+        token
+      );
+
+      showToast(`Đã lưu bản phối cảnh mới cho khách hàng "${editingLead.name}"!`);
+    } catch (err) {
+      console.error("Failed to update lead design:", err);
+      showToast("Lưu phối cảnh thất bại!");
+    }
+  };
+
   const selectedSlot = slots.find((s) => s.id === selectedSlotId) || null;
 
   return (
@@ -336,11 +392,14 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
         isDirty={false}
         showGrid={showGrid}
         mode="customer"
+        editingLead={editingLead}
         onBackToHome={onBackToGallery}
         onSelectTemplate={handleSelectTemplate}
         onToggleGrid={() => setShowGrid(!showGrid)}
         onSaveDesign={() => setIsSaveModalOpen(true)}
         onReset={handleReset}
+        onAdminSaveLeadDesign={handleAdminSaveLeadDesign}
+        onBackToLeads={() => navigate("/admin/leads")}
       />
 
       {/* Main Customer 3-Column Studio Workspace */}
@@ -432,7 +491,9 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
         slotConfig={slotConfig}
+        templateId={template.id}
         templateName={template.name}
+        slots={slots}
       />
     </div>
   );

@@ -77,6 +77,16 @@ leadsRouter.get("/", verifyToken, requireAdmin, async (req, res) => {
   res.json({ data, total, page: pageNum, limit: limitNum });
 });
 
+// GET /api/leads/:id — get lead details by id. Admin-only.
+leadsRouter.get("/:id", verifyToken, requireAdmin, async (req, res) => {
+  const leads = await db.get("leads");
+  const existing = leads.find((l) => l.id === req.params.id);
+  if (!existing) {
+    return res.status(404).json({ message: "Không tìm thấy lead." });
+  }
+  res.json(existing);
+});
+
 // GET /api/leads/:id/activities — get timeline activities for a lead (newest first). Admin-only.
 leadsRouter.get("/:id/activities", verifyToken, requireAdmin, async (req, res) => {
   const leads = await db.get("leads");
@@ -122,9 +132,9 @@ leadsRouter.post("/:id/activities", verifyToken, requireAdmin, async (req, res) 
   res.status(201).json(activity);
 });
 
-// PATCH /api/leads/:id — update status (Mới / Đã liên hệ / Đã chốt) + log activity.
-leadsRouter.patch("/:id", verifyToken, requireAdmin, validate(updateLeadStatusSchema), async (req, res) => {
-  const { status } = req.body ?? {};
+// PATCH /api/leads/:id — update status (Mới / Đã liên hệ / Đã chốt) or design_snapshot + log activity.
+leadsRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => {
+  const { status, design_snapshot } = req.body ?? {};
 
   const leads = await db.get("leads");
   const existing = leads.find((l) => l.id === req.params.id);
@@ -132,22 +142,45 @@ leadsRouter.patch("/:id", verifyToken, requireAdmin, validate(updateLeadStatusSc
     return res.status(404).json({ message: "Không tìm thấy lead." });
   }
 
-  // If status is unchanged, return existing record without logging duplicate activity
-  if (existing.status === status) {
+  const patch = {};
+
+  if (status !== undefined && status !== null) {
+    if (!["new", "contacted", "closed"].includes(status)) {
+      return res.status(400).json({ message: "Trạng thái không hợp lệ." });
+    }
+    patch.status = status;
+  }
+
+  if (design_snapshot !== undefined) {
+    patch.design_snapshot = design_snapshot;
+  }
+
+  if (Object.keys(patch).length === 0) {
     return res.json(existing);
   }
 
-  const oldStatus = existing.status;
-  const updated = await db.updateById("leads", req.params.id, { status });
+  const updated = await db.updateById("leads", req.params.id, patch);
 
-  if (updated && oldStatus !== status) {
+  if (patch.status && existing.status !== patch.status) {
     await db.insert("lead_activities", {
       id: uuid(),
       lead_id: req.params.id,
       admin_id: req.user?.sub ?? null,
       activity_type: "status_change",
-      body: `Trạng thái chuyển từ "${oldStatus}" sang "${status}"`,
-      metadata: { from: oldStatus, to: status },
+      body: `Trạng thái chuyển từ "${existing.status}" sang "${patch.status}"`,
+      metadata: { from: existing.status, to: patch.status },
+      created_at: new Date().toISOString(),
+    });
+  }
+
+  if (patch.design_snapshot) {
+    await db.insert("lead_activities", {
+      id: uuid(),
+      lead_id: req.params.id,
+      admin_id: req.user?.sub ?? null,
+      activity_type: "note",
+      body: "Admin đã tinh chỉnh & cập nhật bản phối cảnh Studio cho khách hàng",
+      metadata: { updated_by: "admin" },
       created_at: new Date().toISOString(),
     });
   }
