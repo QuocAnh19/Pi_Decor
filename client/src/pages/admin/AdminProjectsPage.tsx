@@ -14,6 +14,7 @@ import {
   useProjects,
   ProjectForm,
   SAMPLE_STOCK_IMAGES,
+  PRICE_TIER_OPTIONS,
 } from "../../features/projects";
 import { SearchInput, Select } from "../../components/ui";
 import styles from "./AdminProjectsPage.module.scss";
@@ -37,6 +38,8 @@ export function AdminProjectsPage() {
     setSelectedCategory,
     selectedStatus,
     setSelectedStatus,
+    selectedPriceTier,
+    setSelectedPriceTier,
     viewMode,
     setViewMode,
     isModalOpen,
@@ -119,6 +122,17 @@ export function AdminProjectsPage() {
                 { value: "featured", label: "Nổi bật" },
                 { value: "active", label: "Đang hiển thị" },
                 { value: "draft", label: "Bản nháp" },
+              ]}
+            />
+          </div>
+
+          <div style={{ minWidth: "160px" }}>
+            <Select
+              value={selectedPriceTier}
+              onChange={(e) => setSelectedPriceTier(e.target.value)}
+              options={[
+                { value: "all", label: "Tất cả hạng mục" },
+                ...PRICE_TIER_OPTIONS,
               ]}
             />
           </div>
@@ -214,9 +228,16 @@ export function AdminProjectsPage() {
                 />
 
                 <div className={styles.badgeRow}>
-                  <span className={styles.categoryBadge}>
-                    #PiDecor_{proj.tag.replace(/\s+/g, "")}
-                  </span>
+                  <div style={{ display: "flex", gap: "4px", flexWrap: "wrap", alignItems: "center" }}>
+                    <span className={styles.categoryBadge}>
+                      #PiDecor_{proj.tag.replace(/\s+/g, "")}
+                    </span>
+                    {proj.priceTier === "premium" && (
+                      <span className={`${styles.tierBadge} ${styles.tierPremium}`}>
+                        ✦ Cao cấp
+                      </span>
+                    )}
+                  </div>
 
                   <span
                     className={`${styles.statusBadge} ${
@@ -404,21 +425,28 @@ export function AdminProjectsPage() {
                     {proj.location}
                   </td>
                   <td style={{ padding: "12px 16px" }}>
-                    <span
-                      className={`${styles.statusBadge} ${
-                        proj.status === "featured"
-                          ? styles.statusFeatured
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                      <span
+                        className={`${styles.statusBadge} ${
+                          proj.status === "featured"
+                            ? styles.statusFeatured
+                            : proj.status === "draft"
+                              ? styles.statusDraft
+                              : styles.statusActive
+                        }`}
+                      >
+                        {proj.status === "featured"
+                          ? "Nổi bật"
                           : proj.status === "draft"
-                            ? styles.statusDraft
-                            : styles.statusActive
-                      }`}
-                    >
-                      {proj.status === "featured"
-                        ? "Nổi bật"
-                        : proj.status === "draft"
-                          ? "Bản nháp"
-                          : "Hiển thị"}
-                    </span>
+                            ? "Bản nháp"
+                            : "Hiển thị"}
+                      </span>
+                      {proj.priceTier === "premium" && (
+                        <span className={`${styles.tierBadge} ${styles.tierPremium}`}>
+                          ✦ Cao cấp
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td style={{ padding: "12px 16px", textAlign: "right" }}>
                     <div
