@@ -118,8 +118,16 @@ venuesRouter.post("/:id/projects", verifyToken, requireAdmin, async (req, res) =
   if (!venues.some((v) => v.id === req.params.id)) {
     return res.status(404).json({ message: "Không tìm thấy địa điểm." });
   }
-  const { title, wedding_date, style_tags, cover_image, gallery, lead_id, published } = req.body ?? {};
+  const { title, wedding_date, style_tags, cover_image, gallery, lead_id, published, price_tier } = req.body ?? {};
   if (!title) return res.status(400).json({ message: "Thiếu tên dự án." });
+
+  let finalPriceTier = "standard";
+  if (price_tier !== undefined && price_tier !== null && price_tier !== "") {
+    if (!["standard", "premium"].includes(price_tier)) {
+      return res.status(400).json({ message: "Hạng mục giá không hợp lệ." });
+    }
+    finalPriceTier = price_tier;
+  }
 
   const project = {
     id: uuid(),
@@ -131,6 +139,7 @@ venuesRouter.post("/:id/projects", verifyToken, requireAdmin, async (req, res) =
     gallery: Array.isArray(gallery) ? gallery : [],
     lead_id: lead_id ?? null,
     published: published ?? true,
+    price_tier: finalPriceTier,
   };
   await db.insert("projects", project);
   res.status(201).json(project);
@@ -142,6 +151,13 @@ venuesRouter.patch("/projects/:projectId", verifyToken, requireAdmin, async (req
   if (!existing) return res.status(404).json({ message: "Không tìm thấy dự án." });
 
   const patch = req.body ?? {};
+
+  if ("price_tier" in patch && patch.price_tier !== undefined && patch.price_tier !== null && patch.price_tier !== "") {
+    if (!["standard", "premium"].includes(patch.price_tier)) {
+      return res.status(400).json({ message: "Hạng mục giá không hợp lệ." });
+    }
+  }
+
   if (patch.cover_image && existing.cover_image && patch.cover_image !== existing.cover_image) {
     await deleteImageFile(existing.cover_image);
   }
