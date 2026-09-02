@@ -50,6 +50,9 @@ export interface CategoryPortfolioItem {
   src: string | null;
   /** Array of secondary photo paths or objects with custom frame sizes. */
   gallery?: (string | GalleryItemObject)[];
+  priceTier?: "standard" | "premium" | string;
+  featured?: boolean;
+  status?: string;
 }
 
 export interface FabricSwatch {
