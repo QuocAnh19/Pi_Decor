@@ -432,6 +432,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
         slotConfig={slotConfig}
+        templateName={template.name}
       />
     </div>
   );

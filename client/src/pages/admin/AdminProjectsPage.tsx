@@ -234,7 +234,7 @@ export function AdminProjectsPage() {
                     </span>
                     {proj.priceTier === "premium" && (
                       <span className={`${styles.tierBadge} ${styles.tierPremium}`}>
-                        ✦ Cao cấp
+                        Cao cấp
                       </span>
                     )}
                   </div>
@@ -443,7 +443,7 @@ export function AdminProjectsPage() {
                       </span>
                       {proj.priceTier === "premium" && (
                         <span className={`${styles.tierBadge} ${styles.tierPremium}`}>
-                          ✦ Cao cấp
+                          Cao cấp
                         </span>
                       )}
                     </div>

@@ -114,3 +114,151 @@ export async function captureStudioThumbnail(
     });
   }
 }
+
+export interface BrandingInfo {
+  customerName?: string;
+  phone?: string;
+  weddingDate?: string;
+  templateName?: string;
+  hotline?: string;
+  address?: string;
+  website?: string;
+}
+
+/**
+ * Composites Pi Decor branding, hotline, website, and customer wedding details
+ * onto the captured snapshot, producing an elegant branded high-resolution image.
+ */
+export async function generateBrandedDesignImage(
+  baseImageSrc: string,
+  info: BrandingInfo = {}
+): Promise<string> {
+  const {
+    customerName = "",
+    weddingDate = "",
+    templateName = "Phối cảnh tiệc cưới",
+    hotline = "0789 241 260",
+    address = "372 Trần Đại Nghĩa, Đà Nẵng",
+    website = "pidecor.vn",
+  } = info;
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(baseImageSrc);
+        return;
+      }
+
+      const imgWidth = Math.max(img.width || 1200, 1000);
+      const imgHeight = Math.max(img.height || 750, 600);
+
+      // Footer banner height proportionally
+      const footerHeight = Math.max(96, Math.round(imgHeight * 0.14));
+      const totalHeight = imgHeight + footerHeight;
+
+      canvas.width = imgWidth;
+      canvas.height = totalHeight;
+
+      // 1. Draw original design image
+      ctx.drawImage(img, 0, 0, imgWidth, imgHeight);
+
+      // 2. Draw luxury footer banner background
+      const gradient = ctx.createLinearGradient(0, imgHeight, imgWidth, totalHeight);
+      gradient.addColorStop(0, "#271620");
+      gradient.addColorStop(0.5, "#3b141f");
+      gradient.addColorStop(1, "#271620");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, imgHeight, imgWidth, footerHeight);
+
+      // 3. Draw golden accent line on top of banner
+      ctx.fillStyle = "#a15c2e";
+      const lineThickness = Math.max(3, Math.round(imgWidth * 0.003));
+      ctx.fillRect(0, imgHeight, imgWidth, lineThickness);
+
+      // 4. Subtle gold highlight line
+      ctx.fillStyle = "rgba(241, 228, 216, 0.2)";
+      ctx.fillRect(0, imgHeight + lineThickness, imgWidth, 1);
+
+      // 5. Typography sizing based on canvas width
+      const scale = imgWidth / 1200;
+      const padX = Math.round(36 * scale);
+
+      // Left Column: Brand Name & Customer info
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+
+      // Brand Title
+      ctx.fillStyle = "#fbf7f1";
+      ctx.font = `bold ${Math.round(20 * scale)}px "Fraunces", Georgia, serif`;
+      ctx.fillText("PI DECOR • STUDIO PHỐI CẢNH TIỆC CƯỚI", padX, imgHeight + Math.round(footerHeight * 0.2));
+
+      // Subtitle details
+      ctx.fillStyle = "#f1dedb";
+      ctx.font = `500 ${Math.round(13 * scale)}px "Be Vietnam Pro", sans-serif`;
+      const subtitleParts = [
+        templateName ? `Mẫu: ${templateName}` : null,
+        customerName ? `Khách hàng: ${customerName}` : null,
+        weddingDate ? `Ngày tiệc: ${weddingDate}` : null,
+      ].filter(Boolean);
+      const subtitle = subtitleParts.join("  •  ");
+      ctx.fillText(subtitle || "Thiết kế không gian cưới tương tác", padX, imgHeight + Math.round(footerHeight * 0.56));
+
+      // Right Column: Hotline & Contact info
+      const rightX = imgWidth - padX;
+      ctx.textAlign = "right";
+
+      // Hotline & Zalo
+      ctx.fillStyle = "#e59a6b";
+      ctx.font = `bold ${Math.round(16 * scale)}px "Be Vietnam Pro", sans-serif`;
+      ctx.fillText(`Hotline / Zalo: ${hotline}`, rightX, imgHeight + Math.round(footerHeight * 0.2));
+
+      // Website & Address
+      ctx.fillStyle = "#f1dedb";
+      ctx.font = `normal ${Math.round(12 * scale)}px "Be Vietnam Pro", sans-serif`;
+      ctx.fillText(`Website: ${website}  •  ${address}`, rightX, imgHeight + Math.round(footerHeight * 0.58));
+
+      // 6. Subtle Watermark Badge on Top-Right of the canvas image
+      const tagPadX = imgWidth - Math.round(20 * scale);
+      const tagPadY = Math.round(20 * scale);
+      const tagWidth = Math.round(150 * scale);
+      const tagHeight = Math.round(34 * scale);
+
+      ctx.fillStyle = "rgba(39, 22, 32, 0.72)";
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(tagPadX - tagWidth, tagPadY, tagWidth, tagHeight, 8 * scale);
+      } else {
+        ctx.rect(tagPadX - tagWidth, tagPadY, tagWidth, tagHeight);
+      }
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = `600 ${Math.round(12 * scale)}px "Be Vietnam Pro", sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("✦ Pi Decor Studio", tagPadX - tagWidth / 2, tagPadY + tagHeight / 2);
+
+      try {
+        const result = canvas.toDataURL("image/jpeg", 0.94);
+        resolve(result);
+      } catch {
+        resolve(baseImageSrc);
+      }
+    };
+
+    img.onerror = () => {
+      resolve(baseImageSrc);
+    };
+
+    img.src = baseImageSrc;
+  });
+}
+

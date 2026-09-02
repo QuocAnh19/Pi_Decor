@@ -105,8 +105,8 @@ export function Lookbook() {
           <div className={styles.filterRow}>
             {[
               { id: "all", label: "Tất cả" },
-              { id: "featured", label: "★ Nổi bật" },
-              { id: "premium", label: "✦ Cao cấp" },
+              { id: "featured", label: "Nổi bật" },
+              { id: "premium", label: "Cao cấp" },
               { id: "standard", label: "Bình thường" },
             ].map((tab) => (
               <button
@@ -148,10 +148,10 @@ export function Lookbook() {
                   {/* Badges */}
                   <div className={styles.badgeTopRow}>
                     {item.featured && (
-                      <span className={styles.featuredBadge}>★ Nổi bật</span>
+                      <span className={styles.featuredBadge}>Nổi bật</span>
                     )}
                     {item.priceTier === "premium" && (
-                      <span className={styles.premiumBadge}>✦ Cao cấp</span>
+                      <span className={styles.premiumBadge}>Cao cấp</span>
                     )}
                   </div>
 
