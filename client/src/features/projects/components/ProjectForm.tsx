@@ -1,4 +1,4 @@
-import React, { useState, useRef, FormEvent } from "react";
+import React, { useState, useEffect, useRef, FormEvent } from "react";
 import { PlusIcon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { Modal, Input, Select, Textarea } from "../../../components/ui";
 import type { ProjectPayload } from "../../../lib/types";
@@ -59,7 +59,7 @@ export function ProjectForm(props: ProjectFormProps) {
     date: project?.wedding_date ?? project?.date ?? new Date().toISOString().split("T")[0],
     budget: project?.budget ?? "Thỏa thuận",
     status: project?.published === false ? "draft" : project?.status ?? "active",
-    priceTier: project?.priceTier ?? "standard",
+    priceTier: project?.priceTier ?? (project as any)?.price_tier ?? "standard",
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -82,6 +82,40 @@ export function ProjectForm(props: ProjectFormProps) {
     }
     return spans;
   });
+
+  useEffect(() => {
+    if (project) {
+      setFormData({
+        title: project.title ?? "",
+        categoryId: project.categoryId ?? (Array.isArray((project as any).style_tags) ? (project as any).style_tags[0] : "piwedding"),
+        tag: project.tag ?? (Array.isArray((project as any).style_tags) ? (project as any).style_tags[1] || (project as any).style_tags[0] : "Gia Tiên"),
+        location: project.location ?? (venueName ? `Tại ${venueName}` : "Tư gia, Đà Nẵng"),
+        src: project.src ?? (project as any).cover_image ?? SAMPLE_STOCK_IMAGES[0],
+        gallery: project.gallery ?? [],
+        description: project.description ?? "",
+        date: project.date ?? (project as any).wedding_date ?? new Date().toISOString().split("T")[0],
+        budget: project.budget ?? "Thỏa thuận",
+        status: (project as any).published === false ? "draft" : project.status ?? "active",
+        priceTier: project.priceTier ?? (project as any).price_tier ?? "standard",
+      });
+
+      if (project.gallery) {
+        const urls = (project.gallery as any[])
+          .slice(0, 10)
+          .map((item: any) => (typeof item === "string" ? item : item?.url || ""))
+          .filter(Boolean);
+        setGalleryUrls(urls);
+
+        const spans: Record<number, string> = {};
+        (project.gallery as any[]).slice(0, 10).forEach((item: any, idx: number) => {
+          if (item && typeof item === "object" && item.span) {
+            spans[idx] = item.span;
+          }
+        });
+        setCustomSpans(spans);
+      }
+    }
+  }, [project, venueName]);
 
   const [selectedGalleryFiles, setSelectedGalleryFiles] = useState<File[]>([]);
   const [activeSlotCount, setActiveSlotCount] = useState<number>(() =>

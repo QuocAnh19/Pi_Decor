@@ -92,6 +92,7 @@ const TABLES = {
     "id", "venue_id", "title", "wedding_date", "style_tags", "cover_image",
     "gallery", "lead_id", "published", "created_at", "updated_at",
     "location", "description", "budget", "status", "category_id", "tag",
+    "price_tier",
   ],
   media_assets: [
     "id", "entity_type", "entity_id", "url", "provider", "public_id",

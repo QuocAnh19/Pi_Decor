@@ -92,7 +92,7 @@ export function Lookbook() {
           <div className={styles.filterRow}>
             {[
               { id: "all", label: "Tất cả" },
-              { id: "premium", label: "✦ Cao cấp" },
+              { id: "premium", label: "Cao cấp" },
               { id: "standard", label: "Bình thường" },
             ].map((tab) => (
               <button
