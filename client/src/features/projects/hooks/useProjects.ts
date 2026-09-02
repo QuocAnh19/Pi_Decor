@@ -20,6 +20,7 @@ export function useProjects(selectedVenueId?: string | null) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedPriceTier, setSelectedPriceTier] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
 
   // Modal states
@@ -46,6 +47,7 @@ export function useProjects(selectedVenueId?: string | null) {
           date: item.date || "2026-03-19",
           budget: item.budget || "Thỏa thuận",
           status: "active",
+          priceTier: "standard",
           createdAt: Date.now() - idx * 86400000,
         }));
         setProjects(fallback);
@@ -124,6 +126,7 @@ export function useProjects(selectedVenueId?: string | null) {
       payload.append("description", formData.description || "");
       payload.append("budget", formData.budget || "");
       payload.append("status", formData.status || "active");
+      payload.append("price_tier", formData.priceTier || "standard");
       payload.append(
         "style_tags",
         JSON.stringify([formData.categoryId, formData.tag])
@@ -198,9 +201,12 @@ export function useProjects(selectedVenueId?: string | null) {
       const matchesStatus =
         selectedStatus === "all" || p.status === selectedStatus;
 
-      return matchesSearch && matchesCategory && matchesStatus;
+      const matchesPriceTier =
+        selectedPriceTier === "all" || p.priceTier === selectedPriceTier;
+
+      return matchesSearch && matchesCategory && matchesStatus && matchesPriceTier;
     });
-  }, [projects, searchQuery, selectedCategory, selectedStatus]);
+  }, [projects, searchQuery, selectedCategory, selectedStatus, selectedPriceTier]);
 
   return {
     projects,
@@ -215,6 +221,8 @@ export function useProjects(selectedVenueId?: string | null) {
     setSelectedCategory,
     selectedStatus,
     setSelectedStatus,
+    selectedPriceTier,
+    setSelectedPriceTier,
     viewMode,
     setViewMode,
     isModalOpen,
