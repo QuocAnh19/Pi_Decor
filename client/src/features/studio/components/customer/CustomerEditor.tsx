@@ -285,17 +285,23 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
     showToast(`Đã cập nhật chữ: ${asset.name}`);
   };
 
-  // Reset to original preset of the CURRENT template
+  // Reset to original preset of the CURRENT template or customer's initial snapshot
   const handleReset = () => {
-    const isConfirmed = window.confirm(
-      `Bạn có chắc muốn đặt lại toàn bộ màu sắc, vật liệu và vị trí về thiết kế ban đầu của mẫu "${template.name}"?`
-    );
+    const confirmMsg = editingLead
+      ? `Bạn có chắc muốn đặt lại toàn bộ màu sắc, vật liệu về bản phối cảnh ban đầu của khách hàng "${editingLead.name}"?`
+      : `Bạn có chắc muốn đặt lại toàn bộ màu sắc, vật liệu và vị trí về thiết kế ban đầu của mẫu "${template.name}"?`;
+
+    const isConfirmed = window.confirm(confirmMsg);
     if (isConfirmed) {
       setTemplate(originalTemplateRef.current);
       setSlots(JSON.parse(JSON.stringify(originalSlotsRef.current)));
       setSlotConfig(JSON.parse(JSON.stringify(originalConfigRef.current)));
       setSelectedSlotId(originalSlotsRef.current[0]?.id || null);
-      showToast(`Đã khôi phục về thiết kế gốc ban đầu của mẫu "${template.name}"!`);
+      showToast(
+        editingLead
+          ? `Đã khôi phục về bản phối cảnh ban đầu của khách hàng "${editingLead.name}"!`
+          : `Đã khôi phục về thiết kế gốc ban đầu của mẫu "${template.name}"!`
+      );
     }
   };
 

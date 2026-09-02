@@ -99,164 +99,199 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
     <div className={styles.header}>
       {/* Left side: Back Button & Template Selector */}
       <div className={styles.leftSection}>
-        {onBackToHome && (
-          <button
-            type="button"
-            onClick={onBackToHome}
-            className={styles.backBtn}
-          >
-            <ArrowLeftIcon className="h-4 w-4" style={{ width: 14, height: 14 }} />{" "}
-            {isCustomer ? "Đổi Mẫu Khác" : "Quay lại"}
-          </button>
-        )}
-
-        <div className={styles.templateGroup}>
-          <span className={styles.editingLabel}>
-            {isCustomer ? "Mẫu phông cưới:" : "Đang sửa:"}
-          </span>
-
-          {!isCustomer ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              {isEditingName ? (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <input
-                    type="text"
-                    autoFocus
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSaveName();
-                      else if (e.key === "Escape") handleCancelName();
-                    }}
-                    onBlur={handleSaveName}
-                    style={{
-                      padding: "6px 12px",
-                      borderRadius: "8px",
-                      border: "1.5px solid #a15c2e",
-                      fontSize: "13px",
-                      fontWeight: "700",
-                      color: "#271620",
-                      backgroundColor: "#ffffff",
-                      outline: "none",
-                      minWidth: "220px",
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSaveName}
-                    style={{
-                      padding: "6px 10px",
-                      backgroundColor: "#a15c2e",
-                      color: "#ffffff",
-                      border: "none",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Lưu
-                  </button>
-                </div>
-              ) : (
-                <div
-                  onDoubleClick={() => {
-                    setEditedName(template.name);
-                    setIsEditingName(true);
-                  }}
-                  title="Nhấp đúp chuột để đổi tên mẫu thiết kế này"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "4px 10px",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    backgroundColor: "#fbf7f1",
-                    border: "1px dashed #d8cab8",
-                    transition: "all 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "#a15c2e";
-                    e.currentTarget.style.backgroundColor = "#ffffff";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "#d8cab8";
-                    e.currentTarget.style.backgroundColor = "#fbf7f1";
-                  }}
-                >
-                  <span style={{ fontSize: "13px", fontWeight: "700", color: "#271620" }}>
-                    {template.name}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setEditedName(template.name);
-                      setIsEditingName(true);
-                    }}
-                    title="Đổi tên mẫu"
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      color: "#a15c2e",
-                      cursor: "pointer",
-                      padding: "2px",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <PencilSquareIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                  </button>
-                </div>
-              )}
-
-              {/* Template Switcher Dropdown */}
-              <div style={{ minWidth: "160px" }}>
-                <Select
-                  fullWidth={false}
-                  value={template.id}
-                  onChange={(e) => onSelectTemplate(e.target.value)}
-                  options={templateOptions}
-                />
-              </div>
-            </div>
-          ) : (
-            <div style={{ minWidth: "220px" }}>
-              <Select
-                fullWidth={false}
-                value={template.id}
-                onChange={(e) => onSelectTemplate(e.target.value)}
-                options={templateOptions}
-              />
-            </div>
-          )}
-
-          {!isCustomer && isDirty && (
-            <Badge tone="warning">
-              ● Đã thay đổi chưa lưu
-            </Badge>
-          )}
-
-          {editingLead && (
+        {editingLead ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            {/* Fixed Template Name Tag */}
             <div
               style={{
-                display: "flex",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e7ded0",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "13px",
+                fontWeight: "700",
+                color: "#271620",
+                boxShadow: "0 1px 3px rgba(39, 22, 32, 0.04)",
+              }}
+            >
+              <span style={{ color: "#a15c2e", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.04em", fontWeight: "800" }}>
+                Mẫu gốc:
+              </span>
+              <span>{template.name}</span>
+            </div>
+
+            {/* Customer Info Badge */}
+            <div
+              style={{
+                display: "inline-flex",
                 alignItems: "center",
                 gap: "8px",
-                backgroundColor: "rgba(161, 92, 46, 0.12)",
+                backgroundColor: "rgba(161, 92, 46, 0.1)",
                 border: "1px solid rgba(161, 92, 46, 0.35)",
                 borderRadius: "8px",
-                padding: "4px 12px",
-                fontSize: "12px",
+                padding: "6px 14px",
+                fontSize: "13px",
                 fontWeight: "700",
                 color: "#a15c2e",
               }}
             >
-              <span>🎯 Khách hàng: {editingLead.name} ({editingLead.phone})</span>
+              <span>👤 Khách hàng: {editingLead.name}</span>
+              <span style={{ color: "rgba(161, 92, 46, 0.4)" }}>•</span>
+              <span>📞 {editingLead.phone}</span>
+              {editingLead.wedding_date && (
+                <>
+                  <span style={{ color: "rgba(161, 92, 46, 0.4)" }}>•</span>
+                  <span>📅 Tiệc: {editingLead.wedding_date}</span>
+                </>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <>
+            {onBackToHome && (
+              <button
+                type="button"
+                onClick={onBackToHome}
+                className={styles.backBtn}
+              >
+                <ArrowLeftIcon className="h-4 w-4" style={{ width: 14, height: 14 }} />{" "}
+                {isCustomer ? "Đổi Mẫu Khác" : "Quay lại"}
+              </button>
+            )}
+
+            <div className={styles.templateGroup}>
+              <span className={styles.editingLabel}>
+                {isCustomer ? "Mẫu phông cưới:" : "Đang sửa:"}
+              </span>
+
+              {!isCustomer ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  {isEditingName ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <input
+                        type="text"
+                        autoFocus
+                        value={editedName}
+                        onChange={(e) => setEditedName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleSaveName();
+                          else if (e.key === "Escape") handleCancelName();
+                        }}
+                        onBlur={handleSaveName}
+                        style={{
+                          padding: "6px 12px",
+                          borderRadius: "8px",
+                          border: "1.5px solid #a15c2e",
+                          fontSize: "13px",
+                          fontWeight: "700",
+                          color: "#271620",
+                          backgroundColor: "#ffffff",
+                          outline: "none",
+                          minWidth: "220px",
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSaveName}
+                        style={{
+                          padding: "6px 10px",
+                          backgroundColor: "#a15c2e",
+                          color: "#ffffff",
+                          border: "none",
+                          borderRadius: "6px",
+                          fontSize: "12px",
+                          fontWeight: "700",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Lưu
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onDoubleClick={() => {
+                        setEditedName(template.name);
+                        setIsEditingName(true);
+                      }}
+                      title="Nhấp đúp chuột để đổi tên mẫu thiết kế này"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "4px 10px",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        backgroundColor: "#fbf7f1",
+                        border: "1px dashed #d8cab8",
+                        transition: "all 0.15s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = "#a15c2e";
+                        e.currentTarget.style.backgroundColor = "#ffffff";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = "#d8cab8";
+                        e.currentTarget.style.backgroundColor = "#fbf7f1";
+                      }}
+                    >
+                      <span style={{ fontSize: "13px", fontWeight: "700", color: "#271620" }}>
+                        {template.name}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditedName(template.name);
+                          setIsEditingName(true);
+                        }}
+                        title="Đổi tên mẫu"
+                        style={{
+                          border: "none",
+                          background: "transparent",
+                          color: "#a15c2e",
+                          cursor: "pointer",
+                          padding: "2px",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <PencilSquareIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Template Switcher Dropdown */}
+                  <div style={{ minWidth: "160px" }}>
+                    <Select
+                      fullWidth={false}
+                      value={template.id}
+                      onChange={(e) => onSelectTemplate(e.target.value)}
+                      options={templateOptions}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div style={{ minWidth: "220px" }}>
+                  <Select
+                    fullWidth={false}
+                    value={template.id}
+                    onChange={(e) => onSelectTemplate(e.target.value)}
+                    options={templateOptions}
+                  />
+                </div>
+              )}
+
+              {!isCustomer && isDirty && (
+                <Badge tone="warning">
+                  ● Đã thay đổi chưa lưu
+                </Badge>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Right side: Action Toolbar */}
