@@ -35,10 +35,19 @@ projectsRouter.post("/", verifyToken, requireAdmin, projectUpload, async (req, r
     status,
     category_id,
     tag,
+    price_tier,
   } = req.body ?? {};
 
   if (!title || !title.trim()) {
     return res.status(400).json({ message: "Thiếu tên dự án." });
+  }
+
+  let finalPriceTier = "standard";
+  if (price_tier !== undefined && price_tier !== null && price_tier !== "") {
+    if (!["standard", "premium"].includes(price_tier)) {
+      return res.status(400).json({ message: "Hạng mục giá không hợp lệ." });
+    }
+    finalPriceTier = price_tier;
   }
 
   let finalCoverImage = cover_image ?? null;
@@ -89,6 +98,7 @@ projectsRouter.post("/", verifyToken, requireAdmin, projectUpload, async (req, r
     status: status || (published === "false" ? "draft" : "active"),
     category_id: category_id || parsedTags[0] || "piwedding",
     tag: tag || parsedTags[1] || "Gia Tiên",
+    price_tier: finalPriceTier,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -106,6 +116,12 @@ projectsRouter.patch("/:id", verifyToken, requireAdmin, projectUpload, async (re
   }
 
   const patch = { ...req.body };
+
+  if ("price_tier" in patch && patch.price_tier !== undefined && patch.price_tier !== null && patch.price_tier !== "") {
+    if (!["standard", "premium"].includes(patch.price_tier)) {
+      return res.status(400).json({ message: "Hạng mục giá không hợp lệ." });
+    }
+  }
 
   if (req.files && req.files["image"] && req.files["image"][0]) {
     patch.cover_image = publicUrlFor(req, req.files["image"][0]);
