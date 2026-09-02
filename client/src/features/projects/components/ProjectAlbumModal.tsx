@@ -119,6 +119,17 @@ export function ProjectAlbumModal({ project, onClose }: ProjectAlbumModalProps) 
     <div className={styles.headerInfo}>
       <div className={styles.headerTop}>
         <span className={styles.tagBadge}>#{project.tag}</span>
+        {project.priceTier && (
+          <span
+            className={
+              project.priceTier === "premium"
+                ? styles.premiumBadge
+                : styles.tierBadge
+            }
+          >
+            {project.priceTier === "premium" ? "✦ Hạng mục: Cao cấp" : "Hạng mục: Bình thường"}
+          </span>
+        )}
         {project.location && (
           <span className={styles.locationText}>
             <MapPinIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} />
