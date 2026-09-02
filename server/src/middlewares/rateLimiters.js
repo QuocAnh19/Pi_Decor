@@ -10,7 +10,7 @@ export const loginLimiter = rateLimit({
 
 export const leadsLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: "Bạn đã gửi quá nhiều yêu cầu. Vui lòng thử lại sau." },

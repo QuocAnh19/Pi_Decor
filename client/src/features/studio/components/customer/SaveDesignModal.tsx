@@ -56,6 +56,13 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
       return;
     }
 
+    const cleanPhone = phone.replace(/[\s.\-()]/g, "");
+    const VN_PHONE_REGEX = /^(0|\+84)[0-9]{8,10}$/;
+    if (!VN_PHONE_REGEX.test(cleanPhone)) {
+      setError("Số điện thoại không đúng định dạng VN (VD: 0905 123 456).");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -87,7 +94,7 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
       // 3. Submit lead to database with rich design snapshot
       await api.submitLead({
         name: name.trim(),
-        phone: phone.trim(),
+        phone: cleanPhone,
         email: email.trim() || undefined,
         wedding_date: weddingDate || undefined,
         message: message.trim() ? `[Lưu thiết kế Studio]\n${message.trim()}` : "[Lưu thiết kế Studio]",
