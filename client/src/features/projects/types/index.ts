@@ -12,9 +12,15 @@ export interface ProjectItem {
   date?: string;
   budget?: string;
   status?: "active" | "featured" | "draft";
+  priceTier: "standard" | "premium";
   createdAt?: number;
   venue_id?: string;
 }
+
+export const PRICE_TIER_OPTIONS = [
+  { value: "standard", label: "Bình thường" },
+  { value: "premium", label: "Cao cấp" },
+];
 
 export interface SlotDesc {
   label: string;
@@ -65,6 +71,7 @@ export function dbToProjectItem(item: Project): ProjectItem {
     date: item.wedding_date ? String(item.wedding_date).split("T")[0] : "",
     budget: item.budget ?? "Thỏa thuận",
     status: (item.status as "active" | "featured" | "draft") ?? (item.published === false ? "draft" : "active"),
+    priceTier: (item.price_tier as "standard" | "premium") || "standard",
     createdAt: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
     venue_id: item.venue_id ?? undefined,
   };
