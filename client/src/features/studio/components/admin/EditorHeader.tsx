@@ -14,6 +14,7 @@ import type { Template } from "../../types";
 import type { StudioTemplateRow } from "../../../../lib/types";
 import { Badge, Select } from "../../../../components/ui";
 import styles from "./EditorHeader.module.scss";
+import { formatDate } from "../../../../lib/formatters";
 
 export interface EditorHeaderProps {
   template: Template;
@@ -138,13 +139,13 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                 color: "#a15c2e",
               }}
             >
-              <span>👤 Khách hàng: {editingLead.name}</span>
+              <span>Khách hàng: {editingLead.name}</span>
               <span style={{ color: "rgba(161, 92, 46, 0.4)" }}>•</span>
-              <span>📞 {editingLead.phone}</span>
+              <span>{editingLead.phone}</span>
               {editingLead.wedding_date && (
                 <>
                   <span style={{ color: "rgba(161, 92, 46, 0.4)" }}>•</span>
-                  <span>📅 Tiệc: {editingLead.wedding_date}</span>
+                  <span>Tiệc: {formatDate(editingLead.wedding_date)}</span>
                 </>
               )}
             </div>

@@ -507,7 +507,7 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
               boxShadow: "0 2px 6px rgba(180, 88, 107, 0.12)",
             }}
           >
-            {isCustomer ? `🗑️ Xoá "${slot.label}" khỏi phông` : "🗑️ Xoá slot này"}
+            {isCustomer ? `Xoá "${slot.label}" khỏi phông` : "Xoá slot này"}
           </button>
         </div>
       )}

@@ -15,6 +15,8 @@ export function Navbar() {
   const location = useLocation();
   const isStudio = location.pathname === "/studio";
   const isSubPage = isStudio || location.pathname === "/ban-do";
+  const searchParams = new URLSearchParams(location.search);
+  const isLeadStudio = isStudio && Boolean(searchParams.get("leadId"));
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -57,12 +59,24 @@ export function Navbar() {
   return (
     <header className={`${styles.header} ${solid ? styles.headerSolid : ""}`}>
       <Container className={styles.bar}>
-        <Link to="/" onClick={handleLogoClick} className={styles.logo}>
+        <Link
+          to={isLeadStudio ? "/admin/leads" : "/"}
+          onClick={handleLogoClick}
+          className={styles.logo}
+        >
           Pi Decor
         </Link>
 
         <nav className={styles.nav}>
-          {isSubPage ? (
+          {isLeadStudio ? (
+            <Link
+              to="/admin/leads"
+              className={styles.navLink}
+              style={{ color: "#a15c2e", fontWeight: "700" }}
+            >
+              ← Về trang Admin Leads
+            </Link>
+          ) : isSubPage ? (
             <Link to="/" onClick={handleLogoClick} className={styles.navLink}>
               ← Về trang chủ
             </Link>
