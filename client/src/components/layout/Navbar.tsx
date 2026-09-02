@@ -36,7 +36,10 @@ export function Navbar() {
   };
 
   // Handle nav link click with smooth offset scroll
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
     if (href.startsWith("/#") && location.pathname === "/") {
       e.preventDefault();
       const targetId = href.replace("/#", "");
@@ -74,7 +77,7 @@ export function Navbar() {
               className={styles.navLink}
               style={{ color: "#a15c2e", fontWeight: "700" }}
             >
-              ← Về trang Admin Leads
+              ← Về trang quản lý khách hàng
             </Link>
           ) : isSubPage ? (
             <Link to="/" onClick={handleLogoClick} className={styles.navLink}>
@@ -95,7 +98,7 @@ export function Navbar() {
                 <Link key={l.href} to={l.href} className={styles.navLink}>
                   {l.label}
                 </Link>
-              )
+              ),
             )
           )}
         </nav>
