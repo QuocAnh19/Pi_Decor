@@ -12,6 +12,7 @@ import styles from "./Lookbook.module.scss";
 export function Lookbook() {
   const [projects, setProjects] = useState<CategoryPortfolioItem[]>([]);
   const [selectedProject, setSelectedProject] = useState<CategoryPortfolioItem | null>(null);
+  const [tierFilter, setTierFilter] = useState<"all" | "premium" | "standard">("all");
 
   useEffect(() => {
     api
@@ -35,6 +36,9 @@ export function Lookbook() {
                 Array.isArray(p.gallery) && p.gallery.length > 0
                   ? p.gallery
                   : matchingStatic?.gallery ?? [],
+              priceTier: (p.price_tier as "standard" | "premium") || matchingStatic?.priceTier || "standard",
+              featured: p.status === "featured" || Boolean(matchingStatic?.featured),
+              status: p.status || matchingStatic?.status || "active",
             };
           });
 
@@ -42,7 +46,12 @@ export function Lookbook() {
           const merged = [...mapped];
           categoryPortfolio.forEach((staticItem) => {
             if (!merged.some((m) => m.id === staticItem.id || m.title === staticItem.title)) {
-              merged.push(staticItem);
+              merged.push({
+                ...staticItem,
+                priceTier: staticItem.priceTier || "standard",
+                featured: Boolean(staticItem.featured),
+                status: staticItem.status || "active",
+              });
             }
           });
           setProjects(merged);
@@ -55,7 +64,18 @@ export function Lookbook() {
       });
   }, []);
 
-  const displayList = projects.length > 0 ? projects : categoryPortfolio;
+  const sourceList = projects.length > 0 ? projects : categoryPortfolio;
+
+  // Stable sort: featured projects appear first
+  const sortedList = [...sourceList].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+
+  // Filter by price tier
+  const filteredList = sortedList.filter((item) => {
+    if (tierFilter === "all") return true;
+    return (item.priceTier || "standard") === tierFilter;
+  });
+
+  const displayList = filteredList.slice(0, 9);
 
   return (
     <>
@@ -67,8 +87,27 @@ export function Lookbook() {
             description="Các dự án trang trí vừa được Pi Decor triển khai thực tế gần đây nhất — nhấp vào ảnh để xem toàn bộ album thực tế."
             align="left"
           />
+
+          {/* Price Tier Filter Tabs */}
+          <div className={styles.filterRow}>
+            {[
+              { id: "all", label: "Tất cả" },
+              { id: "premium", label: "✦ Cao cấp" },
+              { id: "standard", label: "Bình thường" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setTierFilter(tab.id as "all" | "premium" | "standard")}
+                className={`${styles.filterButton} ${tierFilter === tab.id ? styles.filterActive : ""}`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           <div className={styles.grid}>
-            {displayList.slice(0, 9).map((item, i) => (
+            {displayList.map((item, i) => (
               <Reveal key={item.id} delay={i * 80}>
                 <div
                   className={styles.card}
@@ -91,6 +130,16 @@ export function Lookbook() {
                     mediaClassName={styles.photo}
                   />
                   <div className={styles.overlay} />
+
+                  {/* Badges */}
+                  <div className={styles.badgeTopRow}>
+                    {item.featured && (
+                      <span className={styles.featuredBadge}>★ Nổi bật</span>
+                    )}
+                    {item.priceTier === "premium" && (
+                      <span className={styles.premiumBadge}>✦ Cao cấp</span>
+                    )}
+                  </div>
 
                   <div className={styles.expandOverlay}>
                     <ArrowsPointingOutIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
