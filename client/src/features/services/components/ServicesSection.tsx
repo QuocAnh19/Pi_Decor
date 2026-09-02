@@ -29,6 +29,9 @@ export function ServicesSection() {
               location: p.location || "Đà Nẵng",
               src: p.cover_image || "/images/portfolio/piwedding-gia-tien-1.jpg",
               gallery: Array.isArray(p.gallery) ? p.gallery : [],
+              priceTier: (p.price_tier as "standard" | "premium") || "standard",
+              featured: p.status === "featured",
+              status: p.status || "active",
             };
           });
 

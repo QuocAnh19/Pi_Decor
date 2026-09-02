@@ -168,7 +168,12 @@ projectsRouter.patch("/:id", verifyToken, requireAdmin, projectUpload, async (re
     }
   }
 
-  if ("published" in patch) {
+  if ("status" in patch && patch.status !== undefined && patch.status !== null && patch.status !== "") {
+    if (!["active", "featured", "draft"].includes(patch.status)) {
+      return res.status(400).json({ message: "Trạng thái không hợp lệ." });
+    }
+    patch.published = patch.status !== "draft";
+  } else if ("published" in patch) {
     patch.published = patch.published === "true" || patch.published === true;
   }
 

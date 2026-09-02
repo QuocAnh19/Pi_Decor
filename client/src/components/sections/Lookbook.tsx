@@ -9,10 +9,12 @@ import { api } from "../../lib/api";
 import type { Project, CategoryPortfolioItem } from "../../lib/types";
 import styles from "./Lookbook.module.scss";
 
+type LookbookFilter = "all" | "featured" | "premium" | "standard";
+
 export function Lookbook() {
   const [projects, setProjects] = useState<CategoryPortfolioItem[]>([]);
   const [selectedProject, setSelectedProject] = useState<CategoryPortfolioItem | null>(null);
-  const [tierFilter, setTierFilter] = useState<"all" | "premium" | "standard">("all");
+  const [activeFilter, setActiveFilter] = useState<LookbookFilter>("all");
 
   useEffect(() => {
     api
@@ -66,13 +68,24 @@ export function Lookbook() {
 
   const sourceList = projects.length > 0 ? projects : categoryPortfolio;
 
-  // Stable sort: featured projects appear first
-  const sortedList = [...sourceList].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
+  // Sorting hierarchy:
+  // 1. featured & premium (score: 3 - Dự án nổi bật cao cấp đứng đầu)
+  // 2. featured & standard (score: 2 - Dự án nổi bật)
+  // 3. premium & non-featured (score: 1 - Dự án cao cấp)
+  // 4. standard & non-featured (score: 0 - Dự án bình thường)
+  const sortedList = [...sourceList].sort((a, b) => {
+    const aScore = (a.featured ? 2 : 0) + (a.priceTier === "premium" ? 1 : 0);
+    const bScore = (b.featured ? 2 : 0) + (b.priceTier === "premium" ? 1 : 0);
+    return bScore - aScore;
+  });
 
-  // Filter by price tier
+  // Filter by category/tier/featured
   const filteredList = sortedList.filter((item) => {
-    if (tierFilter === "all") return true;
-    return (item.priceTier || "standard") === tierFilter;
+    if (activeFilter === "all") return true;
+    if (activeFilter === "featured") return Boolean(item.featured);
+    if (activeFilter === "premium") return item.priceTier === "premium";
+    if (activeFilter === "standard") return (item.priceTier || "standard") === "standard";
+    return true;
   });
 
   const displayList = filteredList.slice(0, 9);
@@ -88,18 +101,19 @@ export function Lookbook() {
             align="left"
           />
 
-          {/* Price Tier Filter Tabs */}
+          {/* Filter Tabs */}
           <div className={styles.filterRow}>
             {[
               { id: "all", label: "Tất cả" },
-              { id: "premium", label: "Cao cấp" },
+              { id: "featured", label: "★ Nổi bật" },
+              { id: "premium", label: "✦ Cao cấp" },
               { id: "standard", label: "Bình thường" },
             ].map((tab) => (
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setTierFilter(tab.id as "all" | "premium" | "standard")}
-                className={`${styles.filterButton} ${tierFilter === tab.id ? styles.filterActive : ""}`}
+                onClick={() => setActiveFilter(tab.id as LookbookFilter)}
+                className={`${styles.filterButton} ${activeFilter === tab.id ? styles.filterActive : ""}`}
               >
                 {tab.label}
               </button>

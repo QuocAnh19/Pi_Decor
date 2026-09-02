@@ -119,6 +119,9 @@ export function ProjectAlbumModal({ project, onClose }: ProjectAlbumModalProps) 
     <div className={styles.headerInfo}>
       <div className={styles.headerTop}>
         <span className={styles.tagBadge}>#{project.tag}</span>
+        {(project.featured || project.status === "featured") && (
+          <span className={styles.featuredBadge}>Nổi bật</span>
+        )}
         {project.priceTier && (
           <span
             className={
@@ -127,7 +130,7 @@ export function ProjectAlbumModal({ project, onClose }: ProjectAlbumModalProps) 
                 : styles.tierBadge
             }
           >
-            {project.priceTier === "premium" ? "✦ Hạng mục: Cao cấp" : "Hạng mục: Bình thường"}
+            {project.priceTier === "premium" ? "Cao cấp" : "Bình thường"}
           </span>
         )}
         {project.location && (

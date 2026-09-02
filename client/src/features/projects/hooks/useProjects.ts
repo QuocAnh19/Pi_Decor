@@ -90,7 +90,10 @@ export function useProjects(selectedVenueId?: string | null) {
     try {
       await api.updateProject(
         proj.id,
-        { published: String(nextStatus) !== "draft" },
+        {
+          status: nextStatus,
+          published: true,
+        },
         token
       );
     } catch (err) {
