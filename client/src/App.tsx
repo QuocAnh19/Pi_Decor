@@ -14,6 +14,7 @@ import { AdminVenuesPage } from "./pages/admin/AdminVenuesPage";
 import { AdminMaterialsPage } from "./pages/admin/AdminMaterialsPage";
 import { AdminTestimonialsPage } from "./pages/admin/AdminTestimonialsPage";
 import { AdminStudioPage } from "./pages/admin/AdminStudioPage";
+import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 import styles from "./App.module.scss";
 
 /** Chrome for every public page. Never mounted under /admin — per
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="materials" element={<AdminMaterialsPage />} />
           <Route path="testimonials" element={<AdminTestimonialsPage />} />
           <Route path="studio" element={<AdminStudioPage />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
         </Route>
       </Route>
     </Routes>

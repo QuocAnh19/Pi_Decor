@@ -224,6 +224,26 @@ export const api = {
 
   getMe: (token: string) => authRequest<{ admin: Admin }>("/auth/me", token),
 
+  updateMe: (
+    payload: { email?: string; current_password?: string; password?: string },
+    token: string
+  ) =>
+    authRequest<{ message: string; token: string; admin: Admin }>("/auth/me", token, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  listAdmins: (token: string) => authRequest<Admin[]>("/auth/admins", token),
+
+  createAdmin: (payload: { email: string; password: string }, token: string) =>
+    authRequest<Admin>("/auth/admins", token, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  deleteAdmin: (id: string, token: string) =>
+    authRequest<void>(`/auth/admins/${id}`, token, { method: "DELETE" }),
+
   getSummary: (token: string) => authRequest<AdminSummary>("/admin/summary", token),
 
   // ── Quotations ───────────────────────────────────────────────────────

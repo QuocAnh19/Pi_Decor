@@ -17,6 +17,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        // SOURCE OF TRUTH: client/src/styles/_variables.scss — mọi thay đổi màu phải sửa ở đó trước, sau đó copy sang đây. Nếu thêm màu mới, luôn thêm ở CẢ HAI file trong cùng 1 commit.
         paper: {
           DEFAULT: "#FBF7F1",
           dim: "#F4EEE3",
@@ -32,6 +33,14 @@ export default {
           hover: "#874C25",
           subtle: "#F1E4D8",
         },
+        blush: {
+          DEFAULT: "#F8E9E7",
+          dim: "#F1DEDB",
+        },
+        plum: {
+          DEFAULT: "#3B141F",
+          light: "#5C2433",
+        },
         material: {
           rose: "#E7B6BB",
           sage: "#AFC49C",
@@ -40,6 +49,12 @@ export default {
           champagne: "#E7BE79",
           smoke: "#8A9BAE",
         },
+        "kids-accent": "#E59A6B",
+        "kids-accent-dim": "#F6DDC6",
+        "wedding-accent": "#A15C2E",
+        "wedding-accent-dim": "#F1E4D8",
+        "event-accent": "#4F6B63",
+        "event-accent-dim": "#DBE6E0",
       },
       fontFamily: {
         serif: ["Fraunces", "serif"],

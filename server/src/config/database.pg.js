@@ -56,20 +56,13 @@ pool.on("error", (err) => {
   console.error("[pg pool] unexpected error on idle client:", err.message);
 });
 
-// Auto-ensure required columns exist on studio_templates
-pool.query(`
-  ALTER TABLE studio_templates ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now();
-  ALTER TABLE studio_templates ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
-  ALTER TABLE studio_templates ADD COLUMN IF NOT EXISTS default_config jsonb NOT NULL DEFAULT '{}';
-`).catch(() => {});
-
 // ── Column allowlist per table ──────────────────────────────────────────
 // Every INSERT/UPDATE is built exclusively from these lists, so a request
 // body can never inject an arbitrary column name — only values are
 // parameterized ($1, $2, ...), and only known column names are ever
 // concatenated into SQL text. Keep this in sync with database/migrations/.
 const TABLES = {
-  admins: ["id", "email", "password_hash", "created_at"],
+  admins: ["id", "email", "password_hash", "role", "created_at"],
   leads: [
     "id", "name", "phone", "email", "wedding_date", "message",
     "design_snapshot", "status", "created_at",

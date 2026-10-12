@@ -21,6 +21,11 @@ $color-paper: #fbf7f1;
 $color-ink: #271620;
 $color-accent-brand: #a15c2e;
 
+// Font Families
+$font-serif: "Fraunces", serif;
+$font-sans: "Be Vietnam Pro", sans-serif;
+$font-script: "Cormorant Garamond", serif;
+
 // Typography Scale
 $text-xs: 0.75rem; // 12px
 $text-sm: 0.875rem; // 14px
@@ -30,6 +35,22 @@ $text-xl: 1.25rem; // 20px
 $text-2xl: 1.5rem; // 24px
 $text-3xl: 1.875rem; // 30px
 $text-4xl: 2.25rem; // 36px
+$text-5xl: 3.85rem;      // 61.6px — Hero H1 desktop lớn nhất hiện tại
+
+$weight-regular: 400;
+$weight-medium: 500;
+$weight-semibold: 600;
+$weight-bold: 700;
+
+$leading-tight: 1.04;    // Hero H1
+$leading-snug: 1.2;      // H2/H3
+$leading-normal: 1.4;    // caption/small
+$leading-relaxed: 1.6;   // body/subtitle
+
+$tracking-tight: -0.01em;   // headings
+$tracking-normal: 0;
+$tracking-wide: 0.02em;     // badge/label nhỏ
+$tracking-widest: 0.2em;    // eyebrow/kicker uppercase
 
 // Spacing Scale
 $space-1: 4px;
@@ -40,6 +61,10 @@ $space-6: 24px;
 $space-8: 32px;
 $space-12: 48px;
 $space-20: 80px;
+$space-0-5: 6px;
+$space-2-5: 10px;
+$space-16: 64px;
+$space-24: 96px;
 
 // Breakpoints
 $bp-sm: 640px;

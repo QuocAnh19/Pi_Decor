@@ -18,6 +18,9 @@ export function validateEnv() {
     if (!process.env.CORS_ORIGIN || !process.env.CORS_ORIGIN.trim()) {
       missingVars.push("CORS_ORIGIN");
     }
+    if (!process.env.ADMIN_PASSWORD || !process.env.ADMIN_PASSWORD.trim()) {
+      missingVars.push("ADMIN_PASSWORD");
+    }
   }
 
   if (missingVars.length > 0) {

@@ -145,6 +145,8 @@ export interface VenueDetail extends Venue {
 export interface Admin {
   id: string;
   email: string;
+  role?: "owner" | "admin";
+  created_at?: string;
 }
 
 export type LeadStatus = "new" | "contacted" | "closed";

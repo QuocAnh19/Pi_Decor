@@ -25,8 +25,16 @@ export function verifyToken(req, res, next) {
 }
 
 export function requireAdmin(req, res, next) {
-  if (req.user?.role !== "admin") {
+  if (req.user?.role !== "admin" && req.user?.role !== "owner") {
     return res.status(403).json({ message: "Bạn không có quyền truy cập khu vực này." });
   }
   next();
 }
+
+export function requireOwner(req, res, next) {
+  if (req.user?.role !== "owner") {
+    return res.status(403).json({ message: "Chỉ chủ sở hữu (owner) mới có quyền thực hiện thao tác này." });
+  }
+  next();
+}
+

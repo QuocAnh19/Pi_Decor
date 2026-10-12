@@ -1,11 +1,9 @@
-import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
-import { uploadImage, publicUrlFor, deleteImageFile, deleteMultipleImageFiles } from "../../utils/uploadImage.js";
+import { uploadImage, publicUrlFor, deleteMultipleImageFiles } from "../../utils/uploadImage.js";
 import { testimonialLimiter } from "../../middlewares/rateLimiters.js";
-
-export const testimonialsRouter = Router();
+import { createCrudRouter } from "../../utils/crudRouterFactory.js";
 
 function safeParsePhotos(photos) {
   if (Array.isArray(photos)) return photos;
@@ -20,19 +18,47 @@ function safeParsePhotos(photos) {
   return [];
 }
 
-// GET /api/testimonials — public, returns approved testimonials only (newest first)
-testimonialsRouter.get("/", async (_req, res) => {
-  const testimonials = await db.get("testimonials");
-  const approved = testimonials
-    .filter((t) => t.status === "approved")
-    .map((t) => ({
-      ...t,
-      photos: safeParsePhotos(t.photos),
-    }))
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  res.json(approved);
+export const testimonialsRouter = createCrudRouter({
+  table: "testimonials",
+  listPublic: true,
+  notFoundMessage: "Không tìm thấy đánh giá.",
+  createHandler: false, // public creation with multiple photos handled below
+  transformOnList: (testimonials) => {
+    return testimonials
+      .filter((t) => t.status === "approved")
+      .map((t) => ({
+        ...t,
+        photos: safeParsePhotos(t.photos),
+      }))
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  },
+  transformOnUpdate: async (patch, existing) => {
+    if (patch.status && !["pending", "approved", "rejected"].includes(patch.status)) {
+      const err = new Error("Trạng thái phê duyệt không hợp lệ.");
+      err.status = 400;
+      throw err;
+    }
+
+    if (patch.photos && Array.isArray(patch.photos)) {
+      const containsBase64 = patch.photos.some((p) => typeof p === "string" && p.startsWith("data:"));
+      if (containsBase64) {
+        const err = new Error("Không chấp nhận ảnh chuỗi base64 Data URL.");
+        err.status = 400;
+        throw err;
+      }
+
+      const existingPhotos = safeParsePhotos(existing.photos);
+      const removedPhotos = existingPhotos.filter((oldP) => !patch.photos.includes(oldP));
+      if (removedPhotos.length > 0) {
+        await deleteMultipleImageFiles(removedPhotos);
+      }
+    }
+
+    return patch;
+  },
 });
 
+// ── Route riêng: Public Form Submission with Multiple Photos ─────────────────
 // POST /api/testimonials — public form submission, ALWAYS forces status='pending', source='customer'
 testimonialsRouter.post("/", testimonialLimiter, uploadImage.array("photos", 3), async (req, res) => {
   const { author, role, quote, rating, lead_id } = req.body ?? {};
@@ -76,6 +102,7 @@ testimonialsRouter.post("/", testimonialLimiter, uploadImage.array("photos", 3),
   res.status(201).json(testimonial);
 });
 
+// ── Route riêng: Admin List with Status Filter ───────────────────────────────
 // GET /api/testimonials/admin — admin only, get all testimonials (optional ?status= filter)
 testimonialsRouter.get("/admin", verifyToken, requireAdmin, async (req, res) => {
   let list = await db.get("testimonials");
@@ -90,57 +117,4 @@ testimonialsRouter.get("/admin", verifyToken, requireAdmin, async (req, res) => 
     }))
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   res.json(formatted);
-});
-
-// PATCH /api/testimonials/:id — admin only, approve/reject or edit testimonial
-testimonialsRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => {
-  const testimonials = await db.get("testimonials");
-  const existing = testimonials.find((t) => t.id === req.params.id);
-  if (!existing) {
-    return res.status(404).json({ message: "Không tìm thấy đánh giá." });
-  }
-
-  const patch = { ...req.body };
-  if (patch.status && !["pending", "approved", "rejected"].includes(patch.status)) {
-    return res.status(400).json({ message: "Trạng thái phê duyệt không hợp lệ." });
-  }
-
-  if (patch.photos && Array.isArray(patch.photos)) {
-    const containsBase64 = patch.photos.some((p) => typeof p === "string" && p.startsWith("data:"));
-    if (containsBase64) {
-      return res.status(400).json({ message: "Không chấp nhận ảnh chuỗi base64 Data URL." });
-    }
-
-    const existingPhotos = safeParsePhotos(existing.photos);
-    const removedPhotos = existingPhotos.filter((oldP) => !patch.photos.includes(oldP));
-    if (removedPhotos.length > 0) {
-      await deleteMultipleImageFiles(removedPhotos);
-    }
-  }
-
-  const updated = await db.updateById("testimonials", req.params.id, patch);
-  res.json(updated);
-});
-
-// DELETE /api/testimonials/:id — admin only
-testimonialsRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
-  const testimonials = await db.get("testimonials");
-  const existing = testimonials.find((t) => t.id === req.params.id);
-
-  const removed = await db.removeById("testimonials", req.params.id);
-  if (!removed) {
-    return res.status(404).json({ message: "Không tìm thấy đánh giá." });
-  }
-
-  if (existing) {
-    const existingPhotos = safeParsePhotos(existing.photos);
-    if (existingPhotos.length > 0) {
-      await deleteMultipleImageFiles(existingPhotos);
-    }
-    if (existing.avatar_url) {
-      await deleteImageFile(existing.avatar_url);
-    }
-  }
-
-  res.status(204).send();
 });
