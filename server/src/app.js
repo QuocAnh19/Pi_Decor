@@ -7,7 +7,6 @@ import { fileURLToPath } from "url";
 import { pool } from "./config/database.js";
 import { loginLimiter } from "./middlewares/rateLimiters.js";
 import { leadsRouter } from "./routes/leads/index.js";
-import { designsRouter } from "./routes/designs/index.js";
 import { materialsRouter } from "./routes/materials/index.js";
 import { servicesRouter } from "./routes/services/index.js";
 import { venuesRouter } from "./routes/venues/index.js";
@@ -52,7 +51,7 @@ app.get("/api/health", async (_req, res) => {
     if (pool) {
       await pool.query("SELECT 1");
     }
-    res.json({ status: "ok", db: pool ? "connected" : "json_fallback", ts: new Date().toISOString() });
+    res.json({ status: "ok", db: "connected", ts: new Date().toISOString() });
   } catch (err) {
     res.status(503).json({ status: "degraded", db: "unreachable", error: err.message });
   }
@@ -64,7 +63,6 @@ app.use("/api/auth/login", loginLimiter);
 // structure as Server/routes in the Ecovera reference project (Mục 2.4 /
 // 3.4 of the technical proposal), so each domain can evolve independently.
 app.use("/api/leads", leadsRouter);
-app.use("/api/designs", designsRouter);
 app.use("/api/materials", materialsRouter);
 app.use("/api/services", servicesRouter);
 app.use("/api/venues", venuesRouter);

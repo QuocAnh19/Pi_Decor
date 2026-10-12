@@ -20,6 +20,3 @@ coverage/
 
 # Local file uploads
 server/uploads/
-
-# Runtime Database JSON fallback
-server/src/data/db.json
