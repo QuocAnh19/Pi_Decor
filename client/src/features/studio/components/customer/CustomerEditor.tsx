@@ -341,8 +341,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
             saved_by: "admin",
             saved_at: new Date().toISOString(),
           },
-        },
-        token
+        }
       );
 
       showToast(`Đã lưu bản phối cảnh mới cho khách hàng "${editingLead.name}"!`);

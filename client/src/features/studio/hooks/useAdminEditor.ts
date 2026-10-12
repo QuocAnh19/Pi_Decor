@@ -91,7 +91,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
       if (!token) return;
 
       api
-        .getStudioTemplatesAdmin(token)
+        .getStudioTemplatesAdmin()
         .then(async (rows) => {
           setAllTemplates(rows);
 
@@ -148,7 +148,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
 
     if (token) {
       api
-        .getStudioAssetsAdmin(token)
+        .getStudioAssetsAdmin()
         .then((aRows) => {
           const loadedAssets = aRows.map(toStudioAsset);
           loadedAssets.forEach((a) => {
@@ -220,8 +220,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
             slots,
             rules,
             slot_config: slotConfig as Record<string, unknown>,
-          },
-          token,
+          }
         );
         const savedId = res?.template?.id || template.id;
         const savedThumbnail = res?.template?.thumbnail || thumbnailData;
@@ -275,8 +274,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
             slots,
             rules,
             slot_config: slotConfig as Record<string, unknown>,
-          },
-          token,
+          }
         );
         const savedId = res?.template?.id || template.id;
         const savedThumbnail = res?.template?.thumbnail || thumbnailData;
@@ -327,8 +325,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
             slots,
             rules,
             slot_config: slotConfig as Record<string, unknown>,
-          },
-          token,
+          }
         );
         const savedThumbnail = res?.template?.thumbnail || captured;
         setTemplate((prev) => ({
@@ -407,7 +404,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
     if (!slotToDelete) return;
 
     if (token) {
-      api.deleteStudioSlotDefinition(slotId, token).catch(() => {});
+      api.deleteStudioSlotDefinition(slotId).catch(() => {});
     }
 
     setSlots((prev) => prev.filter((s) => s.id !== slotId));

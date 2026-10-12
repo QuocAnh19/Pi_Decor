@@ -10,7 +10,10 @@ import {
 } from "@heroicons/react/24/outline";
 import type { Venue, VenuePayload, VenueType } from "../../../lib/types";
 import { Modal, Input, Select } from "../../../components/ui";
+import { extractCoordsFromUrl, geocodeAddress } from "../../../lib/geocode";
 import styles from "./VenueForm.module.scss";
+
+export { extractCoordsFromUrl };
 
 const venueTypes: { value: VenueType; label: string }[] = [
   { value: "hotel", label: "Khách sạn" },
@@ -28,41 +31,6 @@ const PIN_SVG = encodeURIComponent(`
   </svg>
 `);
 const previewIcon = L.icon({ iconUrl: `data:image/svg+xml,${PIN_SVG}`, iconSize: [30, 40], iconAnchor: [15, 40] });
-
-export function extractCoordsFromUrl(input: string): { lat: number; lng: number } | null {
-  if (!input) return null;
-  const trimmed = input.trim();
-
-  const directMatch = trimmed.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
-  if (directMatch) {
-    const lat = parseFloat(directMatch[1]);
-    const lng = parseFloat(directMatch[2]);
-    if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-  }
-
-  const atMatch = trimmed.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (atMatch) {
-    const lat = parseFloat(atMatch[1]);
-    const lng = parseFloat(atMatch[2]);
-    if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-  }
-
-  const queryMatch = trimmed.match(/[?&](?:q|ll|query|center)=(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
-  if (queryMatch) {
-    const lat = parseFloat(queryMatch[1]);
-    const lng = parseFloat(queryMatch[2]);
-    if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-  }
-
-  const placeMatch = trimmed.match(/place\/[^/]+\/(-?\d+\.\d+),(-?\d+\.\d+)/);
-  if (placeMatch) {
-    const lat = parseFloat(placeMatch[1]);
-    const lng = parseFloat(placeMatch[2]);
-    if (!isNaN(lat) && !isNaN(lng)) return { lat, lng };
-  }
-
-  return null;
-}
 
 interface VenueFormProps {
   venue: Venue | null;
@@ -168,16 +136,11 @@ export function VenueForm({ venue, onCancel, onSubmit }: VenueFormProps) {
     setSearchingLocation(true);
     setError(null);
     try {
-      const resp = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ", Việt Nam")}`
-      );
-      const data = await resp.json();
-      if (data && data.length > 0) {
-        const foundLat = parseFloat(data[0].lat);
-        const foundLng = parseFloat(data[0].lon);
-        setLat(foundLat.toFixed(6));
-        setLng(foundLng.toFixed(6));
-        setGmapsSuccessMessage(`✓ Đã tìm thấy vị trí "${data[0].display_name.slice(0, 45)}..."`);
+      const result = await geocodeAddress(query);
+      if (result) {
+        setLat(result.lat.toFixed(6));
+        setLng(result.lng.toFixed(6));
+        setGmapsSuccessMessage(`✓ Đã tìm thấy vị trí "${result.displayName.slice(0, 45)}..."`);
       } else {
         setError(`Không tìm thấy toạ độ cho "${query}". Hãy dán link Google Maps chuẩn hoặc nhấp chọn trực tiếp trên bản đồ.`);
       }

@@ -30,7 +30,7 @@ export function useLeads() {
     if (!token) return;
     setStatus("loading");
     api
-      .getLeads(token, {
+      .getLeads({
         page,
         limit: 20,
         q: debouncedSearch,
@@ -57,7 +57,7 @@ export function useLeads() {
     setSelectedLead((prev) => (prev && prev.id === id ? { ...prev, status: newStatus } : prev));
 
     try {
-      await api.updateLeadStatus(id, newStatus, token);
+      await api.updateLeadStatus(id, newStatus);
     } catch (err) {
       console.error("Failed to update lead status:", err);
       setError(err instanceof Error ? err.message : "Không đổi được trạng thái, thử lại.");

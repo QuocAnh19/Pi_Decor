@@ -72,19 +72,10 @@ export function useMaterials() {
   const handleFormSubmit = async (formData: FormData) => {
     if (!token) return;
 
-    const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
-    const path = editingMaterial ? `/materials/${editingMaterial.id}` : "/materials";
-    const method = editingMaterial ? "PATCH" : "POST";
-
-    const res = await fetch(`${API_URL}${path}`, {
-      method,
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}));
-      throw new Error(body.message ?? "Không lưu được vật liệu.");
+    if (editingMaterial) {
+      await api.updateMaterial(editingMaterial.id, formData);
+    } else {
+      await api.createMaterial(formData);
     }
 
     setFormOpen(false);
@@ -99,7 +90,7 @@ export function useMaterials() {
     setMaterials((prev) => prev.filter((m) => m.id !== mat.id));
 
     try {
-      await api.deleteMaterial(mat.id, token);
+      await api.deleteMaterial(mat.id);
     } catch (err) {
       console.error("Failed to delete material:", err);
       setError(err instanceof Error ? err.message : "Lỗi khi xoá vật liệu.");

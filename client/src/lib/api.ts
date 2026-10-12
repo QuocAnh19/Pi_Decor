@@ -1,3 +1,4 @@
+import { request, authRequest, ApiError, API_URL } from "./http";
 import type {
   Admin,
   AdminSummary,
@@ -21,81 +22,7 @@ import type {
   VenuePayload,
 } from "./types";
 
-/**
- * api.ts — the one file in the client that knows how to call the backend.
- * Base URL comes from VITE_API_URL and falls back to the local dev server.
- */
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
-
-/**
- * Custom error class returned on non-2xx HTTP responses.
- * Provides the HTTP status code for reliable status-based branching (e.g. 401 token refresh).
- */
-export class ApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = "ApiError";
-    this.status = status;
-    Object.setPrototypeOf(this, ApiError.prototype);
-  }
-}
-
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const { headers, ...restOptions } = options;
-  const isFormData = restOptions.body instanceof FormData;
-  const defaultHeaders: Record<string, string> = isFormData
-    ? {}
-    : { "Content-Type": "application/json" };
-
-  const res = await fetch(`${API_URL}${path}`, {
-    ...restOptions,
-    headers: { ...defaultHeaders, ...(headers as Record<string, string>) },
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new ApiError(body.message ?? `Request failed (${res.status})`, res.status);
-  }
-  // DELETE endpoints reply 204 with no body.
-  if (res.status === 204) return undefined as T;
-  return res.json();
-}
-
-/** Same as `request`, plus the admin Bearer token with auto 401 refresh retry */
-async function authRequest<T>(path: string, token: string, options: RequestInit = {}): Promise<T> {
-  const { headers, ...restOptions } = options;
-  try {
-    return await request<T>(path, {
-      ...restOptions,
-      headers: { Authorization: `Bearer ${token}`, ...headers },
-    });
-  } catch (err: unknown) {
-    if (err instanceof ApiError && err.status === 401) {
-      const raw = sessionStorage.getItem("pidecor_admin_auth");
-      if (raw) {
-        try {
-          const parsed = JSON.parse(raw);
-          if (parsed.refreshToken) {
-            const refreshRes = await request<{ token: string }>("/auth/refresh", {
-              method: "POST",
-              body: JSON.stringify({ refresh_token: parsed.refreshToken }),
-            });
-            parsed.token = refreshRes.token;
-            sessionStorage.setItem("pidecor_admin_auth", JSON.stringify(parsed));
-            return await request<T>(path, {
-              ...restOptions,
-              headers: { Authorization: `Bearer ${refreshRes.token}`, ...headers },
-            });
-          }
-        } catch {
-          sessionStorage.removeItem("pidecor_admin_auth");
-        }
-      }
-    }
-    throw err;
-  }
-}
+export { ApiError, API_URL };
 
 export interface LeadPayload {
   name: string;
@@ -111,10 +38,7 @@ export const api = {
   submitLead: (payload: LeadPayload) =>
     request<{ id: string }>("/leads", { method: "POST", body: JSON.stringify(payload) }),
 
-  getLeads: (
-    token: string,
-    params?: { page?: number; limit?: number; q?: string; status?: string }
-  ) => {
+  getLeads: (params?: { page?: number; limit?: number; q?: string; status?: string }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.limit) searchParams.set("limit", String(params.limit));
@@ -122,33 +46,29 @@ export const api = {
     if (params?.status && params.status !== "all") searchParams.set("status", params.status);
 
     const queryStr = searchParams.toString();
-    return authRequest<PaginatedLeadsResponse>(`/leads${queryStr ? `?${queryStr}` : ""}`, token);
+    return authRequest<PaginatedLeadsResponse>(`/leads${queryStr ? `?${queryStr}` : ""}`);
   },
 
-  getLead: (id: string, token: string) =>
-    authRequest<Lead>(`/leads/${id}`, token),
+  getLead: (id: string) =>
+    authRequest<Lead>(`/leads/${id}`),
 
-  updateLead: (
-    id: string,
-    payload: { status?: LeadStatus; design_snapshot?: unknown },
-    token: string
-  ) =>
-    authRequest<Lead>(`/leads/${id}`, token, {
+  updateLead: (id: string, payload: { status?: LeadStatus; design_snapshot?: unknown }) =>
+    authRequest<Lead>(`/leads/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
 
-  updateLeadStatus: (id: string, status: LeadStatus, token: string) =>
-    authRequest<Lead>(`/leads/${id}`, token, {
+  updateLeadStatus: (id: string, status: LeadStatus) =>
+    authRequest<Lead>(`/leads/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
 
-  getLeadActivities: (leadId: string, token: string) =>
-    authRequest<LeadActivity[]>(`/leads/${leadId}/activities`, token),
+  getLeadActivities: (leadId: string) =>
+    authRequest<LeadActivity[]>(`/leads/${leadId}/activities`),
 
-  addLeadActivity: (leadId: string, payload: { activity_type: string; body?: string }, token: string) =>
-    authRequest<LeadActivity>(`/leads/${leadId}/activities`, token, {
+  addLeadActivity: (leadId: string, payload: { activity_type: string; body?: string }) =>
+    authRequest<LeadActivity>(`/leads/${leadId}/activities`, {
       method: "POST",
       body: JSON.stringify(payload),
     }),
@@ -157,8 +77,20 @@ export const api = {
   getMaterials: (category?: string) =>
     request<MaterialItem[]>(category ? `/materials?category=${encodeURIComponent(category)}` : "/materials"),
 
-  deleteMaterial: (id: string, token: string) =>
-    authRequest<void>(`/materials/${id}`, token, { method: "DELETE" }),
+  createMaterial: (formData: FormData) =>
+    authRequest<MaterialItem>("/materials", {
+      method: "POST",
+      body: formData,
+    }),
+
+  updateMaterial: (id: string, formData: FormData) =>
+    authRequest<MaterialItem>(`/materials/${id}`, {
+      method: "PATCH",
+      body: formData,
+    }),
+
+  deleteMaterial: (id: string) =>
+    authRequest<void>(`/materials/${id}`, { method: "DELETE" }),
 
   getServices: () => request<unknown[]>("/services"),
 
@@ -167,43 +99,43 @@ export const api = {
 
   getVenue: (id: string) => request<VenueDetail>(`/venues/${id}`),
 
-  createVenue: (payload: VenuePayload, token: string) =>
-    authRequest<Venue>("/venues", token, { method: "POST", body: JSON.stringify(payload) }),
+  createVenue: (payload: VenuePayload) =>
+    authRequest<Venue>("/venues", { method: "POST", body: JSON.stringify(payload) }),
 
-  updateVenue: (id: string, payload: Partial<VenuePayload>, token: string) =>
-    authRequest<Venue>(`/venues/${id}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+  updateVenue: (id: string, payload: Partial<VenuePayload>) =>
+    authRequest<Venue>(`/venues/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
 
-  deleteVenue: (id: string, token: string) =>
-    authRequest<void>(`/venues/${id}`, token, { method: "DELETE" }),
+  deleteVenue: (id: string) =>
+    authRequest<void>(`/venues/${id}`, { method: "DELETE" }),
 
   getProjects: () => request<Project[]>("/projects"),
 
-  getProjectsAdmin: (token: string) => authRequest<Project[]>("/projects/admin", token),
+  getProjectsAdmin: () => authRequest<Project[]>("/projects/admin"),
 
-  createProject: (payload: FormData | object, token: string) => {
+  createProject: (payload: FormData | object) => {
     const isFormData = payload instanceof FormData;
-    return authRequest<Project>("/projects", token, {
+    return authRequest<Project>("/projects", {
       method: "POST",
       body: isFormData ? payload : JSON.stringify(payload),
     });
   },
 
-  createVenueProject: (venueId: string, payload: ProjectPayload, token: string) =>
-    authRequest<Project>(`/venues/${venueId}/projects`, token, {
+  createVenueProject: (venueId: string, payload: ProjectPayload) =>
+    authRequest<Project>(`/venues/${venueId}/projects`, {
       method: "POST",
       body: JSON.stringify(payload),
     }),
 
-  updateProject: (projectId: string, payload: FormData | object, token: string) => {
+  updateProject: (projectId: string, payload: FormData | object) => {
     const isFormData = payload instanceof FormData;
-    return authRequest<Project>(`/projects/${projectId}`, token, {
+    return authRequest<Project>(`/projects/${projectId}`, {
       method: "PATCH",
       body: isFormData ? payload : JSON.stringify(payload),
     });
   },
 
-  deleteProject: (projectId: string, token: string) =>
-    authRequest<void>(`/projects/${projectId}`, token, { method: "DELETE" }),
+  deleteProject: (projectId: string) =>
+    authRequest<void>(`/projects/${projectId}`, { method: "DELETE" }),
 
   // ── Admin Auth & Dashboard Summary ─────────────────────────────────
   adminLogin: (payload: { email: string; password: string }) =>
@@ -224,81 +156,69 @@ export const api = {
       body: JSON.stringify({ refresh_token: refreshToken }),
     }),
 
-  getMe: (token: string) => authRequest<{ admin: Admin }>("/auth/me", token),
+  getMe: () => authRequest<{ admin: Admin }>("/auth/me"),
 
-  updateMe: (
-    payload: { email?: string; current_password?: string; password?: string },
-    token: string
-  ) =>
-    authRequest<{ message: string; token: string; admin: Admin }>("/auth/me", token, {
+  updateMe: (payload: { email?: string; current_password?: string; password?: string }) =>
+    authRequest<{ message: string; token: string; admin: Admin }>("/auth/me", {
       method: "PATCH",
       body: JSON.stringify(payload),
     }),
 
-  listAdmins: (token: string) => authRequest<Admin[]>("/auth/admins", token),
+  listAdmins: () => authRequest<Admin[]>("/auth/admins"),
 
-  createAdmin: (payload: { email: string; password: string }, token: string) =>
-    authRequest<Admin>("/auth/admins", token, {
+  createAdmin: (payload: { email: string; password: string }) =>
+    authRequest<Admin>("/auth/admins", {
       method: "POST",
       body: JSON.stringify(payload),
     }),
 
-  deleteAdmin: (id: string, token: string) =>
-    authRequest<void>(`/auth/admins/${id}`, token, { method: "DELETE" }),
+  deleteAdmin: (id: string) =>
+    authRequest<void>(`/auth/admins/${id}`, { method: "DELETE" }),
 
-  getSummary: (token: string) => authRequest<AdminSummary>("/admin/summary", token),
+  getSummary: () => authRequest<AdminSummary>("/admin/summary"),
 
   // ── Quotations ───────────────────────────────────────────────────────
-  getQuotations: (token: string, leadId?: string) =>
-    authRequest<Quotation[]>(leadId ? `/quotations?lead_id=${encodeURIComponent(leadId)}` : "/quotations", token),
+  getQuotations: (leadId?: string) =>
+    authRequest<Quotation[]>(leadId ? `/quotations?lead_id=${encodeURIComponent(leadId)}` : "/quotations"),
 
-  getQuotation: (id: string, token: string) =>
-    authRequest<Quotation>(`/quotations/${id}`, token),
+  getQuotation: (id: string) =>
+    authRequest<Quotation>(`/quotations/${id}`),
 
-  createQuotation: (payload: QuotationPayload, token: string) =>
-    authRequest<Quotation>("/quotations", token, { method: "POST", body: JSON.stringify(payload) }),
+  createQuotation: (payload: QuotationPayload) =>
+    authRequest<Quotation>("/quotations", { method: "POST", body: JSON.stringify(payload) }),
 
-  updateQuotation: (id: string, payload: Partial<QuotationPayload> & { status?: string }, token: string) =>
-    authRequest<Quotation>(`/quotations/${id}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+  updateQuotation: (id: string, payload: Partial<QuotationPayload> & { status?: string }) =>
+    authRequest<Quotation>(`/quotations/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
 
-  deleteQuotation: (id: string, token: string) =>
-    authRequest<void>(`/quotations/${id}`, token, { method: "DELETE" }),
+  deleteQuotation: (id: string) =>
+    authRequest<void>(`/quotations/${id}`, { method: "DELETE" }),
 
   // ── Testimonials ─────────────────────────────────────────────────────
   getTestimonials: () => request<TestimonialItem[]>("/testimonials"),
 
-  submitTestimonial: async (payload: TestimonialPayload | FormData) => {
-    if (payload instanceof FormData) {
-      const res = await fetch(`${API_URL}/testimonials`, {
-        method: "POST",
-        body: payload,
-      });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new ApiError(errorData.message || "Gửi đánh giá thất bại.", res.status);
-      }
-      return res.json() as Promise<TestimonialItem>;
-    }
-    return request<TestimonialItem>("/testimonials", { method: "POST", body: JSON.stringify(payload) });
-  },
+  submitTestimonial: (payload: TestimonialPayload | FormData) =>
+    request<TestimonialItem>("/testimonials", {
+      method: "POST",
+      body: payload instanceof FormData ? payload : JSON.stringify(payload),
+    }),
 
-  getTestimonialsAdmin: (token: string, status?: string) =>
-    authRequest<TestimonialItem[]>(status ? `/testimonials/admin?status=${encodeURIComponent(status)}` : "/testimonials/admin", token),
+  getTestimonialsAdmin: (status?: string) =>
+    authRequest<TestimonialItem[]>(status ? `/testimonials/admin?status=${encodeURIComponent(status)}` : "/testimonials/admin"),
 
-  updateTestimonialStatus: (id: string, status: string, token: string) =>
-    authRequest<TestimonialItem>(`/testimonials/${id}`, token, { method: "PATCH", body: JSON.stringify({ status }) }),
+  updateTestimonialStatus: (id: string, status: string) =>
+    authRequest<TestimonialItem>(`/testimonials/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
 
-  deleteTestimonial: (id: string, token: string) =>
-    authRequest<void>(`/testimonials/${id}`, token, { method: "DELETE" }),
+  deleteTestimonial: (id: string) =>
+    authRequest<void>(`/testimonials/${id}`, { method: "DELETE" }),
 
   // ── Studio Templates & Assets ────────────────────────────────────────
   getStudioTemplates: () => request<StudioTemplateRow[]>("/studio/templates"),
 
-  getStudioTemplatesAdmin: (token: string) =>
-    authRequest<StudioTemplateRow[]>("/studio/templates/admin", token),
+  getStudioTemplatesAdmin: () =>
+    authRequest<StudioTemplateRow[]>("/studio/templates/admin"),
 
-  createStudioTemplate: (payload: Partial<StudioTemplateRow>, token: string) =>
-    authRequest<StudioTemplateRow>("/studio/templates", token, { method: "POST", body: JSON.stringify(payload) }),
+  createStudioTemplate: (payload: Partial<StudioTemplateRow>) =>
+    authRequest<StudioTemplateRow>("/studio/templates", { method: "POST", body: JSON.stringify(payload) }),
 
   publishStudioTemplate: (
     id: string,
@@ -311,59 +231,57 @@ export const api = {
       slots?: unknown[];
       rules?: unknown[];
       slot_config?: Record<string, unknown>;
-    },
-    token: string
+    }
   ) =>
     authRequest<{ message: string; template: StudioTemplateRow }>(
       `/studio/templates/${id}/publish`,
-      token,
       { method: "PUT", body: JSON.stringify(payload) }
     ),
 
-  updateStudioTemplate: (id: string, payload: Partial<StudioTemplateRow>, token: string) =>
-    authRequest<StudioTemplateRow>(`/studio/templates/${id}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+  updateStudioTemplate: (id: string, payload: Partial<StudioTemplateRow>) =>
+    authRequest<StudioTemplateRow>(`/studio/templates/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
 
-  deleteStudioTemplate: (id: string, token: string) =>
-    authRequest<void>(`/studio/templates/${id}`, token, { method: "DELETE" }),
+  deleteStudioTemplate: (id: string) =>
+    authRequest<void>(`/studio/templates/${id}`, { method: "DELETE" }),
 
   getStudioSlotDefinitions: (templateId: string) =>
     request<StudioSlotDefinitionRow[]>(`/studio/templates/${templateId}/slots`),
 
-  createStudioSlotDefinition: (templateId: string, payload: Partial<StudioSlotDefinitionRow>, token: string) =>
-    authRequest<StudioSlotDefinitionRow>(`/studio/templates/${templateId}/slots`, token, { method: "POST", body: JSON.stringify(payload) }),
+  createStudioSlotDefinition: (templateId: string, payload: Partial<StudioSlotDefinitionRow>) =>
+    authRequest<StudioSlotDefinitionRow>(`/studio/templates/${templateId}/slots`, { method: "POST", body: JSON.stringify(payload) }),
 
-  reorderStudioSlots: (templateId: string, items: { id: string; sort_order: number }[], token: string) =>
-    authRequest<StudioSlotDefinitionRow[]>(`/studio/templates/${templateId}/slots/reorder`, token, { method: "PATCH", body: JSON.stringify(items) }),
+  reorderStudioSlots: (templateId: string, items: { id: string; sort_order: number }[]) =>
+    authRequest<StudioSlotDefinitionRow[]>(`/studio/templates/${templateId}/slots/reorder`, { method: "PATCH", body: JSON.stringify(items) }),
 
-  updateStudioSlotDefinition: (slotId: string, payload: Partial<StudioSlotDefinitionRow>, token: string) =>
-    authRequest<StudioSlotDefinitionRow>(`/studio/slots/${slotId}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+  updateStudioSlotDefinition: (slotId: string, payload: Partial<StudioSlotDefinitionRow>) =>
+    authRequest<StudioSlotDefinitionRow>(`/studio/slots/${slotId}`, { method: "PATCH", body: JSON.stringify(payload) }),
 
-  deleteStudioSlotDefinition: (slotId: string, token: string) =>
-    authRequest<void>(`/studio/slots/${slotId}`, token, { method: "DELETE" }),
+  deleteStudioSlotDefinition: (slotId: string) =>
+    authRequest<void>(`/studio/slots/${slotId}`, { method: "DELETE" }),
 
   getStudioAssets: () => request<StudioAssetRow[]>("/studio/assets"),
 
-  getStudioAssetsAdmin: (token: string) =>
-    authRequest<StudioAssetRow[]>("/studio/assets/admin", token),
+  getStudioAssetsAdmin: () =>
+    authRequest<StudioAssetRow[]>("/studio/assets/admin"),
 
-  createStudioAsset: (payload: Partial<StudioAssetRow>, token: string) =>
-    authRequest<StudioAssetRow>("/studio/assets", token, { method: "POST", body: JSON.stringify(payload) }),
+  createStudioAsset: (payload: Partial<StudioAssetRow>) =>
+    authRequest<StudioAssetRow>("/studio/assets", { method: "POST", body: JSON.stringify(payload) }),
 
-  updateStudioAsset: (id: string, payload: Partial<StudioAssetRow>, token: string) =>
-    authRequest<StudioAssetRow>(`/studio/assets/${id}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+  updateStudioAsset: (id: string, payload: Partial<StudioAssetRow>) =>
+    authRequest<StudioAssetRow>(`/studio/assets/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
 
-  deleteStudioAsset: (id: string, token: string) =>
-    authRequest<void>(`/studio/assets/${id}`, token, { method: "DELETE" }),
+  deleteStudioAsset: (id: string) =>
+    authRequest<void>(`/studio/assets/${id}`, { method: "DELETE" }),
 
   getStudioSlotRules: (templateId: string) =>
     request<StudioSlotRuleRow[]>(`/studio/templates/${templateId}/rules`),
 
-  createStudioSlotRule: (templateId: string, payload: Partial<StudioSlotRuleRow>, token: string) =>
-    authRequest<StudioSlotRuleRow>(`/studio/templates/${templateId}/rules`, token, { method: "POST", body: JSON.stringify(payload) }),
+  createStudioSlotRule: (templateId: string, payload: Partial<StudioSlotRuleRow>) =>
+    authRequest<StudioSlotRuleRow>(`/studio/templates/${templateId}/rules`, { method: "POST", body: JSON.stringify(payload) }),
 
-  updateStudioSlotRule: (ruleId: string, payload: Partial<StudioSlotRuleRow>, token: string) =>
-    authRequest<StudioSlotRuleRow>(`/studio/rules/${ruleId}`, token, { method: "PATCH", body: JSON.stringify(payload) }),
+  updateStudioSlotRule: (ruleId: string, payload: Partial<StudioSlotRuleRow>) =>
+    authRequest<StudioSlotRuleRow>(`/studio/rules/${ruleId}`, { method: "PATCH", body: JSON.stringify(payload) }),
 
-  deleteStudioSlotRule: (ruleId: string, token: string) =>
-    authRequest<void>(`/studio/rules/${ruleId}`, token, { method: "DELETE" }),
+  deleteStudioSlotRule: (ruleId: string) =>
+    authRequest<void>(`/studio/rules/${ruleId}`, { method: "DELETE" }),
 };

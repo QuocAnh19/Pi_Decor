@@ -39,7 +39,7 @@ export function AdminStudioPage() {
     if (!token) return;
     setLoading(true);
     api
-      .getStudioTemplatesAdmin(token)
+      .getStudioTemplatesAdmin()
       .then((data) => setTemplates(data))
       .catch((err) => console.warn("Failed to load studio templates in admin page:", err))
       .finally(() => setLoading(false));
@@ -62,7 +62,7 @@ export function AdminStudioPage() {
     const isConfirmed = window.confirm(`Bạn có chắc muốn xóa mẫu thiết kế "${name || id}"?`);
     if (!isConfirmed) return;
     try {
-      await api.deleteStudioTemplate(id, token);
+      await api.deleteStudioTemplate(id);
       setTemplates((prev) => prev.filter((t) => t.id !== id));
     } catch (err) {
       console.error("Failed to delete template:", err);
@@ -72,7 +72,7 @@ export function AdminStudioPage() {
   const handleToggleActive = async (id: string, currentActive: boolean) => {
     if (!token) return;
     try {
-      const updated = await api.updateStudioTemplate(id, { is_active: !currentActive }, token);
+      const updated = await api.updateStudioTemplate(id, { is_active: !currentActive });
       setTemplates((prev) => prev.map((t) => (t.id === id ? updated : t)));
     } catch (err) {
       console.error("Failed to toggle active:", err);
@@ -84,7 +84,7 @@ export function AdminStudioPage() {
     if (!newName || newName.trim() === "" || newName.trim() === currentName) return;
     if (!token) return;
     try {
-      const updated = await api.updateStudioTemplate(id, { name: newName.trim() }, token);
+      const updated = await api.updateStudioTemplate(id, { name: newName.trim() });
       setTemplates((prev) => prev.map((t) => (t.id === id ? { ...t, name: updated.name || newName.trim() } : t)));
     } catch (err) {
       console.error("Failed to rename template:", err);

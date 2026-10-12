@@ -19,7 +19,7 @@ export function StudioPage() {
     if (leadId && token) {
       setLoadingLead(true);
       api
-        .getLead(leadId, token)
+        .getLead(leadId)
         .then((lead) => {
           setEditingLead(lead);
           const snapshot = lead.design_snapshot as any;

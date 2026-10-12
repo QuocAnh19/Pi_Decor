@@ -59,7 +59,7 @@ export function AdminSettingsPage() {
     setLoadingAdmins(true);
     setAdminListError(null);
     try {
-      const list = await api.listAdmins(token);
+      const list = await api.listAdmins();
       setAdmins(list);
     } catch (err: unknown) {
       const msg = err instanceof ApiError ? err.message : "Không tải được danh sách admin.";
@@ -126,7 +126,7 @@ export function AdminSettingsPage() {
         payload.password = newPassword;
       }
 
-      const res = await api.updateMe(payload, token);
+      const res = await api.updateMe(payload);
       updateToken(res.token, res.admin);
       setProfileSuccess(res.message || "Cập nhật thông tin thành công.");
       setCurrentPassword("");
@@ -172,8 +172,7 @@ export function AdminSettingsPage() {
     setIsCreatingAdmin(true);
     try {
       const created = await api.createAdmin(
-        { email: cleanEmail, password: newAdminPassword },
-        token
+        { email: cleanEmail, password: newAdminPassword }
       );
       setCreateAdminSuccess(`Đã tạo tài khoản cho ${created.email} thành công.`);
       setNewAdminEmail("");
@@ -195,7 +194,7 @@ export function AdminSettingsPage() {
     setIsDeleting(true);
     setAdminListError(null);
     try {
-      await api.deleteAdmin(adminToDelete.id, token);
+      await api.deleteAdmin(adminToDelete.id);
       setAdmins((prev) => prev.filter((a) => a.id !== adminToDelete.id));
       setDeleteSuccess(`Đã xoá tài khoản ${adminToDelete.email} thành công.`);
       setAdminToDelete(null);

@@ -69,9 +69,9 @@ export function useVenues() {
   const handleVenueFormSubmit = async (payload: VenuePayload) => {
     if (!token) return;
     if (editingVenue) {
-      await api.updateVenue(editingVenue.id, payload, token);
+      await api.updateVenue(editingVenue.id, payload);
     } else {
-      await api.createVenue(payload, token);
+      await api.createVenue(payload);
     }
     setVenueFormOpen(false);
     setEditingVenue(null);
@@ -85,7 +85,7 @@ export function useVenues() {
     if (!token) return;
     if (!confirm(`Xoá địa điểm "${venue.name}"? Toàn bộ dự án bên trong cũng sẽ mất pin trên bản đồ.`)) return;
     try {
-      await api.deleteVenue(venue.id, token);
+      await api.deleteVenue(venue.id);
       if (selectedVenueId === venue.id) {
         setSelectedVenueId(null);
         setSelectedVenue(null);
@@ -99,9 +99,9 @@ export function useVenues() {
   const handleProjectFormSubmit = async (payload: ProjectPayload) => {
     if (!token || !selectedVenueId) return;
     if (editingProject) {
-      await api.updateProject(editingProject.id, payload, token);
+      await api.updateProject(editingProject.id, payload);
     } else {
-      await api.createVenueProject(selectedVenueId, payload, token);
+      await api.createVenueProject(selectedVenueId, payload);
     }
     setProjectFormOpen(false);
     setEditingProject(null);
@@ -113,7 +113,7 @@ export function useVenues() {
     if (!token || !selectedVenueId) return;
     if (!confirm(`Xoá dự án "${project.title}"?`)) return;
     try {
-      await api.deleteProject(project.id, token);
+      await api.deleteProject(project.id);
       loadVenueDetail(selectedVenueId);
       loadVenues();
     } catch (err) {

@@ -41,7 +41,7 @@ export function AdminTestimonialsPage() {
   const loadTestimonials = useCallback(() => {
     if (!token) return;
     return api
-      .getTestimonialsAdmin(token)
+      .getTestimonialsAdmin()
       .then((data) => {
         setTestimonials(data);
         setStatus("ready");
@@ -95,7 +95,7 @@ export function AdminTestimonialsPage() {
     );
 
     try {
-      await api.updateTestimonialStatus(id, newStatus, token);
+      await api.updateTestimonialStatus(id, newStatus);
       setSuccessMsg(newStatus === "approved" ? "✓ Đã duyệt đánh giá thành công!" : "✓ Đã chuyển trạng thái từ chối.");
       setTimeout(() => setSuccessMsg(null), 3000);
       await loadTestimonials();
@@ -115,7 +115,7 @@ export function AdminTestimonialsPage() {
     setSuccessMsg(null);
 
     try {
-      await api.deleteTestimonial(id, token);
+      await api.deleteTestimonial(id);
       setSuccessMsg("✓ Đã xóa đánh giá.");
       setTimeout(() => setSuccessMsg(null), 3000);
       await loadTestimonials();

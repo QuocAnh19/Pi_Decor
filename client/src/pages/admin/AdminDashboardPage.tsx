@@ -25,7 +25,7 @@ export function AdminDashboardPage() {
   useEffect(() => {
     if (!token) return;
     api
-      .getSummary(token)
+      .getSummary()
       .then((summaryRes) => {
         setSummary(summaryRes);
         setStatus("ready");

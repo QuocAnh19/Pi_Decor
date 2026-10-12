@@ -1,14 +1,16 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { api } from "./api";
+import { authStore } from "./authStore";
 import type { Admin } from "./types";
-
-const STORAGE_KEY = "pidecor_admin_auth";
-
-interface StoredAuth {
-  token: string;
-  refreshToken?: string;
-  admin: Admin;
-}
 
 interface AuthContextValue {
   token: string | null;
@@ -23,63 +25,26 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [admin, setAdmin] = useState<Admin | null>(null);
+  const session = useSyncExternalStore(authStore.subscribe, authStore.getSnapshot);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     async function initAuth() {
-      // Ensure localStorage contains no sensitive data or drafts
-      try {
-        localStorage.clear();
-      } catch (e) {
-        // localStorage not available or error clearing
-      }
-
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (!raw) {
+      const currentToken = authStore.getToken();
+      if (!currentToken) {
         setIsReady(true);
         return;
       }
 
       try {
-        const parsed = JSON.parse(raw) as StoredAuth;
-        if (parsed.token && parsed.admin) {
-          try {
-            // Verify stored access token with backend
-            const meRes = await api.getMe(parsed.token);
-            setToken(parsed.token);
-            if (parsed.refreshToken) setRefreshToken(parsed.refreshToken);
-            setAdmin(meRes.admin || parsed.admin);
-          } catch {
-            // Token expired or invalid — try to refresh token if available
-            if (parsed.refreshToken) {
-              try {
-                const refreshed = await api.refreshToken(parsed.refreshToken);
-                parsed.token = refreshed.token;
-                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-                setToken(refreshed.token);
-                setRefreshToken(parsed.refreshToken);
-                setAdmin(parsed.admin);
-              } catch {
-                sessionStorage.removeItem(STORAGE_KEY);
-                setToken(null);
-                setRefreshToken(null);
-                setAdmin(null);
-              }
-            } else {
-              sessionStorage.removeItem(STORAGE_KEY);
-              setToken(null);
-              setRefreshToken(null);
-              setAdmin(null);
-            }
-          }
-        } else {
-          sessionStorage.removeItem(STORAGE_KEY);
+        // Xác thực token lưu trữ với máy chủ; nếu token hết hạn, authRequest sẽ tự động refresh single-flight
+        const meRes = await api.getMe();
+        if (meRes.admin) {
+          authStore.updateToken(authStore.getToken()!, meRes.admin);
         }
       } catch {
-        sessionStorage.removeItem(STORAGE_KEY);
+        // Nếu xác thực và refresh đều thất bại, xóa session để buộc đăng nhập lại
+        authStore.clearSession();
       } finally {
         setIsReady(true);
       }
@@ -88,52 +53,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  async function login(email: string, password: string) {
+  const login = useCallback(async (email: string, password: string) => {
     const res = await api.adminLogin({ email, password });
-    setToken(res.token);
-    if (res.refreshToken) setRefreshToken(res.refreshToken);
-    setAdmin(res.admin);
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(res));
-  }
-
-  function updateToken(newToken: string, newAdmin?: Admin) {
-    setToken(newToken);
-    if (newAdmin) {
-      setAdmin(newAdmin);
-    }
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as StoredAuth;
-        parsed.token = newToken;
-        if (newAdmin) {
-          parsed.admin = newAdmin;
-        }
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-      } catch {
-        // ignore
-      }
-    }
-  }
+    authStore.setSession(res);
+  }, []);
 
   const logout = useCallback(() => {
+    const refreshToken = authStore.getRefreshToken();
     if (refreshToken) {
       api.logout(refreshToken).catch(() => {});
     }
-    setToken(null);
-    setRefreshToken(null);
-    setAdmin(null);
-    sessionStorage.removeItem(STORAGE_KEY);
-    try {
-      localStorage.clear();
-    } catch (e) {
-      // localStorage not available or error clearing
-    }
-  }, [refreshToken]);
+    authStore.clearSession();
+  }, []);
+
+  const updateToken = useCallback((newToken: string, newAdmin?: Admin) => {
+    authStore.updateToken(newToken, newAdmin);
+  }, []);
 
   const value = useMemo(
-    () => ({ token, refreshToken, admin, isReady, login, logout, updateToken }),
-    [token, refreshToken, admin, isReady, logout]
+    () => ({
+      token: session.token,
+      refreshToken: session.refreshToken,
+      admin: session.admin,
+      isReady,
+      login,
+      logout,
+      updateToken,
+    }),
+    [session.token, session.refreshToken, session.admin, isReady, login, logout, updateToken]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -71,7 +71,7 @@ export function QuotationModal({
 
     setFetchingDraft(true);
     api
-      .getQuotations(token, lead.id)
+      .getQuotations(lead.id)
       .then((existingList) => {
         if (existingList && existingList.length > 0) {
           const latestQuote = existingList[0];
@@ -136,9 +136,9 @@ export function QuotationModal({
     try {
       let saved: Quotation;
       if (currentQuotation?.id) {
-        saved = await api.updateQuotation(currentQuotation.id, payload, token);
+        saved = await api.updateQuotation(currentQuotation.id, payload);
       } else {
-        saved = await api.createQuotation(payload, token);
+        saved = await api.createQuotation(payload);
       }
       setCurrentQuotation(saved);
       setSaveSuccessMsg("Đã lưu nháp bảng báo giá thành công!");

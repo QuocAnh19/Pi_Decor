@@ -31,7 +31,7 @@ export function useProjects(selectedVenueId?: string | null) {
     setLoading(true);
     setError(null);
     try {
-      const data = token ? await api.getProjectsAdmin(token) : await api.getProjects();
+      const data = token ? await api.getProjectsAdmin() : await api.getProjects();
       if (Array.isArray(data) && data.length > 0) {
         setProjects(data.map(dbToProjectItem));
       } else {
@@ -72,7 +72,7 @@ export function useProjects(selectedVenueId?: string | null) {
     }
 
     try {
-      await api.deleteProject(id, token);
+      await api.deleteProject(id);
       setProjects((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error("Failed to delete project:", err);
@@ -93,8 +93,7 @@ export function useProjects(selectedVenueId?: string | null) {
         {
           status: nextStatus,
           published: true,
-        },
-        token
+        }
       );
     } catch (err) {
       console.error("Failed to update project status:", err);
@@ -162,9 +161,9 @@ export function useProjects(selectedVenueId?: string | null) {
       });
 
       if (editingProject) {
-        await api.updateProject(editingProject.id, payload, token);
+        await api.updateProject(editingProject.id, payload);
       } else {
-        await api.createProject(payload, token);
+        await api.createProject(payload);
       }
 
       await loadProjects();
@@ -182,9 +181,9 @@ export function useProjects(selectedVenueId?: string | null) {
   const handleSimpleFormSubmit = async (payload: ProjectPayload) => {
     if (!token) return;
     if (editingProject) {
-      await api.updateProject(editingProject.id, payload, token);
+      await api.updateProject(editingProject.id, payload);
     } else if (selectedVenueId) {
-      await api.createVenueProject(selectedVenueId, payload, token);
+      await api.createVenueProject(selectedVenueId, payload);
     }
     setIsModalOpen(false);
     setEditingProject(null);
