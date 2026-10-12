@@ -29,13 +29,17 @@ export const studioRouter = Router();
 
 // GET /api/studio/templates — public, returns active templates only
 studioRouter.get("/templates", async (_req, res) => {
-  const templates = await db.get("studio_templates");
-  res.json(templates.filter((t) => t.is_active));
+  const templates = await db.query(
+    `select * from studio_templates where is_active = true order by created_at desc`
+  );
+  res.json(templates);
 });
 
 // GET /api/studio/templates/admin — admin only, returns all templates
 studioRouter.get("/templates/admin", verifyToken, requireAdmin, async (_req, res) => {
-  const templates = await db.get("studio_templates");
+  const templates = await db.query(
+    `select * from studio_templates order by created_at desc`
+  );
   res.json(templates);
 });
 
@@ -58,8 +62,7 @@ studioRouter.post("/templates", verifyToken, requireAdmin, validate(createTempla
 
 // PATCH /api/studio/templates/:id — admin only, update template
 studioRouter.patch("/templates/:id", verifyToken, requireAdmin, validate(updateTemplateSchema), async (req, res) => {
-  const templates = await db.get("studio_templates");
-  const existing = templates.find((t) => String(t.id) === String(req.params.id));
+  const existing = await db.findById("studio_templates", req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy template." });
   }
@@ -93,14 +96,11 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, validate(p
 
     const cleanSvg = sanitizeSvg(svg_base);
     const validTargetUuid = ensureUuid(rawTargetId);
-    const templates = await db.get("studio_templates");
 
     // Only match existing template by exact ID (never by name to prevent overwriting existing templates)
     let existing = null;
     if (rawTargetId !== "new") {
-      existing = templates.find(
-        (t) => String(t.id) === String(rawTargetId) || String(t.id) === validTargetUuid
-      );
+      existing = await db.findById("studio_templates", validTargetUuid);
     }
 
     const activeFlag = is_active !== undefined ? Boolean(is_active) : (existing ? Boolean(existing.is_active) : true);
@@ -210,18 +210,17 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, validate(p
 
 // DELETE /api/studio/templates/:id — admin only, delete template (and cleanup associated slots/rules in DB)
 studioRouter.delete("/templates/:id", verifyToken, requireAdmin, async (req, res) => {
-  const templates = await db.get("studio_templates");
-  const existing = templates.find((t) => String(t.id) === String(req.params.id));
+  const existing = await db.findById("studio_templates", req.params.id);
+  if (!existing) {
+    return res.status(404).json({ message: "Không tìm thấy template." });
+  }
 
   const removed = await db.removeById("studio_templates", req.params.id);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy template." });
   }
 
-  if (existing) {
-    await deleteMediaOf(existing, "thumbnail");
-  }
-
+  await deleteMediaOf(existing, "thumbnail");
   res.status(204).send();
 });
 
@@ -229,13 +228,13 @@ studioRouter.delete("/templates/:id", verifyToken, requireAdmin, async (req, res
 // 2. Studio Slot Definitions
 // ============================================================================
 
-// GET /api/studio/templates/:id/slots — get slot definitions for a template
+// GET /api/studio/templates/:id/slots — get slot definitions for a template (ordered by sort_order)
 studioRouter.get("/templates/:id/slots", async (req, res) => {
-  const slots = await db.get("studio_slot_definitions");
-  const filtered = slots
-    .filter((s) => s.template_id === req.params.id)
-    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-  res.json(filtered);
+  const slots = await db.query(
+    `select * from studio_slot_definitions where template_id = $1 order by sort_order asc`,
+    [req.params.id]
+  );
+  res.json(slots);
 });
 
 // POST /api/studio/templates/:id/slots — admin only, create a slot definition
@@ -276,11 +275,10 @@ studioRouter.patch("/templates/:id/slots/reorder", verifyToken, requireAdmin, va
     }
   }
 
-  const slots = await db.get("studio_slot_definitions");
-  const updatedList = slots
-    .filter((s) => s.template_id === req.params.id)
-    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-
+  const updatedList = await db.query(
+    `select * from studio_slot_definitions where template_id = $1 order by sort_order asc`,
+    [req.params.id]
+  );
   res.json(updatedList);
 });
 
@@ -308,13 +306,17 @@ studioRouter.delete("/slots/:slotId", verifyToken, requireAdmin, async (req, res
 
 // GET /api/studio/assets — public, returns active assets only
 studioRouter.get("/assets", async (_req, res) => {
-  const assets = await db.get("studio_assets");
-  res.json(assets.filter((a) => a.is_active));
+  const assets = await db.query(
+    `select * from studio_assets where is_active = true order by created_at desc`
+  );
+  res.json(assets);
 });
 
 // GET /api/studio/assets/admin — admin only, returns all assets
 studioRouter.get("/assets/admin", verifyToken, requireAdmin, async (_req, res) => {
-  const assets = await db.get("studio_assets");
+  const assets = await db.query(
+    `select * from studio_assets order by created_at desc`
+  );
   res.json(assets);
 });
 
@@ -326,8 +328,10 @@ studioRouter.post("/assets", verifyToken, requireAdmin, validate(createAssetSche
   const finalThumbnail = thumbnail ?? null;
 
   const cleanName = String(name).trim();
-  const assets = await db.get("studio_assets");
-  const existing = assets.find((a) => a.name === cleanName && a.asset_type === asset_type);
+  const existing = await db.query(
+    `select * from studio_assets where name = $1 and asset_type = $2 limit 1`,
+    [cleanName, asset_type]
+  ).then((r) => r[0] ?? null);
 
   if (existing) {
     if (finalThumbnail && existing.thumbnail && existing.thumbnail !== finalThumbnail) {
@@ -362,8 +366,7 @@ studioRouter.post("/assets", verifyToken, requireAdmin, validate(createAssetSche
 
 // PATCH /api/studio/assets/:id — admin only, update asset
 studioRouter.patch("/assets/:id", verifyToken, requireAdmin, validate(updateAssetSchema), async (req, res) => {
-  const assets = await db.get("studio_assets");
-  const existing = assets.find((a) => String(a.id) === String(req.params.id));
+  const existing = await db.findById("studio_assets", req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy asset." });
   }
@@ -382,18 +385,17 @@ studioRouter.patch("/assets/:id", verifyToken, requireAdmin, validate(updateAsse
 
 // DELETE /api/studio/assets/:id — admin only, delete asset
 studioRouter.delete("/assets/:id", verifyToken, requireAdmin, async (req, res) => {
-  const assets = await db.get("studio_assets");
-  const existing = assets.find((a) => String(a.id) === String(req.params.id));
+  const existing = await db.findById("studio_assets", req.params.id);
+  if (!existing) {
+    return res.status(404).json({ message: "Không tìm thấy asset." });
+  }
 
   const removed = await db.removeById("studio_assets", req.params.id);
   if (!removed) {
     return res.status(404).json({ message: "Không tìm thấy asset." });
   }
 
-  if (existing) {
-    await deleteMediaOf(existing, "thumbnail");
-  }
-
+  await deleteMediaOf(existing, "thumbnail");
   res.status(204).send();
 });
 
@@ -401,13 +403,13 @@ studioRouter.delete("/assets/:id", verifyToken, requireAdmin, async (req, res) =
 // 4. Studio Slot Rules
 // ============================================================================
 
-// GET /api/studio/templates/:id/rules — get slot rules for a template
+// GET /api/studio/templates/:id/rules — get slot rules for a template (ordered by priority)
 studioRouter.get("/templates/:id/rules", async (req, res) => {
-  const rules = await db.get("studio_slot_rules");
-  const filtered = rules
-    .filter((r) => r.template_id === req.params.id)
-    .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
-  res.json(filtered);
+  const rules = await db.query(
+    `select * from studio_slot_rules where template_id = $1 order by priority asc`,
+    [req.params.id]
+  );
+  res.json(rules);
 });
 
 // POST /api/studio/templates/:id/rules — admin only, create rule

@@ -178,6 +178,8 @@ export const api = {
 
   getProjects: () => request<Project[]>("/projects"),
 
+  getProjectsAdmin: (token: string) => authRequest<Project[]>("/projects/admin", token),
+
   createProject: (payload: FormData | object, token: string) => {
     const isFormData = payload instanceof FormData;
     return authRequest<Project>("/projects", token, {

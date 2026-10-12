@@ -110,8 +110,7 @@ export function createCrudRouter({
   }
 
   router.patch("/:id", ...updateMiddlewares, async (req, res) => {
-    const all = await db.get(table);
-    const existing = all.find((item) => String(item.id) === String(req.params.id));
+    const existing = await db.findById(table, req.params.id);
     if (!existing) {
       return res.status(404).json({ message: notFoundMessage });
     }
@@ -147,8 +146,7 @@ export function createCrudRouter({
   // ── DELETE /:id ───────────────────────────────────────────────────────
   router.delete("/:id", verifyToken, requireAdmin, async (req, res, next) => {
     try {
-      const all = await db.get(table);
-      const existing = all.find((item) => String(item.id) === String(req.params.id));
+      const existing = await db.findById(table, req.params.id);
       if (!existing) {
         return res.status(404).json({ message: notFoundMessage });
       }

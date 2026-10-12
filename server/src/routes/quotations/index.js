@@ -103,18 +103,23 @@ quotationsRouter.post("/", validate(createQuotationSchema), async (req, res) => 
 
 // GET /api/quotations — List all quotations, optionally filtered by ?lead_id=...
 quotationsRouter.get("/", async (req, res) => {
-  let list = await db.get("quotations");
   if (req.query.lead_id) {
     const leadId = String(req.query.lead_id).trim();
-    list = list.filter((q) => q.lead_id === leadId);
+    const list = await db.query(
+      `select * from quotations where lead_id = $1 order by created_at desc`,
+      [leadId]
+    );
+    return res.json(list);
   }
-  res.json([...list].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+  const list = await db.query(
+    `select * from quotations order by created_at desc`
+  );
+  res.json(list);
 });
 
 // GET /api/quotations/:id — Get detail of a specific quotation
 quotationsRouter.get("/:id", async (req, res) => {
-  const quotations = await db.get("quotations");
-  const match = quotations.find((q) => q.id === req.params.id);
+  const match = await db.findById("quotations", req.params.id);
   if (!match) {
     return res.status(404).json({ message: "Không tìm thấy báo giá." });
   }
@@ -123,8 +128,7 @@ quotationsRouter.get("/:id", async (req, res) => {
 
 // PATCH /api/quotations/:id — Update quotation items, status, valid_until, or notes
 quotationsRouter.patch("/:id", validate(updateQuotationSchema), async (req, res) => {
-  const quotations = await db.get("quotations");
-  const existing = quotations.find((q) => q.id === req.params.id);
+  const existing = await db.findById("quotations", req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy báo giá." });
   }
@@ -158,8 +162,7 @@ quotationsRouter.patch("/:id", validate(updateQuotationSchema), async (req, res)
 
 // DELETE /api/quotations/:id — Delete a draft quotation (only allowed if status === 'draft')
 quotationsRouter.delete("/:id", async (req, res) => {
-  const quotations = await db.get("quotations");
-  const existing = quotations.find((q) => q.id === req.params.id);
+  const existing = await db.findById("quotations", req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy báo giá." });
   }

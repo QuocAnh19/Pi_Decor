@@ -126,8 +126,7 @@ export async function createProject(data = {}, files = {}, req = null) {
  * @returns {Promise<Record<string, any>>}
  */
 export async function updateProject(id, data = {}, files = {}, req = null) {
-  const projects = await db.get("projects");
-  const existing = projects.find((p) => p.id === id);
+  const existing = await db.findById("projects", id);
   if (!existing) {
     const err = new Error("Không tìm thấy dự án.");
     err.status = 404;
@@ -161,17 +160,16 @@ export async function updateProject(id, data = {}, files = {}, req = null) {
  * @returns {Promise<boolean>}
  */
 export async function deleteProject(id) {
-  const projects = await db.get("projects");
-  const existing = projects.find((p) => p.id === id);
+  const existing = await db.findById("projects", id);
+  if (!existing) {
+    return false;
+  }
 
   const removed = await db.removeById("projects", id);
   if (!removed) {
     return false;
   }
 
-  if (existing) {
-    await deleteMediaOf(existing, "cover_image", "gallery");
-  }
-
+  await deleteMediaOf(existing, "cover_image", "gallery");
   return true;
 }

@@ -31,7 +31,7 @@ export function useProjects(selectedVenueId?: string | null) {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.getProjects();
+      const data = token ? await api.getProjectsAdmin(token) : await api.getProjects();
       if (Array.isArray(data) && data.length > 0) {
         setProjects(data.map(dbToProjectItem));
       } else {
@@ -58,7 +58,7 @@ export function useProjects(selectedVenueId?: string | null) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     loadProjects();

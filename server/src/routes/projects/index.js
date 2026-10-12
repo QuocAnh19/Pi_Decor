@@ -12,11 +12,20 @@ import {
 
 export const projectsRouter = Router();
 
-// GET /api/projects — public, list all projects
+// GET /api/projects — public, list published projects only (newest first)
 projectsRouter.get("/", async (_req, res) => {
-  const projects = await db.get("projects");
-  const sorted = [...projects].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-  res.json(sorted);
+  const projects = await db.query(
+    `select * from projects where published = true order by created_at desc`
+  );
+  res.json(projects);
+});
+
+// GET /api/projects/admin — admin only, list all projects including drafts (newest first)
+projectsRouter.get("/admin", verifyToken, requireAdmin, async (_req, res) => {
+  const projects = await db.query(
+    `select * from projects order by created_at desc`
+  );
+  res.json(projects);
 });
 
 // POST /api/projects — admin only, create a new project

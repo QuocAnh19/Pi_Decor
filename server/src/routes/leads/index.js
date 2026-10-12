@@ -34,6 +34,10 @@ leadsRouter.post("/", leadsLimiter, validate(createLeadSchema), async (req, res)
   res.status(201).json({ id: created.id });
 });
 
+function escapeLike(str) {
+  return str.replace(/[%_\\]/g, "\\$&");
+}
+
 // GET /api/leads — list with pagination & search, newest first. Admin-only.
 leadsRouter.get("/", verifyToken, requireAdmin, async (req, res) => {
   const { q, status, page = 1, limit = 20 } = req.query;
@@ -47,7 +51,8 @@ leadsRouter.get("/", verifyToken, requireAdmin, async (req, res) => {
   const values = [];
 
   if (q && typeof q === "string" && q.trim()) {
-    const term = `%${q.trim().toLowerCase()}%`;
+    const escaped = escapeLike(q.trim().toLowerCase());
+    const term = `%${escaped}%`;
     values.push(term, term, term);
     conditions.push(
       `(lower(name) like $${values.length - 2} OR lower(phone) like $${values.length - 1} OR lower(coalesce(email,'')) like $${values.length})`
@@ -80,8 +85,7 @@ leadsRouter.get("/", verifyToken, requireAdmin, async (req, res) => {
 
 // GET /api/leads/:id — get lead details by id. Admin-only.
 leadsRouter.get("/:id", verifyToken, requireAdmin, async (req, res) => {
-  const leads = await db.get("leads");
-  const existing = leads.find((l) => l.id === req.params.id);
+  const existing = await db.findById("leads", req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy lead." });
   }
@@ -90,24 +94,22 @@ leadsRouter.get("/:id", verifyToken, requireAdmin, async (req, res) => {
 
 // GET /api/leads/:id/activities — get timeline activities for a lead (newest first). Admin-only.
 leadsRouter.get("/:id/activities", verifyToken, requireAdmin, async (req, res) => {
-  const leads = await db.get("leads");
-  const existing = leads.find((l) => l.id === req.params.id);
+  const existing = await db.findById("leads", req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy lead." });
   }
 
-  const activities = await db.get("lead_activities");
-  const leadActs = activities
-    .filter((a) => a.lead_id === req.params.id)
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const leadActs = await db.query(
+    `select * from lead_activities where lead_id = $1 order by created_at desc`,
+    [req.params.id]
+  );
 
   res.json(leadActs);
 });
 
 // POST /api/leads/:id/activities — add a note/call/email activity log for a lead. Admin-only.
 leadsRouter.post("/:id/activities", verifyToken, requireAdmin, validate(createLeadActivitySchema), async (req, res) => {
-  const leads = await db.get("leads");
-  const existing = leads.find((l) => l.id === req.params.id);
+  const existing = await db.findById("leads", req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy lead." });
   }
@@ -126,8 +128,7 @@ leadsRouter.post("/:id/activities", verifyToken, requireAdmin, validate(createLe
 
 // PATCH /api/leads/:id — update status (Mới / Đã liên hệ / Đã chốt) or design_snapshot + log activity.
 leadsRouter.patch("/:id", verifyToken, requireAdmin, validate(updateLeadStatusSchema), async (req, res) => {
-  const leads = await db.get("leads");
-  const existing = leads.find((l) => l.id === req.params.id);
+  const existing = await db.findById("leads", req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy lead." });
   }

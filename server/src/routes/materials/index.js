@@ -28,12 +28,13 @@ function normalizeCategory(catInput) {
 /**
  * Appends a unique 4-character suffix if a material with the same name already exists.
  */
-function generateUniqueName(existingMaterials, targetName, currentId = null) {
+async function generateUniqueName(targetName, currentId = null) {
   const trimmed = String(targetName).trim();
-  const isDuplicate = existingMaterials.some(
-    (m) => String(m.id) !== String(currentId) && m.name.toLowerCase().trim() === trimmed.toLowerCase()
+  const duplicate = await db.query(
+    `select id from materials where lower(trim(name)) = lower(trim($1)) and ($2::uuid is null or id <> $2::uuid) limit 1`,
+    [trimmed, currentId]
   );
-  if (!isDuplicate) return trimmed;
+  if (duplicate.length === 0) return trimmed;
 
   const suffix = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `${trimmed} (${suffix})`;
@@ -41,11 +42,16 @@ function generateUniqueName(existingMaterials, targetName, currentId = null) {
 
 // GET /api/materials — public, filter by ?category=...
 materialsRouter.get("/", async (req, res) => {
-  let list = await db.get("materials");
   if (req.query.category) {
     const cat = String(req.query.category).trim().toLowerCase();
-    list = list.filter((m) => m.category === cat || m.category === CATEGORY_MAP[cat]);
+    const mapped = CATEGORY_MAP[cat] || cat;
+    const list = await db.query(
+      `select * from materials where category = $1 or category = $2 order by created_at asc`,
+      [cat, mapped]
+    );
+    return res.json(list);
   }
+  const list = await db.query(`select * from materials order by created_at asc`);
   res.json(list);
 });
 
@@ -54,9 +60,7 @@ materialsRouter.post("/", verifyToken, requireAdmin, uploadImage.single("image")
   const { name, category, color_hex } = req.body ?? {};
 
   const categoryToUse = normalizeCategory(category);
-
-  const existingMaterials = await db.get("materials");
-  const finalName = generateUniqueName(existingMaterials, name);
+  const finalName = await generateUniqueName(name);
 
   const materialData = {
     name: finalName,
@@ -71,8 +75,7 @@ materialsRouter.post("/", verifyToken, requireAdmin, uploadImage.single("image")
 
 // PATCH /api/materials/:id — admin only, edit fields and/or replace image.
 materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("image"), validate(updateMaterialSchema), async (req, res) => {
-  const existingMaterials = await db.get("materials");
-  const existing = existingMaterials.find((m) => String(m.id) === String(req.params.id));
+  const existing = await db.findById("materials", req.params.id);
   if (!existing) return res.status(404).json({ message: "Không tìm thấy vật liệu." });
 
   const patch = { ...req.body };
@@ -81,7 +84,7 @@ materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("ima
   }
 
   if (patch.name) {
-    patch.name = generateUniqueName(existingMaterials, patch.name, req.params.id);
+    patch.name = await generateUniqueName(patch.name, req.params.id);
   }
 
   if (req.file) {
@@ -98,15 +101,13 @@ materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("ima
 // DELETE /api/materials/:id — admin only.
 materialsRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
   const targetId = req.params.id;
-  const existingMaterials = await db.get("materials");
-  const existing = existingMaterials.find((m) => String(m.id) === String(targetId));
+  const existing = await db.findById("materials", targetId);
+  if (!existing) return res.status(404).json({ message: "Không tìm thấy vật liệu." });
 
   const removed = await db.removeById("materials", targetId);
   if (!removed) return res.status(404).json({ message: "Không tìm thấy vật liệu." });
 
-  if (existing) {
-    await deleteMediaOf(existing, "image_url");
-  }
+  await deleteMediaOf(existing, "image_url");
 
   res.status(204).send();
 });

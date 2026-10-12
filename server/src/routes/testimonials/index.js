@@ -26,14 +26,19 @@ export const testimonialsRouter = createCrudRouter({
   updateSchema: updateTestimonialSchema,
   notFoundMessage: "Không tìm thấy đánh giá.",
   createHandler: false, // public creation with multiple photos handled below
-  transformOnList: (testimonials) => {
-    return testimonials
-      .filter((t) => t.status === "approved")
-      .map((t) => ({
-        ...t,
-        photos: safeParsePhotos(t.photos),
-      }))
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  listHandler: async (_req, res) => {
+    // API công khai: chỉ trả đánh giá đã duyệt (approved), loại bỏ lead_id và trường nội bộ (status, source)
+    const rows = await db.query(
+      `select id, author, role, quote, rating, photos, created_at, updated_at
+       from testimonials
+       where status = 'approved'
+       order by created_at desc`
+    );
+    const publicList = rows.map((t) => ({
+      ...t,
+      photos: safeParsePhotos(t.photos),
+    }));
+    res.json(publicList);
   },
   transformOnUpdate: async (patch, existing) => {
     if (patch.status && !["pending", "approved", "rejected"].includes(patch.status)) {
@@ -97,16 +102,20 @@ testimonialsRouter.post("/", testimonialLimiter, uploadImage.array("photos", 3),
 // ── Route riêng: Admin List with Status Filter ───────────────────────────────
 // GET /api/testimonials/admin — admin only, get all testimonials (optional ?status= filter)
 testimonialsRouter.get("/admin", verifyToken, requireAdmin, async (req, res) => {
-  let list = await db.get("testimonials");
+  let rows;
   if (req.query.status) {
-    const st = String(req.query.status).trim();
-    list = list.filter((t) => t.status === st);
+    rows = await db.query(
+      `select * from testimonials where status = $1 order by created_at desc`,
+      [String(req.query.status).trim()]
+    );
+  } else {
+    rows = await db.query(
+      `select * from testimonials order by created_at desc`
+    );
   }
-  const formatted = list
-    .map((t) => ({
-      ...t,
-      photos: safeParsePhotos(t.photos),
-    }))
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const formatted = rows.map((t) => ({
+    ...t,
+    photos: safeParsePhotos(t.photos),
+  }));
   res.json(formatted);
 });

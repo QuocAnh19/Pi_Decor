@@ -15,13 +15,6 @@ import { projectUpload, createProject } from "../../services/projects.service.js
  * `projects`, never stored, so it can't drift out of sync.
  */
 
-async function withProjectCount(venues, projects) {
-  return venues.map((v) => ({
-    ...v,
-    project_count: projects.filter((p) => p.venue_id === v.id && p.published).length,
-  }));
-}
-
 export const venuesRouter = createCrudRouter({
   table: "venues",
   listPublic: true,
@@ -37,14 +30,25 @@ export const venuesRouter = createCrudRouter({
     lng: Number(venue.lng),
     cover_image: venue.cover_image ?? null,
   }),
-  transformOnList: async (venues, req) => {
-    const projects = await db.get("projects");
-    let list = await withProjectCount(venues, projects);
+  listHandler: async (req, res) => {
+    let sql = `
+      select v.*, coalesce(p.project_count, 0)::int as project_count
+      from venues v
+      left join (
+        select venue_id, count(*)::int as project_count
+        from projects
+        where published = true
+        group by venue_id
+      ) p on p.venue_id = v.id
+    `;
+    const values = [];
     if (req.query.city) {
-      const city = String(req.query.city).trim().toLowerCase();
-      list = list.filter((v) => v.city?.toLowerCase() === city);
+      values.push(String(req.query.city).trim().toLowerCase());
+      sql += ` where lower(v.city) = $1`;
     }
-    return list;
+    sql += ` order by v.created_at asc`;
+    const venues = await db.query(sql, values);
+    res.json(venues);
   },
   beforeDelete: async (venue) => {
     // Migration 0009 định nghĩa FK projects.venue_id ON DELETE CASCADE.
@@ -61,25 +65,34 @@ export const venuesRouter = createCrudRouter({
 venuesRouter.get("/search", async (req, res) => {
   const q = String(req.query.q ?? "").trim().toLowerCase();
   if (!q) return res.json([]);
-  const [venues, projects] = await Promise.all([db.get("venues"), db.get("projects")]);
-  const matches = venues.filter(
-    (v) =>
-      v.name.toLowerCase().includes(q) ||
-      v.city?.toLowerCase().includes(q) ||
-      v.address?.toLowerCase().includes(q)
-  );
-  res.json(await withProjectCount(matches, projects));
+  const escapedQ = q.replace(/[%_\\]/g, "\\$&");
+  const term = `%${escapedQ}%`;
+  const sql = `
+    select v.*, coalesce(p.project_count, 0)::int as project_count
+    from venues v
+    left join (
+      select venue_id, count(*)::int as project_count
+      from projects
+      where published = true
+      group by venue_id
+    ) p on p.venue_id = v.id
+    where (lower(v.name) like $1 or lower(coalesce(v.city,'')) like $1 or lower(coalesce(v.address,'')) like $1)
+    order by v.created_at asc
+  `;
+  const matches = await db.query(sql, [term]);
+  res.json(matches);
 });
 
 // GET /api/venues/:id — venue detail + its published projects, for the
 // marker click / VenueDetailPage gallery.
 venuesRouter.get("/:id", async (req, res) => {
-  const venues = await db.get("venues");
-  const venue = venues.find((v) => v.id === req.params.id);
+  const venue = await db.findById("venues", req.params.id);
   if (!venue) return res.status(404).json({ message: "Không tìm thấy địa điểm." });
 
-  const projects = await db.get("projects");
-  const venueProjects = projects.filter((p) => p.venue_id === venue.id && p.published);
+  const venueProjects = await db.query(
+    `select * from projects where venue_id = $1 and published = true order by created_at desc`,
+    [venue.id]
+  );
   res.json({ ...venue, project_count: venueProjects.length, projects: venueProjects });
 });
 
@@ -87,8 +100,8 @@ venuesRouter.get("/:id", async (req, res) => {
 
 // POST /api/venues/:id/projects — add a case study under a venue.
 venuesRouter.post("/:id/projects", verifyToken, requireAdmin, projectUpload, validate(createProjectSchema), async (req, res, next) => {
-  const venues = await db.get("venues");
-  if (!venues.some((v) => v.id === req.params.id)) {
+  const venue = await db.findById("venues", req.params.id);
+  if (!venue) {
     return res.status(404).json({ message: "Không tìm thấy địa điểm." });
   }
   try {
