@@ -1,14 +1,13 @@
-// server/src/server.js
 import "dotenv/config";
-import { validateEnv } from "./config/env.js";
+import { validateEnv, env } from "./config/env.js";
 
-// Validate mandatory environment variables before binding to port
+// Validate mandatory environment variables before importing app
 validateEnv();
 
-import { app } from "./app.js";
-import { pool } from "./config/database.js";
+const { app } = await import("./app.js");
+const { pool } = await import("./config/database.js");
 
-const PORT = process.env.PORT ?? 4000;
+const PORT = env.PORT;
 
 const server = app.listen(PORT, () => {
   console.log(`Pi Decor API listening on http://localhost:${PORT}`);

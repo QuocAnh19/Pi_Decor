@@ -4,7 +4,9 @@ import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { env } from "./config/env.js";
 import { pool } from "./config/database.js";
+import { hasCloudinary } from "./utils/uploadImage.js";
 import { loginLimiter } from "./middlewares/rateLimiters.js";
 import { leadsRouter } from "./routes/leads/index.js";
 import { materialsRouter } from "./routes/materials/index.js";
@@ -21,30 +23,57 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const app = express();
 
-// Security headers (X-Content-Type-Options, X-Frame-Options, remove
-// X-Powered-By, etc). See database/SECURITY.md §6 — default config is
-// enough for a JSON-only API with no server-rendered HTML.
+// Thiết lập trust proxy để rate limiting và log IP chuẩn xác sau reverse proxy (Render, Railway, Nginx)
+app.set("trust proxy", env.TRUST_PROXY);
+
+// Security headers (X-Content-Type-Options, X-Frame-Options, gỡ bỏ X-Powered-By)
 app.use(helmet());
+
+const allowedOrigins = env.CORS_ORIGIN
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowedOrigins = (process.env.CORS_ORIGIN ?? "http://localhost:5173").split(",");
-      if (!origin || allowedOrigins.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS policy violation"));
+      // Cho phép request không có origin header (curl, mobile, server-to-server)
+      if (!origin) {
+        return callback(null, true);
       }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      // Chỉ cho phép localhost regex ở môi trường development/test
+      if (env.NODE_ENV !== "production" && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+      const corsErr = new Error("CORS policy violation");
+      corsErr.status = 403;
+      callback(corsErr);
     },
   })
 );
 
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+// Đăng ký parser giới hạn riêng cho các endpoint nhận dữ liệu lớn trước parser toàn cục
+app.post("/api/leads", express.json({ limit: "5mb" }));
+app.put("/api/studio/templates/:id/publish", express.json({ limit: "10mb" }));
 
-// Local-disk uploads served statically. See utils/uploadImage.js for why
-// this must become Cloudinary (or similar) before deploying to Render Free.
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+// Giới hạn parser toàn cục chống tấn công làm cạn kiệt bộ nhớ (DDoS/Memory Exhaustion)
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ limit: "100kb", extended: true }));
+
+// Chỉ phục vụ uploads tĩnh từ đĩa cục bộ khi không dùng Cloudinary
+if (!hasCloudinary) {
+  app.use(
+    "/uploads",
+    (_req, res, next) => {
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      next();
+    },
+    express.static(path.join(__dirname, "..", "uploads"))
+  );
+}
 
 app.get("/api/health", async (_req, res) => {
   try {
@@ -52,16 +81,14 @@ app.get("/api/health", async (_req, res) => {
       await pool.query("SELECT 1");
     }
     res.json({ status: "ok", db: "connected", ts: new Date().toISOString() });
-  } catch (err) {
-    res.status(503).json({ status: "degraded", db: "unreachable", error: err.message });
+  } catch {
+    // Không lộ chi tiết err.message để tránh rò rỉ thông tin hạ tầng
+    res.status(503).json({ status: "degraded", db: "unreachable" });
   }
 });
 
 app.use("/api/auth/login", loginLimiter);
 
-// Routes are organized by business domain, not by CRUD verb — same
-// structure as Server/routes in the Ecovera reference project (Mục 2.4 /
-// 3.4 of the technical proposal), so each domain can evolve independently.
 app.use("/api/leads", leadsRouter);
 app.use("/api/materials", materialsRouter);
 app.use("/api/services", servicesRouter);
@@ -79,10 +106,18 @@ app.use((req, res) => {
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
-  console.error(err);
+  console.error("[error-handler]", err);
   if (err && err.code === "LIMIT_FIELD_VALUE") {
     return res.status(400).json({ message: "Kích thước trường dữ liệu quá lớn." });
   }
+  if (err && (err.type === "entity.too.large" || err.status === 413)) {
+    return res.status(413).json({ message: "Dung lượng dữ liệu vượt quá giới hạn cho phép." });
+  }
   const statusCode = err.http_code || err.status || (res.statusCode >= 400 ? res.statusCode : 500);
+
+  // Ở production, che giấu chi tiết lỗi máy chủ 5xx để đảm bảo an toàn thông tin
+  if (statusCode >= 500 && env.NODE_ENV === "production") {
+    return res.status(statusCode).json({ message: "Lỗi máy chủ." });
+  }
   res.status(statusCode).json({ message: err.message ?? "Lỗi máy chủ." });
 });

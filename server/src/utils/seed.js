@@ -2,19 +2,34 @@ import "dotenv/config";
 import bcrypt from "bcryptjs";
 import { v4 as uuid } from "uuid";
 import { db } from "../config/database.js";
+import { env } from "../config/env.js";
 
 async function seed() {
-  const admins = await db.get("admins");
-  const email = process.env.ADMIN_EMAIL ?? "admin@pidecor.vn";
+  const email = env.ADMIN_EMAIL?.trim();
+  const password = env.ADMIN_PASSWORD;
 
+  if (!email || !password || password.length < 12) {
+    console.error(
+      "[seed] Bắt buộc cung cấp ADMIN_EMAIL hợp lệ và ADMIN_PASSWORD có độ dài tối thiểu 12 ký tự."
+    );
+    process.exit(1);
+  }
+
+  const isResetPassword = process.argv.includes("--reset-password");
+
+  const admins = await db.get("admins");
   const existingAdmin = admins.find((a) => a.email === email);
-  const password_hash = await bcrypt.hash(process.env.ADMIN_PASSWORD ?? "admin123", 10);
+
   if (!existingAdmin) {
+    const password_hash = await bcrypt.hash(password, 10);
     await db.insert("admins", { id: uuid(), email, password_hash, role: "owner" });
     console.log(`✓ Admin account created with owner role: ${email}`);
-  } else {
+  } else if (isResetPassword) {
+    const password_hash = await bcrypt.hash(password, 10);
     await db.update("admins", (a) => a.email === email, { password_hash });
-    console.log(`✓ Admin account password updated: ${email}`);
+    console.log(`✓ Admin account password updated (--reset-password): ${email}`);
+  } else {
+    console.log(`ℹ Admin account ${email} đã tồn tại. Bỏ qua ghi đè mật khẩu (sử dụng --reset-password nếu muốn cập nhật).`);
   }
 
   const materials = await db.get("materials");

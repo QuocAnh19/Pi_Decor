@@ -5,6 +5,7 @@ import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { sanitizeSvg } from "../../utils/sanitizeSvg.js";
 import { uploadImage, publicUrlFor, deleteImageFile } from "../../utils/uploadImage.js";
 import { v2 as cloudinary } from "cloudinary";
+import { env } from "../../config/env.js";
 
 export const studioRouter = Router();
 
@@ -97,7 +98,7 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req
 
     let finalThumbnail = thumbnail;
     if (thumbnail && typeof thumbnail === "string" && thumbnail.startsWith("data:image/")) {
-      if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
+      if (env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY) {
         try {
           const uploadRes = await cloudinary.uploader.upload(thumbnail, {
             folder: "pidecor/templates",

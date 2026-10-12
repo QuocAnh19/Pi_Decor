@@ -1,4 +1,5 @@
 import pg from "pg";
+import { env } from "./env.js";
 
 /**
  * config/database.pg.js
@@ -22,13 +23,13 @@ import pg from "pg";
  */
 
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: env.DATABASE_URL,
   // Neon and Supabase both terminate TLS with a certificate that Node's
   // default trust store can't always chain to. rejectUnauthorized: false
   // keeps the connection encrypted while skipping that chain check — the
   // same trade-off Ecovera's README documents for its own hosted MySQL.
   // Skip it for a local `postgres` container (no TLS at all).
-  ssl: process.env.DATABASE_URL?.includes("localhost")
+  ssl: env.DATABASE_URL?.includes("localhost")
     ? false
     : { rejectUnauthorized: false },
 
@@ -36,7 +37,7 @@ const pool = new pg.Pool({
   // Cap how many connections this one server instance can open — Neon/
   // Supabase free tiers cap total concurrent connections per project, so a
   // runaway pool here would starve migrations/other tools of connections.
-  max: Number(process.env.DB_POOL_MAX ?? 10),
+  max: env.DB_POOL_MAX,
   // Close connections that have sat idle for a while instead of holding
   // them open forever.
   idleTimeoutMillis: 30_000,

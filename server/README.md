@@ -25,6 +25,25 @@ sau đó chạy migration: `npm run migrate` và seed: `npm run seed`.
 troubleshooting): xem [`database/README.md`](./database/README.md) và
 [`database/SECURITY.md`](./database/SECURITY.md).**
 
+## Biến môi trường
+
+| Tên biến | Bắt buộc? | Mặc định | Mô tả |
+| --- | --- | --- | --- |
+| `NODE_ENV` | Không | `development` | Môi trường: `development`, `test`, hoặc `production`. |
+| `PORT` | Không | `4000` | Cổng HTTP mà server lắng nghe. |
+| `CORS_ORIGIN` | Có (prod) | `http://localhost:5173` | Danh sách origin hợp lệ, cách nhau bằng dấu phẩy. Localhost bị chặn ở production. |
+| `TRUST_PROXY` | Không | `1` (prod) / `0` (dev) | Cấu hình trust proxy của Express để rate limit và log IP chuẩn sau proxy. |
+| `JWT_SECRET` | **BẮT BUỘC** | — | Khóa bí mật ký token JWT, tối thiểu 32 ký tự. |
+| `JWT_EXPIRES_IN` | Không | `15m` | Thời hạn hiệu lực của access token. |
+| `DATABASE_URL` | **BẮT BUỘC** | — | Chuỗi kết nối PostgreSQL (Neon, Supabase, local Docker). |
+| `DB_POOL_MAX` | Không | `10` | Số kết nối tối đa trong pg pool. |
+| `DB_SSL` | Không | `false` | Bật/tắt SSL khi kết nối PostgreSQL. |
+| `CLOUDINARY_CLOUD_NAME` | Có (prod) | — | Tên Cloudinary cloud lưu ảnh. |
+| `CLOUDINARY_API_KEY` | Có (prod) | — | API key của Cloudinary. |
+| `CLOUDINARY_API_SECRET` | Có (prod) | — | API secret của Cloudinary. |
+| `ADMIN_EMAIL` | Có (seed) | — | Email admin khởi tạo khi chạy `npm run seed`. |
+| `ADMIN_PASSWORD` | Có (seed) | — | Mật khẩu admin khi chạy seed, tối thiểu 12 ký tự. |
+
 ## Cấu trúc thư mục
 
 ```

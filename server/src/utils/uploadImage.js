@@ -6,23 +6,24 @@ import { fileURLToPath } from "url";
 import { v4 as uuid } from "uuid";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { env } from "../config/env.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOAD_DIR = path.join(__dirname, "..", "..", "uploads");
 
-const hasCloudinary = Boolean(
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET
+export const hasCloudinary = Boolean(
+  env.CLOUDINARY_CLOUD_NAME &&
+  env.CLOUDINARY_API_KEY &&
+  env.CLOUDINARY_API_SECRET
 );
 
 let storage;
 
 if (hasCloudinary) {
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: env.CLOUDINARY_CLOUD_NAME,
+    api_key: env.CLOUDINARY_API_KEY,
+    api_secret: env.CLOUDINARY_API_SECRET,
   });
 
   storage = new CloudinaryStorage({
@@ -33,7 +34,7 @@ if (hasCloudinary) {
     },
   });
 
-  console.log(`[uploadImage.js] Using Cloudinary Storage (${process.env.CLOUDINARY_CLOUD_NAME}).`);
+  console.log(`[uploadImage.js] Using Cloudinary Storage (${env.CLOUDINARY_CLOUD_NAME}).`);
 } else {
   storage = multer.diskStorage({
     destination: UPLOAD_DIR,
@@ -81,7 +82,7 @@ export function publicUrlFor(req, filenameOrFile) {
   }
 
   if (hasCloudinary && typeof filenameOrFile === "string" && filenameOrFile.length > 0) {
-    return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${filenameOrFile}`;
+    return `https://res.cloudinary.com/${env.CLOUDINARY_CLOUD_NAME}/image/upload/${filenameOrFile}`;
   }
 
   return `${req.protocol}://${req.get("host")}/uploads/${filenameOrFile}`;
