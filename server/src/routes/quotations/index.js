@@ -2,6 +2,8 @@ import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { db, pool } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
+import { validate } from "../../middlewares/validate.js";
+import { createQuotationSchema, updateQuotationSchema } from "../../schemas/quotations.schema.js";
 
 export const quotationsRouter = Router();
 
@@ -53,7 +55,7 @@ async function generateQuotationNumber() {
 }
 
 // POST /api/quotations — Create new quotation for a lead
-quotationsRouter.post("/", async (req, res) => {
+quotationsRouter.post("/", validate(createQuotationSchema), async (req, res) => {
   const { lead_id, items, discount, valid_until, notes } = req.body ?? {};
 
   if (!lead_id || !Array.isArray(items) || items.length === 0) {
@@ -122,7 +124,7 @@ quotationsRouter.get("/:id", async (req, res) => {
 });
 
 // PATCH /api/quotations/:id — Update quotation items, status, valid_until, or notes
-quotationsRouter.patch("/:id", async (req, res) => {
+quotationsRouter.patch("/:id", validate(updateQuotationSchema), async (req, res) => {
   const quotations = await db.get("quotations");
   const existing = quotations.find((q) => q.id === req.params.id);
   if (!existing) {
@@ -138,6 +140,7 @@ quotationsRouter.patch("/:id", async (req, res) => {
   patch.subtotal = subtotal;
   patch.discount = numDiscount;
   patch.total = total;
+  patch.updated_at = new Date().toISOString();
 
   const oldStatus = existing.status;
   const updated = await db.updateById("quotations", req.params.id, patch);

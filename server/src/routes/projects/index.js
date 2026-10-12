@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
+import { validate } from "../../middlewares/validate.js";
+import { createProjectSchema, updateProjectSchema } from "../../schemas/projects.schema.js";
 import {
   projectUpload,
   createProject,
@@ -18,7 +20,7 @@ projectsRouter.get("/", async (_req, res) => {
 });
 
 // POST /api/projects — admin only, create a new project
-projectsRouter.post("/", verifyToken, requireAdmin, projectUpload, async (req, res, next) => {
+projectsRouter.post("/", verifyToken, requireAdmin, projectUpload, validate(createProjectSchema), async (req, res, next) => {
   try {
     const project = await createProject(req.body, req.files, req);
     res.status(201).json(project);
@@ -31,7 +33,7 @@ projectsRouter.post("/", verifyToken, requireAdmin, projectUpload, async (req, r
 });
 
 // PATCH /api/projects/:id — admin only, update project
-projectsRouter.patch("/:id", verifyToken, requireAdmin, projectUpload, async (req, res, next) => {
+projectsRouter.patch("/:id", verifyToken, requireAdmin, projectUpload, validate(updateProjectSchema), async (req, res, next) => {
   try {
     const updated = await updateProject(req.params.id, req.body, req.files, req);
     res.json(updated);

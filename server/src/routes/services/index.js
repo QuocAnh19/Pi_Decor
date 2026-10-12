@@ -2,6 +2,8 @@ import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
+import { validate } from "../../middlewares/validate.js";
+import { createServiceSchema, updateServiceSchema } from "../../schemas/services.schema.js";
 import { deleteImageFile } from "../../utils/uploadImage.js";
 
 export const servicesRouter = Router();
@@ -33,9 +35,8 @@ servicesRouter.get("/", async (_req, res) => {
   res.json(sorted.map(formatService));
 });
 
-servicesRouter.post("/", verifyToken, requireAdmin, async (req, res) => {
+servicesRouter.post("/", verifyToken, requireAdmin, validate(createServiceSchema), async (req, res) => {
   const { brand, title, tagline, description, icon, accent, items, href, ctaLabel, cta_label, featured, cover, order, image_url } = req.body ?? {};
-  if (!title) return res.status(400).json({ message: "Thiếu tiêu đề dịch vụ." });
 
   const service = {
     id: uuid(),
@@ -45,7 +46,7 @@ servicesRouter.post("/", verifyToken, requireAdmin, async (req, res) => {
     description: description || "",
     icon: icon || "HeartIcon",
     accent: accent || "wedding",
-    items: Array.isArray(items) ? items : typeof items === "string" ? items.split(",").map((i) => i.trim()).filter(Boolean) : [],
+    items: Array.isArray(items) ? items : [],
     href: href || null,
     cta_label: cta_label || ctaLabel || "Liên hệ tư vấn",
     featured: Boolean(featured),
@@ -59,7 +60,7 @@ servicesRouter.post("/", verifyToken, requireAdmin, async (req, res) => {
   res.status(201).json(formatService(service));
 });
 
-servicesRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => {
+servicesRouter.patch("/:id", verifyToken, requireAdmin, validate(updateServiceSchema), async (req, res) => {
   const services = await db.get("services");
   const existing = services.find((s) => s.id === req.params.id);
   if (!existing) return res.status(404).json({ message: "Không tìm thấy dịch vụ." });
@@ -68,13 +69,6 @@ servicesRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => {
   if (patch.ctaLabel) {
     patch.cta_label = patch.ctaLabel;
     delete patch.ctaLabel;
-  }
-  if (patch.items && typeof patch.items === "string") {
-    try {
-      patch.items = JSON.parse(patch.items);
-    } catch {
-      patch.items = patch.items.split(",").map((i) => i.trim()).filter(Boolean);
-    }
   }
 
   const newCover = patch.cover || patch.image_url;

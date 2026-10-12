@@ -6,7 +6,7 @@ import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../../config/auth.js";
 import { validate } from "../../middlewares/validate.js";
-import { loginSchema } from "../../schemas/auth.schema.js";
+import { loginSchema, refreshTokenSchema } from "../../schemas/auth.schema.js";
 import { verifyToken, requireAdmin, requireOwner } from "../../middlewares/verifyToken.js";
 
 export const authRouter = Router();
@@ -73,11 +73,8 @@ authRouter.post("/login", validate(loginSchema), async (req, res) => {
 });
 
 // POST /api/auth/refresh — get new access token via refresh token
-authRouter.post("/refresh", async (req, res) => {
-  const { refresh_token } = req.body ?? {};
-  if (!refresh_token || typeof refresh_token !== "string") {
-    return res.status(401).json({ message: "Thiếu refresh token." });
-  }
+authRouter.post("/refresh", validate(refreshTokenSchema), async (req, res) => {
+  const { refresh_token } = req.body;
 
   const tokenHash = hashToken(refresh_token);
   const refreshTokens = await db.get("refresh_tokens");

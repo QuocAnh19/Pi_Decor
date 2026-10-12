@@ -1,6 +1,8 @@
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
+import { validate } from "../../middlewares/validate.js";
 import { createVenueSchema, updateVenueSchema } from "../../schemas/venues.schema.js";
+import { createProjectSchema } from "../../schemas/projects.schema.js";
 import { createCrudRouter } from "../../utils/crudRouterFactory.js";
 import { projectUpload, createProject } from "../../services/projects.service.js";
 
@@ -84,7 +86,7 @@ venuesRouter.get("/:id", async (req, res) => {
 // ── Admin Project Sub-routes under Venues ─────────────────────────────────────
 
 // POST /api/venues/:id/projects — add a case study under a venue.
-venuesRouter.post("/:id/projects", verifyToken, requireAdmin, projectUpload, async (req, res, next) => {
+venuesRouter.post("/:id/projects", verifyToken, requireAdmin, projectUpload, validate(createProjectSchema), async (req, res, next) => {
   const venues = await db.get("venues");
   if (!venues.some((v) => v.id === req.params.id)) {
     return res.status(404).json({ message: "Không tìm thấy địa điểm." });

@@ -2,6 +2,19 @@ import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
+import { validate } from "../../middlewares/validate.js";
+import {
+  createTemplateSchema,
+  updateTemplateSchema,
+  publishTemplateSchema,
+  createSlotSchema,
+  updateSlotSchema,
+  reorderSlotsSchema,
+  createAssetSchema,
+  updateAssetSchema,
+  createRuleSchema,
+  updateRuleSchema,
+} from "../../schemas/studio.schema.js";
 import { sanitizeSvg } from "../../utils/sanitizeSvg.js";
 import { deleteImageFile } from "../../utils/uploadImage.js";
 import { v2 as cloudinary } from "cloudinary";
@@ -26,12 +39,8 @@ studioRouter.get("/templates/admin", verifyToken, requireAdmin, async (_req, res
 });
 
 // POST /api/studio/templates — admin only, create new template with sanitized svg_base
-studioRouter.post("/templates", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.post("/templates", verifyToken, requireAdmin, validate(createTemplateSchema), async (req, res) => {
   const { name, thumbnail, svg_base, category, is_active } = req.body ?? {};
-
-  if (!name || !svg_base) {
-    return res.status(400).json({ message: "Thiếu tên hoặc nội dung SVG của template." });
-  }
 
   const cleanSvg = sanitizeSvg(svg_base);
   const template = {
@@ -50,7 +59,7 @@ studioRouter.post("/templates", verifyToken, requireAdmin, async (req, res) => {
 });
 
 // PATCH /api/studio/templates/:id — admin only, update template
-studioRouter.patch("/templates/:id", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.patch("/templates/:id", verifyToken, requireAdmin, validate(updateTemplateSchema), async (req, res) => {
   const patch = { ...req.body, updated_at: new Date().toISOString() };
   if (patch.svg_base) {
     patch.svg_base = sanitizeSvg(patch.svg_base);
@@ -73,14 +82,10 @@ function ensureUuid(id) {
 }
 
 // PUT /api/studio/templates/:id/publish — admin only, full atomic publish or draft save
-studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, validate(publishTemplateSchema), async (req, res) => {
   try {
     const rawTargetId = req.params.id;
     const { name, thumbnail, svg_base, category, is_active, slots, rules, slot_config } = req.body ?? {};
-
-    if (!name || !svg_base) {
-      return res.status(400).json({ message: "Thiếu tên hoặc nội dung SVG của phông nền." });
-    }
 
     const cleanSvg = sanitizeSvg(svg_base);
     const validTargetUuid = ensureUuid(rawTargetId);
@@ -231,15 +236,11 @@ studioRouter.get("/templates/:id/slots", async (req, res) => {
 });
 
 // POST /api/studio/templates/:id/slots — admin only, create a slot definition
-studioRouter.post("/templates/:id/slots", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.post("/templates/:id/slots", verifyToken, requireAdmin, validate(createSlotSchema), async (req, res) => {
   const {
     slot_key, label, slot_type, norm_x, norm_y, norm_width, norm_height,
     allow_scale, allow_rotate, mirror_x, z_index, sort_order, required,
   } = req.body ?? {};
-
-  if (!slot_key || !label || !slot_type || norm_x === undefined || norm_y === undefined) {
-    return res.status(400).json({ message: "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y." });
-  }
 
   const slot = {
     id: uuid(),
@@ -264,11 +265,8 @@ studioRouter.post("/templates/:id/slots", verifyToken, requireAdmin, async (req,
 });
 
 // PATCH /api/studio/templates/:id/slots/reorder — admin only, batch update slot sort_order
-studioRouter.patch("/templates/:id/slots/reorder", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.patch("/templates/:id/slots/reorder", verifyToken, requireAdmin, validate(reorderSlotsSchema), async (req, res) => {
   const items = req.body;
-  if (!Array.isArray(items)) {
-    return res.status(400).json({ message: "Payload phải là mảng các đối tượng { id, sort_order }." });
-  }
 
   for (const item of items) {
     if (item.id && item.sort_order !== undefined) {
@@ -285,7 +283,7 @@ studioRouter.patch("/templates/:id/slots/reorder", verifyToken, requireAdmin, as
 });
 
 // PATCH /api/studio/slots/:slotId — admin only, edit single slot
-studioRouter.patch("/slots/:slotId", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.patch("/slots/:slotId", verifyToken, requireAdmin, validate(updateSlotSchema), async (req, res) => {
   const updated = await db.updateById("studio_slot_definitions", req.params.slotId, req.body);
   if (!updated) {
     return res.status(404).json({ message: "Không tìm thấy slot definition." });
@@ -319,12 +317,8 @@ studioRouter.get("/assets/admin", verifyToken, requireAdmin, async (_req, res) =
 });
 
 // POST /api/studio/assets — admin only, create or update asset
-studioRouter.post("/assets", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.post("/assets", verifyToken, requireAdmin, validate(createAssetSchema), async (req, res) => {
   const { asset_type, name, thumbnail, svg_data, color_hex, font_family, tags, is_active, dominant_colors } = req.body ?? {};
-
-  if (!asset_type || !name) {
-    return res.status(400).json({ message: "Thiếu loại asset (asset_type) hoặc tên." });
-  }
 
   const finalSvg = svg_data ? sanitizeSvg(svg_data) : null;
   const finalThumbnail = thumbnail ?? null;
@@ -366,14 +360,14 @@ studioRouter.post("/assets", verifyToken, requireAdmin, async (req, res) => {
 });
 
 // PATCH /api/studio/assets/:id — admin only, update asset
-studioRouter.patch("/assets/:id", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.patch("/assets/:id", verifyToken, requireAdmin, validate(updateAssetSchema), async (req, res) => {
   const assets = await db.get("studio_assets");
   const existing = assets.find((a) => String(a.id) === String(req.params.id));
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy asset." });
   }
 
-  const patch = { ...req.body };
+  const patch = { ...req.body, updated_at: new Date().toISOString() };
   if (patch.svg_data) {
     patch.svg_data = sanitizeSvg(patch.svg_data);
   }
@@ -416,12 +410,8 @@ studioRouter.get("/templates/:id/rules", async (req, res) => {
 });
 
 // POST /api/studio/templates/:id/rules — admin only, create rule
-studioRouter.post("/templates/:id/rules", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.post("/templates/:id/rules", verifyToken, requireAdmin, validate(createRuleSchema), async (req, res) => {
   const { rule_name, condition_slot, condition_value, target_slot, action, action_value, priority } = req.body ?? {};
-
-  if (!condition_slot || !condition_value || !target_slot || !action) {
-    return res.status(400).json({ message: "Thiếu thông tin điều kiện hoặc hành động của rule." });
-  }
 
   const rule = {
     id: uuid(),
@@ -440,7 +430,7 @@ studioRouter.post("/templates/:id/rules", verifyToken, requireAdmin, async (req,
 });
 
 // PATCH /api/studio/rules/:ruleId — admin only, edit rule
-studioRouter.patch("/rules/:ruleId", verifyToken, requireAdmin, async (req, res) => {
+studioRouter.patch("/rules/:ruleId", verifyToken, requireAdmin, validate(updateRuleSchema), async (req, res) => {
   const updated = await db.updateById("studio_slot_rules", req.params.ruleId, req.body);
   if (!updated) {
     return res.status(404).json({ message: "Không tìm thấy rule." });

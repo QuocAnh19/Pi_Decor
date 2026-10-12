@@ -1,6 +1,8 @@
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
+import { validate } from "../../middlewares/validate.js";
+import { createTestimonialSchema, updateTestimonialSchema } from "../../schemas/testimonials.schema.js";
 import { uploadImage, publicUrlFor, deleteMultipleImageFiles } from "../../utils/uploadImage.js";
 import { testimonialLimiter } from "../../middlewares/rateLimiters.js";
 import { createCrudRouter } from "../../utils/crudRouterFactory.js";
@@ -21,6 +23,7 @@ function safeParsePhotos(photos) {
 export const testimonialsRouter = createCrudRouter({
   table: "testimonials",
   listPublic: true,
+  updateSchema: updateTestimonialSchema,
   notFoundMessage: "Không tìm thấy đánh giá.",
   createHandler: false, // public creation with multiple photos handled below
   transformOnList: (testimonials) => {
@@ -60,12 +63,8 @@ export const testimonialsRouter = createCrudRouter({
 
 // ── Route riêng: Public Form Submission with Multiple Photos ─────────────────
 // POST /api/testimonials — public form submission, ALWAYS forces status='pending', source='customer'
-testimonialsRouter.post("/", testimonialLimiter, uploadImage.array("photos", 3), async (req, res) => {
+testimonialsRouter.post("/", testimonialLimiter, uploadImage.array("photos", 3), validate(createTestimonialSchema), async (req, res) => {
   const { author, role, quote, rating, lead_id } = req.body ?? {};
-
-  if (!author || !quote) {
-    return res.status(400).json({ message: "Thiếu tên tác giả hoặc nội dung đánh giá." });
-  }
 
   const numRating = Math.min(5, Math.max(1, Number(rating ?? 5)));
 

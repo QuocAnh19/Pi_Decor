@@ -39,5 +39,13 @@ export const createLeadSchema = z.object({
 export const updateLeadStatusSchema = z.object({
   status: z.enum(["new", "contacted", "closed"], {
     errorMap: () => ({ message: "Trạng thái không hợp lệ." }),
+  }).optional(),
+  design_snapshot: z.unknown().optional(),
+});
+
+export const createLeadActivitySchema = z.object({
+  activity_type: z.enum(["note", "call", "email"], {
+    errorMap: () => ({ message: "Loại hoạt động không hợp lệ." }),
   }),
+  body: z.string().max(2000, "Nội dung hoạt động tối đa 2000 ký tự.").nullable().optional(),
 });

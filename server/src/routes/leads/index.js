@@ -3,7 +3,11 @@ import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { validate } from "../../middlewares/validate.js";
-import { createLeadSchema } from "../../schemas/leads.schema.js";
+import {
+  createLeadSchema,
+  updateLeadStatusSchema,
+  createLeadActivitySchema,
+} from "../../schemas/leads.schema.js";
 
 import { leadsLimiter } from "../../middlewares/rateLimiters.js";
 
@@ -104,19 +108,14 @@ leadsRouter.get("/:id/activities", verifyToken, requireAdmin, async (req, res) =
 });
 
 // POST /api/leads/:id/activities — add a note/call/email activity log for a lead. Admin-only.
-leadsRouter.post("/:id/activities", verifyToken, requireAdmin, async (req, res) => {
+leadsRouter.post("/:id/activities", verifyToken, requireAdmin, validate(createLeadActivitySchema), async (req, res) => {
   const leads = await db.get("leads");
   const existing = leads.find((l) => l.id === req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy lead." });
   }
 
-  const { activity_type, body } = req.body ?? {};
-  const CLIENT_ALLOWED_TYPES = ["note", "call", "email"];
-
-  if (!activity_type || !CLIENT_ALLOWED_TYPES.includes(activity_type)) {
-    return res.status(400).json({ message: "Loại hoạt động không hợp lệ." });
-  }
+  const { activity_type, body } = req.body;
 
   const activity = {
     id: uuid(),
@@ -133,27 +132,14 @@ leadsRouter.post("/:id/activities", verifyToken, requireAdmin, async (req, res) 
 });
 
 // PATCH /api/leads/:id — update status (Mới / Đã liên hệ / Đã chốt) or design_snapshot + log activity.
-leadsRouter.patch("/:id", verifyToken, requireAdmin, async (req, res) => {
-  const { status, design_snapshot } = req.body ?? {};
-
+leadsRouter.patch("/:id", verifyToken, requireAdmin, validate(updateLeadStatusSchema), async (req, res) => {
   const leads = await db.get("leads");
   const existing = leads.find((l) => l.id === req.params.id);
   if (!existing) {
     return res.status(404).json({ message: "Không tìm thấy lead." });
   }
 
-  const patch = {};
-
-  if (status !== undefined && status !== null) {
-    if (!["new", "contacted", "closed"].includes(status)) {
-      return res.status(400).json({ message: "Trạng thái không hợp lệ." });
-    }
-    patch.status = status;
-  }
-
-  if (design_snapshot !== undefined) {
-    patch.design_snapshot = design_snapshot;
-  }
+  const patch = { ...req.body };
 
   if (Object.keys(patch).length === 0) {
     return res.json(existing);
