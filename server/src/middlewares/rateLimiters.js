@@ -23,3 +23,12 @@ export const testimonialLimiter = rateLimit({
   legacyHeaders: false,
   message: { message: "Bạn đã gửi quá nhiều đánh giá. Vui lòng thử lại sau ít phút." },
 });
+
+export const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30, // 30 requests / 15 phút / IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Quá nhiều yêu cầu làm mới phiên. Vui lòng thử lại sau ít phút." },
+});
+

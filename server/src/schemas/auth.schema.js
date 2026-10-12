@@ -8,3 +8,8 @@ export const loginSchema = z.object({
 export const refreshTokenSchema = z.object({
   refresh_token: z.string({ required_error: "Thiếu refresh token." }).min(1, "Thiếu refresh token."),
 });
+
+export const logoutSchema = z.object({
+  refresh_token: z.string().optional(),
+});
+

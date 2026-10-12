@@ -145,7 +145,7 @@ export const api = {
     }),
 
   refreshToken: (refreshToken: string) =>
-    request<{ token: string }>("/auth/refresh", {
+    request<{ token: string; refreshToken?: string }>("/auth/refresh", {
       method: "POST",
       body: JSON.stringify({ refresh_token: refreshToken }),
     }),
@@ -155,6 +155,9 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ refresh_token: refreshToken }),
     }),
+
+  logoutAll: () =>
+    authRequest<{ message: string }>("/auth/logout-all", { method: "POST" }),
 
   getMe: () => authRequest<{ admin: Admin }>("/auth/me"),
 

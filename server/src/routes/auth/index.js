@@ -5,8 +5,9 @@ import jwt from "jsonwebtoken";
 import { db } from "../../config/database.js";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../../config/auth.js";
 import { validate } from "../../middlewares/validate.js";
-import { loginSchema, refreshTokenSchema } from "../../schemas/auth.schema.js";
+import { loginSchema, refreshTokenSchema, logoutSchema } from "../../schemas/auth.schema.js";
 import { verifyToken, requireAdmin, requireOwner } from "../../middlewares/verifyToken.js";
+import { refreshLimiter } from "../../middlewares/rateLimiters.js";
 
 export const authRouter = Router();
 
@@ -55,11 +56,14 @@ authRouter.post("/login", validate(loginSchema), async (req, res) => {
   const tokenHash = hashToken(rawRefreshToken);
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
+  const familyId = crypto.randomUUID();
   await db.insert("refresh_tokens", {
     admin_id: admin.id,
     token_hash: tokenHash,
     expires_at: expiresAt,
     revoked_at: null,
+    family_id: familyId,
+    replaced_by: null,
   });
 
   res.json({
@@ -69,28 +73,58 @@ authRouter.post("/login", validate(loginSchema), async (req, res) => {
   });
 });
 
-// POST /api/auth/refresh — get new access token via refresh token
-authRouter.post("/refresh", validate(refreshTokenSchema), async (req, res) => {
+// POST /api/auth/refresh — get new access token via refresh token rotation
+authRouter.post("/refresh", refreshLimiter, validate(refreshTokenSchema), async (req, res) => {
   const { refresh_token } = req.body;
-
   const tokenHash = hashToken(refresh_token);
-  const refreshTokens = await db.get("refresh_tokens");
-  const match = refreshTokens.find(
-    (rt) =>
-      rt.token_hash === tokenHash &&
-      !rt.revoked_at &&
-      new Date(rt.expires_at) > new Date()
-  );
+
+  // Truy vấn trực tiếp bằng SQL có index token_hash thay vì tải toàn bộ bảng
+  const match = await db.findOneBy("refresh_tokens", "token_hash", tokenHash);
 
   if (!match) {
     return res.status(401).json({ message: "Refresh token không hợp lệ hoặc đã hết hạn." });
   }
 
-  const admins = await db.get("admins");
-  const admin = admins.find((a) => a.id === match.admin_id);
+  // Phát hiện tái sử dụng token đã thu hồi (Token Reuse Detection)
+  if (match.revoked_at) {
+    // Thu hồi TOÀN BỘ token còn hiệu lực của admin này vì nghi ngờ phiên làm việc bị tấn công
+    await db.query(
+      "UPDATE refresh_tokens SET revoked_at = NOW() WHERE admin_id = $1 AND revoked_at IS NULL",
+      [match.admin_id]
+    );
+    return res.status(401).json({
+      message: "Phát hiện refresh token bị sử dụng lại. Mọi phiên đăng nhập đã bị thu hồi vì lý do an toàn.",
+    });
+  }
+
+  // Kiểm tra thời hạn hiệu lực của token
+  if (new Date(match.expires_at) <= new Date()) {
+    return res.status(401).json({ message: "Refresh token không hợp lệ hoặc đã hết hạn." });
+  }
+
+  const admin = await db.findById("admins", match.admin_id);
   if (!admin) {
     return res.status(401).json({ message: "Tài khoản admin không tồn tại." });
   }
+
+  // Xoay vòng token: tạo refresh token mới và thu hồi token hiện tại
+  const newRawRefreshToken = crypto.randomBytes(40).toString("hex");
+  const newTokenHash = hashToken(newRawRefreshToken);
+
+  await db.query(
+    "UPDATE refresh_tokens SET revoked_at = NOW(), replaced_by = $1 WHERE id = $2",
+    [newTokenHash, match.id]
+  );
+
+  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  await db.insert("refresh_tokens", {
+    admin_id: admin.id,
+    token_hash: newTokenHash,
+    expires_at: expiresAt,
+    revoked_at: null,
+    family_id: match.family_id || match.id,
+    replaced_by: null,
+  });
 
   const role = admin.role ?? "admin";
   const token = jwt.sign(
@@ -99,22 +133,32 @@ authRouter.post("/refresh", validate(refreshTokenSchema), async (req, res) => {
     { expiresIn: JWT_EXPIRES_IN }
   );
 
-  res.json({ token });
+  res.json({
+    token,
+    refreshToken: newRawRefreshToken,
+  });
 });
 
-// POST /api/auth/logout — revoke refresh token
-authRouter.post("/logout", async (req, res) => {
+// POST /api/auth/logout — revoke single refresh token
+authRouter.post("/logout", validate(logoutSchema), async (req, res) => {
   const { refresh_token } = req.body ?? {};
   if (refresh_token && typeof refresh_token === "string") {
     const tokenHash = hashToken(refresh_token);
-    await db.updateWhere(
-      "refresh_tokens",
-      "token_hash",
-      tokenHash,
-      { revoked_at: new Date().toISOString() }
+    await db.query(
+      "UPDATE refresh_tokens SET revoked_at = NOW() WHERE token_hash = $1 AND revoked_at IS NULL",
+      [tokenHash]
     );
   }
   res.json({ message: "Đã đăng xuất thành công." });
+});
+
+// POST /api/auth/logout-all — revoke all refresh tokens of the current admin
+authRouter.post("/logout-all", verifyToken, requireAdmin, async (req, res) => {
+  await db.query(
+    "UPDATE refresh_tokens SET revoked_at = NOW() WHERE admin_id = $1 AND revoked_at IS NULL",
+    [req.user.sub]
+  );
+  res.json({ message: "Đã thu hồi tất cả phiên đăng nhập thành công." });
 });
 
 // GET /api/auth/me — verify access token & return current admin profile

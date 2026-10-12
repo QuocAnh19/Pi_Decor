@@ -67,12 +67,27 @@ export const authStore = {
     notify();
   },
 
-  /** Cập nhật token mới khi refresh single-flight thành công */
+  /** Cập nhật token mới khi đổi profile hoặc khôi phục phiên */
   updateToken(newToken: string, newAdmin?: Admin): void {
     currentSession = {
       ...currentSession,
       token: newToken,
       ...(newAdmin ? { admin: newAdmin } : {}),
+    };
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(currentSession));
+    } catch {
+      // Bỏ qua lỗi lưu trữ
+    }
+    notify();
+  },
+
+  /** Cập nhật access token và refresh token mới sau khi xoay vòng refresh token thành công */
+  updateTokens(newToken: string, newRefreshToken?: string | null): void {
+    currentSession = {
+      ...currentSession,
+      token: newToken,
+      ...(newRefreshToken !== undefined ? { refreshToken: newRefreshToken } : {}),
     };
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(currentSession));

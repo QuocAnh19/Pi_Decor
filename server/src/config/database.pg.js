@@ -158,6 +158,7 @@ const TABLES = {
   ],
   refresh_tokens: [
     "id", "admin_id", "token_hash", "expires_at", "revoked_at", "created_at",
+    "family_id", "replaced_by",
   ],
   quotation_counters: ["year", "last_seq"],
 };

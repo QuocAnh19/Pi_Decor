@@ -54,11 +54,11 @@ async function performSingleFlightRefresh(): Promise<string> {
 
   refreshPromise = (async () => {
     try {
-      const res = await request<{ token: string }>("/auth/refresh", {
+      const res = await request<{ token: string; refreshToken?: string }>("/auth/refresh", {
         method: "POST",
         body: JSON.stringify({ refresh_token: currentRefreshToken }),
       });
-      authStore.updateToken(res.token);
+      authStore.updateTokens(res.token, res.refreshToken);
       return res.token;
     } catch (err) {
       // Khi refresh token thất bại hoặc bị thu hồi, xóa sạch phiên và buộc người dùng đăng nhập lại

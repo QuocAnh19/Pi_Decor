@@ -53,3 +53,20 @@ Dưới đây là ma trận đối chiếu cấu trúc schema PostgreSQL (qua c�
 | `refresh_tokens` (0018) | `gen_random_uuid()` | `now()` | Không có cột | Bỏ `id: uuid()`, `created_at`. DB tự sinh khi đăng nhập. |
 | `quotation_counters` (0025) | Không có (PK: `year`) | Không có cột | Không có cột | Quản lý bởi upsert nguyên tử (P03). |
 
+## 5. Hướng dẫn chạy Cron định kỳ dọn dẹp refresh token hết hạn (Nhiệm vụ P10)
+- **Tác vụ**: Dọn dẹp các bản ghi refresh token đã hết hạn hoặc đã bị thu hồi quá 7 ngày trong cơ sở dữ liệu (`server/scripts/cleanup-tokens.js`).
+- **Lệnh thực thi**:
+  ```bash
+  cd server && npm run cleanup-tokens
+  ```
+- **Thiết lập Cron / Scheduler**: Khuyến nghị thiết lập Cron job hàng ngày vào lúc 03:00 sáng (giờ thấp điểm):
+  ```cron
+  0 3 * * * cd /path/to/server && npm run cleanup-tokens >> /var/log/pidecor-cleanup-tokens.log 2>&1
+  ```
+  Hoặc cấu hình scheduled task tương đương trên Render Cron Jobs, Railway Scheduled Services, hay Heroku Scheduler.
+
+## 6. Lưu ý kiến trúc: Chuyển Refresh Token sang Cookie httpOnly (Nhiệm vụ P10)
+- **Điều kiện triển khai**: Việc lưu refresh token trong cookie `httpOnly` chỉ nên thực hiện khi Web frontend và API backend được triển khai trên **cùng site / cùng domain chính** (ví dụ: frontend tại `pidecor.vn` và backend API tại `api.pidecor.vn`). Khi đó, cookie có thể cấu hình với cờ `Domain=pidecor.vn; SameSite=Lax; Secure; HttpOnly`.
+- **Rủi ro khi khác site (Cross-Site)**: Nếu Web client và API server nằm trên hai domain hoàn toàn khác nhau (ví dụ: Frontend trên `pidecor.vercel.app` và API trên `pidecor-api.onrender.com`), cookie gửi qua các request API sẽ bị trình duyệt xem là **Third-Party Cookie**. Các cơ chế bảo mật trình duyệt hiện đại (Safari Intelligent Tracking Prevention, Chrome Privacy Sandbox, Firefox Total Cookie Protection) mặc định chặn toàn bộ third-party cookie trong các ngữ cảnh cross-site, dẫn tới việc refresh token bị thất bại hoàn toàn và người dùng bị đăng xuất liên tục. Do đó, giải pháp lưu trữ phiên trong `sessionStorage` kết hợp xoay vòng token (rotation) và phát hiện dùng lại (reuse detection) là giải pháp tối ưu cho kiến trúc phân tán hiện tại.
+
+
