@@ -1,12 +1,10 @@
 import type {
   ServiceCategory,
   CategoryPortfolioItem,
-  FabricSwatch,
-  ToolCategory,
   Testimonial,
-  LookbookItem,
   HeroMedia,
 } from "./types";
+
 
 /**
  * Real-photo slots for the home page. Every `src` here is a path relative to
@@ -292,21 +290,6 @@ export const categoryPortfolio: CategoryPortfolioItem[] = [
   },
 ];
 
-export const toolCategories: ToolCategory[] = [
-  { id: "fabric", label: "Vải Voan", icon: "GiftIcon" },
-  { id: "flowers", label: "Cụm Hoa", icon: "SparklesIcon" },
-  { id: "arch", label: "Cổng Hoa", icon: "HomeIcon" },
-];
-
-export const fabricSwatches: FabricSwatch[] = [
-  { id: "rose", label: "Hồng Phấn", hex: "#E7B6BB" },
-  { id: "sage", label: "Rêu Nhạt", hex: "#AFC49C" },
-  { id: "sand", label: "Vàng Cát", hex: "#C99F6F" },
-  { id: "lavender", label: "Oải Hương", hex: "#B98AC9" },
-  { id: "champagne", label: "Champagne", hex: "#E7BE79" },
-  { id: "smoke", label: "Xanh Khói", hex: "#8A9BAE" },
-];
-
 export const testimonials: Testimonial[] = [
   {
     id: "t1",
@@ -329,12 +312,3 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
-// aspect-[4/5] cards — export photos ở khung dọc 4:5 (ví dụ 1600×2000px) để không bị crop lệch.
-export const lookbookItems: LookbookItem[] = [
-  { id: "l1", tag: "Sen Hồng", src: "/images/lookbook-sen-hong.jpg" },
-  { id: "l2", tag: "Champagne Gold", src: "/images/lookbook-champagne-gold.jpg" },
-  { id: "l3", tag: "Thôi Nôi Pastel", src: "/images/lookbook-thoi-noi-pastel.jpg" },
-  { id: "l4", tag: "Classic Ivory", src: "/images/lookbook-classic-ivory.jpg" },
-  { id: "l5", tag: "Khai Trương Rực Rỡ", src: "/images/lookbook-khai-truong.jpg" },
-  { id: "l6", tag: "Garden Party", src: "/images/lookbook-garden-party.jpg" },
-];

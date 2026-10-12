@@ -1,11 +1,3 @@
-export interface Service {
-  id: string;
-  title: string;
-  description: string;
-  icon: string; // Heroicons icon name, resolved in ServiceCard
-  href?: string;
-}
-
 /**
  * The 3 real product lines Pi Decor operates under (from the physical
  * business card): PiKids, PiWedding, PiEvent. Each is its own brand
@@ -13,6 +5,7 @@ export interface Service {
  * icon, distinct sub-services — while sharing one visual language.
  */
 export type ServiceAccent = "kids" | "wedding" | "event";
+
 
 export interface ServiceCategory {
   id: string;
@@ -55,18 +48,6 @@ export interface CategoryPortfolioItem {
   status?: string;
 }
 
-export interface FabricSwatch {
-  id: string;
-  label: string;
-  hex: string;
-}
-
-export interface ToolCategory {
-  id: string;
-  label: string;
-  icon: string;
-}
-
 export interface Testimonial {
   id: string;
   quote: string;
@@ -74,12 +55,6 @@ export interface Testimonial {
   role: string;
 }
 
-export interface LookbookItem {
-  id: string;
-  tag: string;
-  /** Path relative to /public, e.g. "/images/lookbook-sen-hong.jpg". Leave null until the real photo is dropped in. */
-  src: string | null;
-}
 
 export interface HeroMedia {
   /** Path relative to /public, e.g. "/images/hero.jpg" or "/images/hero.mp4" */
@@ -221,21 +196,8 @@ export interface ProjectPayload {
   price_tier?: "standard" | "premium" | null;
 }
 
-// ── Lead Activities Timeline ─────────────────────────────────────────────
-
-export type ActivityType = "status_change" | "note" | "call" | "email" | "quotation_sent" | "design_saved";
-
-export interface LeadActivity {
-  id: string;
-  lead_id: string;
-  admin_id: string | null;
-  activity_type: ActivityType;
-  body: string | null;
-  metadata: Record<string, unknown> | null;
-  created_at: string;
-}
-
 // ── Quotations ────────────────────────────────────────────────────────────
+
 
 export type QuotationStatus = "draft" | "sent" | "accepted" | "declined" | "expired";
 

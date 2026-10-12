@@ -5,7 +5,6 @@ import App from "./App";
 import { AuthProvider } from "./lib/authContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./styles/main.scss";
-import "./styles/tailwind.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

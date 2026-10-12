@@ -1,9 +1,8 @@
-import { request, authRequest, ApiError, API_URL } from "./http";
+import { request, authRequest, ApiError } from "./http";
 import type {
   Admin,
   AdminSummary,
   Lead,
-  LeadActivity,
   LeadStatus,
   PaginatedLeadsResponse,
   MaterialItem,
@@ -22,7 +21,7 @@ import type {
   VenuePayload,
 } from "./types";
 
-export { ApiError, API_URL };
+export { ApiError };
 
 export interface LeadPayload {
   name: string;
@@ -64,15 +63,6 @@ export const api = {
       body: JSON.stringify({ status }),
     }),
 
-  getLeadActivities: (leadId: string) =>
-    authRequest<LeadActivity[]>(`/leads/${leadId}/activities`),
-
-  addLeadActivity: (leadId: string, payload: { activity_type: string; body?: string }) =>
-    authRequest<LeadActivity>(`/leads/${leadId}/activities`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
-
   // ── Materials & Services ─────────────────────────────────────────────
   getMaterials: (category?: string) =>
     request<MaterialItem[]>(category ? `/materials?category=${encodeURIComponent(category)}` : "/materials"),
@@ -92,7 +82,6 @@ export const api = {
   deleteMaterial: (id: string) =>
     authRequest<void>(`/materials/${id}`, { method: "DELETE" }),
 
-  getServices: () => request<unknown[]>("/services"),
 
   // ── Map Venues & Projects ───────────────────────────────────────────
   getVenues: () => request<Venue[]>("/venues"),
@@ -184,17 +173,11 @@ export const api = {
   getQuotations: (leadId?: string) =>
     authRequest<Quotation[]>(leadId ? `/quotations?lead_id=${encodeURIComponent(leadId)}` : "/quotations"),
 
-  getQuotation: (id: string) =>
-    authRequest<Quotation>(`/quotations/${id}`),
-
   createQuotation: (payload: QuotationPayload) =>
     authRequest<Quotation>("/quotations", { method: "POST", body: JSON.stringify(payload) }),
 
   updateQuotation: (id: string, payload: Partial<QuotationPayload> & { status?: string }) =>
     authRequest<Quotation>(`/quotations/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
-
-  deleteQuotation: (id: string) =>
-    authRequest<void>(`/quotations/${id}`, { method: "DELETE" }),
 
   // ── Testimonials ─────────────────────────────────────────────────────
   getTestimonials: () => request<TestimonialItem[]>("/testimonials"),
@@ -219,9 +202,6 @@ export const api = {
 
   getStudioTemplatesAdmin: () =>
     authRequest<StudioTemplateRow[]>("/studio/templates/admin"),
-
-  createStudioTemplate: (payload: Partial<StudioTemplateRow>) =>
-    authRequest<StudioTemplateRow>("/studio/templates", { method: "POST", body: JSON.stringify(payload) }),
 
   publishStudioTemplate: (
     id: string,
@@ -250,41 +230,13 @@ export const api = {
   getStudioSlotDefinitions: (templateId: string) =>
     request<StudioSlotDefinitionRow[]>(`/studio/templates/${templateId}/slots`),
 
-  createStudioSlotDefinition: (templateId: string, payload: Partial<StudioSlotDefinitionRow>) =>
-    authRequest<StudioSlotDefinitionRow>(`/studio/templates/${templateId}/slots`, { method: "POST", body: JSON.stringify(payload) }),
-
-  reorderStudioSlots: (templateId: string, items: { id: string; sort_order: number }[]) =>
-    authRequest<StudioSlotDefinitionRow[]>(`/studio/templates/${templateId}/slots/reorder`, { method: "PATCH", body: JSON.stringify(items) }),
-
-  updateStudioSlotDefinition: (slotId: string, payload: Partial<StudioSlotDefinitionRow>) =>
-    authRequest<StudioSlotDefinitionRow>(`/studio/slots/${slotId}`, { method: "PATCH", body: JSON.stringify(payload) }),
-
   deleteStudioSlotDefinition: (slotId: string) =>
     authRequest<void>(`/studio/slots/${slotId}`, { method: "DELETE" }),
-
-  getStudioAssets: () => request<StudioAssetRow[]>("/studio/assets"),
 
   getStudioAssetsAdmin: () =>
     authRequest<StudioAssetRow[]>("/studio/assets/admin"),
 
-  createStudioAsset: (payload: Partial<StudioAssetRow>) =>
-    authRequest<StudioAssetRow>("/studio/assets", { method: "POST", body: JSON.stringify(payload) }),
-
-  updateStudioAsset: (id: string, payload: Partial<StudioAssetRow>) =>
-    authRequest<StudioAssetRow>(`/studio/assets/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
-
-  deleteStudioAsset: (id: string) =>
-    authRequest<void>(`/studio/assets/${id}`, { method: "DELETE" }),
-
   getStudioSlotRules: (templateId: string) =>
     request<StudioSlotRuleRow[]>(`/studio/templates/${templateId}/rules`),
-
-  createStudioSlotRule: (templateId: string, payload: Partial<StudioSlotRuleRow>) =>
-    authRequest<StudioSlotRuleRow>(`/studio/templates/${templateId}/rules`, { method: "POST", body: JSON.stringify(payload) }),
-
-  updateStudioSlotRule: (ruleId: string, payload: Partial<StudioSlotRuleRow>) =>
-    authRequest<StudioSlotRuleRow>(`/studio/rules/${ruleId}`, { method: "PATCH", body: JSON.stringify(payload) }),
-
-  deleteStudioSlotRule: (ruleId: string) =>
-    authRequest<void>(`/studio/rules/${ruleId}`, { method: "DELETE" }),
 };
+

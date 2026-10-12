@@ -69,4 +69,25 @@ Dưới đây là ma trận đối chiếu cấu trúc schema PostgreSQL (qua c�
 - **Điều kiện triển khai**: Việc lưu refresh token trong cookie `httpOnly` chỉ nên thực hiện khi Web frontend và API backend được triển khai trên **cùng site / cùng domain chính** (ví dụ: frontend tại `pidecor.vn` và backend API tại `api.pidecor.vn`). Khi đó, cookie có thể cấu hình với cờ `Domain=pidecor.vn; SameSite=Lax; Secure; HttpOnly`.
 - **Rủi ro khi khác site (Cross-Site)**: Nếu Web client và API server nằm trên hai domain hoàn toàn khác nhau (ví dụ: Frontend trên `pidecor.vercel.app` và API trên `pidecor-api.onrender.com`), cookie gửi qua các request API sẽ bị trình duyệt xem là **Third-Party Cookie**. Các cơ chế bảo mật trình duyệt hiện đại (Safari Intelligent Tracking Prevention, Chrome Privacy Sandbox, Firefox Total Cookie Protection) mặc định chặn toàn bộ third-party cookie trong các ngữ cảnh cross-site, dẫn tới việc refresh token bị thất bại hoàn toàn và người dùng bị đăng xuất liên tục. Do đó, giải pháp lưu trữ phiên trong `sessionStorage` kết hợp xoay vòng token (rotation) và phát hiện dùng lại (reuse detection) là giải pháp tối ưu cho kiến trúc phân tán hiện tại.
 
+## 7. Các endpoint server chưa có client sử dụng (Nhiệm vụ P11)
+- **Mô tả**: Sau khi dọn dẹp các hàm client API thừa không có component nào gọi, các endpoint backend tương ứng sau đây hiện không còn client consumer trong codebase hiện tại:
+  1. `GET /api/leads/:leadId/activities` - Lấy lịch sử hoạt động của lead (tương ứng `getLeadActivities`).
+  2. `POST /api/leads/:leadId/activities` - Ghi hoạt động lead thủ công (tương ứng `addLeadActivity`).
+  3. `GET /api/services` - Lấy danh sách dịch vụ động (tương ứng `getServices`; client đang dùng dữ liệu tĩnh `serviceCategories` từ `src/lib/content.ts`).
+  4. `GET /api/quotations/:id` - Lấy chi tiết báo giá theo ID (tương ứng `getQuotation`; client chỉ dùng `GET /api/quotations?lead_id=...`).
+  5. `DELETE /api/quotations/:id` - Xóa báo giá (tương ứng `deleteQuotation`).
+  6. `POST /api/studio/templates` - Tạo mới template studio đơn lẻ (tương ứng `createStudioTemplate`; client dùng `publishStudioTemplate` qua `PUT /api/studio/templates/:id/publish`).
+  7. `POST /api/studio/templates/:templateId/slots` - Tạo slot đơn lẻ (tương ứng `createStudioSlotDefinition`).
+  8. `PATCH /api/studio/templates/:templateId/slots/reorder` - Sắp xếp lại thứ tự slots (tương ứng `reorderStudioSlots`).
+  9. `PATCH /api/studio/slots/:slotId` - Cập nhật slot đơn lẻ (tương ứng `updateStudioSlotDefinition`).
+  10. `GET /api/studio/assets` - Lấy tài nguyên studio công khai (tương ứng `getStudioAssets`; admin dùng `GET /api/studio/assets/admin`).
+  11. `POST /api/studio/assets` - Tạo tài nguyên studio (tương ứng `createStudioAsset`).
+  12. `PATCH /api/studio/assets/:id` - Sửa tài nguyên studio (tương ứng `updateStudioAsset`).
+  13. `DELETE /api/studio/assets/:id` - Xóa tài nguyên studio (tương ứng `deleteStudioAsset`).
+  14. `POST /api/studio/templates/:templateId/rules` - Tạo rule đơn lẻ (tương ứng `createStudioSlotRule`).
+  15. `PATCH /api/studio/rules/:ruleId` - Sửa rule đơn lẻ (tương ứng `updateStudioSlotRule`).
+  16. `DELETE /api/studio/rules/:ruleId` - Xóa rule đơn lẻ (tương ứng `deleteStudioSlotRule`).
+- **Đề xuất xử lý ở nhiệm vụ sau**: Xem xét deprecate hoặc duy trì làm API công khai/admin tùy thuộc vào yêu cầu mở rộng chức năng Studio Editor & CRM trong tương lai.
+- **Trạng thái**: Chờ duyệt.
+
 
