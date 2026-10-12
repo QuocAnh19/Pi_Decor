@@ -39,13 +39,21 @@ if (hasCloudinary) {
   storage = multer.diskStorage({
     destination: UPLOAD_DIR,
     filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname);
+      // Suy ra phần mở rộng file từ MIME type được kiểm duyệt thay vì tin tưởng originalname của client
+      const ext = ALLOWED_IMAGE_MIME_TYPES.get(file.mimetype) || ".jpg";
       cb(null, `${uuid()}${ext}`);
     },
   });
 
   console.log("[uploadImage.js] Cloudinary credentials not set — using local disk storage.");
 }
+
+export const ALLOWED_IMAGE_MIME_TYPES = new Map([
+  ["image/jpeg", ".jpg"],
+  ["image/png", ".png"],
+  ["image/webp", ".webp"],
+  ["image/gif", ".gif"],
+]);
 
 export const uploadImage = multer({
   storage,
@@ -54,8 +62,25 @@ export const uploadImage = multer({
     fieldSize: 10 * 1024 * 1024, // 10MB limit for text fields to prevent LIMIT_FIELD_VALUE errors
   },
   fileFilter: (_req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Chỉ chấp nhận file ảnh."));
+    if (!ALLOWED_IMAGE_MIME_TYPES.has(file.mimetype)) {
+      const err = new Error("Chỉ chấp nhận file ảnh định dạng JPEG, PNG, WebP hoặc GIF.");
+      err.status = 400;
+      return cb(err);
+    }
+    cb(null, true);
+  },
+});
+
+export const uploadSvg = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 1024 * 1024, // 1MB
+  },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype !== "image/svg+xml" && !file.originalname.toLowerCase().endsWith(".svg")) {
+      const err = new Error("Chỉ chấp nhận file định dạng SVG.");
+      err.status = 400;
+      return cb(err);
     }
     cb(null, true);
   },

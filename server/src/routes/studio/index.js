@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { sanitizeSvg } from "../../utils/sanitizeSvg.js";
-import { uploadImage, publicUrlFor, deleteImageFile } from "../../utils/uploadImage.js";
+import { deleteImageFile } from "../../utils/uploadImage.js";
 import { v2 as cloudinary } from "cloudinary";
 import { env } from "../../config/env.js";
 
@@ -318,20 +318,16 @@ studioRouter.get("/assets/admin", verifyToken, requireAdmin, async (_req, res) =
   res.json(assets);
 });
 
-// POST /api/studio/assets — admin only, create or update asset (optional file upload or body)
-studioRouter.post("/assets", verifyToken, requireAdmin, uploadImage.single("svg"), async (req, res) => {
+// POST /api/studio/assets — admin only, create or update asset
+studioRouter.post("/assets", verifyToken, requireAdmin, async (req, res) => {
   const { asset_type, name, thumbnail, svg_data, color_hex, font_family, tags, is_active, dominant_colors } = req.body ?? {};
 
   if (!asset_type || !name) {
     return res.status(400).json({ message: "Thiếu loại asset (asset_type) hoặc tên." });
   }
 
-  let finalSvg = svg_data ? sanitizeSvg(svg_data) : null;
-  let finalThumbnail = thumbnail ?? null;
-
-  if (req.file) {
-    finalThumbnail = publicUrlFor(req, req.file);
-  }
+  const finalSvg = svg_data ? sanitizeSvg(svg_data) : null;
+  const finalThumbnail = thumbnail ?? null;
 
   const cleanName = String(name).trim();
   const assets = await db.get("studio_assets");
@@ -370,7 +366,7 @@ studioRouter.post("/assets", verifyToken, requireAdmin, uploadImage.single("svg"
 });
 
 // PATCH /api/studio/assets/:id — admin only, update asset
-studioRouter.patch("/assets/:id", verifyToken, requireAdmin, uploadImage.single("svg"), async (req, res) => {
+studioRouter.patch("/assets/:id", verifyToken, requireAdmin, async (req, res) => {
   const assets = await db.get("studio_assets");
   const existing = assets.find((a) => String(a.id) === String(req.params.id));
   if (!existing) {
@@ -381,11 +377,8 @@ studioRouter.patch("/assets/:id", verifyToken, requireAdmin, uploadImage.single(
   if (patch.svg_data) {
     patch.svg_data = sanitizeSvg(patch.svg_data);
   }
-  if (req.file) {
-    patch.thumbnail = publicUrlFor(req, req.file);
-    if (existing.thumbnail && existing.thumbnail !== patch.thumbnail) {
-      await deleteImageFile(existing.thumbnail);
-    }
+  if (patch.thumbnail && existing.thumbnail && existing.thumbnail !== patch.thumbnail) {
+    await deleteImageFile(existing.thumbnail);
   }
 
   const updated = await db.updateById("studio_assets", req.params.id, patch);
