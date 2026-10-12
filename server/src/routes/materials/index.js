@@ -15,8 +15,6 @@ const CATEGORY_MAP = {
   "dãy chữ số": "text_name",
 };
 
-const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
-
 /**
  * Normalizes category input. Maps Vietnamese aliases to internal keys.
  */

@@ -11,8 +11,7 @@ import { createCrudRouter } from "../../utils/crudRouterFactory.js";
  * Venue (địa điểm) and Project (case study) are separate collections so one
  * venue with several past weddings still renders as a single pin, with all
  * its projects nested underneath. `project_count` is always derived from
- * `projects`, never stored, so it can't drift out of sync — same reasoning
- * as `db.json`'s other collections.
+ * `projects`, never stored, so it can't drift out of sync.
  */
 
 async function withProjectCount(venues, projects) {

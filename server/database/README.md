@@ -29,7 +29,7 @@ The one place SQL-like logic still touches JS is
 query *building* (table/column allowlists), never a hand-written SQL
 string per route. Routes themselves (`routes/leads/index.js` etc.) contain
 **zero** SQL; they only ever call `db.get()`, `db.insert()`, `db.update()`,
-`db.remove()`, exactly as they did against the JSON-file prototype.
+`db.remove()`.
 
 ## Folder structure
 
@@ -74,7 +74,7 @@ having to open the file.
 |---------------------------|--------------------------------------|-------|
 | `admins`                  | `routes/auth/index.js`               | 1 row today — see `PiDecor_AdminPanel.md` §2 |
 | `leads`                   | `routes/leads/index.js`              | Footer form + Studio export |
-| `designs`                 | `routes/designs/index.js`            | Saved Konva canvas states, FK → `leads` |
+| `designs`                 | —                                    | Saved canvas states (legacy/internal), FK → `leads` |
 | `materials`               | `routes/materials/index.js`          | API exists; no admin UI screen yet |
 | `services`                | `routes/services/index.js`           | Bento Services grid content |
 | `venues`                  | `routes/venues/index.js`             | Map pins |
@@ -131,7 +131,7 @@ npm run migrate
 # 3. Tạo tài khoản admin + dữ liệu mẫu (materials/services/venue demo)
 npm run seed
 
-# 4. Chạy server, giờ đã nói chuyện với Postgres thay vì db.json
+# 4. Chạy server
 npm run dev
 
 # 5. Kiểm tra nhanh
@@ -208,7 +208,7 @@ Không bắt buộc, nhưng tiện khi kiểm tra dữ liệu bằng mắt thay 
 | `no pg_hba.conf entry for host ..., SSL off` | Thiếu `?sslmode=require`, hoặc `ssl` bị tắt sai chỗ | Thêm `?sslmode=require` vào cuối `DATABASE_URL` (Neon/Supabase bắt buộc TLS) |
 | `relation "leads" does not exist` | Chưa chạy `npm run migrate` trên database này | Chạy `npm run migrate`, kiểm tra log thấy đủ `apply 0001...` → `0011...` |
 | `permission denied for table leads` | `DATABASE_URL` đang dùng role `pidecor_app` nhưng chưa cấp quyền, hoặc gọi nhầm role không có GRANT | Chạy lại `database/security/create_app_role.sql` bằng role owner (xem `SECURITY.md` §1) |
-| Server vẫn dùng `db.json` dù đã set `DATABASE_URL` | Biến môi trường chưa được nạp (thiếu `.env`, hoặc chạy sai thư mục) | Kiểm tra log lúc start có dòng `[database.js] Using Postgres via DATABASE_URL.` chưa; nếu vẫn thấy dòng "using local JSON file" nghĩa là `.env` chưa được đọc |
+| Lỗi thiếu `DATABASE_URL` khi start | Biến môi trường chưa được nạp (thiếu `.env`, hoặc chạy sai thư mục) | Kiểm tra file `.env` đã có `DATABASE_URL` hợp lệ chưa |
 | Free-tier Neon "database sleeping", request đầu chậm | Neon tự tạm ngưng compute khi rảnh (bình thường) | Không cần xử lý — request đầu chậm ~1s để "thức dậy", các request sau bình thường |
 
 
@@ -233,9 +233,7 @@ npm run seed
 npm run dev
 ```
 
-Leaving `DATABASE_URL` unset keeps the app on the original JSON-file store
-at `src/data/db.json` — useful for a throwaway local clone, but every
-`npm run migrate` / production deploy should have `DATABASE_URL` set.
+Biến môi trường `DATABASE_URL` là bắt buộc cho mọi môi trường chạy server.
 
 ## What's intentionally NOT here
 

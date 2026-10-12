@@ -24,3 +24,8 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
   - Tách nhỏ các component lớn trong `admin/` và `features/studio/`.
   - Bổ sung types cụ thể thay thế `any`.
 - **Trạng thái**: Chờ duyệt.
+
+## 3. Cân nhắc drop bảng designs ở migration sau khi xác nhận không dùng
+- **Mô tả**: Route công khai `/api/designs` đã được gỡ bỏ khỏi server. Bảng `designs` và các migration liên quan vẫn đang được giữ nguyên để không mất dữ liệu lịch sử. Phần đếm `designs_total` trong `/api/admin/summary` vẫn đang được giữ phục vụ dashboard client.
+- **Đề xuất xử lý ở nhiệm vụ sau**: Cân nhắc drop bảng `designs` ở migration sau khi xác nhận không còn bất kỳ thành phần nào cần đến dữ liệu này.
+- **Trạng thái**: Chờ duyệt.

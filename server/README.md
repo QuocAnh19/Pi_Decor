@@ -15,13 +15,11 @@ npm run seed               # tạo tài khoản admin + dữ liệu materials/se
 npm run dev                 # http://localhost:4000
 ```
 
-**Lưu trữ dữ liệu — 2 chế độ, tự động chọn theo `.env`:**
+**Lưu trữ dữ liệu — PostgreSQL:**
 
-- Không set `DATABASE_URL` → dữ liệu lưu ở `src/data/db.json` (tự tạo ở lần
-  chạy đầu). Không cần cài gì thêm — phù hợp để thử nhanh, KHÔNG dùng khi
-  deploy thật.
-- Có set `DATABASE_URL` → toàn bộ dữ liệu chạy qua Postgres thật
-  (Neon/Supabase, miễn phí). Route code không đổi 1 dòng nào giữa 2 chế độ.
+Hệ thống sử dụng PostgreSQL (Docker cục bộ hoặc Neon/Supabase). Bắt buộc
+cấu hình `DATABASE_URL`. Chạy `docker compose up -d` để khởi động Postgres cục bộ,
+sau đó chạy migration: `npm run migrate` và seed: `npm run seed`.
 
 👉 **Hướng dẫn đầy đủ (tạo project Neon/Supabase, chạy migration, bảo mật,
 troubleshooting): xem [`database/README.md`](./database/README.md) và
@@ -31,18 +29,16 @@ troubleshooting): xem [`database/README.md`](./database/README.md) và
 
 ```
 database/                    # Schema Postgres — xem database/README.md
-├── migrations/               # 11 file .sql, chạy theo thứ tự (npm run migrate)
+├── migrations/               # File migration .sql, chạy theo thứ tự (npm run migrate)
 ├── security/                  # Tạo role Postgres quyền hạn chế cho app
 └── migrate.js                  # Script chạy migration
 
 src/
 ├── config/
 │   ├── database.js          # Lớp lưu trữ duy nhất — mọi route đi qua đây
-│   ├── database.pg.js        # Bản Postgres (dùng khi có DATABASE_URL)
-│   └── (JSON-file fallback nằm luôn trong database.js)
+│   └── database.pg.js        # Adapter truy vấn Postgres
 ├── routes/
 │   ├── leads/              # POST /api/leads (public) + admin GET/PATCH
-│   ├── designs/             # POST/GET /api/designs — lưu & tải lại canvas
 │   ├── materials/           # CRUD vật liệu decor (+ upload ảnh)
 │   ├── services/            # CRUD nội dung Bento Services
 │   ├── auth/                 # POST /api/auth/login (admin)
@@ -62,8 +58,6 @@ src/
 | POST | `/api/leads` | — | Lưu lead (form liên hệ hoặc "Xuất thiết kế") |
 | GET | `/api/leads` | admin | Danh sách leads |
 | PATCH | `/api/leads/:id` | admin | Đổi trạng thái lead |
-| POST | `/api/designs` | — | Lưu layers của một thiết kế |
-| GET | `/api/designs/:leadId` | — | Lấy các thiết kế đã lưu của một lead |
 | GET | `/api/materials` | — | Danh sách vật liệu (thay materials.json tĩnh) |
 | POST/PATCH/DELETE | `/api/materials/:id?` | admin | Quản trị vật liệu (hỗ trợ upload ảnh) |
 | GET | `/api/services` | — | Danh sách dịch vụ Bento |

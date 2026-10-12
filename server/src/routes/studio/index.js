@@ -213,10 +213,6 @@ studioRouter.delete("/templates/:id", verifyToken, requireAdmin, async (req, res
     await deleteImageFile(existing.thumbnail);
   }
 
-  // Clean up associated slots and rules (app-level cascade for JSON DB mode)
-  await db.removeWhere("studio_slot_definitions", "template_id", req.params.id);
-  await db.removeWhere("studio_slot_rules", "template_id", req.params.id);
-
   res.status(204).send();
 });
 

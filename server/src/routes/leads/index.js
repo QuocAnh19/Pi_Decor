@@ -3,7 +3,7 @@ import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { validate } from "../../middlewares/validate.js";
-import { createLeadSchema, updateLeadStatusSchema } from "../../schemas/leads.schema.js";
+import { createLeadSchema } from "../../schemas/leads.schema.js";
 
 import { leadsLimiter } from "../../middlewares/rateLimiters.js";
 
