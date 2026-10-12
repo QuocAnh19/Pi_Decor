@@ -9,6 +9,7 @@ import {
   SwatchIcon,
   SquaresPlusIcon,
   ChatBubbleLeftRightIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
 import styles from "./AdminLayout.module.scss";
@@ -34,6 +35,12 @@ const navItems = [
     to: "/admin/studio",
     label: "Studio Builder",
     icon: SwatchIcon,
+    end: false,
+  },
+  {
+    to: "/admin/settings",
+    label: "Cài đặt",
+    icon: Cog6ToothIcon,
     end: false,
   },
 ];

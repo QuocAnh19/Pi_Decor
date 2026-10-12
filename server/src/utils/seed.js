@@ -10,8 +10,8 @@ async function seed() {
   const existingAdmin = admins.find((a) => a.email === email);
   const password_hash = await bcrypt.hash(process.env.ADMIN_PASSWORD ?? "admin123", 10);
   if (!existingAdmin) {
-    await db.insert("admins", { id: uuid(), email, password_hash });
-    console.log(`✓ Admin account created: ${email}`);
+    await db.insert("admins", { id: uuid(), email, password_hash, role: "owner" });
+    console.log(`✓ Admin account created with owner role: ${email}`);
   } else {
     await db.update("admins", (a) => a.email === email, { password_hash });
     console.log(`✓ Admin account password updated: ${email}`);

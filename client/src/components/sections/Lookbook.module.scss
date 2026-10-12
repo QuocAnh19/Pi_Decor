@@ -10,13 +10,13 @@
 }
 
 .filterButton {
-  padding: 8px 18px;
+  padding: $space-2 18px;
   border-radius: $radius-pill;
   border: 1px solid rgba(161, 92, 46, 0.25);
   background-color: #ffffff;
   color: $color-ink-muted;
   font-size: $text-sm;
-  font-weight: 600;
+  font-weight: $weight-semibold;
   cursor: pointer;
   transition: all $transition-default;
   user-select: none;
@@ -32,7 +32,7 @@
   background-color: $color-accent;
   color: #ffffff;
   border-color: $color-accent;
-  font-weight: 700;
+  font-weight: $weight-bold;
   box-shadow: 0 4px 12px rgba(161, 92, 46, 0.25);
 
   &:hover {
@@ -96,7 +96,7 @@
   left: 12px;
   z-index: 2;
   display: flex;
-  gap: 6px;
+  gap: $space-0-5;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -104,29 +104,29 @@
 .featuredBadge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: $space-1 $space-2-5;
   border-radius: $radius-pill;
   background: rgba(185, 138, 62, 0.92);
   backdrop-filter: blur(4px);
   color: #ffffff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  @include text-caption;
+  font-weight: $weight-bold;
+  letter-spacing: $tracking-wide;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .premiumBadge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: $space-1 $space-2-5;
   border-radius: $radius-pill;
   background: linear-gradient(135deg, #b45309, #d97706);
   border: 1px solid rgba(251, 191, 36, 0.4);
   backdrop-filter: blur(4px);
   color: #ffffff;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  @include text-caption;
+  font-weight: $weight-bold;
+  letter-spacing: $tracking-wide;
   box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
 }
 
@@ -137,14 +137,14 @@
   z-index: 2;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: $space-0-5;
+  padding: $space-0-5 $space-3;
   border-radius: $radius-pill;
   background: rgba(39, 22, 32, 0.65);
   backdrop-filter: blur(6px);
   color: #ffffff;
-  font-size: 12px;
-  font-weight: 600;
+  @include text-caption;
+  font-weight: $weight-semibold;
   opacity: 0;
   transform: translateY(-4px);
   transition: all $transition-default;
@@ -174,17 +174,14 @@
 }
 
 .tag {
-  font-family: $font-serif;
-  font-size: $text-lg;
+  @include text-h3;
   color: $color-paper;
-  font-weight: 600;
-  line-height: 1.2;
 }
 
 .cardTitle {
   font-size: $text-sm;
   color: rgba(255, 255, 255, 0.95);
-  font-weight: 500;
+  font-weight: $weight-medium;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

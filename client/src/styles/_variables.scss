@@ -1,90 +1,184 @@
 // ─────────────────────────────────────────────────────────────────────────
-// Design tokens for Pi Decor.
+// PI DECOR DESIGN TOKENS & FIGMA VARIABLES CONFIGURATION GUIDE
 //
-// Same palette as before (one warm neutral scale carrying most of the UI,
-// plus a single accent color for interactive elements), just expressed as
-// SCSS variables instead of a Tailwind config. Material colors stay a
-// separate scale — they only ever appear inside the Studio's fabric picker.
+// Hướng dẫn cài đặt Figma Variables:
+// 1. Mở Figma -> Local Variables -> Tạo Collection "PiDecor Tokens"
+// 2. Tạo các Groups: Color/Base, Color/Text, Color/Accent, Color/Material, Radius, v.v.
+// 3. Mỗi dòng dưới đây đều có định dạng:
+//    [Figma Variable] Collection: <Nhóm> | Type: <COLOR | NUMBER | STRING> | Name: <Tên trong Figma>
+//    Description: <Mô tả chức năng & vị trí sử dụng>
 // ─────────────────────────────────────────────────────────────────────────
 
+// [Figma Import] Xuất token từ file _tokens.scss để tái sử dụng
 @forward "tokens";
+@forward "typography";
+
+// [Figma Import] Nạp toàn bộ biến nền tảng từ _tokens.scss
 @use "tokens" as *;
 
-// Base
-$color-paper: #fbf7f1; // page background
-$color-paper-dim: #f4eee3; // alternate section background
-$color-ink: #271620; // primary text
-$color-ink-muted: #6e6259; // secondary text
-$color-ink-faint: #9c9186; // tertiary / placeholder text
-$color-line: #e7ded0; // hairline borders/dividers
+// ── COLOR / BASE (Màu nền trang & khối) ──────────────────────────────────
+// [Figma] Group: Color/Base | Type: COLOR | Name: color/base/paper | Value: #FBF7F1 | Desc: Nền trang chính toàn web (warm paper)
+$color-paper: #fbf7f1; // Figma: Color/Base/paper (#FBF7F1) - Màu nền giấy chính toàn trang web
 
-// Accent
-$color-accent: #a15c2e;
-$color-accent-hover: #874c25;
-$color-accent-subtle: #f1e4d8;
+// [Figma] Group: Color/Base | Type: COLOR | Name: color/base/paper-dim | Value: #F4EEE3 | Desc: Nền xen kẽ giữa các section
+$color-paper-dim: #f4eee3; // Figma: Color/Base/paper-dim (#F4EEE3) - Màu nền phụ / section xen kẽ
 
-// Blush / plum (collage + testimonials band accents)
-$color-blush: #f8e9e7;
-$color-blush-dim: #f1dedb;
-$color-plum: #3b141f;
-$color-plum-light: #5c2433;
+// ── COLOR / TEXT & LINES (Màu văn bản và đường kẻ viền) ──────────────────
+// [Figma] Group: Color/Text | Type: COLOR | Name: color/text/ink | Value: #271620 | Desc: Chữ chính (tiêu đề, nội dung quan trọng)
+$color-ink: #271620; // Figma: Color/Text/ink (#271620) - Màu chữ chính (Primary text)
 
-// Material swatches (Studio fabric colors — real product subject matter)
-$color-material-rose: #e7b6bb;
-$color-material-sage: #afc49c;
-$color-material-sand: #c99f6f;
-$color-material-lavender: #b98ac9;
-$color-material-champagne: #e7be79;
-$color-material-smoke: #8a9bae;
+// [Figma] Group: Color/Text | Type: COLOR | Name: color/text/ink-muted | Value: #6E6259 | Desc: Chữ phụ, mô tả đoạn văn, nhãn phụ
+$color-ink-muted: #6e6259; // Figma: Color/Text/ink-muted (#6E6259) - Màu chữ phụ / mô tả (Secondary text)
 
-// Homepage service-category accents (PiKids / PiWedding / PiEvent) — one
-// "chấm phá" tone per product line, built from the same pastel family as
-// the material swatches above so the extra color stays inside the brand,
-// never introducing a jarring new hue.
-$color-kids-accent: #e59a6b; // warm apricot — playful, still soft
-$color-kids-accent-dim: #f6ddc6;
-$color-wedding-accent: $color-accent; // champagne gold — the flagship line
-$color-wedding-accent-dim: $color-accent-subtle;
-$color-event-accent: #4f6b63; // muted sage-slate — calm, professional
-$color-event-accent-dim: #dbe6e0;
+// [Figma] Group: Color/Text | Type: COLOR | Name: color/text/ink-faint | Value: #9C9186 | Desc: Placeholder ô nhập, ngày tháng mờ, metadata
+$color-ink-faint: #9c9186; // Figma: Color/Text/ink-faint (#9C9186) - Chữ mờ / placeholder / metadata
 
-// Typography
-$font-serif: "Fraunces", serif;
-$font-sans: "Be Vietnam Pro", sans-serif;
-$font-script: "Cormorant Garamond", serif;
+// [Figma] Group: Color/Border | Type: COLOR | Name: color/border/line | Value: #E7DED0 | Desc: Viền thẻ, đường kẻ phân cách mỏng
+$color-line: #e7ded0; // Figma: Color/Border/line (#E7DED0) - Viền mỏng / đường chia khối
 
-// Layout
-$max-width-content: 1240px;
-$radius-s: 8px;
-$radius-m: 16px;
-$radius-l: 24px;
-$radius-pill: 999px;
+// ── COLOR / ACCENT (Màu nhấn thương hiệu chính) ──────────────────────────
+// [Figma] Group: Color/Accent | Type: COLOR | Name: color/accent/primary | Value: #A15C2E | Desc: Màu nhấn chính của thương hiệu (Nâu cam đất)
+$color-accent: #a15c2e; // Figma: Color/Accent/primary (#A15C2E) - Màu nhấn chính thương hiệu Pi Decor
 
-// Motion
-$transition-default: 200ms ease-in-out;
+// [Figma] Group: Color/Accent | Type: COLOR | Name: color/accent/hover | Value: #874C25 | Desc: Trạng thái Hover của nút bấm và liên kết
+$color-accent-hover: #874c25; // Figma: Color/Accent/hover (#874C25) - Trạng thái hover của màu nhấn
 
-// Shadows
-$shadow-sm: 0 1px 2px rgba(39, 22, 32, 0.06);
-$shadow-default: 0 4px 16px rgba(39, 22, 32, 0.08);
-$shadow-lg: 0 30px 70px -20px rgba(39, 22, 32, 0.28);
+// [Figma] Group: Color/Accent | Type: COLOR | Name: color/accent/subtle | Value: #F1E4D8 | Desc: Màu nền mờ cho tag, badge, highlight
+$color-accent-subtle: #f1e4d8; // Figma: Color/Accent/subtle (#F1E4D8) - Màu nền nhấn nhạt cho tag / badge
 
-// Also exposed as CSS custom properties so components that need a runtime
-// value (e.g. inline style for a dynamically-picked swatch hex) can read
-// them without importing SCSS — mirrors how the old Tailwind theme() tokens
-// were reachable from anywhere.
+// ── COLOR / BLUSH & PLUM (Tông màu bổ trợ: Hồng phấn & Mận chín) ─────────
+// [Figma] Group: Color/Accent | Type: COLOR | Name: color/accent/blush | Value: #F8E9E7 | Desc: Nền thẻ hồng phấn dịu dàng trong collage / feedback
+$color-blush: #f8e9e7; // Figma: Color/Accent/blush (#F8E9E7) - Tông hồng phấn dịu nhẹ
+
+// [Figma] Group: Color/Accent | Type: COLOR | Name: color/accent/blush-dim | Value: #F1DEDB | Desc: Nền viền hoặc hover của khối blush
+$color-blush-dim: #f1dedb; // Figma: Color/Accent/blush-dim (#F1DEDB) - Hồng phấn chuyển tiếp / viền
+
+// [Figma] Group: Color/Accent | Type: COLOR | Name: color/accent/plum | Value: #3B141F | Desc: Màu mận chín đậm, tạo chiều sâu cho banner đặc biệt
+$color-plum: #3b141f; // Figma: Color/Accent/plum (#3B141F) - Màu mận đậm quý phái
+
+// [Figma] Group: Color/Accent | Type: COLOR | Name: color/accent/plum-light | Value: #5C2433 | Desc: Màu mận sáng bổ trợ / viền cho plum
+$color-plum-light: #5c2433; // Figma: Color/Accent/plum-light (#5C2433) - Màu mận sáng bổ trợ
+
+// ── COLOR / MATERIAL SWATCHES (Màu swatch vải trong Studio Canvas) ────────
+// [Figma] Group: Color/Material | Type: COLOR | Name: color/material/rose | Value: #E7B6BB | Desc: Mẫu vải Rose voan hoa hồng ngọt ngào
+$color-material-rose: #e7b6bb; // Figma: Color/Material/rose (#E7B6BB) - Vải mẫu màu hoa hồng
+
+// [Figma] Group: Color/Material | Type: COLOR | Name: color/material/sage | Value: #AFC49C | Desc: Mẫu vải Sage xanh xô thơm tự nhiên
+$color-material-sage: #afc49c; // Figma: Color/Material/sage (#AFC49C) - Vải mẫu màu xô thơm
+
+// [Figma] Group: Color/Material | Type: COLOR | Name: color/material/sand | Value: #C99F6F | Desc: Mẫu vải Sand vàng cát ấm áp mộc mạc
+$color-material-sand: #c99f6f; // Figma: Color/Material/sand (#C99F6F) - Vải mẫu màu cát ấm
+
+// [Figma] Group: Color/Material | Type: COLOR | Name: color/material/lavender | Value: #B98AC9 | Desc: Mẫu vải Lavender tím oải hương lãng mạn
+$color-material-lavender: #b98ac9; // Figma: Color/Material/lavender (#B98AC9) - Vải mẫu màu hoa oải hương
+
+// [Figma] Group: Color/Material | Type: COLOR | Name: color/material/champagne | Value: #E7BE79 | Desc: Mẫu vải Champagne ánh kim sang trọng
+$color-material-champagne: #e7be79; // Figma: Color/Material/champagne (#E7BE79) - Vải mẫu màu vàng champagne
+
+// [Figma] Group: Color/Material | Type: COLOR | Name: color/material/smoke | Value: #8A9BAE | Desc: Mẫu vải Smoke xám khói lam thanh lịch
+$color-material-smoke: #8a9bae; // Figma: Color/Material/smoke (#8A9BAE) - Vải mẫu màu xám khói
+
+// ── COLOR / SERVICE ACCENTS (Màu nhận diện từng dòng dịch vụ) ───────────
+// [Figma] Group: Color/Services | Type: COLOR | Name: color/services/kids | Value: #E59A6B | Desc: Nhận diện dòng PiKids (Tiệc thôi nôi / sinh nhật trẻ em)
+$color-kids-accent: #e59a6b; // Figma: Color/Services/kids (#E59A6B) - Màu nhận diện dòng tiệc PiKids (Cam mơ)
+
+// [Figma] Group: Color/Services | Type: COLOR | Name: color/services/kids-dim | Value: #F6DDC6 | Desc: Nền nhạt cho tag, badge dòng PiKids
+$color-kids-accent-dim: #f6ddc6; // Figma: Color/Services/kids-dim (#F6DDC6) - Nền nhạt dòng PiKids
+
+// [Figma] Group: Color/Services | Type: COLOR | Name: color/services/wedding | Value: #A15C2E (Alias: color/accent/primary) | Desc: Nhận diện dòng PiWedding (Tiệc cưới - Flagship)
+$color-wedding-accent: $color-accent; // Figma: Color/Services/wedding (#A15C2E - Alias to color/accent) - Dòng PiWedding
+
+// [Figma] Group: Color/Services | Type: COLOR | Name: color/services/wedding-dim | Value: #F1E4D8 (Alias: color/accent/subtle) | Desc: Nền nhạt cho tag dòng PiWedding
+$color-wedding-accent-dim: $color-accent-subtle; // Figma: Color/Services/wedding-dim (#F1E4D8 - Alias to subtle) - Nền nhạt PiWedding
+
+// [Figma] Group: Color/Services | Type: COLOR | Name: color/services/event | Value: #4F6B63 | Desc: Nhận diện dòng PiEvent (Sự kiện doanh nghiệp / khai trương)
+$color-event-accent: #4f6b63; // Figma: Color/Services/event (#4F6B63) - Màu nhận diện dòng sự kiện PiEvent (Xanh trầm)
+
+// [Figma] Group: Color/Services | Type: COLOR | Name: color/services/event-dim | Value: #DBE6E0 | Desc: Nền nhạt cho tag dòng PiEvent
+$color-event-accent-dim: #dbe6e0; // Figma: Color/Services/event-dim (#DBE6E0) - Nền nhạt dòng PiEvent
+
+// ── TYPOGRAPHY (Font chữ / Text Styles trong Figma) ─────────────────────
+// [Figma] Text Style Font Family: Fraunces | Type: STRING | Name: font/family/serif | Desc: Font serif cổ điển cho Heading & Tiêu đề lớn
+$font-serif: "Fraunces", serif; // Figma: Font Family "Fraunces" - Dùng cho tiêu đề lớn (Headings, Display)
+
+// [Figma] Text Style Font Family: Be Vietnam Pro | Type: STRING | Name: font/family/sans | Desc: Font sans-serif hiện đại cho Body text & UI
+$font-sans: "Be Vietnam Pro", sans-serif; // Figma: Font Family "Be Vietnam Pro" - Dùng cho toàn bộ nội dung & UI
+
+// [Figma] Text Style Font Family: Cormorant Garamond | Type: STRING | Name: font/family/script | Desc: Font serif nghệ thuật cho trích dẫn (Quote/Editorial)
+$font-script: "Cormorant Garamond", serif; // Figma: Font Family "Cormorant Garamond" - Trích dẫn & chữ nghệ thuật
+
+// ── LAYOUT & RADIUS (Kích thước & Bo góc) ─────────────────────────────────
+// [Figma] Group: Layout | Type: NUMBER | Name: layout/max-width-content | Value: 1240 | Desc: Chiều rộng tối đa khung nội dung trang web (px)
+$max-width-content: 1240px; // Figma: Layout/max-width (1240px) - Giới hạn độ rộng container nội dung
+
+// [Figma] Group: Radius | Type: NUMBER | Name: radius/s | Value: 8 | Desc: Bo góc nhỏ 8px (Nút nhỏ, badge, input)
+$radius-s: 8px; // Figma: Radius/s (8px) - Bo góc nhỏ cho controls/inputs
+
+// [Figma] Group: Radius | Type: NUMBER | Name: radius/m | Value: 16 | Desc: Bo góc vừa 16px (Card nội dung, popover, modal nhỏ)
+$radius-m: 16px; // Figma: Radius/m (16px) - Bo góc tiêu chuẩn cho cards
+
+// [Figma] Group: Radius | Type: NUMBER | Name: radius/l | Value: 24 | Desc: Bo góc lớn 24px (Khung bento, modal lớn, banner)
+$radius-l: 24px; // Figma: Radius/l (24px) - Bo góc lớn cho bento grid & banner
+
+// [Figma] Group: Radius | Type: NUMBER | Name: radius/pill | Value: 999 | Desc: Bo tròn tối đa hình viên thuốc (Nút CTA pill)
+$radius-pill: 999px; // Figma: Radius/pill (999px) - Bo góc tròn tuyệt đối cho nút bấm dạng Pill
+
+// ── MOTION / TRANSITION (Thời gian chuyển động) ───────────────────────────
+// [Figma] Smart Animate Duration: 200ms | Easing: Ease In and Out (Chuyển cảnh tương tác)
+$transition-default: 200ms ease-in-out; // Figma: Prototype Animation (200ms ease-in-out) - Hiệu ứng chuyển động chuẩn
+
+// ── EFFECT / SHADOWS (Effect Styles - Drop Shadow trong Figma) ───────────
+// [Figma] Effect Style: shadow/sm | Type: Drop Shadow | X: 0, Y: 1, Blur: 2, Spread: 0, Color: #271620, Opacity: 6% | Desc: Đổ bóng nổi nhẹ
+$shadow-sm: 0 1px 2px rgba(39, 22, 32, 0.06); // Figma Effect: shadow/sm (Y: 1, Blur: 2, Color: #271620 6%) - Bóng nhẹ
+
+// [Figma] Effect Style: shadow/default | Type: Drop Shadow | X: 0, Y: 4, Blur: 16, Spread: 0, Color: #271620, Opacity: 8% | Desc: Đổ bóng nổi tiêu chuẩn cho Card
+$shadow-default: 0 4px 16px rgba(39, 22, 32, 0.08); // Figma Effect: shadow/default (Y: 4, Blur: 16, Color: #271620 8%) - Bóng thẻ Card
+
+// [Figma] Effect Style: shadow/lg | Type: Drop Shadow | X: 0, Y: 30, Blur: 70, Spread: -20, Color: #271620, Opacity: 28% | Desc: Đổ bóng sâu cho Modal & Drawer
+$shadow-lg: 0 30px 70px -20px rgba(39, 22, 32, 0.28); // Figma Effect: shadow/lg (Y: 30, Blur: 70, Spread: -20, Color: #271620 28%) - Bóng Modal
+
+// ── CSS CUSTOM PROPERTIES (:root) ─────────────────────────────────────────
+// Xuất biến CSS dùng runtime trong trình duyệt (tương ứng với Token Studio / CSS Export trong Figma)
 :root {
+  // [CSS Var] Màu nền giấy chính -> var(--color-paper)
   --color-paper: #{$color-paper};
+
+  // [CSS Var] Màu nền giấy phụ xen kẽ -> var(--color-paper-dim)
   --color-paper-dim: #{$color-paper-dim};
+
+  // [CSS Var] Màu văn bản chính -> var(--color-ink)
   --color-ink: #{$color-ink};
+
+  // [CSS Var] Màu văn bản phụ mô tả -> var(--color-ink-muted)
   --color-ink-muted: #{$color-ink-muted};
+
+  // [CSS Var] Màu văn bản mờ / placeholder -> var(--color-ink-faint)
   --color-ink-faint: #{$color-ink-faint};
+
+  // [CSS Var] Màu viền phân cách mỏng -> var(--color-line)
   --color-line: #{$color-line};
+
+  // [CSS Var] Màu nhấn thương hiệu chính -> var(--color-accent)
   --color-accent: #{$color-accent};
+
+  // [CSS Var] Màu nhấn hover -> var(--color-accent-hover)
   --color-accent-hover: #{$color-accent-hover};
+
+  // [CSS Var] Màu nền nhấn dịu nhẹ -> var(--color-accent-subtle)
   --color-accent-subtle: #{$color-accent-subtle};
+
+  // [CSS Var] Màu hồng phấn dịu nhẹ -> var(--color-blush)
   --color-blush: #{$color-blush};
+
+  // [CSS Var] Màu mận đậm quý phái -> var(--color-plum)
   --color-plum: #{$color-plum};
+
+  // [CSS Var] Bóng đổ mặc định cho Card -> var(--shadow-default)
   --shadow-default: #{$shadow-default};
+
+  // [CSS Var] Bóng đổ lớn cho Modal -> var(--shadow-lg)
   --shadow-lg: #{$shadow-lg};
+
+  // [CSS Var] Bán kính bo góc lớn -> var(--radius-l)
   --radius-l: #{$radius-l};
 }

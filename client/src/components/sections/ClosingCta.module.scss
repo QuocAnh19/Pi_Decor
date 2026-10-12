@@ -5,7 +5,7 @@
   padding-block: $space-20;
 
   @media (min-width: 768px) {
-    padding-block: 96px;
+    padding-block: $space-24;
   }
 }
 
@@ -18,20 +18,15 @@
 }
 
 .title {
+  @include text-h2;
   max-width: 32rem;
-  font-size: $text-3xl;
-  line-height: 1.2;
   color: $color-paper;
-
-  @media (min-width: 768px) {
-    font-size: $text-4xl;
-  }
 }
 
 .subtitle {
+  @include text-small;
+  line-height: $leading-relaxed;
   max-width: 26rem;
-  font-size: $text-sm;
-  line-height: 1.6;
   color: rgba($color-paper, 0.7);
 }
 
@@ -41,7 +36,7 @@
   background: $color-accent;
   padding: $space-3 $space-6;
   font-size: $text-sm;
-  font-weight: 600;
+  font-weight: $weight-semibold;
   color: $color-paper;
   transition: background-color $transition-default;
 

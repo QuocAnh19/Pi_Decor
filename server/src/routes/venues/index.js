@@ -1,12 +1,9 @@
-import { Router } from "express";
 import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
-import { validate } from "../../middlewares/validate.js";
 import { createVenueSchema, updateVenueSchema } from "../../schemas/venues.schema.js";
 import { deleteImageFile, deleteMultipleImageFiles } from "../../utils/uploadImage.js";
-
-export const venuesRouter = Router();
+import { createCrudRouter } from "../../utils/crudRouterFactory.js";
 
 /**
  * routes/venues — implements Mục 2 & 5 of PiDecor_MappingProject.md.
@@ -25,11 +22,30 @@ async function withProjectCount(venues, projects) {
   }));
 }
 
-// GET /api/venues — list, for drawing pins on the map (Điểm chạm B) and the
-// homepage teaser. Public.
-venuesRouter.get("/", async (_req, res) => {
-  const [venues, projects] = await Promise.all([db.get("venues"), db.get("projects")]);
-  res.json(await withProjectCount(venues, projects));
+export const venuesRouter = createCrudRouter({
+  table: "venues",
+  listPublic: true,
+  createSchema: createVenueSchema,
+  updateSchema: updateVenueSchema,
+  notFoundMessage: "Không tìm thấy địa điểm.",
+  transformOnCreate: (venue) => ({
+    ...venue,
+    type: venue.type ?? "hotel", // "hotel" | "restaurant" | "resort" | "sảnh tiệc"
+    address: venue.address ?? null,
+    city: venue.city ?? null,
+    lat: Number(venue.lat),
+    lng: Number(venue.lng),
+    cover_image: venue.cover_image ?? null,
+  }),
+  transformOnList: async (venues, req) => {
+    const projects = await db.get("projects");
+    let list = await withProjectCount(venues, projects);
+    if (req.query.city) {
+      const city = String(req.query.city).trim().toLowerCase();
+      list = list.filter((v) => v.city?.toLowerCase() === city);
+    }
+    return list;
+  },
 });
 
 // GET /api/venues/search?q= — autocomplete for the quick-search box on the
@@ -59,60 +75,9 @@ venuesRouter.get("/:id", async (req, res) => {
   res.json({ ...venue, project_count: venueProjects.length, projects: venueProjects });
 });
 
-// ── Admin (M1: basic CRUD, no geocoding yet — see Mục 4 for the geocode step) ──
+// ── Admin Project Sub-routes under Venues ─────────────────────────────────────
 
-// POST /api/admin/venues — create a venue. lat/lng entered manually for now;
-// wiring this to Nominatim/Goong from the address is the next milestone.
-venuesRouter.post("/", verifyToken, requireAdmin, validate(createVenueSchema), async (req, res) => {
-  const { name, type, address, city, lat, lng, cover_image } = req.body ?? {};
-  const venue = {
-    id: uuid(),
-    name,
-    type: type ?? "hotel", // "hotel" | "restaurant" | "resort" | "sảnh tiệc"
-    address: address ?? null,
-    city: city ?? null,
-    lat: Number(lat),
-    lng: Number(lng),
-    cover_image: cover_image ?? null,
-  };
-  await db.insert("venues", venue);
-  res.status(201).json(venue);
-});
-
-venuesRouter.patch("/:id", verifyToken, requireAdmin, validate(updateVenueSchema), async (req, res) => {
-  const venues = await db.get("venues");
-  const existing = venues.find((v) => v.id === req.params.id);
-  if (!existing) return res.status(404).json({ message: "Không tìm thấy địa điểm." });
-
-  const patch = req.body ?? {};
-  if (patch.cover_image && existing.cover_image && patch.cover_image !== existing.cover_image) {
-    await deleteImageFile(existing.cover_image);
-  }
-
-  const updated = await db.updateById("venues", req.params.id, patch);
-  res.json(updated);
-});
-
-venuesRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
-  const venues = await db.get("venues");
-  const existing = venues.find((v) => v.id === req.params.id);
-
-  const removed = await db.removeById("venues", req.params.id);
-  if (!removed) return res.status(404).json({ message: "Không tìm thấy địa điểm." });
-
-  if (existing) {
-    if (existing.cover_image) {
-      await deleteImageFile(existing.cover_image);
-    }
-    if (Array.isArray(existing.gallery)) {
-      await deleteMultipleImageFiles(existing.gallery);
-    }
-  }
-
-  res.status(204).send();
-});
-
-// POST /api/admin/venues/:id/projects — add a case study under a venue.
+// POST /api/venues/:id/projects — add a case study under a venue.
 venuesRouter.post("/:id/projects", verifyToken, requireAdmin, async (req, res) => {
   const venues = await db.get("venues");
   if (!venues.some((v) => v.id === req.params.id)) {

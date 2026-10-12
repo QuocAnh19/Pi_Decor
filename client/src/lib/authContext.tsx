@@ -17,7 +17,7 @@ interface AuthContextValue {
   isReady: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  updateToken: (newToken: string) => void;
+  updateToken: (newToken: string, newAdmin?: Admin) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -96,13 +96,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(res));
   }
 
-  function updateToken(newToken: string) {
+  function updateToken(newToken: string, newAdmin?: Admin) {
     setToken(newToken);
+    if (newAdmin) {
+      setAdmin(newAdmin);
+    }
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
         const parsed = JSON.parse(raw) as StoredAuth;
         parsed.token = newToken;
+        if (newAdmin) {
+          parsed.admin = newAdmin;
+        }
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
       } catch {
         // ignore

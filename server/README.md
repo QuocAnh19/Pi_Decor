@@ -69,6 +69,10 @@ src/
 | GET | `/api/services` | — | Danh sách dịch vụ Bento |
 | POST/PATCH/DELETE | `/api/services/:id?` | admin | Quản trị dịch vụ |
 | POST | `/api/auth/login` | — | Đăng nhập admin, trả về JWT |
+| PATCH | `/api/auth/me` | admin | Cập nhật thông tin/mật khẩu tài khoản hiện tại |
+| GET | `/api/auth/admins` | admin | Danh sách tài khoản admin |
+| POST | `/api/auth/admins` | owner | Tạo tài khoản admin mới |
+| DELETE | `/api/auth/admins/:id` | owner | Xoá tài khoản admin |
 | GET | `/api/admin/summary` | admin | Số liệu tổng quan cho dashboard |
 
 ## Deploy (miễn phí — xem Mục 4 của tài liệu phân tích kỹ thuật)
@@ -86,9 +90,10 @@ src/
    `DATABASE_URL` (role `pidecor_app`, không phải owner), `JWT_SECRET`
    (random thật, khác với local), `CORS_ORIGIN` (domain Vercel/Netlify thật
    của client).
-5. Trước khi có traffic thật: thay `utils/uploadImage.js` bằng Cloudinary
-   SDK (đã có ghi chú sẵn trong file) — ổ đĩa Render Free bị xoá mỗi lần
-   restart.
+5. Trước khi có traffic thật: điền 3 biến `CLOUDINARY_CLOUD_NAME`,
+   `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` trên Render dashboard —
+   `utils/uploadImage.js` đã hỗ trợ Cloudinary tự động khi 3 biến này được set
+   (ổ đĩa Render Free bị xoá mỗi lần restart).
 6. Cập nhật `VITE_API_URL` ở phía client trỏ về URL Render vừa deploy.
 
 `app.js` đã bật sẵn `helmet` (security headers) và rate limiting cho
