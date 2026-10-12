@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { validate } from "../../middlewares/validate.js";
 import { createServiceSchema, updateServiceSchema } from "../../schemas/services.schema.js";
-import { deleteImageFile } from "../../utils/uploadImage.js";
+import { cleanupRemovedMedia, deleteMediaOf } from "../../services/media.service.js";
 
 export const servicesRouter = Router();
 
@@ -38,8 +37,7 @@ servicesRouter.get("/", async (_req, res) => {
 servicesRouter.post("/", verifyToken, requireAdmin, validate(createServiceSchema), async (req, res) => {
   const { brand, title, tagline, description, icon, accent, items, href, ctaLabel, cta_label, featured, cover, order, image_url } = req.body ?? {};
 
-  const service = {
-    id: uuid(),
+  const serviceData = {
     brand: brand || title,
     title: title.trim(),
     tagline: tagline || "",
@@ -52,12 +50,10 @@ servicesRouter.post("/", verifyToken, requireAdmin, validate(createServiceSchema
     featured: Boolean(featured),
     cover: cover || image_url || null,
     order: Number(order ?? 0),
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
 
-  await db.insert("services", service);
-  res.status(201).json(formatService(service));
+  const created = await db.insert("services", serviceData);
+  res.status(201).json(formatService(created));
 });
 
 servicesRouter.patch("/:id", verifyToken, requireAdmin, validate(updateServiceSchema), async (req, res) => {
@@ -73,11 +69,9 @@ servicesRouter.patch("/:id", verifyToken, requireAdmin, validate(updateServiceSc
 
   const newCover = patch.cover || patch.image_url;
   const oldCover = existing.cover || existing.image_url;
-  if (newCover && oldCover && newCover !== oldCover) {
-    await deleteImageFile(oldCover);
+  if (newCover !== undefined && oldCover) {
+    await cleanupRemovedMedia(oldCover, newCover);
   }
-
-  patch.updated_at = new Date().toISOString();
 
   const updated = await db.updateById("services", req.params.id, patch);
   res.json(formatService(updated));
@@ -91,9 +85,7 @@ servicesRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
   if (!removed) return res.status(404).json({ message: "Không tìm thấy dịch vụ." });
 
   if (existing) {
-    if (existing.cover) await deleteImageFile(existing.cover);
-    if (existing.image_url) await deleteImageFile(existing.image_url);
-    if (existing.icon && existing.icon.startsWith("http")) await deleteImageFile(existing.icon);
+    await deleteMediaOf(existing, "cover", "image_url", "icon");
   }
 
   res.status(204).send();

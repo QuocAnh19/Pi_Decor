@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { validate } from "../../middlewares/validate.js";
 import { createMaterialSchema, updateMaterialSchema } from "../../schemas/materials.schema.js";
-import { uploadImage, publicUrlFor, deleteImageFile } from "../../utils/uploadImage.js";
+import { uploadImage, publicUrlFor } from "../../utils/uploadImage.js";
+import { cleanupRemovedMedia, deleteMediaOf } from "../../services/media.service.js";
 
 export const materialsRouter = Router();
 
@@ -58,18 +58,15 @@ materialsRouter.post("/", verifyToken, requireAdmin, uploadImage.single("image")
   const existingMaterials = await db.get("materials");
   const finalName = generateUniqueName(existingMaterials, name);
 
-  const material = {
-    id: uuid(),
+  const materialData = {
     name: finalName,
     category: categoryToUse,
     color_hex: color_hex ?? null,
     image_url: req.file ? publicUrlFor(req, req.file) : null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
 
-  await db.insert("materials", material);
-  res.status(201).json(material);
+  const created = await db.insert("materials", materialData);
+  res.status(201).json(created);
 });
 
 // PATCH /api/materials/:id — admin only, edit fields and/or replace image.
@@ -78,7 +75,7 @@ materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("ima
   const existing = existingMaterials.find((m) => String(m.id) === String(req.params.id));
   if (!existing) return res.status(404).json({ message: "Không tìm thấy vật liệu." });
 
-  const patch = { ...req.body, updated_at: new Date().toISOString() };
+  const patch = { ...req.body };
   if (patch.category) {
     patch.category = normalizeCategory(patch.category);
   }
@@ -89,8 +86,8 @@ materialsRouter.patch("/:id", verifyToken, requireAdmin, uploadImage.single("ima
 
   if (req.file) {
     patch.image_url = publicUrlFor(req, req.file);
-    if (existing.image_url && existing.image_url !== patch.image_url) {
-      await deleteImageFile(existing.image_url);
+    if (existing.image_url) {
+      await cleanupRemovedMedia(existing.image_url, patch.image_url);
     }
   }
 
@@ -107,8 +104,8 @@ materialsRouter.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
   const removed = await db.removeById("materials", targetId);
   if (!removed) return res.status(404).json({ message: "Không tìm thấy vật liệu." });
 
-  if (existing?.image_url) {
-    await deleteImageFile(existing.image_url);
+  if (existing) {
+    await deleteMediaOf(existing, "image_url");
   }
 
   res.status(204).send();

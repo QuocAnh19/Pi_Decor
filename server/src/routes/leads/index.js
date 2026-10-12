@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { validate } from "../../middlewares/validate.js";
@@ -8,7 +7,7 @@ import {
   updateLeadStatusSchema,
   createLeadActivitySchema,
 } from "../../schemas/leads.schema.js";
-
+import { logLeadActivity } from "../../services/activity.service.js";
 import { leadsLimiter } from "../../middlewares/rateLimiters.js";
 
 export const leadsRouter = Router();
@@ -21,8 +20,7 @@ leadsRouter.post("/", leadsLimiter, validate(createLeadSchema), async (req, res)
   const cleanDate = wedding_date && typeof wedding_date === "string" && wedding_date.trim() ? wedding_date.trim() : null;
   const cleanMessage = message && typeof message === "string" && message.trim() ? message.trim() : null;
 
-  const lead = {
-    id: uuid(),
+  const leadData = {
     name: typeof name === "string" ? name.trim() : name,
     phone: typeof phone === "string" ? phone.trim() : phone,
     email: cleanEmail,
@@ -30,11 +28,10 @@ leadsRouter.post("/", leadsLimiter, validate(createLeadSchema), async (req, res)
     message: cleanMessage,
     design_snapshot: design_snapshot ?? null,
     status: "new", // new | contacted | closed
-    created_at: new Date().toISOString(),
   };
 
-  await db.insert("leads", lead);
-  res.status(201).json({ id: lead.id });
+  const created = await db.insert("leads", leadData);
+  res.status(201).json({ id: created.id });
 });
 
 // GET /api/leads — list with pagination & search, newest first. Admin-only.
@@ -117,17 +114,13 @@ leadsRouter.post("/:id/activities", verifyToken, requireAdmin, validate(createLe
 
   const { activity_type, body } = req.body;
 
-  const activity = {
-    id: uuid(),
-    lead_id: req.params.id,
-    admin_id: req.user?.sub ?? null,
-    activity_type,
+  const activity = await logLeadActivity({
+    leadId: req.params.id,
+    adminId: req.user?.sub ?? null,
+    type: activity_type,
     body: body ?? null,
-    metadata: null,
-    created_at: new Date().toISOString(),
-  };
+  });
 
-  await db.insert("lead_activities", activity);
   res.status(201).json(activity);
 });
 
@@ -148,26 +141,22 @@ leadsRouter.patch("/:id", verifyToken, requireAdmin, validate(updateLeadStatusSc
   const updated = await db.updateById("leads", req.params.id, patch);
 
   if (patch.status && existing.status !== patch.status) {
-    await db.insert("lead_activities", {
-      id: uuid(),
-      lead_id: req.params.id,
-      admin_id: req.user?.sub ?? null,
-      activity_type: "status_change",
+    await logLeadActivity({
+      leadId: req.params.id,
+      adminId: req.user?.sub ?? null,
+      type: "status_change",
       body: `Trạng thái chuyển từ "${existing.status}" sang "${patch.status}"`,
       metadata: { from: existing.status, to: patch.status },
-      created_at: new Date().toISOString(),
     });
   }
 
   if (patch.design_snapshot) {
-    await db.insert("lead_activities", {
-      id: uuid(),
-      lead_id: req.params.id,
-      admin_id: req.user?.sub ?? null,
-      activity_type: "note",
+    await logLeadActivity({
+      leadId: req.params.id,
+      adminId: req.user?.sub ?? null,
+      type: "note",
       body: "Admin đã tinh chỉnh & cập nhật bản phối cảnh Studio cho khách hàng",
       metadata: { updated_by: "admin" },
-      created_at: new Date().toISOString(),
     });
   }
 

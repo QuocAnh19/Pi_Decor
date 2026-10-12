@@ -29,3 +29,27 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 - **Mô tả**: Route công khai `/api/designs` đã được gỡ bỏ khỏi server. Bảng `designs` và các migration liên quan vẫn đang được giữ nguyên để không mất dữ liệu lịch sử. Phần đếm `designs_total` trong `/api/admin/summary` vẫn đang được giữ phục vụ dashboard client.
 - **Đề xuất xử lý ở nhiệm vụ sau**: Cân nhắc drop bảng `designs` ở migration sau khi xác nhận không còn bất kỳ thành phần nào cần đến dữ liệu này.
 - **Trạng thái**: Chờ duyệt.
+
+## 4. Bảng quyết định quản lý ID và Timestamps theo schema DB (Nhiệm vụ P07)
+Dưới đây là ma trận đối chiếu cấu trúc schema PostgreSQL (qua các migration) và quyết định loại bỏ việc sinh thủ công `id` / `created_at` / `updated_at` tại tầng application:
+
+| Bảng | Cột ID có Default? | `created_at` Default? | `updated_at` Default & Trigger? | Quyết định xử lý tại tầng Router / Service |
+| :--- | :--- | :--- | :--- | :--- |
+| `admins` (0003, 0025) | `gen_random_uuid()` | `now()` | Không có cột `updated_at` | Bỏ `id: uuid()` và `created_at`. Dùng row trả về từ `db.insert`. |
+| `leads` (0004) | `gen_random_uuid()` | `now()` | Không có cột `updated_at` | Bỏ `id: uuid()` và `created_at`. Dùng row trả về từ `db.insert`. |
+| `designs` (0005) | `gen_random_uuid()` | `now()` | Không có cột `updated_at` | DB tự cấp phát nếu có insert. |
+| `materials` (0006, 0010) | `gen_random_uuid()` | `now()` | `now()`, trigger `trg_materials_updated_at` | Bỏ `id: uuid()`, `created_at`, `updated_at`. DB trigger tự cập nhật. |
+| `services` (0007, 0010, 0022) | `gen_random_uuid()` | `now()` | `now()`, trigger `trg_services_updated_at` | Bỏ `id: uuid()`, `created_at`, `updated_at`. DB trigger tự cập nhật. |
+| `venues` (0008, 0010) | `gen_random_uuid()` | `now()` | `now()`, trigger `trg_venues_updated_at` | Bỏ `id: uuid()`, `created_at`, `updated_at`. DB trigger tự cập nhật. |
+| `projects` (0009, 0010, 0021) | `gen_random_uuid()` | `now()` | `now()`, trigger `trg_projects_updated_at` | Bỏ `id: uuid()`, `created_at`, `updated_at` trong `projects.service.js`. |
+| `media_assets` (0012) | `gen_random_uuid()` | `now()` | Không có cột `updated_at` | DB tự cấp phát nếu có insert. |
+| `lead_activities` (0013) | `gen_random_uuid()` | `now()` | Không có cột `updated_at` | Bỏ `id: uuid()`, `created_at` trong `activity.service.js`. DB tự sinh. |
+| `quotations` (0014, 0010) | `gen_random_uuid()` | `now()` | `now()`, trigger `trg_quotations_updated_at` | Bỏ `id: uuid()`, `created_at`, `updated_at`. DB trigger tự cập nhật. |
+| `testimonials` (0015, 0010) | `gen_random_uuid()` | `now()` | `now()`, trigger `trg_testimonials_updated_at` | Bỏ `id: uuid()`, `created_at`, `updated_at`. DB trigger tự cập nhật. |
+| `studio_templates` (0017, 0019, 0026) | `gen_random_uuid()` | `now()` | `now()`, trigger `trg_studio_templates_updated_at` | Bỏ `id: uuid()`, `created_at`, `updated_at`. DB trigger tự cập nhật. |
+| `studio_slot_definitions` (0017) | `gen_random_uuid()` | Không có cột | Không có cột | Bỏ `id: uuid()`. DB tự sinh khi insert slot mới. |
+| `studio_assets` (0017, 0023) | `gen_random_uuid()` | `now()` | `now()`, trigger `trg_studio_assets_updated_at` | Bỏ `id: uuid()`, `created_at`, `updated_at`. DB trigger tự cập nhật. |
+| `studio_slot_rules` (0017) | `gen_random_uuid()` | Không có cột | Không có cột | Bỏ `id: uuid()`. DB tự sinh khi insert rule mới. |
+| `refresh_tokens` (0018) | `gen_random_uuid()` | `now()` | Không có cột | Bỏ `id: uuid()`, `created_at`. DB tự sinh khi đăng nhập. |
+| `quotation_counters` (0025) | Không có (PK: `year`) | Không có cột | Không có cột | Quản lý bởi upsert nguyên tử (P03). |
+

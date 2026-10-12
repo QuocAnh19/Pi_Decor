@@ -1,6 +1,7 @@
 import fs from "fs";
 import pg from "pg";
 import { env } from "./env.js";
+import { logger } from "./logger.js";
 
 /**
  * Phân tích cấu hình SSL an toàn dựa trên env.DB_SSL và host cơ sở dữ liệu.
@@ -29,7 +30,7 @@ function resolveSslConfig() {
   }
 
   if (sslMode === "require") {
-    console.warn(
+    logger.warn(
       "[database.pg.js] CẢNH BÁO: Đang sử dụng DB_SSL='require' (rejectUnauthorized: false). " +
       "Kết nối được mã hóa nhưng không xác thực chứng chỉ máy chủ (nguy cơ MITM). " +
       "Khuyến nghị chuyển sang 'verify-full' trên môi trường production."
@@ -58,7 +59,7 @@ function applyCa(sslConfig, caInput) {
       sslConfig.ca = trimmed;
     }
   } catch (err) {
-    console.error("[database.pg.js] Lỗi khi nạp DB_SSL_CA:", err.message);
+    logger.error({ err: err.message }, "[database.pg.js] Lỗi khi nạp DB_SSL_CA");
   }
 }
 
@@ -87,7 +88,7 @@ pool.on("error", (err) => {
   // Fired for errors on idle clients in the pool (e.g. the DB restarting
   // under a serverless/auto-suspend plan like Neon's). Log, don't crash —
   // the pool reconnects the next query.
-  console.error("[pg pool] unexpected error on idle client:", err.message);
+  logger.error({ err: err.message }, "[pg pool] unexpected error on idle client");
 });
 
 // ── Column allowlist per table ──────────────────────────────────────────

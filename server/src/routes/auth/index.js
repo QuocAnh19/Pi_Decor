@@ -2,7 +2,6 @@ import { Router } from "express";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { JWT_SECRET, JWT_EXPIRES_IN } from "../../config/auth.js";
 import { validate } from "../../middlewares/validate.js";
@@ -57,12 +56,10 @@ authRouter.post("/login", validate(loginSchema), async (req, res) => {
   const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
 
   await db.insert("refresh_tokens", {
-    id: uuid(),
     admin_id: admin.id,
     token_hash: tokenHash,
     expires_at: expiresAt,
     revoked_at: null,
-    created_at: new Date().toISOString(),
   });
 
   res.json({
@@ -237,19 +234,17 @@ authRouter.post("/admins", verifyToken, requireOwner, async (req, res) => {
 
   const password_hash = await bcrypt.hash(cleanPassword, 10);
   const newAdmin = {
-    id: uuid(),
     email: cleanEmail,
     password_hash,
     role: "admin", // hardcoded: cannot create owner via API
-    created_at: new Date().toISOString(),
   };
 
-  await db.insert("admins", newAdmin);
+  const inserted = await db.insert("admins", newAdmin);
   res.status(201).json({
-    id: newAdmin.id,
-    email: newAdmin.email,
-    role: newAdmin.role,
-    created_at: newAdmin.created_at,
+    id: inserted.id,
+    email: inserted.email,
+    role: inserted.role,
+    created_at: inserted.created_at,
   });
 });
 

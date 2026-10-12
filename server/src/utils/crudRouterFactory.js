@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { v4 as uuid } from "uuid";
 import { db } from "../config/database.js";
 import { verifyToken, requireAdmin } from "../middlewares/verifyToken.js";
 import { validate } from "../middlewares/validate.js";
-import { uploadImage, publicUrlFor, deleteImageFile, deleteMultipleImageFiles } from "./uploadImage.js";
+import { uploadImage, publicUrlFor } from "./uploadImage.js";
+import { cleanupRemovedMedia, deleteMediaOf } from "../services/media.service.js";
 
 /**
  * Creates a standard CRUD Express router for a given database table.
@@ -79,16 +79,12 @@ export function createCrudRouter({
 
     router.post("/", ...createMiddlewares, async (req, res) => {
       let item = {
-        id: uuid(),
         ...(req.body ?? {}),
       };
 
       if (req.file) {
         item.image_url = publicUrlFor(req, req.file);
       }
-
-      item.created_at = new Date().toISOString();
-      item.updated_at = new Date().toISOString();
 
       try {
         if (typeof transformOnCreate === "function") {
@@ -99,8 +95,8 @@ export function createCrudRouter({
         return res.status(status).json({ message: err.message || "Dữ liệu không hợp lệ." });
       }
 
-      await db.insert(table, item);
-      res.status(201).json(item);
+      const created = await db.insert(table, item);
+      res.status(201).json(created);
     });
   }
 
@@ -122,7 +118,6 @@ export function createCrudRouter({
 
     let patch = {
       ...(req.body ?? {}),
-      updated_at: new Date().toISOString(),
     };
 
     if (req.file) {
@@ -138,11 +133,11 @@ export function createCrudRouter({
       return res.status(status).json({ message: err.message || "Dữ liệu không hợp lệ." });
     }
 
-    // Delete old image if single image field changed
+    // Xóa ảnh cũ nếu trường ảnh đơn đã thay đổi
     const oldImg = existing.image_url || existing.cover_image;
     const newImg = patch.image_url || patch.cover_image;
-    if (newImg && oldImg && newImg !== oldImg) {
-      await deleteImageFile(oldImg);
+    if (newImg !== undefined && oldImg) {
+      await cleanupRemovedMedia(oldImg, newImg);
     }
 
     const updated = await db.updateById(table, req.params.id, patch);
@@ -167,16 +162,7 @@ export function createCrudRouter({
         return res.status(404).json({ message: notFoundMessage });
       }
 
-      if (existing.image_url) await deleteImageFile(existing.image_url);
-      if (existing.cover_image) await deleteImageFile(existing.cover_image);
-      if (existing.avatar_url) await deleteImageFile(existing.avatar_url);
-
-      const photos = Array.isArray(existing.photos)
-        ? existing.photos
-        : typeof existing.photos === "string"
-          ? (() => { try { const p = JSON.parse(existing.photos); return Array.isArray(p) ? p : []; } catch { return []; } })()
-          : [];
-      if (photos.length > 0) await deleteMultipleImageFiles(photos);
+      await deleteMediaOf(existing, "image_url", "cover_image", "avatar_url", "photos");
 
       res.status(204).send();
     } catch (err) {

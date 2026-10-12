@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { v4 as uuid } from "uuid";
+import crypto from "crypto";
 import { db } from "../../config/database.js";
+import { logger } from "../../config/logger.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { validate } from "../../middlewares/validate.js";
 import {
@@ -16,7 +17,7 @@ import {
   updateRuleSchema,
 } from "../../schemas/studio.schema.js";
 import { sanitizeSvg } from "../../utils/sanitizeSvg.js";
-import { deleteImageFile } from "../../utils/uploadImage.js";
+import { cleanupRemovedMedia, deleteMediaOf } from "../../services/media.service.js";
 import { v2 as cloudinary } from "cloudinary";
 import { env } from "../../config/env.js";
 
@@ -44,41 +45,44 @@ studioRouter.post("/templates", verifyToken, requireAdmin, validate(createTempla
 
   const cleanSvg = sanitizeSvg(svg_base);
   const template = {
-    id: uuid(),
     name: String(name).trim(),
     thumbnail: thumbnail ?? null,
     svg_base: cleanSvg,
     category: category ?? null,
     is_active: is_active ?? true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
 
-  await db.insert("studio_templates", template);
-  res.status(201).json(template);
+  const inserted = await db.insert("studio_templates", template);
+  res.status(201).json(inserted);
 });
 
 // PATCH /api/studio/templates/:id — admin only, update template
 studioRouter.patch("/templates/:id", verifyToken, requireAdmin, validate(updateTemplateSchema), async (req, res) => {
-  const patch = { ...req.body, updated_at: new Date().toISOString() };
+  const templates = await db.get("studio_templates");
+  const existing = templates.find((t) => String(t.id) === String(req.params.id));
+  if (!existing) {
+    return res.status(404).json({ message: "Không tìm thấy template." });
+  }
+
+  const patch = { ...req.body };
   if (patch.svg_base) {
     patch.svg_base = sanitizeSvg(patch.svg_base);
   }
+  if (patch.thumbnail && existing.thumbnail && existing.thumbnail !== patch.thumbnail) {
+    await cleanupRemovedMedia(existing.thumbnail, patch.thumbnail);
+  }
 
   const updated = await db.updateById("studio_templates", req.params.id, patch);
-  if (!updated) {
-    return res.status(404).json({ message: "Không tìm thấy template." });
-  }
   res.json(updated);
 });
 
 function ensureUuid(id) {
-  if (!id || typeof id !== "string") return uuid();
+  if (!id || typeof id !== "string") return crypto.randomUUID();
   const clean = id.replace(/^(tpl|slot|rule|mat|asset)-/, "");
   if (/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(clean)) {
     return clean;
   }
-  return uuid();
+  return crypto.randomUUID();
 }
 
 // PUT /api/studio/templates/:id/publish — admin only, full atomic publish or draft save
@@ -111,10 +115,10 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, validate(p
           });
           finalThumbnail = uploadRes.secure_url;
           if (existing?.thumbnail && existing.thumbnail !== finalThumbnail) {
-            await deleteImageFile(existing.thumbnail);
+            await cleanupRemovedMedia(existing.thumbnail, finalThumbnail);
           }
         } catch (err) {
-          console.error("Failed to upload template thumbnail to Cloudinary, keeping payload as-is:", err?.message || err);
+          logger.error({ err }, "Failed to upload template thumbnail to Cloudinary, keeping payload as-is");
         }
       }
     }
@@ -131,22 +135,21 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, validate(p
           category: category ?? existing.category ?? null,
           is_active: activeFlag,
           default_config: slot_config ?? existing.default_config ?? {},
-          updated_at: new Date().toISOString(),
         }
       );
     } else {
-      savedTemplate = {
-        id: validTargetUuid,
+      const templateRow = {
         name: String(name).trim(),
         thumbnail: finalThumbnail ?? null,
         svg_base: cleanSvg,
         category: category ?? null,
         is_active: activeFlag,
         default_config: slot_config ?? {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
       };
-      await db.insert("studio_templates", savedTemplate);
+      if (rawTargetId !== "new") {
+        templateRow.id = validTargetUuid;
+      }
+      savedTemplate = await db.insert("studio_templates", templateRow);
     }
 
     // Batch sync slot definitions for this template
@@ -200,7 +203,7 @@ studioRouter.put("/templates/:id/publish", verifyToken, requireAdmin, validate(p
       template: savedTemplate,
     });
   } catch (err) {
-    console.error("Error in publish/draft template endpoint:", err);
+    logger.error({ err }, "Error in publish/draft template endpoint");
     res.status(500).json({ message: "Lỗi hệ thống khi lưu template: " + (err.message || "Không thể truy vấn CSDL") });
   }
 });
@@ -215,8 +218,8 @@ studioRouter.delete("/templates/:id", verifyToken, requireAdmin, async (req, res
     return res.status(404).json({ message: "Không tìm thấy template." });
   }
 
-  if (existing?.thumbnail) {
-    await deleteImageFile(existing.thumbnail);
+  if (existing) {
+    await deleteMediaOf(existing, "thumbnail");
   }
 
   res.status(204).send();
@@ -243,7 +246,6 @@ studioRouter.post("/templates/:id/slots", verifyToken, requireAdmin, validate(cr
   } = req.body ?? {};
 
   const slot = {
-    id: uuid(),
     template_id: req.params.id,
     slot_key: String(slot_key).trim(),
     label: String(label).trim(),
@@ -260,8 +262,8 @@ studioRouter.post("/templates/:id/slots", verifyToken, requireAdmin, validate(cr
     required: required ?? false,
   };
 
-  await db.insert("studio_slot_definitions", slot);
-  res.status(201).json(slot);
+  const inserted = await db.insert("studio_slot_definitions", slot);
+  res.status(201).json(inserted);
 });
 
 // PATCH /api/studio/templates/:id/slots/reorder — admin only, batch update slot sort_order
@@ -328,6 +330,9 @@ studioRouter.post("/assets", verifyToken, requireAdmin, validate(createAssetSche
   const existing = assets.find((a) => a.name === cleanName && a.asset_type === asset_type);
 
   if (existing) {
+    if (finalThumbnail && existing.thumbnail && existing.thumbnail !== finalThumbnail) {
+      await cleanupRemovedMedia(existing.thumbnail, finalThumbnail);
+    }
     const updated = await db.updateById("studio_assets", existing.id, {
       thumbnail: finalThumbnail ?? existing.thumbnail ?? null,
       svg_data: finalSvg ?? existing.svg_data ?? null,
@@ -335,13 +340,11 @@ studioRouter.post("/assets", verifyToken, requireAdmin, validate(createAssetSche
       font_family: font_family ?? existing.font_family ?? null,
       tags: Array.isArray(tags) ? tags : existing.tags ?? [],
       is_active: is_active ?? existing.is_active ?? true,
-      updated_at: new Date().toISOString(),
     });
     return res.json(updated);
   }
 
   const asset = {
-    id: uuid(),
     asset_type,
     name: cleanName,
     thumbnail: finalThumbnail,
@@ -351,12 +354,10 @@ studioRouter.post("/assets", verifyToken, requireAdmin, validate(createAssetSche
     tags: Array.isArray(tags) ? tags : [],
     is_active: is_active ?? true,
     dominant_colors: dominant_colors ?? null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
 
-  await db.insert("studio_assets", asset);
-  res.status(201).json(asset);
+  const inserted = await db.insert("studio_assets", asset);
+  res.status(201).json(inserted);
 });
 
 // PATCH /api/studio/assets/:id — admin only, update asset
@@ -367,12 +368,12 @@ studioRouter.patch("/assets/:id", verifyToken, requireAdmin, validate(updateAsse
     return res.status(404).json({ message: "Không tìm thấy asset." });
   }
 
-  const patch = { ...req.body, updated_at: new Date().toISOString() };
+  const patch = { ...req.body };
   if (patch.svg_data) {
     patch.svg_data = sanitizeSvg(patch.svg_data);
   }
   if (patch.thumbnail && existing.thumbnail && existing.thumbnail !== patch.thumbnail) {
-    await deleteImageFile(existing.thumbnail);
+    await cleanupRemovedMedia(existing.thumbnail, patch.thumbnail);
   }
 
   const updated = await db.updateById("studio_assets", req.params.id, patch);
@@ -389,8 +390,8 @@ studioRouter.delete("/assets/:id", verifyToken, requireAdmin, async (req, res) =
     return res.status(404).json({ message: "Không tìm thấy asset." });
   }
 
-  if (existing?.thumbnail) {
-    await deleteImageFile(existing.thumbnail);
+  if (existing) {
+    await deleteMediaOf(existing, "thumbnail");
   }
 
   res.status(204).send();
@@ -414,7 +415,6 @@ studioRouter.post("/templates/:id/rules", verifyToken, requireAdmin, validate(cr
   const { rule_name, condition_slot, condition_value, target_slot, action, action_value, priority } = req.body ?? {};
 
   const rule = {
-    id: uuid(),
     template_id: req.params.id,
     rule_name: rule_name ? String(rule_name).trim() : null,
     condition_slot,
@@ -425,8 +425,8 @@ studioRouter.post("/templates/:id/rules", verifyToken, requireAdmin, validate(cr
     priority: priority ?? 0,
   };
 
-  await db.insert("studio_slot_rules", rule);
-  res.status(201).json(rule);
+  const inserted = await db.insert("studio_slot_rules", rule);
+  res.status(201).json(inserted);
 });
 
 // PATCH /api/studio/rules/:ruleId — admin only, edit rule

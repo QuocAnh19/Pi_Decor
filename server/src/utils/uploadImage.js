@@ -7,6 +7,7 @@ import { v4 as uuid } from "uuid";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { env } from "../config/env.js";
+import { logger } from "../config/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOAD_DIR = path.join(__dirname, "..", "..", "uploads");
@@ -34,7 +35,7 @@ if (hasCloudinary) {
     },
   });
 
-  console.log(`[uploadImage.js] Using Cloudinary Storage (${env.CLOUDINARY_CLOUD_NAME}).`);
+  logger.info(`[uploadImage.js] Using Cloudinary Storage (${env.CLOUDINARY_CLOUD_NAME}).`);
 } else {
   storage = multer.diskStorage({
     destination: UPLOAD_DIR,
@@ -45,7 +46,7 @@ if (hasCloudinary) {
     },
   });
 
-  console.log("[uploadImage.js] Cloudinary credentials not set — using local disk storage.");
+  logger.info("[uploadImage.js] Cloudinary credentials not set — using local disk storage.");
 }
 
 export const ALLOWED_IMAGE_MIME_TYPES = new Map([
@@ -145,7 +146,7 @@ export function extractCloudinaryPublicId(url) {
 
     return pathAfterUpload ? decodeURIComponent(pathAfterUpload) : null;
   } catch (err) {
-    console.error("[extractCloudinaryPublicId] Error parsing URL:", err);
+    logger.error({ err: err.message }, "[extractCloudinaryPublicId] Error parsing URL");
     return null;
   }
 }
@@ -167,9 +168,9 @@ export async function deleteImageFile(urlOrPath) {
         if (res.result === "not_found") {
           res = await cloudinary.uploader.destroy(publicId, { invalidate: true, resource_type: "raw" });
         }
-        console.log(`[deleteImageFile] Cloudinary destroy '${publicId}':`, res);
+        logger.debug({ publicId, res }, "[deleteImageFile] Cloudinary destroy");
       } catch (err) {
-        console.error(`[deleteImageFile] Cloudinary error deleting '${publicId}':`, err.message || err);
+        logger.error({ err: err.message || err, publicId }, "[deleteImageFile] Cloudinary error deleting");
       }
     }
   }
@@ -186,11 +187,11 @@ export async function deleteImageFile(urlOrPath) {
         const filePath = path.join(UPLOAD_DIR, filename);
         if (fs.existsSync(filePath)) {
           await fs.promises.unlink(filePath);
-          console.log(`[deleteImageFile] Local disk file unlinked '${filename}'.`);
+          logger.debug({ filename }, "[deleteImageFile] Local disk file unlinked");
         }
       }
     } catch (err) {
-      console.error(`[deleteImageFile] Local disk error deleting '${target}':`, err.message || err);
+      logger.error({ err: err.message || err, target }, "[deleteImageFile] Local disk error deleting");
     }
   }
 }

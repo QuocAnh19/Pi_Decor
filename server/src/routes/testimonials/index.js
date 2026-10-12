@@ -1,9 +1,9 @@
-import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { validate } from "../../middlewares/validate.js";
 import { createTestimonialSchema, updateTestimonialSchema } from "../../schemas/testimonials.schema.js";
-import { uploadImage, publicUrlFor, deleteMultipleImageFiles } from "../../utils/uploadImage.js";
+import { uploadImage, publicUrlFor } from "../../utils/uploadImage.js";
+import { cleanupRemovedMedia } from "../../services/media.service.js";
 import { testimonialLimiter } from "../../middlewares/rateLimiters.js";
 import { createCrudRouter } from "../../utils/crudRouterFactory.js";
 
@@ -50,11 +50,7 @@ export const testimonialsRouter = createCrudRouter({
         throw err;
       }
 
-      const existingPhotos = safeParsePhotos(existing.photos);
-      const removedPhotos = existingPhotos.filter((oldP) => !patch.photos.includes(oldP));
-      if (removedPhotos.length > 0) {
-        await deleteMultipleImageFiles(removedPhotos);
-      }
+      await cleanupRemovedMedia(existing.photos, patch.photos);
     }
 
     return patch;
@@ -83,8 +79,7 @@ testimonialsRouter.post("/", testimonialLimiter, uploadImage.array("photos", 3),
     });
   }
 
-  const testimonial = {
-    id: uuid(),
+  const testimonialData = {
     lead_id: lead_id ?? null,
     author: String(author).trim(),
     role: role ? String(role).trim() : null,
@@ -93,12 +88,10 @@ testimonialsRouter.post("/", testimonialLimiter, uploadImage.array("photos", 3),
     photos: photoList,
     status: "pending",   // Always force pending for public submissions
     source: "customer",  // Always force customer
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
 
-  await db.insert("testimonials", testimonial);
-  res.status(201).json(testimonial);
+  const created = await db.insert("testimonials", testimonialData);
+  res.status(201).json(created);
 });
 
 // ── Route riêng: Admin List with Status Filter ───────────────────────────────

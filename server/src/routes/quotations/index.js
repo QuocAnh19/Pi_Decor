@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { v4 as uuid } from "uuid";
 import { db, pool } from "../../config/database.js";
+import { logger } from "../../config/logger.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { validate } from "../../middlewares/validate.js";
 import { createQuotationSchema, updateQuotationSchema } from "../../schemas/quotations.schema.js";
+import { logLeadActivity } from "../../services/activity.service.js";
 
 export const quotationsRouter = Router();
 
@@ -73,8 +74,7 @@ quotationsRouter.post("/", validate(createQuotationSchema), async (req, res) => 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     const quotation_number = await generateQuotationNumber();
 
-    const quotation = {
-      id: uuid(),
+    const quotationData = {
       lead_id,
       admin_id: req.user?.sub ?? null,
       quotation_number,
@@ -85,17 +85,15 @@ quotationsRouter.post("/", validate(createQuotationSchema), async (req, res) => 
       status: "draft",
       valid_until: valid_until ?? null,
       notes: notes ?? null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
     };
 
     try {
-      await db.insert("quotations", quotation);
+      const quotation = await db.insert("quotations", quotationData);
       return res.status(201).json(quotation);
     } catch (err) {
       // Mã lỗi 23505: unique_violation trong Postgres (trùng quotation_number)
       if (err.code === "23505" && attempt < maxRetries) {
-        console.warn(`[quotations] Trùng quotation_number (${quotation_number}), thử lại lần ${attempt + 1}...`);
+        logger.warn({ quotation_number, attempt }, `[quotations] Trùng quotation_number, thử lại lần ${attempt + 1}...`);
         continue;
       }
       throw err;
@@ -140,26 +138,19 @@ quotationsRouter.patch("/:id", validate(updateQuotationSchema), async (req, res)
   patch.subtotal = subtotal;
   patch.discount = numDiscount;
   patch.total = total;
-  patch.updated_at = new Date().toISOString();
 
   const oldStatus = existing.status;
   const updated = await db.updateById("quotations", req.params.id, patch);
 
   // If status transitions to 'sent', log a lead activity
   if (updated && patch.status === "sent" && oldStatus !== "sent") {
-    try {
-      await db.insert("lead_activities", {
-        id: uuid(),
-        lead_id: existing.lead_id,
-        admin_id: req.user?.sub ?? null,
-        activity_type: "quotation_sent",
-        body: `Đã gửi báo giá ${existing.quotation_number} (Tổng: ${total.toLocaleString("vi-VN")} đ)`,
-        metadata: { quotation_id: existing.id, quotation_number: existing.quotation_number, total },
-        created_at: new Date().toISOString(),
-      });
-    } catch (err) {
-      console.warn("Failed to log quotation_sent lead_activity:", err);
-    }
+    await logLeadActivity({
+      leadId: existing.lead_id,
+      adminId: req.user?.sub ?? null,
+      type: "quotation_sent",
+      body: `Đã gửi báo giá ${existing.quotation_number} (Tổng: ${total.toLocaleString("vi-VN")} đ)`,
+      metadata: { quotation_id: existing.id, quotation_number: existing.quotation_number, total },
+    });
   }
 
   res.json(updated);

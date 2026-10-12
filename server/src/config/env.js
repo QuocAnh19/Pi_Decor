@@ -31,6 +31,9 @@ const envSchema = z
       .enum(["disable", "require", "verify-full"])
       .optional(),
     DB_SSL_CA: z.string().optional(),
+    LOG_LEVEL: z
+      .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+      .default("info"),
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
     CLOUDINARY_API_KEY: z.string().optional(),
     CLOUDINARY_API_SECRET: z.string().optional(),
@@ -76,18 +79,18 @@ const envSchema = z
 export function validateEnv(source = process.env) {
   const result = envSchema.safeParse(source);
   if (!result.success) {
-    console.error("================================================================");
-    console.error("[FATAL STARTUP ERROR] Cấu hình biến môi trường không hợp lệ:");
+    process.stderr.write("================================================================\n");
+    process.stderr.write("[FATAL STARTUP ERROR] Cấu hình biến môi trường không hợp lệ:\n");
     for (const issue of result.error.issues) {
-      console.error(`  - ${issue.path.join(".")}: ${issue.message}`);
+      process.stderr.write(`  - ${issue.path.join(".")}: ${issue.message}\n`);
     }
 
     const hasJwtError = result.error.issues.some((i) => i.path.includes("JWT_SECRET"));
     if (hasJwtError) {
-      console.error("\nHướng dẫn tạo JWT_SECRET ngẫu nhiên an toàn (tối thiểu 32 ký tự):");
-      console.error('  node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+      process.stderr.write("\nHướng dẫn tạo JWT_SECRET ngẫu nhiên an toàn (tối thiểu 32 ký tự):\n");
+      process.stderr.write('  node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"\n');
     }
-    console.error("================================================================");
+    process.stderr.write("================================================================\n");
     process.exit(1);
   }
   return result.data;

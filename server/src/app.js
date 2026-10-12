@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 
 import { env } from "./config/env.js";
 import { pool } from "./config/database.js";
+import { httpLogger, logger } from "./config/logger.js";
 import { hasCloudinary } from "./utils/uploadImage.js";
 import { loginLimiter } from "./middlewares/rateLimiters.js";
 import { leadsRouter } from "./routes/leads/index.js";
@@ -25,6 +26,9 @@ export const app = express();
 
 // Thiết lập trust proxy để rate limiting và log IP chuẩn xác sau reverse proxy (Render, Railway, Nginx)
 app.set("trust proxy", env.TRUST_PROXY);
+
+// Ghi log request với pino-http kèm request ID và redact thông tin nhạy cảm
+app.use(httpLogger);
 
 // Security headers (X-Content-Type-Options, X-Frame-Options, gỡ bỏ X-Powered-By)
 app.use(helmet());
@@ -105,8 +109,14 @@ app.use((req, res) => {
 });
 
 // eslint-disable-next-line no-unused-vars
-app.use((err, _req, res, _next) => {
-  console.error("[error-handler]", err);
+app.use((err, req, res, _next) => {
+  const reqId = req.id || req.headers?.["x-request-id"];
+  if (req.log) {
+    req.log.error({ reqId, err }, err.message || "Unhandled server error");
+  } else {
+    logger.error({ reqId, err }, err.message || "Unhandled server error");
+  }
+
   if (err && err.code === "LIMIT_FIELD_VALUE") {
     return res.status(400).json({ message: "Kích thước trường dữ liệu quá lớn." });
   }

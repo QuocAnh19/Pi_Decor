@@ -1,12 +1,7 @@
-import { v4 as uuid } from "uuid";
 import { db } from "../config/database.js";
 import { parseArrayField } from "../utils/parseArrayField.js";
-import {
-  uploadImage,
-  publicUrlFor,
-  deleteImageFile,
-  deleteMultipleImageFiles,
-} from "../utils/uploadImage.js";
+import { uploadImage, publicUrlFor } from "../utils/uploadImage.js";
+import { cleanupRemovedMedia, deleteMediaOf } from "./media.service.js";
 
 export const projectUpload = uploadImage.fields([
   { name: "image", maxCount: 1 },
@@ -73,7 +68,7 @@ export function normalizeProjectInput(raw = {}, files = {}, req = null) {
 }
 
 /**
- * Tạo mới dự án và lưu vào DB với đầy đủ timestamps.
+ * Tạo mới dự án và lưu vào DB (id, created_at, updated_at do DB tự quản lý).
  * @param {Record<string, any>} data
  * @param {Record<string, any>} [files]
  * @param {import("express").Request|null} [req]
@@ -100,8 +95,7 @@ export async function createProject(data = {}, files = {}, req = null) {
   const status = normalized.status || (published ? "active" : "draft");
   const price_tier = normalized.price_tier || "standard";
 
-  const project = {
-    id: uuid(),
+  const projectData = {
     venue_id: data.venue_id || null,
     title: rawTitle,
     wedding_date: data.wedding_date || null,
@@ -117,11 +111,9 @@ export async function createProject(data = {}, files = {}, req = null) {
     category_id: data.category_id || style_tags[0] || "piwedding",
     tag: data.tag || style_tags[1] || "Gia Tiên",
     price_tier,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   };
 
-  await db.insert("projects", project);
+  const project = await db.insert("projects", projectData);
   return project;
 }
 
@@ -150,19 +142,14 @@ export async function updateProject(id, data = {}, files = {}, req = null) {
   }
 
   // Dọn file ảnh bìa cũ trên đĩa/Cloudinary khi thay ảnh mới
-  if (patch.cover_image && existing.cover_image && patch.cover_image !== existing.cover_image) {
-    await deleteImageFile(existing.cover_image);
+  if (patch.cover_image !== undefined) {
+    await cleanupRemovedMedia(existing.cover_image, patch.cover_image);
   }
 
   // Dọn những ảnh đã bị loại bỏ khỏi gallery
-  if (patch.gallery && Array.isArray(existing.gallery)) {
-    const removedImages = existing.gallery.filter((oldImg) => !patch.gallery.includes(oldImg));
-    if (removedImages.length > 0) {
-      await deleteMultipleImageFiles(removedImages);
-    }
+  if (patch.gallery !== undefined) {
+    await cleanupRemovedMedia(existing.gallery, patch.gallery);
   }
-
-  patch.updated_at = new Date().toISOString();
 
   const updated = await db.updateById("projects", id, patch);
   return updated;
@@ -183,12 +170,7 @@ export async function deleteProject(id) {
   }
 
   if (existing) {
-    if (existing.cover_image) {
-      await deleteImageFile(existing.cover_image);
-    }
-    if (Array.isArray(existing.gallery)) {
-      await deleteMultipleImageFiles(existing.gallery);
-    }
+    await deleteMediaOf(existing, "cover_image", "gallery");
   }
 
   return true;
