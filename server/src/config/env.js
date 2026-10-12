@@ -28,12 +28,9 @@ const envSchema = z
       .min(1, "DATABASE_URL không được để trống."),
     DB_POOL_MAX: z.coerce.number().int().positive().default(10),
     DB_SSL: z
-      .preprocess((val) => {
-        if (typeof val === "boolean") return val;
-        if (typeof val === "string") return val.toLowerCase() === "true" || val === "1";
-        return false;
-      }, z.boolean())
-      .default(false),
+      .enum(["disable", "require", "verify-full"])
+      .optional(),
+    DB_SSL_CA: z.string().optional(),
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
     CLOUDINARY_API_KEY: z.string().optional(),
     CLOUDINARY_API_SECRET: z.string().optional(),

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { v4 as uuid } from "uuid";
-import { db } from "../../config/database.js";
+import { db, pool } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 
 export const quotationsRouter = Router();
@@ -32,20 +32,24 @@ function calculateTotals(items = [], discountInput = 0) {
 }
 
 /**
- * Generates sequential BG-YYYY-XXXX quotation number.
- * Trade-off note: Sequence counting is calculated from existing records in memory/db.
- * Acceptable for single-admin operations; race conditions are negligible in this scope.
+ * Sinh số báo giá tuần tự nguyên tử theo định dạng BG-YYYY-XXXX.
+ * Sử dụng bảng quotation_counters với upsert + returning để tránh race condition
+ * và không bị trùng số khi xoá bản ghi nháp.
  */
 async function generateQuotationNumber() {
   const currentYear = new Date().getFullYear();
-  const prefix = `BG-${currentYear}-`;
-  const quotations = await db.get("quotations");
-  
-  const sameYearQuotes = quotations.filter((q) => q.quotation_number && q.quotation_number.startsWith(prefix));
-  const nextSeq = sameYearQuotes.length + 1;
+  const { rows } = await pool.query(
+    `insert into quotation_counters (year, last_seq)
+     values ($1, 1)
+     on conflict (year) do update
+     set last_seq = quotation_counters.last_seq + 1
+     returning last_seq`,
+    [currentYear]
+  );
+  const nextSeq = rows[0].last_seq;
   const seqPadded = String(nextSeq).padStart(4, "0");
 
-  return `${prefix}${seqPadded}`;
+  return `BG-${currentYear}-${seqPadded}`;
 }
 
 // POST /api/quotations — Create new quotation for a lead
@@ -56,33 +60,45 @@ quotationsRouter.post("/", async (req, res) => {
     return res.status(400).json({ message: "Thiếu lead_id hoặc danh sách hạng mục báo giá (items)." });
   }
 
-  const leads = await db.get("leads");
-  const existingLead = leads.find((l) => l.id === lead_id);
+  const existingLead = await db.findById("leads", lead_id);
   if (!existingLead) {
     return res.status(404).json({ message: "Không tìm thấy lead tương ứng." });
   }
 
   const { items: calculatedItems, subtotal, discount: numDiscount, total } = calculateTotals(items, discount);
-  const quotation_number = await generateQuotationNumber();
 
-  const quotation = {
-    id: uuid(),
-    lead_id,
-    admin_id: req.user?.sub ?? null,
-    quotation_number,
-    items: calculatedItems,
-    subtotal,
-    discount: numDiscount,
-    total,
-    status: "draft",
-    valid_until: valid_until ?? null,
-    notes: notes ?? null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  };
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const quotation_number = await generateQuotationNumber();
 
-  await db.insert("quotations", quotation);
-  res.status(201).json(quotation);
+    const quotation = {
+      id: uuid(),
+      lead_id,
+      admin_id: req.user?.sub ?? null,
+      quotation_number,
+      items: calculatedItems,
+      subtotal,
+      discount: numDiscount,
+      total,
+      status: "draft",
+      valid_until: valid_until ?? null,
+      notes: notes ?? null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    try {
+      await db.insert("quotations", quotation);
+      return res.status(201).json(quotation);
+    } catch (err) {
+      // Mã lỗi 23505: unique_violation trong Postgres (trùng quotation_number)
+      if (err.code === "23505" && attempt < maxRetries) {
+        console.warn(`[quotations] Trùng quotation_number (${quotation_number}), thử lại lần ${attempt + 1}...`);
+        continue;
+      }
+      throw err;
+    }
+  }
 });
 
 // GET /api/quotations — List all quotations, optionally filtered by ?lead_id=...

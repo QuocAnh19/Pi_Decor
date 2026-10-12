@@ -22,13 +22,14 @@ Cách tạo role này: xem hướng dẫn từng bước ngay trong file
 `database/migrations/` vì nó chứa chỗ để điền mật khẩu — không được để
 `migrate.js` tự động chạy (và tự động commit) một file có mật khẩu.
 
-## 2. Kết nối luôn mã hoá (TLS)
+## 2. Kết nối luôn mã hoá & xác thực chứng chỉ (TLS / SSL)
 
-- `src/config/database.pg.js` bật `ssl: { rejectUnauthorized: false }` cho
-  mọi connection string không phải `localhost` — bắt buộc với Neon/Supabase
-  (họ chỉ chấp nhận kết nối TLS).
-- Luôn dùng `?sslmode=require` trong connection string Neon (xem ví dụ
-  trong `.env.example`).
+- `src/config/database.pg.js` hỗ trợ cấu hình SSL an toàn qua biến `DB_SSL`:
+  - `verify-full` (mặc định cho remote host): Bật TLS và xác thực toàn diện chứng chỉ CA (`rejectUnauthorized: true`), ngăn chặn hoàn toàn nguy cơ tấn công Man-in-the-Middle (MITM).
+  - `require`: Mã hóa kết nối nhưng bỏ qua kiểm tra CA (`rejectUnauthorized: false`). Chỉ sử dụng khi bắt buộc và sẽ in cảnh báo bảo mật rõ ràng.
+  - `disable`: Tắt SSL (mặc định khi kết nối tới `localhost`, `127.0.0.1` hoặc container `postgres` trong Docker).
+- Hỗ trợ biến `DB_SSL_CA` để truyền chứng chỉ CA tùy chỉnh (chuỗi PEM hoặc đường dẫn file cert) cho các nhà cung cấp sử dụng private CA.
+- Luôn dùng `?sslmode=require` hoặc `?sslmode=verify-full` trong connection string Neon/Supabase.
 - Không tắt SSL để "cho dễ debug" kể cả ở staging — dữ liệu `leads` chứa số
   điện thoại, email khách hàng thật.
 

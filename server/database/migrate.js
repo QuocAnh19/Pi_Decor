@@ -39,11 +39,22 @@ async function main() {
     process.exit(1);
   }
 
+  const isLocalHost = ["localhost", "127.0.0.1", "postgres"].some((h) =>
+    process.env.DATABASE_URL.includes(h)
+  );
+  let ssl = false;
+  const sslMode = process.env.DB_SSL;
+  if (sslMode === "disable") {
+    ssl = false;
+  } else if (sslMode === "require") {
+    ssl = { rejectUnauthorized: false };
+  } else if (sslMode === "verify-full" || (!sslMode && !isLocalHost)) {
+    ssl = { rejectUnauthorized: true };
+  }
+
   const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL.includes("localhost")
-      ? false
-      : { rejectUnauthorized: false }, // required by Neon / Supabase pooled connections
+    ssl,
   });
 
   const files = (await readdir(MIGRATIONS_DIR))

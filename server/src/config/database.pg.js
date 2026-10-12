@@ -1,37 +1,70 @@
+import fs from "fs";
 import pg from "pg";
 import { env } from "./env.js";
 
 /**
- * config/database.pg.js
- * ───────────────────────
- * Postgres implementation of the exact same db.get/set/insert/update/remove
- * interface that config/database.js originally shipped with (JSON file on
- * disk). Every route file imports `db` from config/database.js and never
- * touches this file or a SQL string directly — see database/README.md for
- * why the SQL itself also lives in its own folder instead of inside route
- * files or components.
- *
- * Connects to any standard Postgres connection string: Neon, Supabase
- * (direct or pooled connection), Render Postgres, or a local `postgres`
- * Docker container for dev. Uses `pg`'s built-in connection pool — same
- * role as Ecovera's mysql2 promise pool (Mục 2.1 of the technical
- * proposal), just for Postgres instead of MySQL.
- *
- * IMPORTANT: run `npm run migrate` (database/migrate.js) against
- * DATABASE_URL at least once before starting the server with this file
- * active — it only ever reads/writes rows, it never creates tables.
+ * Phân tích cấu hình SSL an toàn dựa trên env.DB_SSL và host cơ sở dữ liệu.
+ * Mặc định: tắt SSL nếu host là localhost/127.0.0.1/postgres (docker dev),
+ * ngược lại bật verify-full (rejectUnauthorized: true) để chống tấn công MITM.
  */
+function resolveSslConfig() {
+  let host = "";
+  try {
+    const url = new URL(env.DATABASE_URL);
+    host = url.hostname;
+  } catch {
+    const match = env.DATABASE_URL.match(/@([^:/]+)/);
+    host = match ? match[1] : "";
+  }
+
+  const isLocalHost = ["localhost", "127.0.0.1", "postgres"].includes(host.toLowerCase());
+
+  let sslMode = env.DB_SSL;
+  if (!sslMode) {
+    sslMode = isLocalHost ? "disable" : "verify-full";
+  }
+
+  if (sslMode === "disable") {
+    return false;
+  }
+
+  if (sslMode === "require") {
+    console.warn(
+      "[database.pg.js] CẢNH BÁO: Đang sử dụng DB_SSL='require' (rejectUnauthorized: false). " +
+      "Kết nối được mã hóa nhưng không xác thực chứng chỉ máy chủ (nguy cơ MITM). " +
+      "Khuyến nghị chuyển sang 'verify-full' trên môi trường production."
+    );
+    const sslConfig = { rejectUnauthorized: false };
+    if (env.DB_SSL_CA) {
+      applyCa(sslConfig, env.DB_SSL_CA);
+    }
+    return sslConfig;
+  }
+
+  // Chế độ verify-full (rejectUnauthorized: true) — an toàn chống tấn công MITM
+  const sslConfig = { rejectUnauthorized: true };
+  if (env.DB_SSL_CA) {
+    applyCa(sslConfig, env.DB_SSL_CA);
+  }
+  return sslConfig;
+}
+
+function applyCa(sslConfig, caInput) {
+  try {
+    const trimmed = caInput.trim();
+    if (fs.existsSync(trimmed)) {
+      sslConfig.ca = fs.readFileSync(trimmed, "utf-8");
+    } else {
+      sslConfig.ca = trimmed;
+    }
+  } catch (err) {
+    console.error("[database.pg.js] Lỗi khi nạp DB_SSL_CA:", err.message);
+  }
+}
 
 const pool = new pg.Pool({
   connectionString: env.DATABASE_URL,
-  // Neon and Supabase both terminate TLS with a certificate that Node's
-  // default trust store can't always chain to. rejectUnauthorized: false
-  // keeps the connection encrypted while skipping that chain check — the
-  // same trade-off Ecovera's README documents for its own hosted MySQL.
-  // Skip it for a local `postgres` container (no TLS at all).
-  ssl: env.DATABASE_URL?.includes("localhost")
-    ? false
-    : { rejectUnauthorized: false },
+  ssl: resolveSslConfig(),
 
   // ── Security / resilience limits (see database/SECURITY.md §3) ────────
   // Cap how many connections this one server instance can open — Neon/
@@ -125,6 +158,7 @@ const TABLES = {
   refresh_tokens: [
     "id", "admin_id", "token_hash", "expires_at", "revoked_at", "created_at",
   ],
+  quotation_counters: ["year", "last_seq"],
 };
 
 // jsonb columns need JSON.stringify() before going over the wire; pg does
@@ -349,6 +383,34 @@ export const db = {
       values
     );
     return rows[0].n;
+  },
+
+  /**
+   * Tìm 1 bản ghi theo ID (trả về row hoặc null).
+   */
+  findById: async (table, id) => {
+    assertKnownTable(table);
+    const { rows } = await pool.query(
+      `select * from ${table} where id = $1 limit 1`,
+      [id]
+    );
+    return rows[0] ?? null;
+  },
+
+  /**
+   * Tìm 1 bản ghi theo một cột và giá trị cụ thể (trả về row hoặc null).
+   */
+  findOneBy: async (table, column, value) => {
+    assertKnownTable(table);
+    const allowedCols = TABLES[table];
+    if (!allowedCols.includes(column)) {
+      throw new Error(`[database.pg.js] Cột không hợp lệ: "${column}" cho bảng "${table}".`);
+    }
+    const { rows } = await pool.query(
+      `select * from ${table} where ${column} = $1 limit 1`,
+      [value]
+    );
+    return rows[0] ?? null;
   },
 };
 

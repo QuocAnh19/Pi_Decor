@@ -60,7 +60,11 @@ database/
     ├── 0020_make_venue_id_nullable_in_projects.sql
     ├── 0021_add_missing_project_columns.sql
     ├── 0022_update_services_schema.sql
-    └── 0023_studio_assets_unique_name.sql
+    ├── 0023_studio_assets_unique_name.sql
+    ├── 0024_add_price_tier_to_projects.sql
+    ├── 0025_admins_role.sql
+    ├── 0025_quotation_counters.sql
+    └── 0026_studio_templates_columns.sql
 ```
 
 Each file is numbered and runs in that exact order — `0005_designs.sql`
@@ -82,6 +86,7 @@ having to open the file.
 | `media_assets`            | `utils/uploadImage.js`               | Track uploaded images/assets across entity types |
 | `lead_activities`         | `routes/leads/index.js`              | Timeline activities and status logs for leads |
 | `quotations`              | `routes/quotations/index.js`         | Quotation records generated for leads |
+| `quotation_counters`      | `routes/quotations/index.js`         | Atomic year-based sequence counters for quotation numbering |
 | `testimonials`            | `routes/testimonials/index.js`       | Customer testimonials and moderation status |
 | `studio_templates`        | `routes/studio/index.js`             | Interactive studio canvas background templates |
 | `studio_slot_definitions` | `routes/studio/index.js`             | Template slot position & type definitions |

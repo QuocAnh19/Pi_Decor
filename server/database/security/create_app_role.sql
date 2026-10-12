@@ -43,7 +43,10 @@ grant usage on schema public to pidecor_app;
 -- exactly the tables config/database.pg.js knows about — never
 -- schema_migrations (migration history is not the app's business).
 grant select, insert, update, delete
-  on admins, leads, designs, materials, services, venues, projects
+  on admins, leads, designs, materials, services, venues, projects,
+     media_assets, lead_activities, quotations, testimonials,
+     studio_templates, studio_slot_definitions, studio_assets, studio_slot_rules,
+     refresh_tokens, quotation_counters
   to pidecor_app;
 
 -- New tables added by a future migration are NOT automatically visible to
@@ -66,5 +69,8 @@ revoke create on schema public from pidecor_app;
 -- standing access to these tables either. Neon/Supabase project defaults
 -- are already reasonably locked down, but this makes the intent explicit
 -- regardless of provider defaults.
-revoke all on admins, leads, designs, materials, services, venues, projects
+revoke all on admins, leads, designs, materials, services, venues, projects,
+  media_assets, lead_activities, quotations, testimonials,
+  studio_templates, studio_slot_definitions, studio_assets, studio_slot_rules,
+  refresh_tokens, quotation_counters
   from public;
