@@ -105,7 +105,7 @@ async function seed() {
 
   // Bản đồ dự án đã thực hiện (PiDecor_MappingProject.md, mốc M1) — 1 venue
   // mẫu để demo pin + click-to-show-projects ngay. Đây là DỮ LIỆU DEMO —
-  // thay bằng địa điểm/dự án thật của bạn qua API /api/admin/venues trước khi lên production.
+  // thay bằng địa điểm/dự án thật của bạn qua API /api/venues trước khi lên production.
   const venues = await db.get("venues");
   if (venues.length <= 1) {
     const seedVenues = [

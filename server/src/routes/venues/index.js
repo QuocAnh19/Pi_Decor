@@ -1,9 +1,8 @@
-import { v4 as uuid } from "uuid";
 import { db } from "../../config/database.js";
 import { verifyToken, requireAdmin } from "../../middlewares/verifyToken.js";
 import { createVenueSchema, updateVenueSchema } from "../../schemas/venues.schema.js";
-import { deleteImageFile, deleteMultipleImageFiles } from "../../utils/uploadImage.js";
 import { createCrudRouter } from "../../utils/crudRouterFactory.js";
+import { projectUpload, createProject } from "../../services/projects.service.js";
 
 /**
  * routes/venues — implements Mục 2 & 5 of PiDecor_MappingProject.md.
@@ -45,6 +44,14 @@ export const venuesRouter = createCrudRouter({
     }
     return list;
   },
+  beforeDelete: async (venue) => {
+    // Migration 0009 định nghĩa FK projects.venue_id ON DELETE CASCADE.
+    // Migration 0020 đã cho phép venue_id NULL để các dự án (Lookbook, Gia Tiên) có thể
+    // tồn tại độc lập mà không bắt buộc phải thuộc về địa điểm nào.
+    // Để việc xóa địa điểm không làm mất vĩnh viễn các dự án (vốn là portfolio quý giá),
+    // ta gán venue_id = NULL cho các dự án liên quan trước khi xóa địa điểm.
+    await db.query("UPDATE projects SET venue_id = NULL WHERE venue_id = $1", [venue.id]);
+  },
 });
 
 // GET /api/venues/search?q= — autocomplete for the quick-search box on the
@@ -77,74 +84,18 @@ venuesRouter.get("/:id", async (req, res) => {
 // ── Admin Project Sub-routes under Venues ─────────────────────────────────────
 
 // POST /api/venues/:id/projects — add a case study under a venue.
-venuesRouter.post("/:id/projects", verifyToken, requireAdmin, async (req, res) => {
+venuesRouter.post("/:id/projects", verifyToken, requireAdmin, projectUpload, async (req, res, next) => {
   const venues = await db.get("venues");
   if (!venues.some((v) => v.id === req.params.id)) {
     return res.status(404).json({ message: "Không tìm thấy địa điểm." });
   }
-  const { title, wedding_date, style_tags, cover_image, gallery, lead_id, published, price_tier } = req.body ?? {};
-  if (!title) return res.status(400).json({ message: "Thiếu tên dự án." });
-
-  let finalPriceTier = "standard";
-  if (price_tier !== undefined && price_tier !== null && price_tier !== "") {
-    if (!["standard", "premium"].includes(price_tier)) {
-      return res.status(400).json({ message: "Hạng mục giá không hợp lệ." });
+  try {
+    const project = await createProject({ ...(req.body ?? {}), venue_id: req.params.id }, req.files, req);
+    res.status(201).json(project);
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ message: err.message });
     }
-    finalPriceTier = price_tier;
+    next(err);
   }
-
-  const project = {
-    id: uuid(),
-    venue_id: req.params.id,
-    title,
-    wedding_date: wedding_date ?? null,
-    style_tags: Array.isArray(style_tags) ? style_tags : [],
-    cover_image: cover_image ?? null,
-    gallery: Array.isArray(gallery) ? gallery : [],
-    lead_id: lead_id ?? null,
-    published: published ?? true,
-    price_tier: finalPriceTier,
-  };
-  await db.insert("projects", project);
-  res.status(201).json(project);
-});
-
-venuesRouter.patch("/projects/:projectId", verifyToken, requireAdmin, async (req, res) => {
-  const projects = await db.get("projects");
-  const existing = projects.find((p) => p.id === req.params.projectId);
-  if (!existing) return res.status(404).json({ message: "Không tìm thấy dự án." });
-
-  const patch = req.body ?? {};
-
-  if ("price_tier" in patch && patch.price_tier !== undefined && patch.price_tier !== null && patch.price_tier !== "") {
-    if (!["standard", "premium"].includes(patch.price_tier)) {
-      return res.status(400).json({ message: "Hạng mục giá không hợp lệ." });
-    }
-  }
-
-  if (patch.cover_image && existing.cover_image && patch.cover_image !== existing.cover_image) {
-    await deleteImageFile(existing.cover_image);
-  }
-
-  const updated = await db.updateById("projects", req.params.projectId, patch);
-  res.json(updated);
-});
-
-venuesRouter.delete("/projects/:projectId", verifyToken, requireAdmin, async (req, res) => {
-  const projects = await db.get("projects");
-  const existing = projects.find((p) => p.id === req.params.projectId);
-
-  const removed = await db.removeById("projects", req.params.projectId);
-  if (!removed) return res.status(404).json({ message: "Không tìm thấy dự án." });
-
-  if (existing) {
-    if (existing.cover_image) {
-      await deleteImageFile(existing.cover_image);
-    }
-    if (Array.isArray(existing.gallery)) {
-      await deleteMultipleImageFiles(existing.gallery);
-    }
-  }
-
-  res.status(204).send();
 });

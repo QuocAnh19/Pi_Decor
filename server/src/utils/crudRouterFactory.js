@@ -20,6 +20,7 @@ import { uploadImage, publicUrlFor, deleteImageFile, deleteMultipleImageFiles } 
  * @param {Function} [options.transformOnCreate] - Optional hook (item, req) => transformedItem
  * @param {Function} [options.transformOnUpdate] - Optional hook (patch, existing, req) => transformedPatch
  * @param {Function} [options.transformOnList] - Optional hook (list, req) => transformedList
+ * @param {Function} [options.beforeDelete] - Optional hook (existing, req) => Promise<void>
  * @param {boolean|Function|Array} [options.createHandler] - Custom handler or false to omit POST /
  * @param {boolean|Function|Array} [options.listHandler] - Custom handler or false to omit GET /
  * @returns {import("express").Router}
@@ -34,6 +35,7 @@ export function createCrudRouter({
   transformOnCreate,
   transformOnUpdate,
   transformOnList,
+  beforeDelete,
   createHandler,
   listHandler,
 } = {}) {
@@ -148,16 +150,23 @@ export function createCrudRouter({
   });
 
   // ── DELETE /:id ───────────────────────────────────────────────────────
-  router.delete("/:id", verifyToken, requireAdmin, async (req, res) => {
-    const all = await db.get(table);
-    const existing = all.find((item) => String(item.id) === String(req.params.id));
+  router.delete("/:id", verifyToken, requireAdmin, async (req, res, next) => {
+    try {
+      const all = await db.get(table);
+      const existing = all.find((item) => String(item.id) === String(req.params.id));
+      if (!existing) {
+        return res.status(404).json({ message: notFoundMessage });
+      }
 
-    const removed = await db.removeById(table, req.params.id);
-    if (!removed) {
-      return res.status(404).json({ message: notFoundMessage });
-    }
+      if (typeof beforeDelete === "function") {
+        await beforeDelete(existing, req);
+      }
 
-    if (existing) {
+      const removed = await db.removeById(table, req.params.id);
+      if (!removed) {
+        return res.status(404).json({ message: notFoundMessage });
+      }
+
       if (existing.image_url) await deleteImageFile(existing.image_url);
       if (existing.cover_image) await deleteImageFile(existing.cover_image);
       if (existing.avatar_url) await deleteImageFile(existing.avatar_url);
@@ -169,10 +178,10 @@ export function createCrudRouter({
           : [];
       if (photos.length > 0) await deleteMultipleImageFiles(photos);
 
-      if (Array.isArray(existing.gallery)) await deleteMultipleImageFiles(existing.gallery);
+      res.status(204).send();
+    } catch (err) {
+      next(err);
     }
-
-    res.status(204).send();
   });
 
   return router;
