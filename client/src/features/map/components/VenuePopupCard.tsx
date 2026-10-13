@@ -10,7 +10,6 @@ import {
   ArrowsPointingOutIcon,
 } from "@heroicons/react/24/outline";
 import type { VenueDetail, Project, CategoryPortfolioItem } from "../../../lib/types";
-import { categoryPortfolio } from "../../../lib/content";
 import { formatDate } from "../../../lib/formatters";
 import { ProjectAlbumModal } from "../../projects";
 import styles from "./VenuePopupCard.module.scss";
@@ -35,39 +34,35 @@ export function VenuePopupCard({ venue, loading, onClose }: VenuePopupCardProps)
 
   const handleOpenProject = (project: Project) => {
     if (!venue) return;
-    const matchingStatic = categoryPortfolio.find(
-      (c) => c.id === project.id || c.title?.toLowerCase() === project.title?.toLowerCase()
-    );
 
     // Build rich gallery list
     let galleryList: (string | { url: string; span?: string })[] = [];
     if (Array.isArray(project.gallery) && project.gallery.length > 0) {
       galleryList = project.gallery;
-    } else if (matchingStatic?.gallery && matchingStatic.gallery.length > 0) {
-      galleryList = matchingStatic.gallery;
     } else if (project.cover_image) {
       galleryList = [project.cover_image];
-    } else if (matchingStatic?.src) {
-      galleryList = [matchingStatic.src];
     }
+
+    const firstGalleryUrl =
+      typeof galleryList[0] === "string" ? galleryList[0] : galleryList[0]?.url;
 
     const portfolioItem: CategoryPortfolioItem = {
       id: project.id,
       title: project.title,
-      tag: project.style_tags?.[0] || project.tag || matchingStatic?.tag || "Dự án thực tế",
+      tag: project.tag || project.style_tags?.[1] || project.style_tags?.[0] || "Dự án thực tế",
       src:
         project.cover_image ||
-        matchingStatic?.src ||
-        (typeof galleryList[0] === "string" ? galleryList[0] : galleryList[0]?.url) ||
+        firstGalleryUrl ||
         "/images/portfolio/piwedding-gia-tien-1.jpg",
-      categoryId: project.category_id || matchingStatic?.categoryId || "piwedding",
+      categoryId: project.category_id || project.style_tags?.[0] || "piwedding",
       location: venue.name
         ? `${venue.name}${venue.city ? ` · ${venue.city}` : ""}`
-        : project.location || matchingStatic?.location || undefined,
+        : project.location || undefined,
       gallery: galleryList,
     };
     setSelectedProject(portfolioItem);
   };
+
 
   if (loading || !venue) {
     return createPortal(

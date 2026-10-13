@@ -191,3 +191,66 @@
   font-size: $text-xs;
   color: rgba(255, 255, 255, 0.8);
 }
+
+.skeletonCard {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border-radius: $radius-l;
+  background: linear-gradient(90deg, #ede7df 25%, #f5efe8 50%, #ede7df 75%);
+  background-size: 200% 100%;
+  animation: shimmerLookbook 1.5s infinite;
+}
+
+@keyframes shimmerLookbook {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.errorBox {
+  padding: $space-8 $space-6;
+  text-align: center;
+  background: #fdf6f0;
+  border: 1px solid #f0d5c0;
+  border-radius: $radius-l;
+  margin-top: $space-4;
+}
+
+.errorMessage {
+  font-size: $text-sm;
+  color: #a1421f;
+  margin-bottom: $space-4;
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: $space-2 20px;
+  background: $color-accent;
+  color: #ffffff;
+  border-radius: $radius-pill;
+  font-size: $text-sm;
+  font-weight: $weight-medium;
+  cursor: pointer;
+  transition: opacity $transition-default;
+
+  &:hover {
+    opacity: 0.88;
+  }
+}
+
+.emptyBox {
+  padding: $space-12 $space-6;
+  text-align: center;
+  background: rgba(251, 247, 241, 0.6);
+  border: 1px dashed rgba(161, 92, 46, 0.25);
+  border-radius: $radius-l;
+  color: $color-ink-muted;
+  font-size: $text-sm;
+  grid-column: 1 / -1;
+}
+

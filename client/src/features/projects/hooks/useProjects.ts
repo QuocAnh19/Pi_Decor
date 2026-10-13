@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../../../lib/authContext";
 import { api } from "../../../lib/api";
-import { categoryPortfolio } from "../../../lib/content";
 import type { ProjectPayload } from "../../../lib/types";
 import {
   ProjectItem,
@@ -32,33 +31,17 @@ export function useProjects(selectedVenueId?: string | null) {
     setError(null);
     try {
       const data = token ? await api.getProjectsAdmin() : await api.getProjects();
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         setProjects(data.map(dbToProjectItem));
-      } else {
-        const fallback: ProjectItem[] = categoryPortfolio.map((item: any, idx: number) => ({
-          id: String(item.id),
-          categoryId: item.categoryId || "piwedding",
-          tag: item.tag || "Gia Tiên",
-          title: item.title || "Dự án mới",
-          location: item.location || "Đà Nẵng",
-          src: item.src || "/images/portfolio/piwedding-gia-tien-1.jpg",
-          gallery: Array.isArray(item.gallery) ? item.gallery : [],
-          description: item.description || `Concept trang trí ${item.tag} ấn tượng tại ${item.location}.`,
-          date: item.date || "2026-03-19",
-          budget: item.budget || "Thỏa thuận",
-          status: "active",
-          priceTier: "standard",
-          createdAt: Date.now() - idx * 86400000,
-        }));
-        setProjects(fallback);
       }
     } catch (err) {
       console.error("Failed to load projects from DB:", err);
-      setError("Không thể nạp dữ liệu từ máy chủ. Đang hiển thị bản dữ liệu xem trước.");
+      setError("Không thể nạp dữ liệu từ máy chủ. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
   }, [token]);
+
 
   useEffect(() => {
     loadProjects();

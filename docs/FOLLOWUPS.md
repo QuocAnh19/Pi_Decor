@@ -73,8 +73,9 @@ Dưới đây là ma trận đối chiếu cấu trúc schema PostgreSQL (qua c�
 - **Mô tả**: Sau khi dọn dẹp các hàm client API thừa không có component nào gọi, các endpoint backend tương ứng sau đây hiện không còn client consumer trong codebase hiện tại:
   1. `GET /api/leads/:leadId/activities` - Lấy lịch sử hoạt động của lead (tương ứng `getLeadActivities`).
   2. `POST /api/leads/:leadId/activities` - Ghi hoạt động lead thủ công (tương ứng `addLeadActivity`).
-  3. `GET /api/services` - Lấy danh sách dịch vụ động (tương ứng `getServices`; client đang dùng dữ liệu tĩnh `serviceCategories` từ `src/lib/content.ts`).
+  3. `GET /api/services` - *(Đã kích hoạt ở P12)*: Client đã kết nối lại qua `api.getServices()` để hiển thị bento grid động trên trang chủ.
   4. `GET /api/quotations/:id` - Lấy chi tiết báo giá theo ID (tương ứng `getQuotation`; client chỉ dùng `GET /api/quotations?lead_id=...`).
+
   5. `DELETE /api/quotations/:id` - Xóa báo giá (tương ứng `deleteQuotation`).
   6. `POST /api/studio/templates` - Tạo mới template studio đơn lẻ (tương ứng `createStudioTemplate`; client dùng `publishStudioTemplate` qua `PUT /api/studio/templates/:id/publish`).
   7. `POST /api/studio/templates/:templateId/slots` - Tạo slot đơn lẻ (tương ứng `createStudioSlotDefinition`).

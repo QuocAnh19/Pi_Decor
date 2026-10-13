@@ -314,3 +314,14 @@
     background: $color-event-accent;
   }
 }
+
+.emptyBox {
+  padding: 40px 20px;
+  text-align: center;
+  background: rgba(251, 247, 241, 0.6);
+  border: 1px dashed #d5c8b8;
+  border-radius: $radius-m;
+  color: #7a6e60;
+  font-size: 0.9375rem;
+  margin: 12px 0;
+}

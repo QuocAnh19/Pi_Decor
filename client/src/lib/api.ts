@@ -10,6 +10,7 @@ import type {
   ProjectPayload,
   Quotation,
   QuotationPayload,
+  ServiceCategory,
   StudioAssetRow,
   StudioSlotDefinitionRow,
   StudioSlotRuleRow,
@@ -82,8 +83,10 @@ export const api = {
   deleteMaterial: (id: string) =>
     authRequest<void>(`/materials/${id}`, { method: "DELETE" }),
 
+  getServices: () => request<ServiceCategory[]>("/services"),
 
   // ── Map Venues & Projects ───────────────────────────────────────────
+
   getVenues: () => request<Venue[]>("/venues"),
 
   getVenue: (id: string) => request<VenueDetail>(`/venues/${id}`),

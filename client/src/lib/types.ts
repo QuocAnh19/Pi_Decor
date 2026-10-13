@@ -16,11 +16,14 @@ export interface ServiceCategory {
   icon: string; // Heroicons icon name
   accent: ServiceAccent;
   items: string[]; // sub-services, e.g. ["Đầy tháng", "Thôi nôi", ...]
-  href?: string; // e.g. "/studio" for PiWedding's Interactive Studio
+  href?: string | null; // e.g. "/studio" for PiWedding's Interactive Studio
   ctaLabel: string;
   featured?: boolean; // gets the large bento slot
   /** Full-bleed card background photo. Path relative to /public, e.g. "/images/service-pikids.jpg". */
   cover: string | null;
+  order?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /**
@@ -36,7 +39,7 @@ export interface GalleryItemObject {
 export interface CategoryPortfolioItem {
   id: string;
   categoryId: string; // ServiceCategory.id
-  tag: string; // must match one of that category's `items`
+  tag: string; // must match one of that category's items
   title: string;
   location?: string;
   /** Path relative to /public. Leave null until the real photo is dropped in. */
@@ -48,12 +51,6 @@ export interface CategoryPortfolioItem {
   status?: string;
 }
 
-export interface Testimonial {
-  id: string;
-  quote: string;
-  author: string;
-  role: string;
-}
 
 
 export interface HeroMedia {
@@ -98,8 +95,9 @@ export interface Project {
   wedding_date: string | null;
   style_tags: string[];
   cover_image: string | null;
-  gallery: string[];
+  gallery: (string | GalleryItemObject)[];
   lead_id: string | null;
+
   published: boolean;
   location?: string | null;
   description?: string | null;

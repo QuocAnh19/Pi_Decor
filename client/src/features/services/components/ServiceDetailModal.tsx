@@ -124,33 +124,40 @@ export function ServiceDetailModal({
             Hiển thị {filteredItems.length} dự án đã thực hiện
           </p>
 
-          <div className={styles.grid}>
-            {filteredItems.map((project) => (
-              <button
-                key={project.id}
-                type="button"
-                className={styles.projectCard}
-                onClick={() => setOpenProject(project)}
-              >
-                <span className={styles.projectMediaWrap}>
-                  <MediaSlot
-                    src={project.src}
-                    alt={project.title}
-                    label={project.title}
-                    className={styles.projectMedia}
-                  />
-                  <span className={styles.expandOverlay} aria-hidden="true">
-                    <Icons.ArrowsPointingOutIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+          {filteredItems.length === 0 ? (
+            <div className={styles.emptyBox}>
+              <p>Chưa có dự án nào trong mục này. Hãy liên hệ để Pi Decor thiết kế concept riêng cho bạn!</p>
+            </div>
+          ) : (
+            <div className={styles.grid}>
+              {filteredItems.map((project) => (
+                <button
+                  key={project.id}
+                  type="button"
+                  className={styles.projectCard}
+                  onClick={() => setOpenProject(project)}
+                >
+                  <span className={styles.projectMediaWrap}>
+                    <MediaSlot
+                      src={project.src}
+                      alt={project.title}
+                      label={project.title}
+                      className={styles.projectMedia}
+                    />
+                    <span className={styles.expandOverlay} aria-hidden="true">
+                      <Icons.ArrowsPointingOutIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
+                    </span>
+                    <span className={styles.projectTag}>{project.tag}</span>
                   </span>
-                  <span className={styles.projectTag}>{project.tag}</span>
-                </span>
-                <span className={styles.projectTitle}>{project.title}</span>
-                <span className={styles.projectLocation}>
-                  {project.location ?? "Việt Nam"}
-                </span>
-              </button>
-            ))}
-          </div>
+                  <span className={styles.projectTitle}>{project.title}</span>
+                  <span className={styles.projectLocation}>
+                    {project.location ?? "Việt Nam"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+
 
           <div className={styles.footer}>
             <Link
