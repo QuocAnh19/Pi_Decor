@@ -1,19 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../../lib/authContext";
-import { api } from "../../../lib/api";
 import type { Lead, LeadStatus } from "../../../lib/types";
+import { useLeadsQuery, useUpdateLeadStatusMutation } from "./leads.queries";
 
+/**
+ * Hook quản lý danh sách leads/khách hàng tiềm năng.
+ * Tích hợp TanStack Query và bảo toàn 100% interface trả về cho UI.
+ */
 export function useLeads() {
   const { token } = useAuth();
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [total, setTotal] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
   const [search, setSearch] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,48 +27,52 @@ export function useLeads() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const loadLeads = useCallback(() => {
-    if (!token) return;
-    setStatus("loading");
-    api
-      .getLeads({
-        page,
-        limit: 20,
-        q: debouncedSearch,
-        status: statusFilter,
-      })
-      .then((res) => {
-        setLeads(res.data);
-        setTotal(res.total);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, [token, page, debouncedSearch, statusFilter]);
+  const {
+    data: responseData,
+    isLoading,
+    isError,
+    refetch,
+  } = useLeadsQuery({
+    page,
+    limit: 20,
+    q: debouncedSearch,
+    status: statusFilter,
+    enabled: Boolean(token),
+  });
 
-  useEffect(() => {
-    loadLeads();
-  }, [loadLeads]);
+  const updateStatusMutation = useUpdateLeadStatusMutation();
+
+  const leads = responseData?.data ?? [];
+  const total = responseData?.total ?? 0;
+
+  const status: "loading" | "ready" | "error" = isLoading
+    ? "loading"
+    : isError
+      ? "error"
+      : "ready";
 
   const handleStatusChange = async (id: string, newStatus: LeadStatus) => {
     if (!token || updatingStatusId === id) return;
     setUpdatingStatusId(id);
 
-    // Optimistically update both leads array and selectedLead
-    setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status: newStatus } : l)));
-    setSelectedLead((prev) => (prev && prev.id === id ? { ...prev, status: newStatus } : prev));
-
     try {
-      await api.updateLeadStatus(id, newStatus);
+      await updateStatusMutation.mutateAsync({ id, status: newStatus });
+      if (selectedLead?.id === id) {
+        setSelectedLead({ ...selectedLead, status: newStatus });
+      }
     } catch (err) {
       console.error("Failed to update lead status:", err);
       setError(err instanceof Error ? err.message : "Không đổi được trạng thái, thử lại.");
-      loadLeads();
     } finally {
       setUpdatingStatusId(null);
     }
   };
 
   const totalPages = Math.max(1, Math.ceil(total / 20));
+
+  const loadLeads = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   return {
     leads,

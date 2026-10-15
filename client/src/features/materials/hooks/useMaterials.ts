@@ -1,14 +1,25 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "../../../lib/authContext";
-import { api } from "../../../lib/api";
 import type { MaterialItem } from "../../../lib/types";
+import {
+  useMaterialsQuery,
+  useCreateMaterialMutation,
+  useUpdateMaterialMutation,
+  useDeleteMaterialMutation,
+} from "./materials.queries";
 
+/**
+ * Hook quản lý vật liệu của admin.
+ * Sử dụng TanStack Query cho cache, refetch và optimistic updates; giữ nguyên interface trả về.
+ */
 export function useMaterials() {
   const { token } = useAuth();
-  const [materials, setMaterials] = useState<MaterialItem[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [error, setError] = useState<string | null>(null);
+  const { data: materials = [], isLoading, isError } = useMaterialsQuery();
+  const createMutation = useCreateMaterialMutation();
+  const updateMutation = useUpdateMaterialMutation();
+  const deleteMutation = useDeleteMaterialMutation();
 
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
@@ -16,23 +27,15 @@ export function useMaterials() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<MaterialItem | null>(null);
 
-  const loadMaterials = useCallback(() => {
-    return api
-      .getMaterials()
-      .then((data) => {
-        setMaterials(data);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, []);
-
-  useEffect(() => {
-    loadMaterials();
-  }, [loadMaterials]);
+  const status: "loading" | "ready" | "error" = isLoading
+    ? "loading"
+    : isError
+      ? "error"
+      : "ready";
 
   const filteredMaterials = useMemo(() => {
     return materials.filter((mat) => {
-      // 1. Filter by category
+      // 1. Lọc theo category
       if (selectedCategory !== "all") {
         if (selectedCategory === "fabric" && mat.category !== "fabric") return false;
         if (
@@ -56,7 +59,7 @@ export function useMaterials() {
           return false;
       }
 
-      // 2. Filter by search query
+      // 2. Lọc theo search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchName = mat.name?.toLowerCase().includes(q);
@@ -72,28 +75,25 @@ export function useMaterials() {
   const handleFormSubmit = async (formData: FormData) => {
     if (!token) return;
 
-    if (editingMaterial) {
-      await api.updateMaterial(editingMaterial.id, formData);
-    } else {
-      await api.createMaterial(formData);
+    try {
+      if (editingMaterial) {
+        await updateMutation.mutateAsync({ id: editingMaterial.id, formData });
+      } else {
+        await createMutation.mutateAsync(formData);
+      }
+      setFormOpen(false);
+      setEditingMaterial(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Lỗi khi lưu vật liệu.");
     }
-
-    setFormOpen(false);
-    setEditingMaterial(null);
-    await loadMaterials();
   };
 
   const handleDelete = async (mat: MaterialItem) => {
     if (!token) return;
-
-    setMaterials((prev) => prev.filter((m) => m.id !== mat.id));
-
     try {
-      await api.deleteMaterial(mat.id);
+      await deleteMutation.mutateAsync(mat.id);
     } catch (err) {
-      console.error("Failed to delete material:", err);
       setError(err instanceof Error ? err.message : "Lỗi khi xoá vật liệu.");
-      await loadMaterials();
     }
   };
 

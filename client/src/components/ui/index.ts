@@ -2,6 +2,7 @@ export { Button, ButtonLink } from "./Button";
 export { Badge } from "./Badge";
 export type { BadgeTone } from "./Badge";
 export { Toast } from "./Toast";
+export { GlobalToast } from "./GlobalToast";
 export { Container, Section, SectionHeader } from "./Layout";
 export { Modal } from "./Modal";
 export type { ModalProps } from "./Modal";

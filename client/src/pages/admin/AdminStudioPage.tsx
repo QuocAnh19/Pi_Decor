@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   PencilSquareIcon,
@@ -18,23 +18,27 @@ import {
   ConfirmDeleteModal,
   useConfirmDelete,
 } from "../../components/admin";
-import { AdminEditor } from "../../features/studio";
-import { api } from "../../lib/api";
+import {
+  AdminEditor,
+  useStudioTemplatesAdminQuery,
+  useUpdateStudioTemplateMutation,
+  useDeleteStudioTemplateMutation,
+} from "../../features/studio";
 import { useAuth } from "../../lib/authContext";
-import type { StudioTemplateRow } from "../../lib/types";
 import styles from "./AdminStudioPage.module.scss";
 
 /**
  * AdminStudioPage — route /admin/studio
- * Displays the Studio template management interface within AdminLayout.
- * Includes Header, Search bar, Status filters, Grid/Table views, and seamless transition to AdminEditor.
+ * Quản lý danh sách mẫu thiết kế Studio thông qua TanStack Query.
  */
 export function AdminStudioPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { token } = useAuth();
 
-  const [templates, setTemplates] = useState<StudioTemplateRow[]>([]);
-  const [loading, setLoading] = useState(false);
+  const query = useStudioTemplatesAdminQuery(Boolean(token));
+  const updateMutation = useUpdateStudioTemplateMutation();
+  const deleteMutation = useDeleteStudioTemplateMutation();
+
   const [filterStatus, setFilterStatus] = useState<"all" | "published" | "draft">("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
@@ -42,19 +46,8 @@ export function AdminStudioPage() {
   const isEditing = searchParams.get("mode") === "editor";
   const activeTemplateId = searchParams.get("templateId") || undefined;
 
-  const fetchTemplates = () => {
-    if (!token) return;
-    setLoading(true);
-    api
-      .getStudioTemplatesAdmin()
-      .then((data) => setTemplates(data))
-      .catch((err) => console.warn("Failed to load studio templates in admin page:", err))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchTemplates();
-  }, [token, isEditing]);
+  const templates = useMemo(() => query.data ?? [], [query.data]);
+  const loading = query.isLoading;
 
   const handleSelectTemplate = (id: string) => {
     setSearchParams({ mode: "editor", templateId: id });
@@ -77,10 +70,9 @@ export function AdminStudioPage() {
     await executeDelete(async (item) => {
       if (!token) return;
       try {
-        await api.deleteStudioTemplate(item.id);
-        setTemplates((prev) => prev.filter((t) => t.id !== item.id));
-      } catch (err) {
-        console.error("Failed to delete template:", err);
+        await deleteMutation.mutateAsync(item.id);
+      } catch {
+        // toast.error đã được xử lý trong mutation
       }
     });
   };
@@ -88,10 +80,9 @@ export function AdminStudioPage() {
   const handleToggleActive = async (id: string, currentActive: boolean) => {
     if (!token) return;
     try {
-      const updated = await api.updateStudioTemplate(id, { is_active: !currentActive });
-      setTemplates((prev) => prev.map((t) => (t.id === id ? updated : t)));
-    } catch (err) {
-      console.error("Failed to toggle active:", err);
+      await updateMutation.mutateAsync({ id, payload: { is_active: !currentActive } });
+    } catch {
+      // toast.error đã được xử lý trong mutation
     }
   };
 
@@ -100,11 +91,9 @@ export function AdminStudioPage() {
     if (!newName || newName.trim() === "" || newName.trim() === currentName) return;
     if (!token) return;
     try {
-      const updated = await api.updateStudioTemplate(id, { name: newName.trim() });
-      setTemplates((prev) => prev.map((t) => (t.id === id ? { ...t, name: updated.name || newName.trim() } : t)));
-    } catch (err) {
-      console.error("Failed to rename template:", err);
-      alert("Không thể đổi tên mẫu: " + (err instanceof Error ? err.message : ""));
+      await updateMutation.mutateAsync({ id, payload: { name: newName.trim() } });
+    } catch {
+      // toast.error đã được xử lý trong mutation
     }
   };
 
@@ -150,7 +139,7 @@ export function AdminStudioPage() {
           templateId={activeTemplateId}
           onBackToHome={() => {
             setSearchParams({});
-            fetchTemplates();
+            query.refetch();
           }}
         />
       </div>
@@ -159,7 +148,6 @@ export function AdminStudioPage() {
 
   return (
     <div className={styles.shell}>
-      {/* Top Header Row with Action Button */}
       <AdminPageHeader
         title="Quản Lý Mẫu Thiết Kế Studio"
         subtitle="Tạo mới, chỉnh sửa toạ độ vật liệu 2D hoặc công khai lên Studio khách hàng"
@@ -167,7 +155,6 @@ export function AdminStudioPage() {
         addLabel="Tạo Thiết Kế Mới"
       />
 
-      {/* Filter & Search Bar */}
       <div className={styles.filterBar}>
         <div className={styles.searchRow}>
           <div style={{ flex: 1, minWidth: "240px" }}>
@@ -181,7 +168,7 @@ export function AdminStudioPage() {
           <div style={{ minWidth: "180px" }}>
             <Select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => setFilterStatus(e.target.value as "all" | "published" | "draft")}
               options={[
                 { value: "all", label: "Tất cả trạng thái" },
                 { value: "published", label: "Đang hiển thị" },
@@ -193,15 +180,13 @@ export function AdminStudioPage() {
           <ViewToggle viewMode={viewMode} onChange={setViewMode} />
         </div>
 
-        {/* Status / Category Tabs */}
         <StatusTabs
           tabs={tabs}
           activeTab={filterStatus}
-          onChange={(id) => setFilterStatus(id as any)}
+          onChange={(id) => setFilterStatus(id as "all" | "published" | "draft")}
         />
       </div>
 
-      {/* Content View: Loading / Empty / Grid / Table */}
       {loading ? (
         <div className={styles.emptyState}>
           <p style={{ fontSize: "15px", margin: 0 }}>Đang nạp thư viện thiết kế từ máy chủ...</p>
@@ -221,7 +206,6 @@ export function AdminStudioPage() {
         <div className={styles.grid}>
           {filteredTemplates.map((tpl) => (
             <div key={tpl.id} className={styles.card}>
-              {/* Card Preview */}
               <div
                 className={styles.cardImageWrapper}
                 onClick={() => handleSelectTemplate(tpl.id)}
@@ -247,7 +231,6 @@ export function AdminStudioPage() {
                   <PhotoIcon className="h-10 w-10" style={{ width: 40, height: 40, color: "#9c9186" }} />
                 )}
 
-                {/* Status Toggle Badge */}
                 <button
                   type="button"
                   onClick={(e) => {
@@ -268,7 +251,6 @@ export function AdminStudioPage() {
                 </button>
               </div>
 
-              {/* Card Body */}
               <div className={styles.cardBody}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
@@ -327,7 +309,6 @@ export function AdminStudioPage() {
           ))}
         </div>
       ) : (
-        /* Table View */
         <AdminTable
           headers={[
             "Xem trước & Tên mẫu thiết kế",
@@ -338,114 +319,113 @@ export function AdminStudioPage() {
         >
           {filteredTemplates.map((tpl) => (
             <AdminTableRow key={tpl.id}>
-                  <td style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div
-                      style={{
-                        width: "60px",
-                        height: "44px",
-                        borderRadius: "8px",
-                        border: "1px solid #e7ded0",
-                        backgroundColor: "#fbf7f1",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                        flexShrink: 0,
-                      }}
+              <td style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: "12px" }}>
+                <div
+                  style={{
+                    width: "60px",
+                    height: "44px",
+                    borderRadius: "8px",
+                    border: "1px solid #e7ded0",
+                    backgroundColor: "#fbf7f1",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                    flexShrink: 0,
+                  }}
+                >
+                  {tpl.thumbnail ? (
+                    <img
+                      src={tpl.thumbnail}
+                      alt={tpl.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <PhotoIcon className="h-5 w-5" style={{ width: 20, height: 20, color: "#9c9186" }} />
+                  )}
+                </div>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                    <span
+                      style={{ fontWeight: "700", color: "#271620", fontSize: "14px", cursor: "pointer" }}
+                      onClick={() => handleRenamePrompt(tpl.id, tpl.name)}
+                      title="Nhấp để đổi tên mẫu"
                     >
-                      {tpl.thumbnail ? (
-                        <img
-                          src={tpl.thumbnail}
-                          alt={tpl.name}
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      ) : (
-                        <PhotoIcon className="h-5 w-5" style={{ width: 20, height: 20, color: "#9c9186" }} />
-                      )}
-                    </div>
-                    <div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <span
-                          style={{ fontWeight: "700", color: "#271620", fontSize: "14px", cursor: "pointer" }}
-                          onClick={() => handleRenamePrompt(tpl.id, tpl.name)}
-                          title="Nhấp để đổi tên mẫu"
-                        >
-                          {tpl.name}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleRenamePrompt(tpl.id, tpl.name)}
-                          style={{
-                            border: "none",
-                            background: "transparent",
-                            color: "#a15c2e",
-                            cursor: "pointer",
-                            padding: "2px",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                          title="Đổi tên mẫu"
-                        >
-                          <PencilSquareIcon className="h-3 w-3" style={{ width: 12, height: 12 }} />
-                        </button>
-                      </div>
-                      <div style={{ fontSize: "11px", color: "#9c9186", fontFamily: "monospace" }}>
-                        {tpl.id}
-                      </div>
-                    </div>
-                  </td>
-
-                  <td style={{ padding: "12px 16px" }}>
+                      {tpl.name}
+                    </span>
                     <button
                       type="button"
-                      onClick={() => handleToggleActive(tpl.id, tpl.is_active)}
-                      className={`${styles.statusBadge} ${tpl.is_active ? styles.statusActive : styles.statusDraft}`}
-                      style={{ position: "static" }}
+                      onClick={() => handleRenamePrompt(tpl.id, tpl.name)}
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        color: "#a15c2e",
+                        cursor: "pointer",
+                        padding: "2px",
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                      title="Đổi tên mẫu"
                     >
-                      {tpl.is_active ? (
-                        <>
-                          <EyeIcon className="h-3 w-3" style={{ width: 12, height: 12 }} /> Đang hiển thị
-                        </>
-                      ) : (
-                        <>
-                          <EyeSlashIcon className="h-3 w-3" style={{ width: 12, height: 12 }} /> Đã ẩn
-                        </>
-                      )}
+                      <PencilSquareIcon className="h-3 w-3" style={{ width: 12, height: 12 }} />
                     </button>
-                  </td>
+                  </div>
+                  <div style={{ fontSize: "11px", color: "#9c9186", fontFamily: "monospace" }}>
+                    {tpl.id}
+                  </div>
+                </div>
+              </td>
 
-                  <td style={{ padding: "12px 16px", color: "#6e6259", fontSize: "12px" }}>
-                    {new Date(tpl.updated_at || tpl.created_at).toLocaleDateString("vi-VN")}
-                  </td>
+              <td style={{ padding: "12px 16px" }}>
+                <button
+                  type="button"
+                  onClick={() => handleToggleActive(tpl.id, tpl.is_active)}
+                  className={`${styles.statusBadge} ${tpl.is_active ? styles.statusActive : styles.statusDraft}`}
+                  style={{ position: "static" }}
+                >
+                  {tpl.is_active ? (
+                    <>
+                      <EyeIcon className="h-3 w-3" style={{ width: 12, height: 12 }} /> Đang hiển thị
+                    </>
+                  ) : (
+                    <>
+                      <EyeSlashIcon className="h-3 w-3" style={{ width: 12, height: 12 }} /> Đã ẩn
+                    </>
+                  )}
+                </button>
+              </td>
 
-                  <td style={{ padding: "12px 16px", textAlign: "right" }}>
-                    <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectTemplate(tpl.id)}
-                        className={styles.editBtn}
-                        style={{ padding: "6px 12px", flex: "none" }}
-                      >
-                        <PencilSquareIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} /> Sửa
-                      </button>
+              <td style={{ padding: "12px 16px", color: "#6e6259", fontSize: "12px" }}>
+                {new Date(tpl.updated_at || tpl.created_at).toLocaleDateString("vi-VN")}
+              </td>
 
-                      <button
-                        type="button"
-                        onClick={() => requestDelete({ id: tpl.id, name: tpl.name })}
-                        className={styles.deleteBtn}
-                        style={{ padding: "6px 10px" }}
-                        title="Xóa mẫu"
-                      >
-                        <TrashIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                      </button>
-                    </div>
-                  </td>
-                </AdminTableRow>
-              ))}
+              <td style={{ padding: "12px 16px", textAlign: "right" }}>
+                <div style={{ display: "flex", gap: "6px", justifyContent: "flex-end" }}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectTemplate(tpl.id)}
+                    className={styles.editBtn}
+                    style={{ padding: "6px 12px", flex: "none" }}
+                  >
+                    <PencilSquareIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} /> Sửa
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => requestDelete({ id: tpl.id, name: tpl.name })}
+                    className={styles.deleteBtn}
+                    style={{ padding: "6px 10px" }}
+                    title="Xóa mẫu"
+                  >
+                    <TrashIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
+                  </button>
+                </div>
+              </td>
+            </AdminTableRow>
+          ))}
         </AdminTable>
       )}
 
-      {/* Confirm Delete Modal */}
       <ConfirmDeleteModal
         isOpen={isDeleteOpen}
         onClose={cancelDelete}

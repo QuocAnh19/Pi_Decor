@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   UsersIcon,
@@ -7,31 +6,23 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
-import { api } from "../../lib/api";
-import type { AdminSummary } from "../../lib/types";
+import { useAdminSummaryQuery } from "../../features/dashboard";
 import styles from "./AdminDashboardPage.module.scss";
 
 /**
- * /admin — Dashboard tổng quan (M5 in the spec's milestone table).
- * Pulls counts directly from GET /api/admin/summary.
+ * /admin — Dashboard tổng quan.
+ * Sử dụng TanStack Query lấy số liệu từ GET /api/admin/summary.
  */
 export function AdminDashboardPage() {
   const { token } = useAuth();
-  const [summary, setSummary] = useState<AdminSummary | null>(null);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">(
-    "loading",
-  );
+  const query = useAdminSummaryQuery(Boolean(token));
 
-  useEffect(() => {
-    if (!token) return;
-    api
-      .getSummary()
-      .then((summaryRes) => {
-        setSummary(summaryRes);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, [token]);
+  const summary = query.data ?? null;
+  const status: "loading" | "ready" | "error" = query.isLoading
+    ? "loading"
+    : query.isError
+    ? "error"
+    : "ready";
 
   return (
     <div>
@@ -52,52 +43,41 @@ export function AdminDashboardPage() {
       )}
 
       {status === "ready" && summary && (
-        <>
-          <div className={styles.grid}>
-            <Link to="/admin/leads" className={styles.card}>
-              <div className={styles.cardIcon}>
-                <UsersIcon className="h-5 w-5" />
-              </div>
-              <p className={styles.cardValue}>{summary.leads_total}</p>
-              <p className={styles.cardLabel}>Tổng số khách để lại thông tin</p>
-            </Link>
+        <div className={styles.grid}>
+          <Link to="/admin/leads" className={styles.card}>
+            <div className={styles.cardIcon}>
+              <UsersIcon className="h-5 w-5" />
+            </div>
+            <p className={styles.cardValue}>{summary.leads_total}</p>
+            <p className={styles.cardLabel}>Tổng số khách để lại thông tin</p>
+          </Link>
 
-            <Link to="/admin/leads" className={styles.card}>
-              <div className={`${styles.cardIcon} ${styles.cardIconAccent}`}>
-                <SparklesIcon className="h-5 w-5" />
-              </div>
-              <p className={styles.cardValue}>{summary.leads_new}</p>
-              <p className={styles.cardLabel}>Lead mới, chưa liên hệ</p>
-            </Link>
+          <Link to="/admin/leads" className={styles.card}>
+            <div className={`${styles.cardIcon} ${styles.cardIconAccent}`}>
+              <SparklesIcon className="h-5 w-5" />
+            </div>
+            <p className={styles.cardValue}>{summary.leads_new}</p>
+            <p className={styles.cardLabel}>Lead mới, chưa liên hệ</p>
+          </Link>
 
-            <Link to="/admin/venues" className={styles.card}>
-              <div className={styles.cardIcon}>
-                <MapPinIcon className="h-5 w-5" />
-              </div>
-              <p className={styles.cardValue}>{summary.venues_total}</p>
-              <p className={styles.cardLabel}>Địa điểm trên Bản đồ</p>
-            </Link>
+          <Link to="/admin/venues" className={styles.card}>
+            <div className={styles.cardIcon}>
+              <MapPinIcon className="h-5 w-5" />
+            </div>
+            <p className={styles.cardValue}>{summary.venues_total}</p>
+            <p className={styles.cardLabel}>Địa điểm trên Bản đồ</p>
+          </Link>
 
-            <Link to="/admin/projects" className={styles.card}>
-              <div className={styles.cardIcon}>
-                <SwatchIcon className="h-5 w-5" />
-              </div>
-              <p className={styles.cardValue}>
-                {summary.projects_published_total}
-              </p>
-              <p className={styles.cardLabel}>Dự án đã công khai</p>
-            </Link>
-          </div>
-
-          {/* <div className={styles.quickLinks}>
-            <Link to="/admin/leads" className={styles.quickLink}>
-              Xem danh sách khách hàng <ArrowRightIcon className="h-4 w-4" />
-            </Link>
-            <Link to="/admin/venues" className={styles.quickLink}>
-              Quản lý Bản đồ dự án <ArrowRightIcon className="h-4 w-4" />
-            </Link>
-          </div> */}
-        </>
+          <Link to="/admin/projects" className={styles.card}>
+            <div className={styles.cardIcon}>
+              <SwatchIcon className="h-5 w-5" />
+            </div>
+            <p className={styles.cardValue}>
+              {summary.projects_published_total}
+            </p>
+            <p className={styles.cardLabel}>Dự án đã công khai</p>
+          </Link>
+        </div>
       )}
     </div>
   );

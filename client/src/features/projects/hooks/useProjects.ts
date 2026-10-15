@@ -1,17 +1,31 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAuth } from "../../../lib/authContext";
-import { api } from "../../../lib/api";
+import { toast } from "../../../lib/toast";
 import type { ProjectPayload } from "../../../lib/types";
 import {
   ProjectItem,
   dbToProjectItem,
   ASYMMETRIC_SLOT_DESCS,
 } from "../types";
+import {
+  useProjectsQuery,
+  useCreateProjectMutation,
+  useUpdateProjectMutation,
+  useDeleteProjectMutation,
+  useCreateVenueProjectMutation,
+} from "./projects.queries";
 
 export function useProjects(selectedVenueId?: string | null) {
   const { token } = useAuth();
-  const [projects, setProjects] = useState<ProjectItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const isAdmin = Boolean(token);
+
+  // TanStack Query & Mutations
+  const projectsQuery = useProjectsQuery(isAdmin);
+  const createMutation = useCreateProjectMutation();
+  const updateMutation = useUpdateProjectMutation();
+  const deleteMutation = useDeleteProjectMutation();
+  const createVenueProjectMutation = useCreateVenueProjectMutation();
+
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,60 +40,50 @@ export function useProjects(selectedVenueId?: string | null) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
 
+  // Chuyển đổi dữ liệu từ DB sang UI model
+  const projects = useMemo<ProjectItem[]>(() => {
+    if (!Array.isArray(projectsQuery.data)) return [];
+    return projectsQuery.data.map(dbToProjectItem);
+  }, [projectsQuery.data]);
+
   const loadProjects = useCallback(async () => {
-    setLoading(true);
     setError(null);
     try {
-      const data = token ? await api.getProjectsAdmin() : await api.getProjects();
-      if (Array.isArray(data)) {
-        setProjects(data.map(dbToProjectItem));
-      }
+      await projectsQuery.refetch();
     } catch (err) {
-      console.error("Failed to load projects from DB:", err);
       setError("Không thể nạp dữ liệu từ máy chủ. Vui lòng thử lại sau.");
-    } finally {
-      setLoading(false);
+      toast.error(err, "Lỗi tải danh sách dự án.");
     }
-  }, [token]);
-
-
-  useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
+  }, [projectsQuery]);
 
   const handleDeleteProject = async (id: string) => {
     if (!token) {
-      alert("Vui lòng đăng nhập lại.");
+      toast.error(new Error("Vui lòng đăng nhập lại."));
       return;
     }
 
     try {
-      await api.deleteProject(id);
-      setProjects((prev) => prev.filter((p) => p.id !== id));
-    } catch (err) {
-      console.error("Failed to delete project:", err);
-      alert("Xóa dự án thất bại: " + (err instanceof Error ? err.message : "Lỗi không xác định."));
+      await deleteMutation.mutateAsync(id);
+    } catch {
+      // toast.error được gọi trong onError của deleteMutation
     }
   };
 
   const handleToggleFeatured = async (proj: ProjectItem) => {
     if (!token) return;
-    const nextStatus: "active" | "featured" | "draft" = proj.status === "featured" ? "active" : "featured";
-    setProjects((prev) =>
-      prev.map((p) => (p.id === proj.id ? { ...p, status: nextStatus } : p))
-    );
+    const nextStatus: "active" | "featured" | "draft" =
+      proj.status === "featured" ? "active" : "featured";
 
     try {
-      await api.updateProject(
-        proj.id,
-        {
+      await updateMutation.mutateAsync({
+        id: proj.id,
+        payload: {
           status: nextStatus,
           published: true,
-        }
-      );
-    } catch (err) {
-      console.error("Failed to update project status:", err);
-      await loadProjects();
+        },
+      });
+    } catch {
+      // toast.error được gọi trong onError của updateMutation
     }
   };
 
@@ -92,11 +96,11 @@ export function useProjects(selectedVenueId?: string | null) {
     customSpans: Record<number, string>
   ) => {
     if (!formData.title.trim()) {
-      alert("Vui lòng nhập tên dự án!");
+      toast.error(new Error("Vui lòng nhập tên dự án!"));
       return;
     }
     if (!token) {
-      alert("Phiên làm việc hết hạn, vui lòng đăng nhập lại.");
+      toast.error(new Error("Phiên làm việc hết hạn, vui lòng đăng nhập lại."));
       return;
     }
 
@@ -143,17 +147,15 @@ export function useProjects(selectedVenueId?: string | null) {
       });
 
       if (editingProject) {
-        await api.updateProject(editingProject.id, payload);
+        await updateMutation.mutateAsync({ id: editingProject.id, payload });
       } else {
-        await api.createProject(payload);
+        await createMutation.mutateAsync(payload);
       }
 
-      await loadProjects();
       setIsModalOpen(false);
       setEditingProject(null);
-    } catch (err) {
-      console.error("Failed to save project:", err);
-      alert("Lưu dự án thất bại: " + (err instanceof Error ? err.message : "Lỗi máy chủ."));
+    } catch {
+      // toast.error đã được mutation xử lý
     } finally {
       setSubmitting(false);
     }
@@ -162,14 +164,20 @@ export function useProjects(selectedVenueId?: string | null) {
   // Simple payload submit (used when called from venue page)
   const handleSimpleFormSubmit = async (payload: ProjectPayload) => {
     if (!token) return;
-    if (editingProject) {
-      await api.updateProject(editingProject.id, payload);
-    } else if (selectedVenueId) {
-      await api.createVenueProject(selectedVenueId, payload);
+    try {
+      if (editingProject) {
+        await updateMutation.mutateAsync({ id: editingProject.id, payload });
+      } else if (selectedVenueId) {
+        await createVenueProjectMutation.mutateAsync({
+          venueId: selectedVenueId,
+          payload,
+        });
+      }
+      setIsModalOpen(false);
+      setEditingProject(null);
+    } catch {
+      // toast.error đã được mutation xử lý
     }
-    setIsModalOpen(false);
-    setEditingProject(null);
-    await loadProjects();
   };
 
   const filteredProjects = useMemo(() => {
@@ -195,9 +203,9 @@ export function useProjects(selectedVenueId?: string | null) {
   return {
     projects,
     filteredProjects,
-    loading,
+    loading: projectsQuery.isLoading,
     submitting,
-    error,
+    error: error ?? (projectsQuery.isError ? "Không thể nạp dữ liệu từ máy chủ. Vui lòng thử lại sau." : null),
     setError,
     searchQuery,
     setSearchQuery,

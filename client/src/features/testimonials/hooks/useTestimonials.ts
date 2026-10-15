@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import { api } from "../../../lib/api";
+import { useState, useCallback } from "react";
 import type { TestimonialItem } from "../../../lib/types";
+import { useTestimonialsQuery } from "./testimonials.queries";
 
 export interface LightboxState {
   photos: string[];
@@ -9,28 +9,20 @@ export interface LightboxState {
 }
 
 export function useTestimonials() {
-  const [reviews, setReviews] = useState<TestimonialItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const query = useTestimonialsQuery();
   const [visibleCount, setVisibleCount] = useState<number>(3);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [lightbox, setLightbox] = useState<LightboxState | null>(null);
 
-  const loadReviews = useCallback(() => {
-    setLoading(true);
-    return api
-      .getTestimonials()
-      .then((data) => setReviews(data))
-      .catch((err) => console.warn("Failed to load approved testimonials:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  const loadReviews = useCallback(async () => {
+    await query.refetch();
+  }, [query]);
 
-  useEffect(() => {
-    loadReviews();
-  }, [loadReviews]);
+  const reviews: TestimonialItem[] = query.data ?? [];
 
   return {
     reviews,
-    loading,
+    loading: query.isLoading,
     visibleCount,
     setVisibleCount,
     isModalOpen,

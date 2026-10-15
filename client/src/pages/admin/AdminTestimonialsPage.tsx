@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   CheckCircleIcon,
   XCircleIcon,
@@ -7,7 +7,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { useAuth } from "../../lib/authContext";
-import { api } from "../../lib/api";
 import { SearchInput, Select } from "../../components/ui";
 import {
   AdminPageHeader,
@@ -17,7 +16,11 @@ import {
   ConfirmDeleteModal,
   useConfirmDelete,
 } from "../../components/admin";
-import type { TestimonialItem } from "../../lib/types";
+import {
+  useTestimonialsAdminQuery,
+  useUpdateTestimonialStatusMutation,
+  useDeleteTestimonialMutation,
+} from "../../features/testimonials";
 import styles from "./AdminTestimonialsPage.module.scss";
 
 const statusBadgeClass: Record<string, string> = {
@@ -34,30 +37,23 @@ const statusTextMap: Record<string, string> = {
 
 export function AdminTestimonialsPage() {
   const { token } = useAuth();
-  const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
+  const query = useTestimonialsAdminQuery(undefined, Boolean(token));
+  const updateStatusMutation = useUpdateTestimonialStatusMutation();
+  const deleteMutation = useDeleteTestimonialMutation();
+
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "table">("table");
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  const loadTestimonials = useCallback(() => {
-    if (!token) return;
-    return api
-      .getTestimonialsAdmin()
-      .then((data) => {
-        setTestimonials(data);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, [token]);
-
-  useEffect(() => {
-    loadTestimonials();
-  }, [loadTestimonials]);
+  const testimonials = useMemo(() => query.data ?? [], [query.data]);
+  const status: "loading" | "ready" | "error" = query.isLoading
+    ? "loading"
+    : query.isError
+    ? "error"
+    : "ready";
 
   const counts = useMemo(() => {
     return {
@@ -70,15 +66,12 @@ export function AdminTestimonialsPage() {
 
   const filteredTestimonials = useMemo(() => {
     return testimonials.filter((t) => {
-      // 1. Status Filter
       if (statusFilter !== "all" && (t.status ?? "pending") !== statusFilter) {
         return false;
       }
-      // 2. Rating Filter
       if (ratingFilter !== "all" && String(t.rating ?? 5) !== ratingFilter) {
         return false;
       }
-      // 3. Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchAuthor = t.author?.toLowerCase().includes(q);
@@ -93,21 +86,14 @@ export function AdminTestimonialsPage() {
   async function handleUpdateStatus(id: string, newStatus: string) {
     if (!token || updatingId) return;
     setUpdatingId(id);
-    setError(null);
-    setSuccessMsg(null);
-
-    setTestimonials((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status: newStatus as any } : t))
-    );
-
     try {
-      await api.updateTestimonialStatus(id, newStatus);
-      setSuccessMsg(newStatus === "approved" ? "✓ Đã duyệt đánh giá thành công!" : "✓ Đã chuyển trạng thái từ chối.");
+      await updateStatusMutation.mutateAsync({ id, status: newStatus });
+      setSuccessMsg(
+        newStatus === "approved"
+          ? "✓ Đã duyệt đánh giá thành công!"
+          : "✓ Đã chuyển trạng thái từ chối."
+      );
       setTimeout(() => setSuccessMsg(null), 3000);
-      await loadTestimonials();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Cập nhật trạng thái thất bại.");
-      await loadTestimonials();
     } finally {
       setUpdatingId(null);
     }
@@ -124,16 +110,10 @@ export function AdminTestimonialsPage() {
   async function handleConfirmDelete() {
     await executeDelete(async (id) => {
       setUpdatingId(id);
-      setError(null);
-      setSuccessMsg(null);
-
       try {
-        await api.deleteTestimonial(id);
+        await deleteMutation.mutateAsync(id);
         setSuccessMsg("✓ Đã xóa đánh giá.");
         setTimeout(() => setSuccessMsg(null), 3000);
-        await loadTestimonials();
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Xoá đánh giá thất bại.");
       } finally {
         setUpdatingId(null);
       }
@@ -149,10 +129,9 @@ export function AdminTestimonialsPage() {
 
   return (
     <div>
-      {/* Header Row */}
       <AdminPageHeader
         title="Quản Lý Đánh Giá Khách Hàng"
-        subtitle="Kiểm duyệt, phê duyệt và quản lý các phản hồi, đánh giá từ cô dâu &amp; chú rể"
+        subtitle="Kiểm duyệt, phê duyệt và quản lý các phản hồi, đánh giá từ cô dâu & chú rể"
       />
 
       {successMsg && (
@@ -161,13 +140,6 @@ export function AdminTestimonialsPage() {
         </div>
       )}
 
-      {error && (
-        <div className={styles.error} onClick={() => setError(null)}>
-          {error}
-        </div>
-      )}
-
-      {/* Filter & Search Bar */}
       <div className={styles.filterBar}>
         <div className={styles.searchRow}>
           <div style={{ flex: 1, minWidth: "240px" }}>
@@ -214,7 +186,6 @@ export function AdminTestimonialsPage() {
           />
         </div>
 
-        {/* Tabs Row */}
         <StatusTabs
           tabs={statusTabs}
           activeTab={statusFilter}
@@ -238,7 +209,6 @@ export function AdminTestimonialsPage() {
             description="Thử thay đổi từ khóa hoặc bộ lọc trạng thái."
           />
         ) : viewMode === "grid" ? (
-          /* Grid View */
           <div className={styles.grid}>
             {filteredTestimonials.map((t) => (
               <div key={t.id} className={styles.card}>
@@ -303,7 +273,6 @@ export function AdminTestimonialsPage() {
             ))}
           </div>
         ) : (
-          /* Table View */
           <div className={styles.tableWrapper}>
             <table className={styles.table}>
               <thead>
@@ -383,7 +352,6 @@ export function AdminTestimonialsPage() {
         )
       )}
 
-      {/* Confirm Delete Modal */}
       <ConfirmDeleteModal
         isOpen={isDeleteOpen}
         onClose={cancelDelete}

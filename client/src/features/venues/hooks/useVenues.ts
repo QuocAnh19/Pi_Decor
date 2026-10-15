@@ -1,40 +1,55 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useAuth } from "../../../lib/authContext";
 import { api } from "../../../lib/api";
-import type { Project, ProjectPayload, Venue, VenueDetail, VenuePayload } from "../../../lib/types";
+import { queryClient } from "../../../lib/queryClient";
+import type { Project, ProjectPayload, Venue, VenuePayload } from "../../../lib/types";
+import {
+  venuesKeys,
+  useVenuesQuery,
+  useVenueDetailQuery,
+  useCreateVenueMutation,
+  useUpdateVenueMutation,
+  useDeleteVenueMutation,
+  useCreateVenueProjectMutation,
+  useDeleteVenueProjectMutation,
+} from "./venues.queries";
 
 export function useVenues() {
   const { token } = useAuth();
-  const [venues, setVenues] = useState<Venue[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [error, setError] = useState<string | null>(null);
 
+  // Queries
+  const venuesQuery = useVenuesQuery();
+  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
+  const detailQuery = useVenueDetailQuery(selectedVenueId);
+
+  // Filter & Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("all");
+  const [error, setError] = useState<string | null>(null);
 
-  const [selectedVenueId, setSelectedVenueId] = useState<string | null>(null);
-  const [selectedVenue, setSelectedVenue] = useState<VenueDetail | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-
+  // Form states
   const [venueFormOpen, setVenueFormOpen] = useState(false);
   const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
 
   const [projectFormOpen, setProjectFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
 
-  const loadVenues = useCallback(() => {
-    return api
-      .getVenues()
-      .then((data) => {
-        setVenues(data);
-        setStatus("ready");
-      })
-      .catch(() => setStatus("error"));
-  }, []);
+  // Mutations
+  const createVenueMutation = useCreateVenueMutation();
+  const updateVenueMutation = useUpdateVenueMutation();
+  const deleteVenueMutation = useDeleteVenueMutation();
+  const createProjectMutation = useCreateVenueProjectMutation();
+  const deleteProjectMutation = useDeleteVenueProjectMutation();
 
-  useEffect(() => {
-    loadVenues();
-  }, [loadVenues]);
+  const venues = useMemo(() => venuesQuery.data ?? [], [venuesQuery.data]);
+  const status: "loading" | "ready" | "error" = venuesQuery.isLoading
+    ? "loading"
+    : venuesQuery.isError
+    ? "error"
+    : "ready";
+
+  const selectedVenue = detailQuery.data ?? null;
+  const detailLoading = detailQuery.isLoading;
 
   const filteredVenues = useMemo(() => {
     return venues.filter((venue) => {
@@ -52,44 +67,32 @@ export function useVenues() {
     });
   }, [venues, selectedType, searchQuery]);
 
-  const loadVenueDetail = useCallback((id: string) => {
-    setDetailLoading(true);
-    api
-      .getVenue(id)
-      .then(setSelectedVenue)
-      .catch(() => setError("Không tải được chi tiết địa điểm."))
-      .finally(() => setDetailLoading(false));
-  }, []);
-
   const handleSelectVenue = (venue: Venue) => {
     setSelectedVenueId(venue.id);
-    loadVenueDetail(venue.id);
   };
 
   const handleVenueFormSubmit = async (payload: VenuePayload) => {
     if (!token) return;
-    if (editingVenue) {
-      await api.updateVenue(editingVenue.id, payload);
-    } else {
-      await api.createVenue(payload);
-    }
-    setVenueFormOpen(false);
-    setEditingVenue(null);
-    await loadVenues();
-    if (editingVenue && selectedVenueId === editingVenue.id) {
-      loadVenueDetail(editingVenue.id);
+    try {
+      if (editingVenue) {
+        await updateVenueMutation.mutateAsync({ id: editingVenue.id, payload });
+      } else {
+        await createVenueMutation.mutateAsync(payload);
+      }
+      setVenueFormOpen(false);
+      setEditingVenue(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Không lưu được địa điểm.");
     }
   };
 
   const handleDeleteVenue = async (venue: Venue) => {
     if (!token) return;
     try {
-      await api.deleteVenue(venue.id);
+      await deleteVenueMutation.mutateAsync(venue.id);
       if (selectedVenueId === venue.id) {
         setSelectedVenueId(null);
-        setSelectedVenue(null);
       }
-      await loadVenues();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không xoá được địa điểm.");
     }
@@ -97,23 +100,25 @@ export function useVenues() {
 
   const handleProjectFormSubmit = async (payload: ProjectPayload) => {
     if (!token || !selectedVenueId) return;
-    if (editingProject) {
-      await api.updateProject(editingProject.id, payload);
-    } else {
-      await api.createVenueProject(selectedVenueId, payload);
+    try {
+      if (editingProject) {
+        await api.updateProject(editingProject.id, payload);
+        queryClient.invalidateQueries({ queryKey: venuesKeys.detail(selectedVenueId) });
+        queryClient.invalidateQueries({ queryKey: ["projects"] });
+      } else {
+        await createProjectMutation.mutateAsync({ venueId: selectedVenueId, payload });
+      }
+      setProjectFormOpen(false);
+      setEditingProject(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Không lưu được dự án.");
     }
-    setProjectFormOpen(false);
-    setEditingProject(null);
-    loadVenueDetail(selectedVenueId);
-    loadVenues();
   };
 
   const handleDeleteProject = async (project: Project) => {
     if (!token || !selectedVenueId) return;
     try {
-      await api.deleteProject(project.id);
-      loadVenueDetail(selectedVenueId);
-      loadVenues();
+      await deleteProjectMutation.mutateAsync({ projectId: project.id, venueId: selectedVenueId });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không xoá được dự án.");
     }
