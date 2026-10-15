@@ -7,9 +7,20 @@ import {
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import { SearchInput, Select } from "../../components/ui";
+import {
+  AdminPageHeader,
+  StatusTabs,
+  ConfirmDeleteModal,
+  useConfirmDelete,
+} from "../../components/admin";
 import { useVenues, VenueList, VenueForm } from "../../features/venues";
 import { ProjectForm } from "../../features/projects";
+import type { Venue, Project } from "../../lib/types";
 import styles from "./AdminVenuesPage.module.scss";
+
+type DeleteTarget =
+  | { type: "venue"; venue: Venue }
+  | { type: "project"; project: Project };
 
 /**
  * /admin/venues — Tab "Bản đồ" (M3 + M4 in the spec).
@@ -43,6 +54,25 @@ export function AdminVenuesPage() {
     handleDeleteProject,
   } = useVenues();
 
+  const {
+    target: deleteTarget,
+    isOpen: isDeleteOpen,
+    loading: isDeleting,
+    requestDelete,
+    cancelDelete,
+    executeDelete,
+  } = useConfirmDelete<DeleteTarget>();
+
+  const handleConfirmDelete = async () => {
+    await executeDelete(async (target) => {
+      if (target.type === "venue") {
+        await handleDeleteVenue(target.venue);
+      } else {
+        await handleDeleteProject(target.project);
+      }
+    });
+  };
+
   const counts = useMemo(() => {
     return {
       all: venues.length,
@@ -54,11 +84,11 @@ export function AdminVenuesPage() {
   }, [venues]);
 
   const typeTabs = [
-    { id: "all", label: `Tất cả (${counts.all})` },
-    { id: "hotel", label: `Khách sạn (${counts.hotel})` },
-    { id: "restaurant", label: `Nhà hàng (${counts.restaurant})` },
-    { id: "resort", label: `Resort (${counts.resort})` },
-    { id: "sảnh tiệc", label: `Sảnh tiệc (${counts["sảnh tiệc"]})` },
+    { id: "all", label: "Tất cả", count: counts.all },
+    { id: "hotel", label: "Khách sạn", count: counts.hotel },
+    { id: "restaurant", label: "Nhà hàng", count: counts.restaurant },
+    { id: "resort", label: "Resort", count: counts.resort },
+    { id: "sảnh tiệc", label: "Sảnh tiệc", count: counts["sảnh tiệc"] },
   ];
 
   const typeSelectOptions = [
@@ -71,26 +101,15 @@ export function AdminVenuesPage() {
 
   return (
     <div>
-      <div className={styles.headerRow}>
-        <div>
-          <h1 className={styles.title}>Bản Đồ Phân Bổ Dự Án</h1>
-          <p className={styles.subtitle}>
-            Trực quan hóa vị trí công trình, mật độ khách hàng và khu vực hoạt
-            động trên bản đồ
-          </p>
-        </div>
-        <button
-          type="button"
-          className={styles.addVenueButton}
-          onClick={() => {
-            setEditingVenue(null);
-            setVenueFormOpen(true);
-          }}
-        >
-          <PlusIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-          Thêm Địa Điểm Mới
-        </button>
-      </div>
+      <AdminPageHeader
+        title="Bản Đồ Phân Bổ Dự Án"
+        subtitle="Trực quan hóa vị trí công trình, mật độ khách hàng và khu vực hoạt động trên bản đồ"
+        onAdd={() => {
+          setEditingVenue(null);
+          setVenueFormOpen(true);
+        }}
+        addLabel="Thêm Địa Điểm Mới"
+      />
 
       {error && (
         <p className={styles.error} onClick={() => setError(null)}>
@@ -119,20 +138,11 @@ export function AdminVenuesPage() {
         </div>
 
         {/* Type Filter Buttons */}
-        <div className={styles.tabsRow}>
-          {typeTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setSelectedType(tab.id)}
-              className={`${styles.tabButton} ${
-                selectedType === tab.id ? styles.tabActive : ""
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <StatusTabs
+          tabs={typeTabs}
+          activeTab={selectedType}
+          onChange={setSelectedType}
+        />
       </div>
 
       {status === "loading" && <p className={styles.status}>Đang tải danh sách địa điểm…</p>}
@@ -159,7 +169,7 @@ export function AdminVenuesPage() {
               setEditingVenue(venue);
               setVenueFormOpen(true);
             }}
-            onDelete={handleDeleteVenue}
+            onDelete={(venue) => requestDelete({ type: "venue", venue })}
           />
 
           <div className={styles.detailPanel}>
@@ -258,7 +268,7 @@ export function AdminVenuesPage() {
                           <button
                             type="button"
                             className={`${styles.iconButton} ${styles.iconButtonDanger}`}
-                            onClick={() => handleDeleteProject(project)}
+                            onClick={() => requestDelete({ type: "project", project })}
                             title="Xoá dự án"
                           >
                             <TrashIcon
@@ -299,6 +309,15 @@ export function AdminVenuesPage() {
           onSubmit={handleProjectFormSubmit}
         />
       )}
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteOpen}
+        title={deleteTarget?.type === "venue" ? "Xác nhận xoá địa điểm" : "Xác nhận xoá dự án"}
+        itemName={deleteTarget?.type === "venue" ? deleteTarget.venue.name : deleteTarget?.project.title}
+        loading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onClose={cancelDelete}
+      />
     </div>
   );
 }

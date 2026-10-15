@@ -83,7 +83,6 @@ export function useVenues() {
 
   const handleDeleteVenue = async (venue: Venue) => {
     if (!token) return;
-    if (!confirm(`Xoá địa điểm "${venue.name}"? Toàn bộ dự án bên trong cũng sẽ mất pin trên bản đồ.`)) return;
     try {
       await api.deleteVenue(venue.id);
       if (selectedVenueId === venue.id) {
@@ -111,7 +110,6 @@ export function useVenues() {
 
   const handleDeleteProject = async (project: Project) => {
     if (!token || !selectedVenueId) return;
-    if (!confirm(`Xoá dự án "${project.title}"?`)) return;
     try {
       await api.deleteProject(project.id);
       loadVenueDetail(selectedVenueId);

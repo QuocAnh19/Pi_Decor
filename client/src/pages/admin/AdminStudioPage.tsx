@@ -1,16 +1,23 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  PlusIcon,
   PencilSquareIcon,
   TrashIcon,
   PhotoIcon,
   EyeIcon,
   EyeSlashIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import { SearchInput, Select } from "../../components/ui";
+import {
+  AdminPageHeader,
+  ViewToggle,
+  StatusTabs,
+  EmptyState,
+  AdminTable,
+  AdminTableRow,
+  ConfirmDeleteModal,
+  useConfirmDelete,
+} from "../../components/admin";
 import { AdminEditor } from "../../features/studio";
 import { api } from "../../lib/api";
 import { useAuth } from "../../lib/authContext";
@@ -57,16 +64,25 @@ export function AdminStudioPage() {
     setSearchParams({ mode: "editor", templateId: "new" });
   };
 
-  const handleDeleteTemplate = async (id: string, name?: string) => {
-    if (!token) return;
-    const isConfirmed = window.confirm(`Bạn có chắc muốn xóa mẫu thiết kế "${name || id}"?`);
-    if (!isConfirmed) return;
-    try {
-      await api.deleteStudioTemplate(id);
-      setTemplates((prev) => prev.filter((t) => t.id !== id));
-    } catch (err) {
-      console.error("Failed to delete template:", err);
-    }
+  const {
+    target: templateToDelete,
+    isOpen: isDeleteOpen,
+    loading: isDeleting,
+    requestDelete,
+    cancelDelete,
+    executeDelete,
+  } = useConfirmDelete<{ id: string; name?: string }>();
+
+  const handleConfirmDelete = async () => {
+    await executeDelete(async (item) => {
+      if (!token) return;
+      try {
+        await api.deleteStudioTemplate(item.id);
+        setTemplates((prev) => prev.filter((t) => t.id !== item.id));
+      } catch (err) {
+        console.error("Failed to delete template:", err);
+      }
+    });
   };
 
   const handleToggleActive = async (id: string, currentActive: boolean) => {
@@ -144,25 +160,12 @@ export function AdminStudioPage() {
   return (
     <div className={styles.shell}>
       {/* Top Header Row with Action Button */}
-      <div className={styles.headerRow}>
-        <div>
-          <h1 className={styles.title}>
-            Quản Lý Mẫu Thiết Kế Studio
-          </h1>
-          <p className={styles.subtitle}>
-            Tạo mới, chỉnh sửa toạ độ vật liệu 2D hoặc công khai lên Studio khách hàng
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleCreateNew}
-          className={styles.addButton}
-        >
-          <PlusIcon className="h-4 w-4" style={{ width: 18, height: 18 }} />
-          <span>Tạo Thiết Kế Mới</span>
-        </button>
-      </div>
+      <AdminPageHeader
+        title="Quản Lý Mẫu Thiết Kế Studio"
+        subtitle="Tạo mới, chỉnh sửa toạ độ vật liệu 2D hoặc công khai lên Studio khách hàng"
+        onAdd={handleCreateNew}
+        addLabel="Tạo Thiết Kế Mới"
+      />
 
       {/* Filter & Search Bar */}
       <div className={styles.filterBar}>
@@ -187,39 +190,15 @@ export function AdminStudioPage() {
             />
           </div>
 
-          <div className={styles.viewModeToggle}>
-            <button
-              type="button"
-              onClick={() => setViewMode("grid")}
-              className={`${styles.viewModeBtn} ${viewMode === "grid" ? styles.viewModeActive : ""}`}
-              title="Xem dạng lưới"
-            >
-              <Squares2X2Icon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              className={`${styles.viewModeBtn} ${viewMode === "table" ? styles.viewModeActive : ""}`}
-              title="Xem dạng bảng"
-            >
-              <ListBulletIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            </button>
-          </div>
+          <ViewToggle viewMode={viewMode} onChange={setViewMode} />
         </div>
 
         {/* Status / Category Tabs */}
-        <div className={styles.tabsRow}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setFilterStatus(tab.id as any)}
-              className={`${styles.tabButton} ${filterStatus === tab.id ? styles.tabActive : ""}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <StatusTabs
+          tabs={tabs}
+          activeTab={filterStatus}
+          onChange={(id) => setFilterStatus(id as any)}
+        />
       </div>
 
       {/* Content View: Loading / Empty / Grid / Table */}
@@ -228,15 +207,16 @@ export function AdminStudioPage() {
           <p style={{ fontSize: "15px", margin: 0 }}>Đang nạp thư viện thiết kế từ máy chủ...</p>
         </div>
       ) : filteredTemplates.length === 0 ? (
-        <div className={styles.emptyState}>
-          <PhotoIcon className="h-10 w-10" style={{ width: 42, height: 42, color: "#9c9186", margin: "0 auto 12px" }} />
-          <p style={{ fontSize: "15px", fontWeight: "700", color: "#271620", margin: 0 }}>
-            Không tìm thấy mẫu thiết kế nào phù hợp
-          </p>
-          <p style={{ fontSize: "12px", color: "#9c9186", marginTop: "4px", margin: "4px 0 0" }}>
-            Thử thay đổi từ khóa tìm kiếm hoặc nhấn nút "Tạo Thiết Kế Mới".
-          </p>
-        </div>
+        <EmptyState
+          icon={
+            <PhotoIcon
+              className="h-10 w-10"
+              style={{ width: 42, height: 42, color: "#9c9186" }}
+            />
+          }
+          title="Không tìm thấy mẫu thiết kế nào phù hợp"
+          description='Thử thay đổi từ khóa tìm kiếm hoặc nhấn nút "Tạo Thiết Kế Mới".'
+        />
       ) : viewMode === "grid" ? (
         <div className={styles.grid}>
           {filteredTemplates.map((tpl) => (
@@ -334,7 +314,7 @@ export function AdminStudioPage() {
 
                   <button
                     type="button"
-                    onClick={() => handleDeleteTemplate(tpl.id, tpl.name)}
+                    onClick={() => requestDelete({ id: tpl.id, name: tpl.name })}
                     className={styles.deleteBtn}
                     title="Xóa mẫu thiết kế này"
                   >
@@ -348,51 +328,16 @@ export function AdminStudioPage() {
         </div>
       ) : (
         /* Table View */
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            border: "1px solid #e7ded0",
-            boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
-            overflow: "hidden",
-          }}
+        <AdminTable
+          headers={[
+            "Xem trước & Tên mẫu thiết kế",
+            "Trạng thái",
+            "Ngày tạo / Cập nhật",
+            { label: "Thao tác", align: "right" },
+          ]}
         >
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13px",
-              color: "#271620",
-            }}
-          >
-            <thead>
-              <tr
-                style={{
-                  backgroundColor: "#fbf7f1",
-                  borderBottom: "1px solid #e7ded0",
-                  textAlign: "left",
-                  color: "#6e6259",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                }}
-              >
-                <th style={{ padding: "14px 16px" }}>Xem trước &amp; Tên mẫu thiết kế</th>
-                <th style={{ padding: "14px 16px" }}>Trạng thái</th>
-                <th style={{ padding: "14px 16px" }}>Ngày tạo / Cập nhật</th>
-                <th style={{ padding: "14px 16px", textAlign: "right" }}>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTemplates.map((tpl) => (
-                <tr
-                  key={tpl.id}
-                  style={{
-                    borderBottom: "1px solid #e7ded0",
-                    transition: "background-color 0.15s ease",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fdf7f5")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                >
+          {filteredTemplates.map((tpl) => (
+            <AdminTableRow key={tpl.id}>
                   <td style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: "12px" }}>
                     <div
                       style={{
@@ -486,7 +431,7 @@ export function AdminStudioPage() {
 
                       <button
                         type="button"
-                        onClick={() => handleDeleteTemplate(tpl.id, tpl.name)}
+                        onClick={() => requestDelete({ id: tpl.id, name: tpl.name })}
                         className={styles.deleteBtn}
                         style={{ padding: "6px 10px" }}
                         title="Xóa mẫu"
@@ -495,12 +440,19 @@ export function AdminStudioPage() {
                       </button>
                     </div>
                   </td>
-                </tr>
+                </AdminTableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+        </AdminTable>
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteOpen}
+        onClose={cancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName={templateToDelete?.name ? `mẫu "${templateToDelete.name}"` : "mẫu này"}
+        loading={isDeleting}
+      />
     </div>
   );
 }

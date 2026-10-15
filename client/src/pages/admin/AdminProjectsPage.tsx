@@ -1,13 +1,10 @@
 import {
-  PlusIcon,
   PencilSquareIcon,
   TrashIcon,
   StarIcon,
   MapPinIcon,
   CalendarIcon,
   CurrencyDollarIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import {
@@ -15,8 +12,19 @@ import {
   ProjectForm,
   SAMPLE_STOCK_IMAGES,
   PRICE_TIER_OPTIONS,
+  type ProjectItem,
 } from "../../features/projects";
 import { SearchInput, Select } from "../../components/ui";
+import {
+  AdminPageHeader,
+  ViewToggle,
+  StatusTabs,
+  EmptyState,
+  AdminTable,
+  AdminTableRow,
+  ConfirmDeleteModal,
+  useConfirmDelete,
+} from "../../components/admin";
 import styles from "./AdminProjectsPage.module.scss";
 
 function getCategoryLabel(catId: string): string {
@@ -51,35 +59,72 @@ export function AdminProjectsPage() {
     handleFullFormSubmit,
   } = useProjects();
 
+  const {
+    isOpen: isDeleteOpen,
+    loading: isDeleting,
+    requestDelete,
+    cancelDelete,
+    executeDelete,
+  } = useConfirmDelete<string>();
+
+  const handleConfirmDelete = async () => {
+    await executeDelete(async (id) => {
+      await handleDeleteProject(id);
+    });
+  };
+
+  const categoryTabs = [
+    { id: "all", label: `Tất cả (${projects.length})` },
+    {
+      id: "piwedding",
+      label: `PiWedding (${projects.filter((p) => p.categoryId === "piwedding").length})`,
+    },
+    {
+      id: "pikids",
+      label: `PiKids (${projects.filter((p) => p.categoryId === "pikids").length})`,
+    },
+    {
+      id: "pievent",
+      label: `PiEvent (${projects.filter((p) => p.categoryId === "pievent").length})`,
+    },
+  ];
+
   const handleOpenAddModal = () => {
     setEditingProject(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (proj: any) => {
+  const handleOpenEditModal = (proj: ProjectItem) => {
     setEditingProject(proj);
     setIsModalOpen(true);
   };
 
+  const renderStatusBadge = (status?: string) => {
+    const isFeatured = status === "featured";
+    const isDraft = status === "draft";
+    return (
+      <span
+        className={`${styles.statusBadge} ${
+          isFeatured
+            ? styles.statusFeatured
+            : isDraft
+              ? styles.statusDraft
+              : styles.statusActive
+        }`}
+      >
+        {isFeatured ? "Nổi bật" : isDraft ? "Bản nháp" : "Hiển thị"}
+      </span>
+    );
+  };
+
   return (
     <div>
-      <div className={styles.headerRow}>
-        <div>
-          <h1 className={styles.title}>Quản Lý Hồ Sơ Dự Án</h1>
-          <p className={styles.subtitle}>
-            Theo dõi tiến độ triển khai, trạng thái thi công và danh mục công trình đang thực hiện
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleOpenAddModal}
-          className={styles.addButton}
-        >
-          <PlusIcon className="h-4 w-4" style={{ width: 18, height: 18 }} />
-          <span>Thêm Dự Án Mới</span>
-        </button>
-      </div>
+      <AdminPageHeader
+        title="Quản Lý Hồ Sơ Dự Án"
+        subtitle="Theo dõi tiến độ triển khai, trạng thái thi công và danh mục công trình đang thực hiện"
+        onAdd={handleOpenAddModal}
+        addLabel="Thêm Dự Án Mới"
+      />
 
       {error && (
         <div
@@ -137,83 +182,24 @@ export function AdminProjectsPage() {
             />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "4px",
-              backgroundColor: "#ffffff",
-              padding: "4px",
-              borderRadius: "8px",
-              border: "1px solid #e7ded0",
-            }}
-          >
-            <button
-              onClick={() => setViewMode("grid")}
-              style={{
-                padding: "6px 10px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor: viewMode === "grid" ? "#a15c2e" : "transparent",
-                color: viewMode === "grid" ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                transition: "all 0.15s ease",
-              }}
-              title="Xem dạng lưới"
-            >
-              <Squares2X2Icon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            </button>
-            <button
-              onClick={() => setViewMode("table")}
-              style={{
-                padding: "6px 10px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor: viewMode === "table" ? "#a15c2e" : "transparent",
-                color: viewMode === "table" ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                transition: "all 0.15s ease",
-              }}
-              title="Xem dạng bảng"
-            >
-              <ListBulletIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            </button>
-          </div>
+          <ViewToggle viewMode={viewMode} onChange={setViewMode} />
         </div>
 
         {/* Category Tabs */}
-        <div className={styles.tabsRow}>
-          {[
-            { id: "all", label: `Tất cả (${projects.length})` },
-            {
-              id: "piwedding",
-              label: `PiWedding (${projects.filter((p) => p.categoryId === "piwedding").length})`,
-            },
-            {
-              id: "pikids",
-              label: `PiKids (${projects.filter((p) => p.categoryId === "pikids").length})`,
-            },
-            {
-              id: "pievent",
-              label: `PiEvent (${projects.filter((p) => p.categoryId === "pievent").length})`,
-            },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setSelectedCategory(tab.id)}
-              className={`${styles.tabButton} ${selectedCategory === tab.id ? styles.tabActive : ""}`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <StatusTabs
+          tabs={categoryTabs}
+          activeTab={selectedCategory}
+          onChange={setSelectedCategory}
+        />
       </div>
 
       {/* Grid or Table View */}
-      {viewMode === "grid" ? (
+      {filteredProjects.length === 0 ? (
+        <EmptyState
+          title="Không tìm thấy dự án nào phù hợp"
+          description="Thử thay đổi từ khóa tìm kiếm hoặc chọn phân mục khác."
+        />
+      ) : viewMode === "grid" ? (
         <div className={styles.grid}>
           {filteredProjects.map((proj) => (
             <div key={proj.id} className={styles.card}>
@@ -239,21 +225,7 @@ export function AdminProjectsPage() {
                     )}
                   </div>
 
-                  <span
-                    className={`${styles.statusBadge} ${
-                      proj.status === "featured"
-                        ? styles.statusFeatured
-                        : proj.status === "draft"
-                          ? styles.statusDraft
-                          : styles.statusActive
-                    }`}
-                  >
-                    {proj.status === "featured"
-                      ? "Nổi bật"
-                      : proj.status === "draft"
-                        ? "Bản nháp"
-                        : "Hiển thị"}
-                  </span>
+                  {renderStatusBadge(proj.status)}
                 </div>
               </div>
 
@@ -325,7 +297,7 @@ export function AdminProjectsPage() {
                     </button>
 
                     <button
-                      onClick={() => handleDeleteProject(proj.id)}
+                      onClick={() => requestDelete(proj.id)}
                       className={`${styles.iconBtn} ${styles.dangerBtn}`}
                       title="Xóa dự án"
                     >
@@ -339,144 +311,93 @@ export function AdminProjectsPage() {
         </div>
       ) : (
         /* Table View */
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            border: "1px solid #e7ded0",
-            boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
-            overflow: "hidden",
-          }}
+        <AdminTable
+          headers={[
+            "Hình ảnh & Dự án",
+            "Phân mục",
+            "Địa điểm",
+            "Trạng thái",
+            { label: "Thao tác", align: "right" },
+          ]}
         >
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13px",
-              color: "#271620",
-            }}
-          >
-            <thead>
-              <tr
+          {filteredProjects.map((proj) => (
+            <AdminTableRow key={proj.id}>
+              <td
                 style={{
-                  backgroundColor: "#fbf7f1",
-                  borderBottom: "1px solid #e7ded0",
-                  textAlign: "left",
-                  color: "#6e6259",
-                  fontSize: "12px",
-                  fontWeight: "700",
+                  padding: "12px 16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
                 }}
               >
-                <th style={{ padding: "14px 16px" }}>Hình ảnh &amp; Dự án</th>
-                <th style={{ padding: "14px 16px" }}>Phân mục</th>
-                <th style={{ padding: "14px 16px" }}>Địa điểm</th>
-                <th style={{ padding: "14px 16px" }}>Trạng thái</th>
-                <th style={{ padding: "14px 16px", textAlign: "right" }}>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProjects.map((proj) => (
-                <tr
-                  key={proj.id}
+                <img
+                  src={proj.src}
+                  alt={proj.title}
                   style={{
-                    borderBottom: "1px solid #e7ded0",
-                    transition: "background-color 0.15s ease",
+                    width: "54px",
+                    height: "42px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                    border: "1px solid #e7ded0",
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fdf7f5")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                >
-                  <td
-                    style={{
-                      padding: "12px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                  >
-                    <img
-                      src={proj.src}
-                      alt={proj.title}
-                      style={{
-                        width: "54px",
-                        height: "42px",
-                        objectFit: "cover",
-                        borderRadius: "8px",
-                        border: "1px solid #e7ded0",
-                      }}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = SAMPLE_STOCK_IMAGES[0];
-                      }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: "700", color: "#271620", fontSize: "14px" }}>
-                        {proj.title}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#6e6259", marginTop: "2px" }}>
-                        {proj.description?.slice(0, 50)}...
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span className={styles.categoryBadge}>
-                      #{getCategoryLabel(proj.categoryId)} • {proj.tag}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = SAMPLE_STOCK_IMAGES[0];
+                  }}
+                />
+                <div>
+                  <div style={{ fontWeight: "700", color: "#271620", fontSize: "14px" }}>
+                    {proj.title}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#6e6259", marginTop: "2px" }}>
+                    {proj.description?.slice(0, 50)}...
+                  </div>
+                </div>
+              </td>
+              <td style={{ padding: "12px 16px" }}>
+                <span className={styles.categoryBadge}>
+                  #{getCategoryLabel(proj.categoryId)} • {proj.tag}
+                </span>
+              </td>
+              <td style={{ padding: "12px 16px", color: "#6e6259", fontWeight: "500" }}>
+                {proj.location}
+              </td>
+              <td style={{ padding: "12px 16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                  {renderStatusBadge(proj.status)}
+                  {proj.priceTier === "premium" && (
+                    <span className={`${styles.tierBadge} ${styles.tierPremium}`}>
+                      Cao cấp
                     </span>
-                  </td>
-                  <td style={{ padding: "12px 16px", color: "#6e6259", fontWeight: "500" }}>
-                    {proj.location}
-                  </td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                      <span
-                        className={`${styles.statusBadge} ${
-                          proj.status === "featured"
-                            ? styles.statusFeatured
-                            : proj.status === "draft"
-                              ? styles.statusDraft
-                              : styles.statusActive
-                        }`}
-                      >
-                        {proj.status === "featured"
-                          ? "Nổi bật"
-                          : proj.status === "draft"
-                            ? "Bản nháp"
-                            : "Hiển thị"}
-                      </span>
-                      {proj.priceTier === "premium" && (
-                        <span className={`${styles.tierBadge} ${styles.tierPremium}`}>
-                          Cao cấp
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td style={{ padding: "12px 16px", textAlign: "right" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "6px",
-                        justifyContent: "flex-end",
-                      }}
-                    >
-                      <button
-                        onClick={() => handleOpenEditModal(proj)}
-                        className={styles.iconBtn}
-                        title="Chỉnh sửa dự án"
-                      >
-                        <PencilSquareIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} /> Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(proj.id)}
-                        className={`${styles.iconBtn} ${styles.dangerBtn}`}
-                        title="Xóa dự án"
-                      >
-                        <TrashIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  )}
+                </div>
+              </td>
+              <td style={{ padding: "12px 16px", textAlign: "right" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "6px",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <button
+                    onClick={() => handleOpenEditModal(proj)}
+                    className={styles.iconBtn}
+                    title="Chỉnh sửa dự án"
+                  >
+                    <PencilSquareIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} /> Sửa
+                  </button>
+                  <button
+                    onClick={() => requestDelete(proj.id)}
+                    className={`${styles.iconBtn} ${styles.dangerBtn}`}
+                    title="Xóa dự án"
+                  >
+                    <TrashIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
+                  </button>
+                </div>
+              </td>
+            </AdminTableRow>
+          ))}
+        </AdminTable>
       )}
 
       {/* Add / Edit Project Modal */}
@@ -490,6 +411,15 @@ export function AdminProjectsPage() {
           onSubmit={handleFullFormSubmit}
         />
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteOpen}
+        onClose={cancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName="dự án này"
+        loading={isDeleting}
+      />
     </div>
   );
 }

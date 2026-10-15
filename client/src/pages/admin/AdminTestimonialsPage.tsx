@@ -3,14 +3,20 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   TrashIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
   ChatBubbleBottomCenterTextIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { useAuth } from "../../lib/authContext";
 import { api } from "../../lib/api";
 import { SearchInput, Select } from "../../components/ui";
+import {
+  AdminPageHeader,
+  ViewToggle,
+  StatusTabs,
+  EmptyState,
+  ConfirmDeleteModal,
+  useConfirmDelete,
+} from "../../components/admin";
 import type { TestimonialItem } from "../../lib/types";
 import styles from "./AdminTestimonialsPage.module.scss";
 
@@ -107,23 +113,31 @@ export function AdminTestimonialsPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!token || updatingId) return;
-    if (!confirm("Xoá đánh giá này khỏi hệ thống?")) return;
-    setUpdatingId(id);
-    setError(null);
-    setSuccessMsg(null);
+  const {
+    isOpen: isDeleteOpen,
+    loading: isDeleting,
+    requestDelete,
+    cancelDelete,
+    executeDelete,
+  } = useConfirmDelete<string>();
 
-    try {
-      await api.deleteTestimonial(id);
-      setSuccessMsg("✓ Đã xóa đánh giá.");
-      setTimeout(() => setSuccessMsg(null), 3000);
-      await loadTestimonials();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Xoá đánh giá thất bại.");
-    } finally {
-      setUpdatingId(null);
-    }
+  async function handleConfirmDelete() {
+    await executeDelete(async (id) => {
+      setUpdatingId(id);
+      setError(null);
+      setSuccessMsg(null);
+
+      try {
+        await api.deleteTestimonial(id);
+        setSuccessMsg("✓ Đã xóa đánh giá.");
+        setTimeout(() => setSuccessMsg(null), 3000);
+        await loadTestimonials();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Xoá đánh giá thất bại.");
+      } finally {
+        setUpdatingId(null);
+      }
+    });
   }
 
   const statusTabs = [
@@ -136,14 +150,10 @@ export function AdminTestimonialsPage() {
   return (
     <div>
       {/* Header Row */}
-      <div className={styles.headerRow}>
-        <div>
-          <h1 className={styles.title}>Quản Lý Đánh Giá Khách Hàng</h1>
-          <p className={styles.subtitle}>
-            Kiểm duyệt, phê duyệt và quản lý các phản hồi, đánh giá từ cô dâu &amp; chú rể
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Quản Lý Đánh Giá Khách Hàng"
+        subtitle="Kiểm duyệt, phê duyệt và quản lý các phản hồi, đánh giá từ cô dâu &amp; chú rể"
+      />
 
       {successMsg && (
         <div style={{ padding: "10px 16px", backgroundColor: "#eef4ea", color: "#47663b", borderRadius: "8px", marginBottom: "16px", fontSize: "14px", fontWeight: "600", border: "1px solid rgba(71, 102, 59, 0.3)" }}>
@@ -196,70 +206,20 @@ export function AdminTestimonialsPage() {
             />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "4px",
-              backgroundColor: "#ffffff",
-              padding: "4px",
-              borderRadius: "8px",
-              border: "1px solid #e7ded0",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setViewMode("grid")}
-              style={{
-                padding: "6px 10px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor: viewMode === "grid" ? "#a15c2e" : "transparent",
-                color: viewMode === "grid" ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                transition: "all 0.15s ease",
-              }}
-              title="Xem dạng thẻ"
-            >
-              <Squares2X2Icon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              style={{
-                padding: "6px 10px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor: viewMode === "table" ? "#a15c2e" : "transparent",
-                color: viewMode === "table" ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                transition: "all 0.15s ease",
-              }}
-              title="Xem dạng bảng"
-            >
-              <ListBulletIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            </button>
-          </div>
+          <ViewToggle
+            viewMode={viewMode}
+            onChange={setViewMode}
+            gridTitle="Xem dạng thẻ"
+            tableTitle="Xem dạng bảng"
+          />
         </div>
 
         {/* Tabs Row */}
-        <div className={styles.tabsRow}>
-          {statusTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setStatusFilter(tab.id)}
-              className={`${styles.tabButton} ${
-                statusFilter === tab.id ? styles.tabActive : ""
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <StatusTabs
+          tabs={statusTabs}
+          activeTab={statusFilter}
+          onChange={setStatusFilter}
+        />
       </div>
 
       {status === "loading" && <p className={styles.status}>Đang tải danh sách đánh giá…</p>}
@@ -267,11 +227,16 @@ export function AdminTestimonialsPage() {
 
       {status === "ready" && (
         filteredTestimonials.length === 0 ? (
-          <div className={styles.empty}>
-            <ChatBubbleBottomCenterTextIcon className="h-10 w-10" style={{ width: 40, height: 40, color: "#9c9186" }} />
-            <div style={{ fontWeight: "700", color: "#271620" }}>Không tìm thấy đánh giá phù hợp</div>
-            <div style={{ fontSize: "12px", color: "#9c9186" }}>Thử thay đổi từ khóa hoặc bộ lọc trạng thái.</div>
-          </div>
+          <EmptyState
+            icon={
+              <ChatBubbleBottomCenterTextIcon
+                className="h-10 w-10"
+                style={{ width: 40, height: 40, color: "#9c9186" }}
+              />
+            }
+            title="Không tìm thấy đánh giá phù hợp"
+            description="Thử thay đổi từ khóa hoặc bộ lọc trạng thái."
+          />
         ) : viewMode === "grid" ? (
           /* Grid View */
           <div className={styles.grid}>
@@ -327,7 +292,7 @@ export function AdminTestimonialsPage() {
                   <button
                     type="button"
                     className={styles.btnDelete}
-                    onClick={() => handleDelete(t.id)}
+                    onClick={() => requestDelete(t.id)}
                     disabled={updatingId === t.id}
                     title="Xoá đánh giá"
                   >
@@ -402,7 +367,7 @@ export function AdminTestimonialsPage() {
                         <button
                           type="button"
                           className={styles.btnDelete}
-                          onClick={() => handleDelete(t.id)}
+                          onClick={() => requestDelete(t.id)}
                           disabled={updatingId === t.id}
                           title="Xoá"
                         >
@@ -417,6 +382,15 @@ export function AdminTestimonialsPage() {
           </div>
         )
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteOpen}
+        onClose={cancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName="đánh giá này"
+        loading={isDeleting}
+      />
     </div>
   );
 }

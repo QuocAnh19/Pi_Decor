@@ -1,4 +1,6 @@
 import { useMaterials, MaterialList, MaterialForm } from "../../features/materials";
+import { ConfirmDeleteModal, useConfirmDelete } from "../../components/admin";
+import type { MaterialItem } from "../../lib/types";
 import styles from "./AdminMaterialsPage.module.scss";
 
 export function AdminMaterialsPage() {
@@ -21,6 +23,21 @@ export function AdminMaterialsPage() {
     handleFormSubmit,
     handleDelete,
   } = useMaterials();
+
+  const {
+    target: materialToDelete,
+    isOpen: isDeleteOpen,
+    loading: isDeleting,
+    requestDelete,
+    cancelDelete,
+    executeDelete,
+  } = useConfirmDelete<MaterialItem>();
+
+  const handleConfirmDelete = async () => {
+    await executeDelete(async (mat) => {
+      await handleDelete(mat);
+    });
+  };
 
   return (
     <div>
@@ -51,7 +68,7 @@ export function AdminMaterialsPage() {
             setEditingMaterial(mat);
             setFormOpen(true);
           }}
-          onDelete={handleDelete}
+          onDelete={requestDelete}
         />
       )}
 
@@ -65,6 +82,15 @@ export function AdminMaterialsPage() {
           onSubmit={handleFormSubmit}
         />
       )}
+
+      {/* Confirm Delete Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteOpen}
+        onClose={cancelDelete}
+        onConfirm={handleConfirmDelete}
+        itemName={materialToDelete ? `vật liệu "${materialToDelete.name}"` : "vật liệu này"}
+        loading={isDeleting}
+      />
     </div>
   );
 }

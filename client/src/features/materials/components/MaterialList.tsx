@@ -1,13 +1,18 @@
 import { useMemo } from "react";
 import {
-  PlusIcon,
   PencilSquareIcon,
   TrashIcon,
   PhotoIcon,
-  Squares2X2Icon,
-  ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import { SearchInput, Select } from "../../../components/ui";
+import {
+  AdminPageHeader,
+  ViewToggle,
+  StatusTabs,
+  EmptyState,
+  AdminTable,
+  AdminTableRow,
+} from "../../../components/admin";
 import type { MaterialItem } from "../../../lib/types";
 import styles from "./MaterialList.module.scss";
 
@@ -82,20 +87,12 @@ export function MaterialList({
   return (
     <div className={styles.container}>
       {/* Header Row */}
-      <div className={styles.headerRow}>
-        <div>
-          <h1 className={styles.title}>Danh Mục & Kho Vật Liệu</h1>
-          <p className={styles.subtitle}>
-            Quản lý kho nguyên vật liệu, đơn giá nhà cung cấp và thông số kỹ
-            thuật chi tiết
-          </p>
-        </div>
-
-        <button type="button" className={styles.addButton} onClick={onAdd}>
-          <PlusIcon className="h-4 w-4" style={{ width: 18, height: 18 }} />
-          <span>Thêm Vật Liệu Mới</span>
-        </button>
-      </div>
+      <AdminPageHeader
+        title="Danh Mục &amp; Kho Vật Liệu"
+        subtitle="Quản lý kho nguyên vật liệu, đơn giá nhà cung cấp và thông số kỹ thuật chi tiết"
+        onAdd={onAdd}
+        addLabel="Thêm Vật Liệu Mới"
+      />
 
       {/* Filter & Search Bar */}
       <div className={styles.filterBar}>
@@ -122,95 +119,29 @@ export function MaterialList({
             />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "4px",
-              backgroundColor: "#ffffff",
-              padding: "4px",
-              borderRadius: "8px",
-              border: "1px solid #e7ded0",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => onViewModeChange("grid")}
-              style={{
-                padding: "6px 10px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor:
-                  viewMode === "grid" ? "#a15c2e" : "transparent",
-                color: viewMode === "grid" ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                transition: "all 0.15s ease",
-              }}
-              title="Xem dạng lưới"
-            >
-              <Squares2X2Icon
-                className="h-4 w-4"
-                style={{ width: 16, height: 16 }}
-              />
-            </button>
-            <button
-              type="button"
-              onClick={() => onViewModeChange("table")}
-              style={{
-                padding: "6px 10px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor:
-                  viewMode === "table" ? "#a15c2e" : "transparent",
-                color: viewMode === "table" ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                transition: "all 0.15s ease",
-              }}
-              title="Xem dạng bảng"
-            >
-              <ListBulletIcon
-                className="h-4 w-4"
-                style={{ width: 16, height: 16 }}
-              />
-            </button>
-          </div>
+          <ViewToggle viewMode={viewMode} onChange={onViewModeChange} />
         </div>
 
         {/* Category Tabs */}
-        <div className={styles.tabsRow}>
-          {categoryTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onCategoryChange(tab.id)}
-              className={`${styles.tabButton} ${
-                selectedCategory === tab.id ? styles.tabActive : ""
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <StatusTabs
+          tabs={categoryTabs}
+          activeTab={selectedCategory}
+          onChange={onCategoryChange}
+        />
       </div>
 
       {/* Main List Display */}
       {materials.length === 0 ? (
-        <div className={styles.empty}>
-          <PhotoIcon
-            className="h-10 w-10"
-            style={{ width: 40, height: 40, color: "#9c9186" }}
-          />
-          <div style={{ fontWeight: "700", color: "#271620" }}>
-            Không tìm thấy vật liệu phù hợp
-          </div>
-          <div style={{ fontSize: "12px", color: "#9c9186" }}>
-            Thử thay đổi từ khóa tìm kiếm hoặc bấm "Thêm Vật Liệu Mới" để tạo
-            vật liệu.
-          </div>
-        </div>
+        <EmptyState
+          icon={
+            <PhotoIcon
+              className="h-10 w-10"
+              style={{ width: 40, height: 40, color: "#9c9186" }}
+            />
+          }
+          title="Không tìm thấy vật liệu phù hợp"
+          description='Thử thay đổi từ khóa tìm kiếm hoặc bấm "Thêm Vật Liệu Mới" để tạo vật liệu.'
+        />
       ) : viewMode === "grid" ? (
         /* Grid View */
         <div className={styles.grid}>
@@ -290,60 +221,17 @@ export function MaterialList({
         </div>
       ) : (
         /* Table View */
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            border: "1px solid #e7ded0",
-            boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
-            overflow: "hidden",
-          }}
+        <AdminTable
+          headers={[
+            "Hình ảnh & Tên vật liệu",
+            "Phân loại",
+            "Mã màu / Định dạng",
+            "Mã định danh (ID)",
+            { label: "Thao tác", align: "right" },
+          ]}
         >
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13px",
-              color: "#271620",
-            }}
-          >
-            <thead>
-              <tr
-                style={{
-                  backgroundColor: "#fbf7f1",
-                  borderBottom: "1px solid #e7ded0",
-                  textAlign: "left",
-                  color: "#6e6259",
-                  fontSize: "12px",
-                  fontWeight: "700",
-                }}
-              >
-                <th style={{ padding: "14px 16px" }}>
-                  Hình ảnh &amp; Tên vật liệu
-                </th>
-                <th style={{ padding: "14px 16px" }}>Phân loại</th>
-                <th style={{ padding: "14px 16px" }}>Mã màu / Định dạng</th>
-                <th style={{ padding: "14px 16px" }}>Mã định danh (ID)</th>
-                <th style={{ padding: "14px 16px", textAlign: "right" }}>
-                  Thao tác
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {materials.map((mat) => (
-                <tr
-                  key={mat.id}
-                  style={{
-                    borderBottom: "1px solid #e7ded0",
-                    transition: "background-color 0.15s ease",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor = "#fdf7f5")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = "transparent")
-                  }
-                >
+          {materials.map((mat) => (
+            <AdminTableRow key={mat.id}>
                   <td
                     style={{
                       padding: "12px 16px",
@@ -500,11 +388,9 @@ export function MaterialList({
                       </button>
                     </div>
                   </td>
-                </tr>
+                </AdminTableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+        </AdminTable>
       )}
     </div>
   );

@@ -85,7 +85,6 @@ export function useMaterials() {
 
   const handleDelete = async (mat: MaterialItem) => {
     if (!token) return;
-    if (!confirm(`Xoá vật liệu "${mat.name}"?`)) return;
 
     setMaterials((prev) => prev.filter((m) => m.id !== mat.id));
 

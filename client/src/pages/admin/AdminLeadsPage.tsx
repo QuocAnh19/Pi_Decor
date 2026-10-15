@@ -1,8 +1,6 @@
 import { useState } from "react";
 import {
   SparklesIcon,
-  ListBulletIcon,
-  Squares2X2Icon,
   PhoneIcon,
   EnvelopeIcon,
   CalendarDaysIcon,
@@ -11,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useLeads, LeadTable, LeadDetailDrawer, QuotationModal } from "../../features/leads";
 import { SearchInput, Select } from "../../components/ui";
+import { AdminPageHeader, ViewToggle, StatusTabs } from "../../components/admin";
 import { formatDate } from "../../lib/formatters";
 import type { Lead, LeadStatus } from "../../lib/types";
 import styles from "./AdminLeadsPage.module.scss";
@@ -73,16 +72,10 @@ export function AdminLeadsPage() {
   return (
     <div>
       {/* Header Row */}
-      <div className={styles.headerRow}>
-        <div>
-          <h1 className={styles.title}>
-            Quản Lý Khách Hàng &amp; Báo Giá
-          </h1>
-          <p className={styles.subtitle}>
-            Theo dõi thông tin liên hệ, nhu cầu tư vấn và lập báo giá chi tiết xuất file PDF cho khách hàng
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Quản Lý Khách Hàng &amp; Báo Giá"
+        subtitle="Theo dõi thông tin liên hệ, nhu cầu tư vấn và lập báo giá chi tiết xuất file PDF cho khách hàng"
+      />
 
       {error && <p className={styles.error}>{error}</p>}
 
@@ -108,76 +101,23 @@ export function AdminLeadsPage() {
             />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "4px",
-              backgroundColor: "#ffffff",
-              padding: "4px",
-              borderRadius: "8px",
-              border: "1px solid #e7ded0",
-            }}
-          >
-            {/* Nút bên trái: Xem dạng thẻ */}
-            <button
-              type="button"
-              onClick={() => setViewMode("grid")}
-              style={{
-                padding: "6px 10px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor: viewMode === "grid" ? "#a15c2e" : "transparent",
-                color: viewMode === "grid" ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                transition: "all 0.15s ease",
-              }}
-              title="Xem dạng thẻ"
-            >
-              <Squares2X2Icon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            </button>
-
-            {/* Nút bên phải: Xem dạng bảng */}
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              style={{
-                padding: "6px 10px",
-                border: "none",
-                borderRadius: "6px",
-                backgroundColor: viewMode === "table" ? "#a15c2e" : "transparent",
-                color: viewMode === "table" ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                transition: "all 0.15s ease",
-              }}
-              title="Xem dạng bảng"
-            >
-              <ListBulletIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            </button>
-          </div>
+          <ViewToggle
+            viewMode={viewMode}
+            onChange={setViewMode}
+            gridTitle="Xem dạng thẻ"
+            tableTitle="Xem dạng bảng"
+          />
         </div>
 
         {/* Tabs Row */}
-        <div className={styles.tabsRow}>
-          {statusTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                setStatusFilter(tab.id);
-                setPage(1);
-              }}
-              className={`${styles.tabButton} ${
-                statusFilter === tab.id ? styles.tabActive : ""
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <StatusTabs
+          tabs={statusTabs}
+          activeTab={statusFilter}
+          onChange={(tabId) => {
+            setStatusFilter(tabId);
+            setPage(1);
+          }}
+        />
       </div>
 
       {status === "loading" && <p className={styles.status}>Đang nạp danh sách khách hàng…</p>}

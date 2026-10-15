@@ -48,7 +48,6 @@ export function useProjects(selectedVenueId?: string | null) {
   }, [loadProjects]);
 
   const handleDeleteProject = async (id: string) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa dự án này?")) return;
     if (!token) {
       alert("Vui lòng đăng nhập lại.");
       return;
