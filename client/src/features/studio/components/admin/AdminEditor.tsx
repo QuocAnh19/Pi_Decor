@@ -1,9 +1,8 @@
 import React from "react";
 import { useAdminEditor } from "../../hooks/useAdminEditor";
 import { EditorHeader } from "./EditorHeader";
-import { AdminCanvas } from "./AdminCanvas";
+import { EditorCanvasFrame } from "../shared/EditorCanvasFrame";
 import { SlotList } from "./SlotList";
-import { SlotProperties } from "./SlotProperties";
 import { RuleList } from "./RuleList";
 import { AddSlotModal } from "./AddSlotModal";
 import { TemplateUploader } from "./TemplateUploader";
@@ -110,71 +109,24 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
   const selectedSlot = slots.find((s) => s.id === selectedSlotId) || null;
 
   return (
-    <div
-      className="no-scrollbar"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        backgroundColor: "#f4eee3",
-        color: "#271620",
-        padding: "16px 24px",
-        gap: "16px",
-        boxSizing: "border-box",
-      }}
-    >
-      {toastMessage && (
-        <div
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            maxWidth: "380px",
-            backgroundColor: "#271620",
-            color: "#fbf7f1",
-            border: "1px solid #a15c2e",
-            borderRadius: "8px",
-            padding: "10px 16px",
-            fontSize: "13px",
-            fontWeight: "600",
-            boxShadow: "0 10px 25px rgba(39, 22, 32, 0.2)",
-            zIndex: 9999,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            pointerEvents: "none",
-          }}
-        >
-          {toastMessage}
-        </div>
-      )}
-
-      {/* Header Controls */}
-      <EditorHeader
-        template={template}
-        allTemplates={allTemplates}
-        isDirty={isDirty}
-        showGrid={showGrid}
-        onBackToHome={onBackToHome}
-        onSelectTemplate={handleSelectTemplate}
-        onSaveDraft={handleSaveDraft}
-        onPublish={handlePublish}
-        onToggleActive={handleToggleActive}
-        onToggleGrid={() => setShowGrid(!showGrid)}
-        onUpdateTemplateName={handleUpdateTemplateName}
-      />
-
-      {/* Main Admin 3-Column Layout */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "320px 1fr 340px",
-          gap: "20px",
-          flex: 1,
-          alignItems: "start",
-        }}
-      >
-        {/* Left Column: Template SVG Upload, Slot & Rule Tabs */}
+    <EditorCanvasFrame
+      toastMessage={toastMessage}
+      header={
+        <EditorHeader
+          template={template}
+          allTemplates={allTemplates}
+          isDirty={isDirty}
+          showGrid={showGrid}
+          onBackToHome={onBackToHome}
+          onSelectTemplate={handleSelectTemplate}
+          onSaveDraft={handleSaveDraft}
+          onPublish={handlePublish}
+          onToggleActive={handleToggleActive}
+          onToggleGrid={() => setShowGrid(!showGrid)}
+          onUpdateTemplateName={handleUpdateTemplateName}
+        />
+      }
+      leftPanel={
         <div
           style={{
             display: "flex",
@@ -234,8 +186,7 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
                 transition: "all 0.15s ease",
               }}
             >
-              Rules 
-              {/* ({rules.length}) */}
+              Rules
             </button>
           </div>
 
@@ -258,59 +209,36 @@ export const AdminEditor: React.FC<AdminEditorProps> = ({
             )}
           </div>
         </div>
-
-        {/* Middle Column: SVG Admin Canvas */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div style={{ flex: 1, minHeight: "520px" }}>
-            <AdminCanvas
-              template={template}
-              slots={slots}
-              slotConfig={slotConfig}
-              selectedSlotId={selectedSlotId}
-              showGrid={showGrid}
-              onSlotSelect={(id) => setSelectedSlotId(id)}
-              onSlotMove={(id, x, y) => handleSlotPositionChange(id, x, y)}
-              onSlotUpdate={handleSlotUpdate}
-            />
-          </div>
-        </div>
-
-        {/* Right Column: Slot Properties Panel */}
-        <div
-          style={{
-            position: "sticky",
-            top: "16px",
-            height: "calc(100vh - 100px)",
-            maxHeight: "calc(100vh - 100px)",
-            backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            border: "1px solid #e7ded0",
-            boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <SlotProperties
-            slot={selectedSlot}
-            slotConfig={slotConfig}
-            onUpdate={handleSlotUpdate}
-            onDelete={(id) => handleDeleteSlot(id)}
-            onAssignMaterial={(mat, slot) => handleMaterialAssign(slot.slotKey, mat)}
-            onAssignColor={(key, hex, filterMode, saturation) => handleColorHexChange(key, hex, filterMode, saturation)}
-            onAddAsset={handleAddCustomAsset}
-          />
-        </div>
-      </div>
-
-      <AddSlotModal
-        isOpen={isAddSlotOpen}
-        onClose={() => setIsAddSlotOpen(false)}
-        onAdd={handleSlotAddSubmit}
-        existingSlots={slots}
-        existingSlotKeys={slots.map((s) => s.slotKey)}
-        initialNormPos={initialClickNorm}
-      />
-    </div>
+      }
+      canvas={{
+        template,
+        slots,
+        slotConfig,
+        selectedSlotId,
+        showGrid,
+        onSlotSelect: setSelectedSlotId,
+        onSlotMove: handleSlotPositionChange,
+        onSlotUpdate: handleSlotUpdate,
+      }}
+      slotProperties={{
+        slot: selectedSlot,
+        slotConfig,
+        onUpdate: handleSlotUpdate,
+        onDelete: handleDeleteSlot,
+        onAssignMaterial: (mat, slot) => handleMaterialAssign(slot.slotKey, mat),
+        onAssignColor: handleColorHexChange,
+        onAddAsset: handleAddCustomAsset,
+      }}
+      modals={
+        <AddSlotModal
+          isOpen={isAddSlotOpen}
+          onClose={() => setIsAddSlotOpen(false)}
+          onAdd={handleSlotAddSubmit}
+          existingSlots={slots}
+          existingSlotKeys={slots.map((s) => s.slotKey)}
+          initialNormPos={initialClickNorm}
+        />
+      }
+    />
   );
 };

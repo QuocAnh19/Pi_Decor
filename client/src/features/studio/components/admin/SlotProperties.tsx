@@ -40,6 +40,18 @@ const friendlyTypeLabel: Record<string, string> = {
   text_date: "Ngày cưới",
 };
 
+const alignBtnStyle: React.CSSProperties = {
+  padding: "6px 8px",
+  fontSize: "11px",
+  fontWeight: "700",
+  backgroundColor: "#ffffff",
+  color: "#a15c2e",
+  border: "1px solid #e7ded0",
+  borderRadius: "6px",
+  cursor: "pointer",
+  transition: "all 0.15s ease",
+};
+
 export const SlotProperties: React.FC<SlotPropertiesProps> = ({
   slot,
   slotConfig = {},
@@ -51,6 +63,60 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
   onAssignColor,
 }) => {
   const isCustomer = mode === "customer";
+
+  const handleCoordChange = (
+    field: "normX" | "normY" | "normWidth" | "normHeight",
+    min: number,
+    max: number,
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!slot) return;
+    const val = parseFloat(e.target.value);
+    if (!isNaN(val)) {
+      onUpdate(slot.id, { [field]: Math.max(min, Math.min(max, val)) });
+    }
+  };
+
+  const renderAlignButton = (
+    title: string,
+    label: string,
+    patch: Partial<SlotDefinition>,
+  ) => {
+    if (!slot) return null;
+    return (
+      <button
+        type="button"
+        title={title}
+        onClick={() => onUpdate(slot.id, patch)}
+        style={alignBtnStyle}
+      >
+        {label}
+      </button>
+    );
+  };
+
+  const renderCheckbox = (
+    label: string,
+    checked: boolean,
+    onChange: (checked: boolean) => void,
+  ) => (
+    <label
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        fontSize: "13px",
+        color: "#271620",
+        cursor: "pointer",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      {label}
+    </label>
+  );
 
   if (!slot) {
     return (
@@ -222,43 +288,16 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
             gap: "8px",
           }}
         >
-          <button
-            type="button"
-            title="Căn giữa trục ngang (X = 0.50)"
-            onClick={() => onUpdate(slot.id, { normX: 0.5 })}
-            style={{
-              padding: "6px 8px",
-              fontSize: "11px",
-              fontWeight: "700",
-              backgroundColor: "#ffffff",
-              color: "#a15c2e",
-              border: "1px solid #e7ded0",
-              borderRadius: "6px",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-          >
-            ↔ Căn Giữa Ngang
-          </button>
-
-          <button
-            type="button"
-            title="Căn giữa trục dọc (Y = 0.50)"
-            onClick={() => onUpdate(slot.id, { normY: 0.5 })}
-            style={{
-              padding: "6px 8px",
-              fontSize: "11px",
-              fontWeight: "700",
-              backgroundColor: "#ffffff",
-              color: "#a15c2e",
-              border: "1px solid #e7ded0",
-              borderRadius: "6px",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-          >
-            ↕ Căn Giữa Dọc
-          </button>
+          {renderAlignButton(
+            "Căn giữa trục ngang (X = 0.50)",
+            "↔ Căn Giữa Ngang",
+            { normX: 0.5 },
+          )}
+          {renderAlignButton(
+            "Căn giữa trục dọc (Y = 0.50)",
+            "↕ Căn Giữa Dọc",
+            { normY: 0.5 },
+          )}
         </div>
       </div>
 
@@ -303,12 +342,7 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
               max="1"
               step="0.01"
               value={slot.normX}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val)) {
-                  onUpdate(slot.id, { normX: Math.max(0, Math.min(1, val)) });
-                }
-              }}
+              onChange={handleCoordChange("normX", 0, 1)}
             />
 
             <Input
@@ -318,12 +352,7 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
               max="1"
               step="0.01"
               value={slot.normY}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val)) {
-                  onUpdate(slot.id, { normY: Math.max(0, Math.min(1, val)) });
-                }
-              }}
+              onChange={handleCoordChange("normY", 0, 1)}
             />
 
             <Input
@@ -333,14 +362,7 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
               max="1.0"
               step="0.05"
               value={slot.normWidth ?? 0.2}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val)) {
-                  onUpdate(slot.id, {
-                    normWidth: Math.max(0.05, Math.min(1.0, val)),
-                  });
-                }
-              }}
+              onChange={handleCoordChange("normWidth", 0.05, 1.0)}
             />
 
             <Input
@@ -350,14 +372,7 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
               max="1.0"
               step="0.05"
               value={slot.normHeight ?? 0.2}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val)) {
-                  onUpdate(slot.id, {
-                    normHeight: Math.max(0.05, Math.min(1.0, val)),
-                  });
-                }
-              }}
+              onChange={handleCoordChange("normHeight", 0.05, 1.0)}
             />
           </div>
         </div>
@@ -411,43 +426,12 @@ export const SlotProperties: React.FC<SlotPropertiesProps> = ({
       {!isCustomer && (
         <>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "13px",
-                color: "#271620",
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={Boolean(slot.required)}
-                onChange={(e) => onUpdate(slot.id, { required: e.target.checked })}
-              />
-              Slot bắt buộc
-            </label>
-
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                fontSize: "13px",
-                color: "#271620",
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={Boolean(slot.allowScale)}
-                onChange={(e) =>
-                  onUpdate(slot.id, { allowScale: e.target.checked })
-                }
-              />
-              Cho phép thu phóng
-            </label>
+            {renderCheckbox("Slot bắt buộc", Boolean(slot.required), (required) =>
+              onUpdate(slot.id, { required }),
+            )}
+            {renderCheckbox("Cho phép thu phóng", Boolean(slot.allowScale), (allowScale) =>
+              onUpdate(slot.id, { allowScale }),
+            )}
           </div>
 
           <div

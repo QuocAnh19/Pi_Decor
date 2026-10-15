@@ -16,8 +16,7 @@ import type { Lead } from "../../../../lib/types";
 
 import { EditorHeader } from "../admin/EditorHeader";
 import { SlotList } from "../admin/SlotList";
-import { AdminCanvas } from "../admin/AdminCanvas";
-import { SlotProperties } from "../admin/SlotProperties";
+import { EditorCanvasFrame } from "../shared/EditorCanvasFrame";
 import { AddSlotModal } from "../admin/AddSlotModal";
 import { SaveDesignModal } from "./SaveDesignModal";
 
@@ -72,6 +71,42 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
     }, 3000);
   }, []);
 
+  const applyTemplateToState = async (
+    matched: StudioTemplateRow,
+    fallbackToSeed = false,
+  ) => {
+    const tpl = toStudioTemplate(matched);
+    setTemplate(tpl);
+    originalTemplateRef.current = tpl;
+
+    const initialConfig =
+      matched.default_config && Object.keys(matched.default_config).length > 0
+        ? (matched.default_config as SlotConfig)
+        : {};
+    setSlotConfig(initialConfig);
+    originalConfigRef.current = initialConfig;
+
+    try {
+      const sRows = await api.getStudioSlotDefinitions(matched.id);
+      if (sRows.length > 0) {
+        const mapped = sRows.map(toStudioSlot);
+        setSlots(mapped);
+        originalSlotsRef.current = mapped;
+        setSelectedSlotId(mapped[0]?.id || null);
+      } else if (fallbackToSeed) {
+        setSlots(seedSlots);
+        originalSlotsRef.current = seedSlots;
+        setSelectedSlotId(seedSlots[0]?.id || null);
+      }
+    } catch {
+      if (fallbackToSeed) {
+        setSlots(seedSlots);
+        originalSlotsRef.current = seedSlots;
+        setSelectedSlotId(seedSlots[0]?.id || null);
+      }
+    }
+  };
+
   // Fetch available templates from API
   useEffect(() => {
     api
@@ -81,28 +116,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
           setAllTemplates(rows);
           const matched = rows.find((r) => r.id === templateId);
           if (matched && !overrideSlots) {
-            const tpl = toStudioTemplate(matched);
-            setTemplate(tpl);
-            originalTemplateRef.current = tpl;
-
-            const initialConfig =
-              matched.default_config && Object.keys(matched.default_config).length > 0
-                ? (matched.default_config as SlotConfig)
-                : {};
-            setSlotConfig(initialConfig);
-            originalConfigRef.current = initialConfig;
-
-            api
-              .getStudioSlotDefinitions(matched.id)
-              .then((sRows) => {
-                if (sRows.length > 0) {
-                  const mapped = sRows.map(toStudioSlot);
-                  setSlots(mapped);
-                  originalSlotsRef.current = mapped;
-                  setSelectedSlotId(mapped[0]?.id || null);
-                }
-              })
-              .catch(() => {});
+            applyTemplateToState(matched, false);
           }
         }
       })
@@ -113,34 +127,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
   const handleSelectTemplate = async (newId: string) => {
     const matched = allTemplates.find((t) => t.id === newId);
     if (matched) {
-      const tpl = toStudioTemplate(matched);
-      setTemplate(tpl);
-      originalTemplateRef.current = tpl;
-
-      const initialConfig =
-        matched.default_config && Object.keys(matched.default_config).length > 0
-          ? (matched.default_config as SlotConfig)
-          : {};
-      setSlotConfig(initialConfig);
-      originalConfigRef.current = initialConfig;
-
-      try {
-        const sRows = await api.getStudioSlotDefinitions(matched.id);
-        if (sRows.length > 0) {
-          const mapped = sRows.map(toStudioSlot);
-          setSlots(mapped);
-          originalSlotsRef.current = mapped;
-          setSelectedSlotId(mapped[0]?.id || null);
-        } else {
-          setSlots(seedSlots);
-          originalSlotsRef.current = seedSlots;
-          setSelectedSlotId(seedSlots[0]?.id || null);
-        }
-      } catch {
-        setSlots(seedSlots);
-        originalSlotsRef.current = seedSlots;
-        setSelectedSlotId(seedSlots[0]?.id || null);
-      }
+      await applyTemplateToState(matched, true);
       showToast(`Đã chuyển sang mẫu: ${matched.name}`);
     } else {
       const seed = seedTemplates.find((t) => t.id === newId);
@@ -354,70 +341,26 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
   const selectedSlot = slots.find((s) => s.id === selectedSlotId) || null;
 
   return (
-    <div
-      className="no-scrollbar"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        backgroundColor: "#f4eee3",
-        color: "#271620",
-        padding: "16px 24px",
-        gap: "16px",
-        boxSizing: "border-box",
-      }}
-    >
-      {toastMessage && (
-        <div
-          style={{
-            position: "fixed",
-            top: "20px",
-            right: "20px",
-            maxWidth: "380px",
-            backgroundColor: "#271620",
-            color: "#fbf7f1",
-            border: "1px solid #a15c2e",
-            borderRadius: "8px",
-            padding: "10px 16px",
-            fontSize: "13px",
-            fontWeight: "600",
-            boxShadow: "0 10px 25px rgba(39, 22, 32, 0.2)",
-            zIndex: 9999,
-            pointerEvents: "none",
-          }}
-        >
-          {toastMessage}
-        </div>
-      )}
-
-      {/* Header Controls */}
-      <EditorHeader
-        template={template}
-        allTemplates={allTemplates}
-        isDirty={false}
-        showGrid={showGrid}
-        mode="customer"
-        editingLead={editingLead}
-        onBackToHome={onBackToGallery}
-        onSelectTemplate={handleSelectTemplate}
-        onToggleGrid={() => setShowGrid(!showGrid)}
-        onSaveDesign={() => setIsSaveModalOpen(true)}
-        onReset={handleReset}
-        onAdminSaveLeadDesign={handleAdminSaveLeadDesign}
-        onBackToLeads={() => navigate("/admin/leads")}
-      />
-
-      {/* Main Customer 3-Column Studio Workspace */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "320px 1fr 340px",
-          gap: "20px",
-          flex: 1,
-          alignItems: "start",
-        }}
-      >
-        {/* Left Column: Friendly Slot List */}
+    <EditorCanvasFrame
+      toastMessage={toastMessage}
+      header={
+        <EditorHeader
+          template={template}
+          allTemplates={allTemplates}
+          isDirty={false}
+          showGrid={showGrid}
+          mode="customer"
+          editingLead={editingLead}
+          onBackToHome={onBackToGallery}
+          onSelectTemplate={handleSelectTemplate}
+          onToggleGrid={() => setShowGrid(!showGrid)}
+          onSaveDesign={() => setIsSaveModalOpen(true)}
+          onReset={handleReset}
+          onAdminSaveLeadDesign={handleAdminSaveLeadDesign}
+          onBackToLeads={() => navigate("/admin/leads")}
+        />
+      }
+      leftPanel={
         <div
           style={{
             height: "calc(100vh - 100px)",
@@ -433,73 +376,47 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
             slotConfig={slotConfig}
           />
         </div>
-
-        {/* Middle Column: Interactive SVG Canvas */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div style={{ flex: 1, minHeight: "520px" }}>
-            <AdminCanvas
-              template={template}
-              slots={slots}
-              slotConfig={slotConfig}
-              selectedSlotId={selectedSlotId}
-              showGrid={showGrid}
-              onSlotSelect={(id) => setSelectedSlotId(id)}
-              onSlotMove={(id, x, y) => handleSlotPositionChange(id, x, y)}
-              onSlotUpdate={handleSlotUpdate}
-            />
-          </div>
-        </div>
-
-        {/* Right Column: Customer Slot Properties (Color Tint, Materials, Names) */}
-        <div
-          style={{
-            position: "sticky",
-            top: "16px",
-            height: "calc(100vh - 100px)",
-            maxHeight: "calc(100vh - 100px)",
-            backgroundColor: "#ffffff",
-            borderRadius: "16px",
-            border: "1px solid #e7ded0",
-            boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          <SlotProperties
-            slot={selectedSlot}
-            slotConfig={slotConfig}
+      }
+      canvas={{
+        template,
+        slots,
+        slotConfig,
+        selectedSlotId,
+        showGrid,
+        onSlotSelect: setSelectedSlotId,
+        onSlotMove: handleSlotPositionChange,
+        onSlotUpdate: handleSlotUpdate,
+      }}
+      slotProperties={{
+        slot: selectedSlot,
+        slotConfig,
+        mode: "customer",
+        onUpdate: handleSlotUpdate,
+        onDelete: handleDeleteSlot,
+        onAssignMaterial: (mat, slot) => handleMaterialAssign(slot.slotKey, mat),
+        onAssignColor: handleColorHexChange,
+        onAddAsset: handleAddCustomAsset,
+      }}
+      modals={
+        <>
+          <AddSlotModal
+            isOpen={isAddSlotModalOpen}
+            onClose={() => setIsAddSlotModalOpen(false)}
+            onAdd={handleSlotAddSubmit}
+            existingSlots={slots}
+            existingSlotKeys={slots.map((s) => s.slotKey)}
             mode="customer"
-            onUpdate={handleSlotUpdate}
-            onDelete={handleDeleteSlot}
-            onAssignMaterial={(mat, slot) => handleMaterialAssign(slot.slotKey, mat)}
-            onAssignColor={(key, hex, filterMode, saturation) =>
-              handleColorHexChange(key, hex, filterMode, saturation)
-            }
-            onAddAsset={handleAddCustomAsset}
           />
-        </div>
-      </div>
-
-      {/* Add Slot Modal for Customer */}
-      <AddSlotModal
-        isOpen={isAddSlotModalOpen}
-        onClose={() => setIsAddSlotModalOpen(false)}
-        onAdd={handleSlotAddSubmit}
-        existingSlots={slots}
-        existingSlotKeys={slots.map((s) => s.slotKey)}
-        mode="customer"
-      />
-
-      {/* Save Design & Get Consultation Quote Modal */}
-      <SaveDesignModal
-        isOpen={isSaveModalOpen}
-        onClose={() => setIsSaveModalOpen(false)}
-        slotConfig={slotConfig}
-        templateId={template.id}
-        templateName={template.name}
-        slots={slots}
-      />
-    </div>
+          <SaveDesignModal
+            isOpen={isSaveModalOpen}
+            onClose={() => setIsSaveModalOpen(false)}
+            slotConfig={slotConfig}
+            templateId={template.id}
+            templateName={template.name}
+            slots={slots}
+          />
+        </>
+      }
+    />
   );
 };

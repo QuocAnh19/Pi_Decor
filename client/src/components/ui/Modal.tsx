@@ -79,6 +79,62 @@ export function Modal({
 
   if (!isOpen) return null;
 
+  const closeLabel = variant === "drawer" ? "Đóng bảng" : "Đóng cửa sổ";
+
+  const renderContent = () => (
+    <>
+      {title ? (
+        <div className={styles.header}>
+          <div className={styles.title}>{title}</div>
+          {showCloseButton && (
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={onClose}
+              aria-label={closeLabel}
+              title="Đóng (Esc)"
+            >
+              <XMarkIcon style={{ width: 20, height: 20 }} />
+            </button>
+          )}
+        </div>
+      ) : (
+        showCloseButton && (
+          <button
+            type="button"
+            className={styles.closeButtonFloating}
+            onClick={onClose}
+            aria-label={closeLabel}
+            title="Đóng (Esc)"
+          >
+            <XMarkIcon style={{ width: 20, height: 20 }} />
+          </button>
+        )
+      )}
+
+      <div
+        ref={bodyRef}
+        onScroll={handleBodyScroll}
+        className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}
+      >
+        {children}
+      </div>
+
+      {/* Floating Scroll to Top button at bottom-right of popup */}
+      {showScrollTopButton && canScrollUp && (
+        <button
+          type="button"
+          className={styles.bottomScrollTopBtn}
+          onClick={handleScrollTop}
+          title="Cuộn lên đầu trang popup"
+          aria-label="Cuộn lên đầu trang popup"
+        >
+          <ChevronDoubleUpIcon style={{ width: 20, height: 20 }} />
+        </button>
+      )}
+    </>
+  );
+
   if (variant === "drawer") {
     return (
       <>
@@ -88,55 +144,7 @@ export function Modal({
           style={{ cursor: closeOnBackdropClick ? "pointer" : "default" }}
         />
         <aside className={`${styles.drawer} ${className}`} style={{ maxWidth }}>
-          {title ? (
-            <div className={styles.header}>
-              <div className={styles.title}>{title}</div>
-              {showCloseButton && (
-                <button
-                  type="button"
-                  className={styles.closeButton}
-                  onClick={onClose}
-                  aria-label="Đóng bảng"
-                  title="Đóng (Esc)"
-                >
-                  <XMarkIcon style={{ width: 20, height: 20 }} />
-                </button>
-              )}
-            </div>
-          ) : (
-            showCloseButton && (
-              <button
-                type="button"
-                className={styles.closeButtonFloating}
-                onClick={onClose}
-                aria-label="Đóng bảng"
-                title="Đóng (Esc)"
-              >
-                <XMarkIcon style={{ width: 20, height: 20 }} />
-              </button>
-            )
-          )}
-
-          <div
-            ref={bodyRef}
-            onScroll={handleBodyScroll}
-            className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}
-          >
-            {children}
-          </div>
-
-          {/* Floating Scroll to Top button at bottom-right of popup */}
-          {showScrollTopButton && canScrollUp && (
-            <button
-              type="button"
-              className={styles.bottomScrollTopBtn}
-              onClick={handleScrollTop}
-              title="Cuộn lên đầu trang popup"
-              aria-label="Cuộn lên đầu trang popup"
-            >
-              <ChevronDoubleUpIcon style={{ width: 20, height: 20 }} />
-            </button>
-          )}
+          {renderContent()}
         </aside>
       </>
     );
@@ -153,55 +161,7 @@ export function Modal({
         style={{ maxWidth, cursor: "default" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {title ? (
-          <div className={styles.header}>
-            <div className={styles.title}>{title}</div>
-            {showCloseButton && (
-              <button
-                type="button"
-                className={styles.closeButton}
-                onClick={onClose}
-                aria-label="Đóng cửa sổ"
-                title="Đóng (Esc)"
-              >
-                <XMarkIcon style={{ width: 20, height: 20 }} />
-              </button>
-            )}
-          </div>
-        ) : (
-          showCloseButton && (
-            <button
-              type="button"
-              className={styles.closeButtonFloating}
-              onClick={onClose}
-              aria-label="Đóng cửa sổ"
-              title="Đóng (Esc)"
-            >
-              <XMarkIcon style={{ width: 20, height: 20 }} />
-            </button>
-          )
-        )}
-
-        <div
-          ref={bodyRef}
-          onScroll={handleBodyScroll}
-          className={`${styles.body} ${!bodyPadding ? styles.bodyFlush : ""}`}
-        >
-          {children}
-        </div>
-
-        {/* Floating Scroll to Top button at bottom-right of popup */}
-        {showScrollTopButton && canScrollUp && (
-          <button
-            type="button"
-            className={styles.bottomScrollTopBtn}
-            onClick={handleScrollTop}
-            title="Cuộn lên đầu trang popup"
-            aria-label="Cuộn lên đầu trang popup"
-          >
-            <ChevronDoubleUpIcon style={{ width: 20, height: 20 }} />
-          </button>
-        )}
+        {renderContent()}
       </div>
     </div>
   );

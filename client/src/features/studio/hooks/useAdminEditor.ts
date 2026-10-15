@@ -196,7 +196,8 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
     }
   };
 
-  const handlePublish = async () => {
+  const saveTemplateStatus = async (isActive: boolean) => {
+    const actionLabel = isActive ? "xuất bản" : "lưu nháp";
     try {
       let thumbnailData = template.thumbnail;
       try {
@@ -215,7 +216,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
             name: template.name,
             thumbnail: thumbnailData,
             svg_base: template.svgBase,
-            is_active: true,
+            is_active: isActive,
             category: template.category ?? null,
             slots,
             rules,
@@ -227,82 +228,35 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
         setTemplate((prev) => ({
           ...prev,
           id: savedId,
-          isActive: true,
+          isActive,
           thumbnail: savedThumbnail,
         }));
         setIsDirty(false);
-        showToast("Đã xuất bản template và cập nhật ảnh đại diện thành công!");
-        loadTemplatesFromAPI(savedId);
-      } else {
-        setTemplate((prev) => ({
-          ...prev,
-          isActive: true,
-          thumbnail: thumbnailData,
-        }));
-        setIsDirty(false);
-        showToast("Đã lưu thiết kế!");
-      }
-    } catch (err: unknown) {
-      console.error("Failed to publish template:", err);
-      showToast(
-        `Lỗi xuất bản: ${err instanceof Error ? err.message : "Không thể lưu cấu hình"}`,
-      );
-    }
-  };
-
-  const handleSaveDraft = async () => {
-    try {
-      let thumbnailData = template.thumbnail;
-      try {
-        const captured = await captureStudioThumbnail();
-        if (captured) {
-          thumbnailData = captured;
-        }
-      } catch (captureErr) {
-        console.warn("Could not capture preview thumbnail:", captureErr);
-      }
-
-      if (token) {
-        const res = await api.publishStudioTemplate(
-          template.id,
-          {
-            name: template.name,
-            thumbnail: thumbnailData,
-            svg_base: template.svgBase,
-            is_active: false,
-            category: template.category ?? null,
-            slots,
-            rules,
-            slot_config: slotConfig as Record<string, unknown>,
-          }
+        showToast(
+          isActive
+            ? "Đã xuất bản template và cập nhật ảnh đại diện thành công!"
+            : "✓ Đã lưu nháp template và cập nhật ảnh đại diện vào CSDL!"
         );
-        const savedId = res?.template?.id || template.id;
-        const savedThumbnail = res?.template?.thumbnail || thumbnailData;
-        setTemplate((prev) => ({
-          ...prev,
-          id: savedId,
-          isActive: false,
-          thumbnail: savedThumbnail,
-        }));
-        setIsDirty(false);
-        showToast("✓ Đã lưu nháp template và cập nhật ảnh đại diện vào CSDL!");
         loadTemplatesFromAPI(savedId);
       } else {
         setTemplate((prev) => ({
           ...prev,
-          isActive: false,
+          isActive,
           thumbnail: thumbnailData,
         }));
         setIsDirty(false);
-        showToast("✓ Đã lưu nháp template!");
+        showToast(isActive ? "Đã lưu thiết kế!" : "✓ Đã lưu nháp template!");
       }
     } catch (err: unknown) {
-      console.error("Failed to save template draft:", err);
+      console.error(`Failed to ${isActive ? "publish" : "save"} template:`, err);
       showToast(
-        `Lỗi lưu nháp: ${err instanceof Error ? err.message : "Không thể lưu bản nháp"}`,
+        `Lỗi ${actionLabel}: ${err instanceof Error ? err.message : "Không thể lưu cấu hình"}`
       );
     }
   };
+
+  const handlePublish = () => saveTemplateStatus(true);
+  const handleSaveDraft = () => saveTemplateStatus(false);
 
   const handleCaptureThumbnail = async () => {
     try {
