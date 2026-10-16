@@ -2,11 +2,12 @@ import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/auth.js";
 
 /**
- * verifyToken / requireAdmin
- * ───────────────────────────
- * The technical proposal flagged Ecovera's admin routes as missing a
- * consistent auth/role check (Mục 2.5) — this file is the fix, applied
- * uniformly to every route under /api/admin/*.
+ * verifyToken / requireAdmin / requireOwner
+ * ──────────────────────────────────────────
+ * Middleware xác thực và phân quyền cho các endpoint quản trị:
+ * - verifyToken: kiểm tra JWT bearer token trong Authorization header.
+ * - requireAdmin: yêu cầu role 'admin' hoặc 'owner'.
+ * - requireOwner: yêu cầu role 'owner' cho các tác vụ nhạy cảm (quản lý admin khác).
  */
 export function verifyToken(req, res, next) {
   const header = req.headers.authorization ?? "";
@@ -33,8 +34,9 @@ export function requireAdmin(req, res, next) {
 
 export function requireOwner(req, res, next) {
   if (req.user?.role !== "owner") {
-    return res.status(403).json({ message: "Chỉ chủ sở hữu (owner) mới có quyền thực hiện thao tác này." });
+    return res
+      .status(403)
+      .json({ message: "Chỉ chủ sở hữu (owner) mới có quyền thực hiện thao tác này." });
   }
   next();
 }
-

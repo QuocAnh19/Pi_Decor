@@ -1,115 +1,89 @@
 # Pi Decor API (server/)
 
-Express REST API for Pi Decor — leads, saved designs, materials/services, and
-a minimal JWT-protected admin area. Structured by business domain (same
-pattern as the Ecovera reference project's `Server/routes`), so each area
-can grow independently.
+Express 5 REST API (ESM) cho Pi Decor — quản lý leads, báo giá, studio thiết kế, vật liệu/dịch vụ, địa điểm/dự án bản đồ, đánh giá khách hàng và phân quyền admin. Kiến trúc module hóa theo domain nghiệp vụ.
+
+## Yêu cầu môi trường
+
+- Node.js >= 20 (xem `.nvmrc` ở thư mục gốc)
+- PostgreSQL 16 (chạy qua Docker Compose hoặc dịch vụ đám mây Neon/Supabase)
 
 ## Chạy local
 
 ```bash
 cd server
-cp .env.example .env      # rồi sửa ADMIN_EMAIL / ADMIN_PASSWORD / JWT_SECRET
+cp .env.example .env      # cấu hình DATABASE_URL, JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD
 npm install
-npm run seed               # tạo tài khoản admin + dữ liệu materials/services mẫu
-npm run dev                 # http://localhost:4000
+npm run migrate           # chạy các migration schema PostgreSQL
+npm run seed              # khởi tạo tài khoản admin và dữ liệu mẫu
+npm run dev               # khởi động server ở cổng http://localhost:4000
 ```
 
-**Lưu trữ dữ liệu — PostgreSQL:**
+Để chạy bộ kiểm thử Vitest:
 
-Hệ thống sử dụng PostgreSQL (Docker cục bộ hoặc Neon/Supabase). Bắt buộc
-cấu hình `DATABASE_URL`. Chạy `docker compose up -d` để khởi động Postgres cục bộ,
-sau đó chạy migration: `npm run migrate` và seed: `npm run seed`.
-
-👉 **Hướng dẫn đầy đủ (tạo project Neon/Supabase, chạy migration, bảo mật,
-troubleshooting): xem [`database/README.md`](./database/README.md) và
-[`database/SECURITY.md`](./database/SECURITY.md).**
+```bash
+npm test
+```
 
 ## Biến môi trường
 
-| Tên biến | Bắt buộc? | Mặc định | Mô tả |
-| --- | --- | --- | --- |
-| `NODE_ENV` | Không | `development` | Môi trường: `development`, `test`, hoặc `production`. |
-| `PORT` | Không | `4000` | Cổng HTTP mà server lắng nghe. |
-| `CORS_ORIGIN` | Có (prod) | `http://localhost:5173` | Danh sách origin hợp lệ, cách nhau bằng dấu phẩy. Localhost bị chặn ở production. |
-| `TRUST_PROXY` | Không | `1` (prod) / `0` (dev) | Cấu hình trust proxy của Express để rate limit và log IP chuẩn sau proxy. |
-| `JWT_SECRET` | **BẮT BUỘC** | — | Khóa bí mật ký token JWT, tối thiểu 32 ký tự. |
-| `JWT_EXPIRES_IN` | Không | `15m` | Thời hạn hiệu lực của access token. |
-| `DATABASE_URL` | **BẮT BUỘC** | — | Chuỗi kết nối PostgreSQL (Neon, Supabase, local Docker). |
-| `DB_POOL_MAX` | Không | `10` | Số kết nối tối đa trong pg pool. |
-| `DB_SSL` | Không | `false` | Bật/tắt SSL khi kết nối PostgreSQL. |
-| `CLOUDINARY_CLOUD_NAME` | Có (prod) | — | Tên Cloudinary cloud lưu ảnh. |
-| `CLOUDINARY_API_KEY` | Có (prod) | — | API key của Cloudinary. |
-| `CLOUDINARY_API_SECRET` | Có (prod) | — | API secret của Cloudinary. |
-| `ADMIN_EMAIL` | Có (seed) | — | Email admin khởi tạo khi chạy `npm run seed`. |
-| `ADMIN_PASSWORD` | Có (seed) | — | Mật khẩu admin khi chạy seed, tối thiểu 12 ký tự. |
+| Tên biến                | Bắt buộc?    | Mặc định                | Mô tả                                                                       |
+| ----------------------- | ------------ | ----------------------- | --------------------------------------------------------------------------- |
+| `NODE_ENV`              | Không        | `development`           | Môi trường runtime: `development`, `test`, hoặc `production`.               |
+| `PORT`                  | Không        | `4000`                  | Cổng HTTP lắng nghe.                                                        |
+| `CORS_ORIGIN`           | Có (prod)    | `http://localhost:5173` | Danh sách origin hợp lệ được phép gọi API (phân tách bởi dấu phẩy).         |
+| `TRUST_PROXY`           | Không        | `1` (prod) / `0` (dev)  | Cấu hình trust proxy của Express cho reverse proxy.                         |
+| `JWT_SECRET`            | **BẮT BUỘC** | —                       | Khóa bí mật ký token JWT (tối thiểu 32 ký tự).                              |
+| `JWT_EXPIRES_IN`        | Không        | `15m`                   | Thời hạn hiệu lực của access token.                                         |
+| `DATABASE_URL`          | **BẮT BUỘC** | —                       | Chuỗi kết nối PostgreSQL (Neon, Supabase, local Docker).                    |
+| `DATABASE_URL_TEST`     | Không        | —                       | Chuỗi kết nối PostgreSQL riêng cho test suite.                              |
+| `DB_POOL_MAX`           | Không        | `10`                    | Số kết nối tối đa trong pg connection pool.                                 |
+| `DB_SSL`                | Không        | `false`                 | Bật/tắt SSL khi kết nối PostgreSQL (`disable`, `require`, `verify-full`).   |
+| `CLOUDINARY_CLOUD_NAME` | Tùy chọn     | —                       | Tên Cloudinary cloud lưu trữ ảnh upload.                                    |
+| `CLOUDINARY_API_KEY`    | Tùy chọn     | —                       | API key của Cloudinary.                                                     |
+| `CLOUDINARY_API_SECRET` | Tùy chọn     | —                       | API secret của Cloudinary.                                                  |
+| `ADMIN_EMAIL`           | Có (seed)    | —                       | Email admin khởi tạo khi chạy `npm run seed`.                               |
+| `ADMIN_PASSWORD`        | Có (seed)    | —                       | Mật khẩu admin khi chạy seed (tối thiểu 12 ký tự).                          |
+| `SENTRY_DSN`            | Không        | —                       | DSN kết nối Sentry giám sát lỗi backend (tự động kích hoạt khi có giá trị). |
 
 ## Cấu trúc thư mục
 
 ```
-database/                    # Schema Postgres — xem database/README.md
-├── migrations/               # File migration .sql, chạy theo thứ tự (npm run migrate)
-├── security/                  # Tạo role Postgres quyền hạn chế cho app
-└── migrate.js                  # Script chạy migration
-
+database/                     # Schema Postgres & migrations
+├── migrations/               # 0001 đến 0029 file .sql chạy tuần tự
+├── security/                 # Script tạo role pidecor_app quyền tối thiểu
+└── migrate.js               # Script thực thi migration tự động
 src/
-├── config/
-│   ├── database.js          # Lớp lưu trữ duy nhất — mọi route đi qua đây
-│   └── database.pg.js        # Adapter truy vấn Postgres
-├── routes/
-│   ├── leads/              # POST /api/leads (public) + admin GET/PATCH
-│   ├── materials/           # CRUD vật liệu decor (+ upload ảnh)
-│   ├── services/            # CRUD nội dung Bento Services
-│   ├── auth/                 # POST /api/auth/login (admin)
-│   └── admin/                 # GET /api/admin/summary (JWT + role required)
-├── middlewares/verifyToken.js # verifyToken + requireAdmin, dùng chung
-├── utils/uploadImage.js       # Multer wrapper — local disk, swap-ready cho Cloudinary
-├── utils/seed.js               # Tạo admin + seed materials/services
-├── app.js                       # Lắp ráp Express app: helmet, rate limit, routes
-└── server.js                     # Chỉ chịu trách nhiệm app.listen(PORT)
+├── config/                   # Cấu hình db (database.pg.js) & auth
+├── middlewares/              # verifyToken, validate (Zod), rateLimiter, errorHandler
+├── routes/                   # Router theo domain (auth, leads, quotations, studio,...)
+├── schemas/                  # Zod validation schemas
+├── services/                 # Nghiệp vụ logic (projects, quotations, activities,...)
+├── utils/                    # Seed script, upload multer/cloudinary
+├── app.js                    # Express app: CORS, Helmet, Sentry, Rate limit, Routers
+└── server.js                 # Điểm khởi chạy app.listen(PORT)
 ```
 
-## API chính
+## Tổng quan các Endpoint chính
 
-| Method | Path | Auth | Mô tả |
-| --- | --- | --- | --- |
-| GET | `/api/health` | — | Health check |
-| POST | `/api/leads` | — | Lưu lead (form liên hệ hoặc "Xuất thiết kế") |
-| GET | `/api/leads` | admin | Danh sách leads |
-| PATCH | `/api/leads/:id` | admin | Đổi trạng thái lead |
-| GET | `/api/materials` | — | Danh sách vật liệu (thay materials.json tĩnh) |
-| POST/PATCH/DELETE | `/api/materials/:id?` | admin | Quản trị vật liệu (hỗ trợ upload ảnh) |
-| GET | `/api/services` | — | Danh sách dịch vụ Bento |
-| POST/PATCH/DELETE | `/api/services/:id?` | admin | Quản trị dịch vụ |
-| POST | `/api/auth/login` | — | Đăng nhập admin, trả về JWT |
-| PATCH | `/api/auth/me` | admin | Cập nhật thông tin/mật khẩu tài khoản hiện tại |
-| GET | `/api/auth/admins` | admin | Danh sách tài khoản admin |
-| POST | `/api/auth/admins` | owner | Tạo tài khoản admin mới |
-| DELETE | `/api/auth/admins/:id` | owner | Xoá tài khoản admin |
-| GET | `/api/admin/summary` | admin | Số liệu tổng quan cho dashboard |
+| Method   | Path                    | Auth           | Mô tả                                                              |
+| -------- | ----------------------- | -------------- | ------------------------------------------------------------------ |
+| GET      | `/api/health`           | Public         | Healthcheck trạng thái server và database                          |
+| POST     | `/api/auth/login`       | Public         | Đăng nhập admin, cấp access token và refresh token                 |
+| POST     | `/api/auth/refresh`     | Public         | Xoay vòng refresh token, cấp cặp token mới                         |
+| POST     | `/api/auth/logout`      | Public         | Thu hồi refresh token hiện tại                                     |
+| POST     | `/api/auth/logout-all`  | Admin          | Thu hồi toàn bộ refresh token của tài khoản                        |
+| GET      | `/api/auth/me`          | Admin          | Lấy thông tin tài khoản đang đăng nhập                             |
+| POST     | `/api/leads`            | Public         | Khách gửi thông tin liên hệ / lưu thiết kế Studio (có lưu consent) |
+| GET      | `/api/leads`            | Admin          | Danh sách leads (hỗ trợ phân trang, tìm kiếm, lọc status)          |
+| PATCH    | `/api/leads/:id`        | Admin          | Cập nhật trạng thái lead (new, contacted, closed)                  |
+| GET/POST | `/api/quotations`       | Admin          | Xem danh sách hoặc tạo báo giá tự động tăng số hiệu                |
+| GET/POST | `/api/materials`        | Public / Admin | Danh mục vật liệu trang trí                                        |
+| GET/POST | `/api/services`         | Public / Admin | Danh mục dịch vụ Bento                                             |
+| GET/POST | `/api/venues`           | Public / Admin | Danh sách và thông tin ghim bản đồ địa điểm                        |
+| GET/POST | `/api/projects`         | Public / Admin | Danh sách dự án tiệc cưới đã thực hiện                             |
+| GET/POST | `/api/testimonials`     | Public / Admin | Đánh giá của khách hàng (lưu consent cá nhân)                      |
+| GET/PUT  | `/api/studio/templates` | Public / Admin | Template và cấu hình canvas Studio                                 |
+| GET      | `/api/admin/summary`    | Admin          | Thống kê tổng quan cho Admin Dashboard                             |
 
-## Deploy (miễn phí — xem Mục 4 của tài liệu phân tích kỹ thuật)
-
-1. Tạo database Postgres thật trên **Neon** hoặc **Supabase** (free) — xem
-   [`database/README.md`](./database/README.md), chạy `npm run migrate` rồi
-   `npm run seed` từ máy bạn, trỏ vào database đó.
-2. Tạo role Postgres quyền hạn chế cho server (`pidecor_app`) theo
-   [`database/SECURITY.md`](./database/SECURITY.md) §1 — **không** dùng
-   connection string owner cho server đang chạy thật.
-3. Push `server/` lên GitHub, tạo Web Service mới trên **Render** (Free),
-   root directory = `server`, build command = `npm install`, start command
-   = `npm start`.
-4. Set biến môi trường trên Render giống `.env.example` — bao gồm
-   `DATABASE_URL` (role `pidecor_app`, không phải owner), `JWT_SECRET`
-   (random thật, khác với local), `CORS_ORIGIN` (domain Vercel/Netlify thật
-   của client).
-5. Trước khi có traffic thật: điền 3 biến `CLOUDINARY_CLOUD_NAME`,
-   `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` trên Render dashboard —
-   `utils/uploadImage.js` đã hỗ trợ Cloudinary tự động khi 3 biến này được set
-   (ổ đĩa Render Free bị xoá mỗi lần restart).
-6. Cập nhật `VITE_API_URL` ở phía client trỏ về URL Render vừa deploy.
-
-`app.js` đã bật sẵn `helmet` (security headers) và rate limiting cho
-`/api/auth/login` + `/api/leads` — không cần cấu hình thêm gì ở bước
-deploy, chỉ cần biết chúng tồn tại nếu traffic thật cần điều chỉnh giới
-hạn (xem `database/SECURITY.md` §5).
+👉 Chi tiết đầy đủ mọi endpoint xem tại [`docs/API.md`](../docs/API.md).
+👉 Hướng dẫn vận hành, backup/restore xem tại [`docs/RUNBOOK.md`](../docs/RUNBOOK.md).

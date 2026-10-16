@@ -6,8 +6,7 @@
 --   POST /api/designs         — save a full Konva layer set, tied to a lead.
 --   GET  /api/designs/:leadId — reload every saved design for that lead.
 --
--- Lets a customer come back and keep editing instead of only ever getting a
--- one-shot PNG/PDF export (Mục 3.2 of the technical proposal).
+-- Cho phép lưu và tải lại trạng thái thiết kế thay vì chỉ xuất một lần.
 -- ============================================================================
 
 create table if not exists designs (

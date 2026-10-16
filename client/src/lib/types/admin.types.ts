@@ -1,4 +1,4 @@
-// ── Admin (PiDecor_AdminPanel.md) ───────────────────────────────────────
+// ── Admin Types ─────────────────────────────────────────────────────────────
 
 export interface Admin {
   id: string;

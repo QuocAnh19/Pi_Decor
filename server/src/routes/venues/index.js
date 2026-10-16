@@ -7,7 +7,7 @@ import { createCrudRouter } from "../../utils/crudRouterFactory.js";
 import { projectUpload, createProject } from "../../services/projects.service.js";
 
 /**
- * routes/venues — implements Mục 2 & 5 of PiDecor_MappingProject.md.
+ * routes/venues — Quản lý địa điểm và dự án bản đồ.
  *
  * Venue (địa điểm) and Project (case study) are separate collections so one
  * venue with several past weddings still renders as a single pin, with all
@@ -63,7 +63,9 @@ export const venuesRouter = createCrudRouter({
 // GET /api/venues/search?q= — autocomplete for the quick-search box on the
 // homepage (Điểm chạm A). Matches name, city, or address, case-insensitive.
 venuesRouter.get("/search", async (req, res) => {
-  const q = String(req.query.q ?? "").trim().toLowerCase();
+  const q = String(req.query.q ?? "")
+    .trim()
+    .toLowerCase();
   if (!q) return res.json([]);
   const escapedQ = q.replace(/[%_\\]/g, "\\$&");
   const term = `%${escapedQ}%`;
@@ -99,18 +101,29 @@ venuesRouter.get("/:id", async (req, res) => {
 // ── Admin Project Sub-routes under Venues ─────────────────────────────────────
 
 // POST /api/venues/:id/projects — add a case study under a venue.
-venuesRouter.post("/:id/projects", verifyToken, requireAdmin, projectUpload, validate(createProjectSchema), async (req, res, next) => {
-  const venue = await db.findById("venues", req.params.id);
-  if (!venue) {
-    return res.status(404).json({ message: "Không tìm thấy địa điểm." });
-  }
-  try {
-    const project = await createProject({ ...(req.body ?? {}), venue_id: req.params.id }, req.files, req);
-    res.status(201).json(project);
-  } catch (err) {
-    if (err.status) {
-      return res.status(err.status).json({ message: err.message });
+venuesRouter.post(
+  "/:id/projects",
+  verifyToken,
+  requireAdmin,
+  projectUpload,
+  validate(createProjectSchema),
+  async (req, res, next) => {
+    const venue = await db.findById("venues", req.params.id);
+    if (!venue) {
+      return res.status(404).json({ message: "Không tìm thấy địa điểm." });
     }
-    next(err);
+    try {
+      const project = await createProject(
+        { ...(req.body ?? {}), venue_id: req.params.id },
+        req.files,
+        req
+      );
+      res.status(201).json(project);
+    } catch (err) {
+      if (err.status) {
+        return res.status(err.status).json({ message: err.message });
+      }
+      next(err);
+    }
   }
-});
+);

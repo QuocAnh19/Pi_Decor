@@ -5,7 +5,6 @@ import { db } from "../config/database.js";
 import { env } from "../config/env.js";
 import { portfolioSeed } from "../data/portfolio.seed.js";
 
-
 async function seed() {
   const email = env.ADMIN_EMAIL?.trim();
   const password = env.ADMIN_PASSWORD;
@@ -31,7 +30,9 @@ async function seed() {
     await db.update("admins", (a) => a.email === email, { password_hash });
     console.log(`✓ Admin account password updated (--reset-password): ${email}`);
   } else {
-    console.log(`ℹ Admin account ${email} đã tồn tại. Bỏ qua ghi đè mật khẩu (sử dụng --reset-password nếu muốn cập nhật).`);
+    console.log(
+      `ℹ Admin account ${email} đã tồn tại. Bỏ qua ghi đè mật khẩu (sử dụng --reset-password nếu muốn cập nhật).`
+    );
   }
 
   const materials = await db.get("materials");
@@ -102,10 +103,12 @@ async function seed() {
       },
     ];
     await db.set("services", seedServices);
-    console.log(`✓ Seeded ${seedServices.length} real brand services (PiWedding, PiKids, PiEvent).`);
+    console.log(
+      `✓ Seeded ${seedServices.length} real brand services (PiWedding, PiKids, PiEvent).`
+    );
   }
 
-  // Bản đồ dự án đã thực hiện (PiDecor_MappingProject.md, mốc M1) — 1 venue
+  // Bản đồ dự án đã thực hiện — 1 venue
   // mẫu để demo pin + click-to-show-projects ngay. Đây là DỮ LIỆU DEMO —
   // thay bằng địa điểm/dự án thật của bạn qua API /api/venues trước khi lên production.
   const venues = await db.get("venues");
@@ -164,7 +167,6 @@ async function seed() {
     ];
     await db.set("venues", seedVenues);
     console.log(`✓ Seeded ${seedVenues.length} venues.`);
-
   }
 
   // Bản đồ dự án đã thực hiện & portfolio thực tế — seed idempotent theo title
@@ -277,7 +279,6 @@ async function seed() {
   if (newProjectsCount > 0) {
     console.log(`✓ Seeded ${newProjectsCount} projects (idempotent check by title).`);
   }
-
 
   const testimonials = await db.get("testimonials");
   if (testimonials.length === 0) {

@@ -8,13 +8,8 @@
 --   PATCH  /api/materials/:id  — admin only.
 --   DELETE /api/materials/:id  — admin only.
 --
--- Scope note (PiDecor_AdminPanel.md §1): this table exists and its admin API
--- already works end-to-end, but there is currently no admin UI screen for
--- it — editing goes through server/src/utils/seed.js for now, since the
--- Studio builder's own swatches/shapes are still hardcoded client-side in
--- client/src/lib/studioBuilder/catalog.ts. Kept as a real table (not a
--- static JSON file) so the API is ready the moment a "Vật liệu" admin
--- screen gets built, without another migration.
+-- Scope note: bảng lưu danh mục vật liệu trang trí phục vụ API công khai
+-- và quản trị trong admin.
 -- ============================================================================
 
 create table if not exists materials (

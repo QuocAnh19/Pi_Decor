@@ -1,6 +1,6 @@
 import type { GalleryItemObject } from "./catalog.types";
 
-// ── Bản đồ dự án đã thực hiện (PiDecor_MappingProject.md) ──────────────────
+// ── Bản đồ dự án đã thực hiện ──────────────────────────────────────────────
 
 export type VenueType = "hotel" | "restaurant" | "resort" | "sảnh tiệc";
 

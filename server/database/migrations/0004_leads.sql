@@ -8,10 +8,8 @@
 --   GET   /api/leads        — admin only, list newest-first.
 --   PATCH /api/leads/:id    — admin only, change status.
 --
--- Replaces the "ghi chú tự do" (free-form note) gap called out in Mục
--- 1.1(d)/3.2 of PiDecor_PhanTich_DeXuat_KyThuat.docx: every customer
--- request is now one structured row instead of a Zalo message or a sticky
--- note.
+-- Lưu trữ thông tin khách hàng liên hệ qua form Footer và xuất thiết kế Studio
+-- thành các bản ghi có cấu trúc rõ ràng.
 -- ============================================================================
 
 create table if not exists leads (
@@ -39,7 +37,7 @@ create table if not exists leads (
 );
 
 comment on table leads is
-  'One row per customer contact — Footer form or Studio export. status matches the 3-state flow in PiDecor_AdminPanel.md §4 (Mới / Đã liên hệ / Đã chốt).';
+  'One row per customer contact — Footer form or Studio export. status matches the 3-state flow: new / contacted / closed.';
 comment on column leads.design_snapshot is
   'BuilderState JSON captured client-side at submit time; NOT the same as designs.layers (that is the Konva canvas state for the older Interactive Workspace flow).';
 

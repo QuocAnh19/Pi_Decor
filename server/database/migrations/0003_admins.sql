@@ -5,11 +5,8 @@
 -- Backs: server/src/routes/auth/index.js (POST /api/auth/login)
 --        server/src/utils/seed.js         (npm run seed creates the 1st row)
 --
--- Scope note (see PiDecor_AdminPanel.md §2): this project has exactly ONE
--- account type — the shop owner. There is no public customer login, so this
--- table is intentionally tiny. If a second admin/sales-staff role is ever
--- needed, add a `role text not null default 'admin'` column then instead of
--- redesigning the table.
+-- Scope note: this project supports admin and owner account roles.
+-- There is no public customer login.
 -- ============================================================================
 
 create table if not exists admins (

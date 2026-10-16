@@ -51,9 +51,8 @@ function RouteLoadingFallback() {
   );
 }
 
-/** Chrome for every public page. Never mounted under /admin — per
- * PiDecor_AdminPanel.md §2/§5 the admin area has its own layout and no
- * public UI links point into it. */
+/** Chrome for every public page. Never mounted under /admin —
+ * the admin area has its own layout and no public UI links point into it. */
 function PublicLayout() {
   const location = useLocation();
   const isStudio = location.pathname === "/studio";
