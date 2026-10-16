@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "../../../lib/api";
 import { captureStudioThumbnail, generateBrandedDesignImage } from "../utils/captureThumbnail";
 import { buildDesignSnapshot } from "../../../lib/mappers";
+import { VN_PHONE_REGEX, sanitizePhoneNumber } from "@pidecor/shared";
 import type { SlotConfig, SlotDefinition } from "../types";
 
 interface UseSaveDesignFormOptions {
@@ -48,8 +49,7 @@ export function useSaveDesignForm({
       return;
     }
 
-    const cleanPhone = phone.replace(/[\s.\-()]/g, "");
-    const VN_PHONE_REGEX = /^(0|\+84)[0-9]{8,10}$/;
+    const cleanPhone = sanitizePhoneNumber(phone);
     if (!VN_PHONE_REGEX.test(cleanPhone)) {
       setError("Số điện thoại không đúng định dạng VN (VD: 0905 123 456).");
       return;

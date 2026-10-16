@@ -11,6 +11,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { api } from "../../lib/api";
+import { VN_PHONE_REGEX, sanitizePhoneNumber } from "@pidecor/shared";
 import { Input, Select, Textarea } from "../ui";
 import styles from "./LeadForm.module.scss";
 
@@ -39,8 +40,7 @@ export function LeadForm() {
     const rawMessage = String(form.get("message") ?? "").trim();
     const consentChecked = form.get("consent") === "on";
 
-    const cleanPhone = phone.replace(/[\s.\-()]/g, "");
-    const VN_PHONE_REGEX = /^(0|\+84)[0-9]{8,10}$/;
+    const cleanPhone = sanitizePhoneNumber(phone);
 
     if (!name || !phone) {
       setError("Vui lòng nhập họ tên và số điện thoại.");

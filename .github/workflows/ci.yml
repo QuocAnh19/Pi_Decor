@@ -29,7 +29,12 @@ jobs:
           cache-dependency-path: "package-lock.json"
 
       - name: Install dependencies
+        working-directory: .
         run: npm ci
+
+      - name: Build shared package
+        working-directory: .
+        run: npm --prefix packages/shared run build
 
       - name: TypeScript typecheck
         run: npx tsc --noEmit
@@ -81,7 +86,12 @@ jobs:
           cache-dependency-path: "package-lock.json"
 
       - name: Install dependencies
+        working-directory: .
         run: npm ci
+
+      - name: Build shared package
+        working-directory: .
+        run: npm --prefix packages/shared run build
 
       - name: ESLint
         run: npm run lint

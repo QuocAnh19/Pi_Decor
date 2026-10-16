@@ -1,6 +1,5 @@
-// ── Quotations ────────────────────────────────────────────────────────────
-
-export type QuotationStatus = "draft" | "sent" | "accepted" | "declined" | "expired";
+import type { QuotationStatus, TestimonialStatus } from "@pidecor/shared";
+export type { QuotationStatus };
 
 export interface QuotationItem {
   description: string;
@@ -35,7 +34,7 @@ export interface QuotationPayload {
 
 // ── Testimonials & Moderation ────────────────────────────────────────────
 
-export type TestimonialStatus = "pending" | "approved" | "rejected";
+export type { TestimonialStatus };
 export type TestimonialSource = "customer" | "admin_seed";
 
 export interface TestimonialItem {

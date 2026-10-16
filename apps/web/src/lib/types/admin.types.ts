@@ -7,7 +7,8 @@ export interface Admin {
   created_at?: string;
 }
 
-export type LeadStatus = "new" | "contacted" | "closed";
+import type { LeadStatus } from "@pidecor/shared";
+export type { LeadStatus };
 
 /**
  * Mirrors `buildDesignSnapshot()` in `BuilderShell.tsx` — what a Studio
