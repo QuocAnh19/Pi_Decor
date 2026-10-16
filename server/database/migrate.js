@@ -31,16 +31,16 @@ async function client_bootstrap(pool) {
   `);
 }
 
-async function main() {
-  if (!process.env.DATABASE_URL) {
-    console.error(
-      "✗ DATABASE_URL is not set. Add it to server/.env (see .env.example) before running migrations.",
+export async function runMigrations(customConnectionString) {
+  const dbUrl = customConnectionString || process.env.DATABASE_URL_TEST || process.env.DATABASE_URL;
+  if (!dbUrl) {
+    throw new Error(
+      "DATABASE_URL is not set. Add it to server/.env before running migrations."
     );
-    process.exit(1);
   }
 
   const isLocalHost = ["localhost", "127.0.0.1", "postgres"].some((h) =>
-    process.env.DATABASE_URL.includes(h)
+    dbUrl.includes(h)
   );
   let ssl = false;
   const sslMode = process.env.DB_SSL;
@@ -53,7 +53,7 @@ async function main() {
   }
 
   const pool = new pg.Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: dbUrl,
     ssl,
   });
 
@@ -61,7 +61,6 @@ async function main() {
     .filter((f) => f.endsWith(".sql"))
     .sort();
 
-  // Đảm bảo bảng tracking tồn tại TRƯỚC khi loop, không phụ thuộc thứ tự file
   await client_bootstrap(pool);
 
   const client = await pool.connect();
@@ -74,11 +73,9 @@ async function main() {
         [file],
       );
       if (rows.length > 0) {
-        console.log(`· skip  ${file} (already applied)`);
         continue;
       }
 
-      console.log(`→ apply ${file}`);
       await client.query("begin");
       try {
         await client.query(sql);
@@ -92,14 +89,18 @@ async function main() {
         throw new Error(`Migration ${file} failed: ${err.message}`);
       }
     }
-    console.log("✓ All migrations applied.");
   } finally {
     client.release();
     await pool.end();
   }
 }
 
-main().catch((err) => {
-  console.error("✗ Migration run failed:", err.message);
-  process.exit(1);
-});
+// Chạy trực tiếp qua `npm run migrate`
+if (process.argv[1] && process.argv[1].endsWith("migrate.js")) {
+  runMigrations()
+    .then(() => console.log("✓ All migrations applied."))
+    .catch((err) => {
+      console.error("✗ Migration run failed:", err.message);
+      process.exit(1);
+    });
+}

@@ -22,10 +22,9 @@ const envSchema = z
       .min(32, "JWT_SECRET phải có độ dài tối thiểu 32 ký tự."),
     JWT_EXPIRES_IN: z.string().default("15m"),
     DATABASE_URL: z
-      .string({
-        required_error: "DATABASE_URL là bắt buộc ở mọi môi trường.",
-      })
-      .min(1, "DATABASE_URL không được để trống."),
+      .string()
+      .optional(),
+    DATABASE_URL_TEST: z.string().optional(),
     DB_POOL_MAX: z.coerce.number().int().positive().default(10),
     DB_SSL: z
       .enum(["disable", "require", "verify-full"])
@@ -45,9 +44,19 @@ const envSchema = z
     if (data.TRUST_PROXY === undefined) {
       data.TRUST_PROXY = data.NODE_ENV === "production" ? 1 : 0;
     }
+    if (data.NODE_ENV === "test" && data.DATABASE_URL_TEST) {
+      data.DATABASE_URL = data.DATABASE_URL_TEST;
+    }
     return data;
   })
   .superRefine((data, ctx) => {
+    if (!data.DATABASE_URL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "DATABASE_URL là bắt buộc ở mọi môi trường.",
+        path: ["DATABASE_URL"],
+      });
+    }
     if (data.NODE_ENV === "production") {
       if (!data.CLOUDINARY_CLOUD_NAME || !data.CLOUDINARY_CLOUD_NAME.trim()) {
         ctx.addIssue({

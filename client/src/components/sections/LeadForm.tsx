@@ -37,8 +37,16 @@ export function LeadForm() {
     const weddingDate = String(form.get("wedding_date") ?? "").trim();
     const rawMessage = String(form.get("message") ?? "").trim();
 
+    const cleanPhone = phone.replace(/[\s.\-()]/g, "");
+    const VN_PHONE_REGEX = /^(0|\+84)[0-9]{8,10}$/;
+
     if (!name || !phone) {
       setError("Vui lòng nhập họ tên và số điện thoại.");
+      return;
+    }
+
+    if (!VN_PHONE_REGEX.test(cleanPhone)) {
+      setError("Số điện thoại không đúng định dạng (VD: 0905 123 456).");
       return;
     }
 

@@ -9,7 +9,8 @@
     "lint": "eslint src --ext .ts,.tsx",
     "lint:styles": "stylelint \"src/**/*.scss\"",
     "preview": "vite preview",
-    "knip": "knip"
+    "knip": "knip",
+    "test": "vitest run"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -26,15 +27,20 @@
     "react-router-dom": "^6.24.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
     "@types/leaflet": "^1.9.12",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-v8": "^2.1.9",
     "autoprefixer": "^10.4.19",
     "eslint": "^8.57.1",
     "eslint-plugin-react-hooks": "^4.6.2",
+    "jsdom": "^29.1.1",
     "knip": "^6.41.0",
     "postcss": "^8.4.38",
     "sass": "^1.77.6",
@@ -42,6 +48,7 @@
     "stylelint": "^17.16.0",
     "stylelint-config-standard-scss": "^17.0.0",
     "typescript": "^5.5.2",
-    "vite": "^5.3.1"
+    "vite": "^5.3.1",
+    "vitest": "^2.1.9"
   }
 }
