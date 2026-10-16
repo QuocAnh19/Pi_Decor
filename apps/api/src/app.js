@@ -17,7 +17,7 @@ import { venuesRouter } from "./routes/venues/index.js";
 import { projectsRouter } from "./routes/projects/index.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { adminRouter } from "./routes/admin/index.js";
-import { quotationsRouter } from "./routes/quotations/index.js";
+import { quotationsRouter } from "./modules/quotations/quotations.routes.js";
 import { testimonialsRouter } from "./routes/testimonials/index.js";
 import { studioRouter } from "./routes/studio/index.js";
 

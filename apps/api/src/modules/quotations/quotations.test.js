@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
-import { app } from "../src/app.js";
-import { generateTestAdminToken, seedTestAdmin } from "./helpers.js";
+import { app } from "../../app.js";
+import { generateTestAdminToken, seedTestAdmin } from "../../../tests/helpers.js";
 
 describe("Quotations Integration Tests", () => {
   let token;
