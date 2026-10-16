@@ -1,11 +1,4 @@
 import { useMemo } from "react";
-import {
-  PhotoIcon,
-  PencilIcon,
-  TrashIcon,
-  PlusIcon,
-  EyeSlashIcon,
-} from "@heroicons/react/24/outline";
 import { SearchInput, Select } from "../../components/ui";
 import {
   AdminPageHeader,
@@ -16,6 +9,7 @@ import {
 import { useVenues, VenueList, VenueForm } from "../../features/venues";
 import { ProjectForm } from "../../features/projects";
 import type { Venue, Project } from "../../lib/types";
+import { VenueDetailPanel } from "./components/VenueDetailPanel";
 import styles from "./AdminVenuesPage.module.scss";
 
 type DeleteTarget =
@@ -145,9 +139,13 @@ export function AdminVenuesPage() {
         />
       </div>
 
-      {status === "loading" && <p className={styles.status}>Đang tải danh sách địa điểm…</p>}
+      {status === "loading" && (
+        <p className={styles.status}>Đang tải danh sách địa điểm…</p>
+      )}
       {status === "error" && (
-        <p className={styles.status}>Không tải được danh sách địa điểm, vui lòng thử lại.</p>
+        <p className={styles.status}>
+          Không tải được danh sách địa điểm, vui lòng thử lại.
+        </p>
       )}
 
       {status === "ready" && (
@@ -172,118 +170,22 @@ export function AdminVenuesPage() {
             onDelete={(venue) => requestDelete({ type: "venue", venue })}
           />
 
-          <div className={styles.detailPanel}>
-            {!selectedVenueId && (
-              <p className={styles.placeholder}>
-                Chọn một địa điểm bên trái để xem và quản lý danh sách dự án.
-              </p>
-            )}
-
-            {selectedVenueId && detailLoading && (
-              <p className={styles.placeholder}>Đang tải dự án…</p>
-            )}
-
-            {selectedVenueId && !detailLoading && selectedVenue && (
-              <>
-                <div className={styles.detailHeader}>
-                  <div>
-                    <p className={styles.detailName}>{selectedVenue.name}</p>
-                    <p className={styles.detailMeta}>
-                      {selectedVenue.address ?? "Chưa có địa chỉ"}
-                      {selectedVenue.city ? `, ${selectedVenue.city}` : ""}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.addProjectButton}
-                    onClick={() => {
-                      setEditingProject(null);
-                      setProjectFormOpen(true);
-                    }}
-                  >
-                    <PlusIcon
-                      className="h-4 w-4"
-                      style={{ width: 16, height: 16 }}
-                    />{" "}
-                    Thêm dự án
-                  </button>
-                </div>
-
-                {selectedVenue.projects.length === 0 ? (
-                  <p className={styles.placeholder}>
-                    Chưa có dự án nào tại địa điểm này. Hãy bấm "Thêm dự án" để tạo mới!
-                  </p>
-                ) : (
-                  <ul className={styles.projectList}>
-                    {selectedVenue.projects.map((project) => (
-                      <li key={project.id} className={styles.projectItem}>
-                        <div className={styles.projectThumb}>
-                          {project.cover_image ? (
-                            <img
-                              src={project.cover_image}
-                              alt={project.title}
-                              className={styles.projectThumbImg}
-                            />
-                          ) : (
-                            <PhotoIcon
-                              className="h-4 w-4"
-                              style={{ width: 16, height: 16 }}
-                            />
-                          )}
-                        </div>
-                        <div className={styles.projectBody}>
-                          <p className={styles.projectTitle}>
-                            {project.title}
-                            {!project.published && (
-                              <span className={styles.unpublished}>
-                                <EyeSlashIcon
-                                  className="h-3 w-3 inline"
-                                  style={{ width: 12, height: 12 }}
-                                />{" "}
-                                Ẩn
-                              </span>
-                            )}
-                          </p>
-                          <p className={styles.projectMeta}>
-                            {project.wedding_date ?? "Chưa rõ ngày"}
-                            {project.style_tags.length > 0 &&
-                              ` · ${project.style_tags.map((t) => `#${t}`).join(" ")}`}
-                          </p>
-                        </div>
-                        <div className={styles.projectActions}>
-                          <button
-                            type="button"
-                            className={styles.iconButton}
-                            onClick={() => {
-                              setEditingProject(project);
-                              setProjectFormOpen(true);
-                            }}
-                            title="Sửa dự án"
-                          >
-                            <PencilIcon
-                              className="h-4 w-4"
-                              style={{ width: 16, height: 16 }}
-                            />
-                          </button>
-                          <button
-                            type="button"
-                            className={`${styles.iconButton} ${styles.iconButtonDanger}`}
-                            onClick={() => requestDelete({ type: "project", project })}
-                            title="Xoá dự án"
-                          >
-                            <TrashIcon
-                              className="h-4 w-4"
-                              style={{ width: 16, height: 16 }}
-                            />
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </>
-            )}
-          </div>
+          <VenueDetailPanel
+            selectedVenueId={selectedVenueId}
+            detailLoading={detailLoading}
+            selectedVenue={selectedVenue}
+            onAddProject={() => {
+              setEditingProject(null);
+              setProjectFormOpen(true);
+            }}
+            onEditProject={(project) => {
+              setEditingProject(project);
+              setProjectFormOpen(true);
+            }}
+            onDeleteProject={(project) =>
+              requestDelete({ type: "project", project })
+            }
+          />
         </div>
       )}
 
@@ -312,8 +214,16 @@ export function AdminVenuesPage() {
 
       <ConfirmDeleteModal
         isOpen={isDeleteOpen}
-        title={deleteTarget?.type === "venue" ? "Xác nhận xoá địa điểm" : "Xác nhận xoá dự án"}
-        itemName={deleteTarget?.type === "venue" ? deleteTarget.venue.name : deleteTarget?.project.title}
+        title={
+          deleteTarget?.type === "venue"
+            ? "Xác nhận xoá địa điểm"
+            : "Xác nhận xoá dự án"
+        }
+        itemName={
+          deleteTarget?.type === "venue"
+            ? deleteTarget.venue.name
+            : deleteTarget?.project.title
+        }
         loading={isDeleting}
         onConfirm={handleConfirmDelete}
         onClose={cancelDelete}
