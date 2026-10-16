@@ -3,6 +3,7 @@ import { api } from "../../../../lib/api";
 import type { MaterialItem } from "../../../../lib/types";
 import { SearchInput } from "../../../../components/ui";
 import { SlotDefinition } from "../../types";
+import { MaterialPickerCard } from "./MaterialPickerCard";
 
 export interface MaterialPickerForSlotProps {
   slot: SlotDefinition | null;
@@ -26,7 +27,6 @@ export const MaterialPickerForSlot: React.FC<MaterialPickerForSlotProps> = ({
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Load materials from database
   useEffect(() => {
     setLoading(true);
     api
@@ -36,7 +36,6 @@ export const MaterialPickerForSlot: React.FC<MaterialPickerForSlotProps> = ({
       .finally(() => setLoading(false));
   }, []);
 
-  // Auto switch tab to match current slot type
   useEffect(() => {
     if (slot) {
       switch (slot.slotType) {
@@ -60,20 +59,32 @@ export const MaterialPickerForSlot: React.FC<MaterialPickerForSlotProps> = ({
     }
   }, [slot]);
 
-  // Filter materials by tab & search query
   const filteredMaterials = useMemo(() => {
     return materials.filter((mat) => {
       const cat = (mat.category || "").toLowerCase().trim();
       let matchesCategory = true;
 
       if (activeTab === "fabric") {
-        matchesCategory = cat === "fabric" || cat.includes("rèm nền") || cat === "drape" || cat.includes("rèm");
+        matchesCategory =
+          cat === "fabric" ||
+          cat.includes("rèm nền") ||
+          cat === "drape" ||
+          cat.includes("rèm");
       } else if (activeTab === "drape_detail") {
-        matchesCategory = cat === "drape_detail" || cat.includes("rèm chi tiết") || cat.includes("detail") || cat.includes("vắt");
+        matchesCategory =
+          cat === "drape_detail" ||
+          cat.includes("rèm chi tiết") ||
+          cat.includes("detail") ||
+          cat.includes("vắt");
       } else if (activeTab === "flowers") {
-        matchesCategory = cat === "flowers" || cat === "flower" || cat.includes("hoa");
+        matchesCategory =
+          cat === "flowers" || cat === "flower" || cat.includes("hoa");
       } else if (activeTab === "text_name") {
-        matchesCategory = cat === "text_name" || cat === "text_date" || cat === "text" || cat.includes("chữ");
+        matchesCategory =
+          cat === "text_name" ||
+          cat === "text_date" ||
+          cat === "text" ||
+          cat.includes("chữ");
       }
 
       if (!matchesCategory) return false;
@@ -117,9 +128,23 @@ export const MaterialPickerForSlot: React.FC<MaterialPickerForSlotProps> = ({
         boxShadow: "0 4px 16px rgba(39, 22, 32, 0.04)",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h4 style={{ fontSize: "13px", fontWeight: "700", color: "#a15c2e", margin: 0 }}>
-          Gán vật liệu cho: <span style={{ color: "#271620" }}>{slot.label}</span>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h4
+          style={{
+            fontSize: "13px",
+            fontWeight: "700",
+            color: "#a15c2e",
+            margin: 0,
+          }}
+        >
+          Gán vật liệu cho:{" "}
+          <span style={{ color: "#271620" }}>{slot.label}</span>
         </h4>
         <span style={{ fontSize: "11px", color: "#6e6259", fontWeight: "600" }}>
           ({filteredMaterials.length})
@@ -155,7 +180,10 @@ export const MaterialPickerForSlot: React.FC<MaterialPickerForSlotProps> = ({
               cursor: "pointer",
               whiteSpace: "nowrap",
               transition: "all 0.15s ease",
-              boxShadow: activeTab === tab.id ? "0 1px 3px rgba(161, 92, 46, 0.25)" : "none",
+              boxShadow:
+                activeTab === tab.id
+                  ? "0 1px 3px rgba(161, 92, 46, 0.25)"
+                  : "none",
             }}
           >
             {tab.label}
@@ -172,11 +200,25 @@ export const MaterialPickerForSlot: React.FC<MaterialPickerForSlotProps> = ({
 
       {/* Material Grid */}
       {loading ? (
-        <p style={{ fontSize: "12px", color: "#6e6259", textAlign: "center", padding: "12px" }}>
+        <p
+          style={{
+            fontSize: "12px",
+            color: "#6e6259",
+            textAlign: "center",
+            padding: "12px",
+          }}
+        >
           Đang tải vật liệu…
         </p>
       ) : filteredMaterials.length === 0 ? (
-        <p style={{ fontSize: "12px", color: "#9c9186", textAlign: "center", padding: "16px" }}>
+        <p
+          style={{
+            fontSize: "12px",
+            color: "#9c9186",
+            textAlign: "center",
+            padding: "16px",
+          }}
+        >
           Chưa có vật liệu nào phù hợp bộ lọc này.
         </p>
       ) : (
@@ -193,111 +235,12 @@ export const MaterialPickerForSlot: React.FC<MaterialPickerForSlotProps> = ({
           }}
         >
           {filteredMaterials.map((mat) => (
-            <div
+            <MaterialPickerCard
               key={mat.id}
-              onClick={() => onAssignMaterial(mat, slot)}
-              style={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e7ded0",
-                borderRadius: "10px",
-                padding: "8px",
-                cursor: "pointer",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "6px",
-                transition: "all 0.15s ease",
-                boxShadow: "0 2px 6px rgba(39, 22, 32, 0.04)",
-                position: "relative",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "#a15c2e";
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(161, 92, 46, 0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "#e7ded0";
-                e.currentTarget.style.boxShadow = "0 2px 6px rgba(39, 22, 32, 0.04)";
-              }}
-            >
-              <div
-                style={{
-                  width: "100%",
-                  height: "80px",
-                  backgroundColor: "#fbf7f1",
-                  borderRadius: "8px",
-                  border: "1px solid #e7ded0",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  padding: "4px",
-                }}
-              >
-                {mat.image_url ? (
-                  <img
-                    src={mat.image_url}
-                    alt={mat.name}
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "100%",
-                      width: "auto",
-                      height: "auto",
-                      objectFit: "contain",
-                      display: "block",
-                    }}
-                  />
-                ) : mat.color_hex ? (
-                  <div
-                    style={{
-                      width: "44px",
-                      height: "44px",
-                      borderRadius: "50%",
-                      backgroundColor: mat.color_hex,
-                      border: "2px solid rgba(255, 255, 255, 0.8)",
-                      boxShadow: "0 2px 8px rgba(39, 22, 32, 0.15)",
-                    }}
-                  />
-                ) : (
-                  <span style={{ color: "#9c9186", fontSize: "10px" }}>Không có ảnh</span>
-                )}
-              </div>
-
-              <span
-                style={{
-                  fontSize: "11px",
-                  fontWeight: "600",
-                  color: "#271620",
-                  textAlign: "center",
-                  lineHeight: "1.3",
-                  wordBreak: "break-word",
-                }}
-              >
-                {mat.name}
-              </span>
-
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAssignMaterial(mat, slot);
-                }}
-                style={{
-                  width: "100%",
-                  padding: "5px",
-                  fontSize: "10px",
-                  fontWeight: "700",
-                  backgroundColor: "#a15c2e",
-                  color: "#ffffff",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  boxShadow: "0 1px 4px rgba(161, 92, 46, 0.2)",
-                  transition: "all 0.15s ease",
-                }}
-              >
-                + Gán Vào Slot
-              </button>
-            </div>
+              material={mat}
+              slot={slot}
+              onAssignMaterial={onAssignMaterial}
+            />
           ))}
         </div>
       )}
