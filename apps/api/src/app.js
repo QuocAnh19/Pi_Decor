@@ -13,7 +13,7 @@ import { leadsRouter } from "./modules/leads/leads.routes.js";
 import { errorHandler } from "./shared/errorHandler.js";
 import { materialsRouter } from "./routes/materials/index.js";
 import { servicesRouter } from "./routes/services/index.js";
-import { venuesRouter } from "./routes/venues/index.js";
+import { venuesRouter } from "./modules/venues/venues.routes.js";
 import { projectsRouter } from "./modules/projects/projects.routes.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { adminRouter } from "./routes/admin/index.js";
