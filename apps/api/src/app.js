@@ -6,10 +6,11 @@ import { fileURLToPath } from "url";
 
 import { env } from "./config/env.js";
 import { pool } from "./config/database.js";
-import { httpLogger, logger } from "./config/logger.js";
+import { httpLogger } from "./config/logger.js";
 import { hasCloudinary } from "./utils/uploadImage.js";
 import { loginLimiter } from "./middlewares/rateLimiters.js";
-import { leadsRouter } from "./routes/leads/index.js";
+import { leadsRouter } from "./modules/leads/leads.routes.js";
+import { errorHandler } from "./shared/errorHandler.js";
 import { materialsRouter } from "./routes/materials/index.js";
 import { servicesRouter } from "./routes/services/index.js";
 import { venuesRouter } from "./routes/venues/index.js";
@@ -20,7 +21,7 @@ import { quotationsRouter } from "./routes/quotations/index.js";
 import { testimonialsRouter } from "./routes/testimonials/index.js";
 import { studioRouter } from "./routes/studio/index.js";
 
-import { initSentry, captureServerError } from "./config/sentry.js";
+import { initSentry } from "./config/sentry.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -114,26 +115,4 @@ app.use((req, res) => {
   res.status(404).json({ message: `Không tìm thấy route: ${req.method} ${req.path}` });
 });
 
-app.use((err, req, res, _next) => {
-  captureServerError(err, req);
-  const reqId = req.id || req.headers?.["x-request-id"];
-  if (req.log) {
-    req.log.error({ reqId, err }, err.message || "Unhandled server error");
-  } else {
-    logger.error({ reqId, err }, err.message || "Unhandled server error");
-  }
-
-  if (err && err.code === "LIMIT_FIELD_VALUE") {
-    return res.status(400).json({ message: "Kích thước trường dữ liệu quá lớn." });
-  }
-  if (err && (err.type === "entity.too.large" || err.status === 413)) {
-    return res.status(413).json({ message: "Dung lượng dữ liệu vượt quá giới hạn cho phép." });
-  }
-  const statusCode = err.http_code || err.status || (res.statusCode >= 400 ? res.statusCode : 500);
-
-  // Ở production, che giấu chi tiết lỗi máy chủ 5xx để đảm bảo an toàn thông tin
-  if (statusCode >= 500 && env.NODE_ENV === "production") {
-    return res.status(statusCode).json({ message: "Lỗi máy chủ." });
-  }
-  res.status(statusCode).json({ message: err.message ?? "Lỗi máy chủ." });
-});
+app.use(errorHandler);

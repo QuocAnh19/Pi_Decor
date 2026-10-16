@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import request from "supertest";
-import { app } from "../src/app.js";
-import { generateTestAdminToken } from "./helpers.js";
+import { app } from "../../app.js";
+import { generateTestAdminToken } from "../../../tests/helpers.js";
 
 describe("Leads Integration Tests", () => {
   it("tạo lead thành công với số điện thoại Việt Nam hợp lệ", async () => {
@@ -51,9 +51,7 @@ describe("Leads Integration Tests", () => {
 
     // Có token admin hợp lệ -> 200
     const token = generateTestAdminToken();
-    const authRes = await request(app)
-      .get("/api/leads")
-      .set("Authorization", `Bearer ${token}`);
+    const authRes = await request(app).get("/api/leads").set("Authorization", `Bearer ${token}`);
     expect(authRes.status).toBe(200);
     expect(authRes.body).toHaveProperty("data");
   });
