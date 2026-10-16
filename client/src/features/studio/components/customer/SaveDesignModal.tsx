@@ -1,14 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   XMarkIcon,
   PaperAirplaneIcon,
   CheckCircleIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
-import { api } from "../../../../lib/api";
 import { Input, Textarea } from "../../../../components/ui";
-import { captureStudioThumbnail, generateBrandedDesignImage } from "../../utils/captureThumbnail";
-import { buildDesignSnapshot } from "../../../../lib/mappers";
+import { useSaveDesignForm } from "../../hooks/useSaveDesignForm";
 import type { SlotConfig, SlotDefinition } from "../../types";
 
 interface SaveDesignModalProps {
@@ -20,15 +18,6 @@ interface SaveDesignModalProps {
   slots?: SlotDefinition[];
 }
 
-function triggerDownload(dataUrl: string, fileName: string) {
-  const link = document.createElement("a");
-  link.href = dataUrl;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
-
 export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
   isOpen,
   onClose,
@@ -37,126 +26,29 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
   templateName = "Phối cảnh tiệc cưới",
   slots = [],
 }) => {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [weddingDate, setWeddingDate] = useState("");
-  const [message, setMessage] = useState("");
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [exportedImageUrl, setExportedImageUrl] = useState<string | null>(null);
+  const {
+    name, setName, phone, setPhone, email, setEmail,
+    weddingDate, setWeddingDate, message, setMessage,
+    loading, error, success, exportedImageUrl,
+    handleSubmit, handleManualDownload,
+  } = useSaveDesignForm({ slotConfig, templateId, templateName, slots });
 
   if (!isOpen) return null;
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!name.trim() || !phone.trim()) {
-      setError("Vui lòng nhập họ tên và số điện thoại.");
-      return;
-    }
-
-    const cleanPhone = phone.replace(/[\s.\-()]/g, "");
-    const VN_PHONE_REGEX = /^(0|\+84)[0-9]{8,10}$/;
-    if (!VN_PHONE_REGEX.test(cleanPhone)) {
-      setError("Số điện thoại không đúng định dạng VN (VD: 0905 123 456).");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      let finalPreviewImage: string | undefined = undefined;
-
-      // 1. Capture the latest canvas snapshot reflecting customer edits
-      try {
-        const rawCaptured = await captureStudioThumbnail();
-        if (rawCaptured) {
-          // 2. Composite Pi Decor watermark, hotline, and wedding details onto the image
-          const branded = await generateBrandedDesignImage(rawCaptured, {
-            customerName: name.trim(),
-            phone: phone.trim(),
-            weddingDate: weddingDate ? String(weddingDate) : "",
-            templateName: templateName || "Phối cảnh Tiệc cưới",
-            hotline: "0789 241 260",
-            website: "pidecor.vn",
-            address: "372 Trần Đại Nghĩa, Đà Nẵng",
-          });
-          finalPreviewImage = branded || rawCaptured;
-        }
-      } catch (capErr) {
-        console.warn("Could not capture or brand customer preview:", capErr);
-      }
-
-      setExportedImageUrl(finalPreviewImage || null);
-
-      // 3. Submit lead to database with rich design snapshot
-      await api.submitLead({
-        name: name.trim(),
-        phone: cleanPhone,
-        email: email.trim() || undefined,
-        wedding_date: weddingDate || undefined,
-        message: message.trim() ? `[Lưu thiết kế Studio]\n${message.trim()}` : "[Lưu thiết kế Studio]",
-        design_snapshot: buildDesignSnapshot({
-          templateId,
-          templateName,
-          slotConfig,
-          slots,
-          previewImage: finalPreviewImage,
-          savedBy: "customer",
-        }),
-      });
-
-      // 4. Trigger automatic file download for customer
-      if (finalPreviewImage) {
-        const sanitizedName = name.trim().replace(/[^a-zA-Z0-9à-ỹÀ-Ỹ_]/g, "_") || "Studio";
-        triggerDownload(finalPreviewImage, `PiDecor_ThietKe_${sanitizedName}.jpg`);
-      }
-
-      setSuccess(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Gửi thiết kế thất bại, thử lại sau.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const handleManualDownload = () => {
-    if (exportedImageUrl) {
-      const sanitizedName = name.trim().replace(/[^a-zA-Z0-9à-ỹÀ-Ỹ_]/g, "_") || "Studio";
-      triggerDownload(exportedImageUrl, `PiDecor_ThietKe_${sanitizedName}.jpg`);
-    }
-  };
 
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(39, 22, 32, 0.55)",
-        backdropFilter: "blur(6px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9999,
-        padding: "16px",
+        position: "fixed", inset: 0, backgroundColor: "rgba(39, 22, 32, 0.55)",
+        backdropFilter: "blur(6px)", display: "flex", alignItems: "center",
+        justifyContent: "center", zIndex: 9999, padding: "16px",
       }}
       onClick={onClose}
     >
       <div
         style={{
-          backgroundColor: "#ffffff",
-          borderRadius: "20px",
-          border: "1px solid #e7ded0",
-          width: "100%",
-          maxWidth: "520px",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          padding: "26px",
-          boxShadow: "0 25px 60px rgba(39, 22, 32, 0.2)",
-          color: "#271620",
+          backgroundColor: "#ffffff", borderRadius: "20px", border: "1px solid #e7ded0",
+          width: "100%", maxWidth: "520px", maxHeight: "90vh", overflowY: "auto",
+          padding: "26px", boxShadow: "0 25px 60px rgba(39, 22, 32, 0.2)", color: "#271620",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -182,28 +74,17 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
               File ảnh thiết kế đã tự động tải về thiết bị của bạn (kèm thông tin liên hệ và hotline Pi Decor). Chuyên viên sẽ sớm liên hệ qua SĐT <strong>{phone}</strong> để tư vấn chi tiết.
             </p>
 
-            {/* Branded Exported Image Preview */}
             {exportedImageUrl && (
               <div
                 style={{
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  border: "1px solid #e7ded0",
-                  boxShadow: "0 4px 16px rgba(39, 22, 32, 0.08)",
-                  marginBottom: "16px",
-                  backgroundColor: "#0f172a",
+                  borderRadius: "12px", overflow: "hidden", border: "1px solid #e7ded0",
+                  boxShadow: "0 4px 16px rgba(39, 22, 32, 0.08)", marginBottom: "16px", backgroundColor: "#0f172a",
                 }}
               >
                 <img
                   src={exportedImageUrl}
                   alt="Ảnh thiết kế phối cảnh Pi Decor"
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    maxHeight: "240px",
-                    objectFit: "contain",
-                    display: "block",
-                  }}
+                  style={{ width: "100%", height: "auto", maxHeight: "240px", objectFit: "contain", display: "block" }}
                 />
               </div>
             )}
@@ -214,19 +95,10 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
                   type="button"
                   onClick={handleManualDownload}
                   style={{
-                    padding: "11px 20px",
-                    backgroundColor: "#a15c2e",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "10px",
-                    fontWeight: "700",
-                    fontSize: "13px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    boxShadow: "0 4px 14px rgba(161, 92, 46, 0.28)",
+                    padding: "11px 20px", backgroundColor: "#a15c2e", color: "#ffffff",
+                    border: "none", borderRadius: "10px", fontWeight: "700", fontSize: "13px",
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                    gap: "8px", boxShadow: "0 4px 14px rgba(161, 92, 46, 0.28)",
                   }}
                 >
                   <ArrowDownTrayIcon className="h-4 w-4" style={{ width: 18, height: 18 }} />
@@ -238,14 +110,8 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
                 type="button"
                 onClick={onClose}
                 style={{
-                  padding: "9px 20px",
-                  backgroundColor: "#fbf7f1",
-                  color: "#6e6259",
-                  border: "1px solid #e7ded0",
-                  borderRadius: "10px",
-                  fontWeight: "600",
-                  fontSize: "13px",
-                  cursor: "pointer",
+                  padding: "9px 20px", backgroundColor: "#fbf7f1", color: "#6e6259",
+                  border: "1px solid #e7ded0", borderRadius: "10px", fontWeight: "600", fontSize: "13px", cursor: "pointer",
                 }}
               >
                 Hoàn tất &amp; Đóng
@@ -307,14 +173,8 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
                 onClick={onClose}
                 disabled={loading}
                 style={{
-                  padding: "9px 18px",
-                  backgroundColor: "#fbf7f1",
-                  color: "#6e6259",
-                  border: "1px solid #e7ded0",
-                  borderRadius: "8px",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  cursor: "pointer",
+                  padding: "9px 18px", backgroundColor: "#fbf7f1", color: "#6e6259",
+                  border: "1px solid #e7ded0", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer",
                 }}
               >
                 Hủy
@@ -323,17 +183,9 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
                 type="submit"
                 disabled={loading}
                 style={{
-                  padding: "9px 22px",
-                  backgroundColor: "#a15c2e",
-                  color: "#ffffff",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontWeight: "700",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
+                  padding: "9px 22px", backgroundColor: "#a15c2e", color: "#ffffff",
+                  border: "none", borderRadius: "8px", fontWeight: "700", fontSize: "13px",
+                  cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
                   boxShadow: "0 2px 8px rgba(161, 92, 46, 0.25)",
                 }}
               >
