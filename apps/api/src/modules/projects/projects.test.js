@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
-import { app } from "../src/app.js";
-import { pool } from "../src/config/database.js";
-import { generateTestAdminToken } from "./helpers.js";
+import { app } from "../../app.js";
+import { pool } from "../../config/database.js";
+import { generateTestAdminToken } from "../../../tests/helpers.js";
 
 describe("Projects Integration Tests", () => {
   let token;

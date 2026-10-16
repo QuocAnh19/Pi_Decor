@@ -1,1 +1,1 @@
-export { cleanupRemovedMedia, cleanupEntityMedia } from "../services/media.service.js";
+export { cleanupRemovedMedia, deleteMediaOf } from "../services/media.service.js";
