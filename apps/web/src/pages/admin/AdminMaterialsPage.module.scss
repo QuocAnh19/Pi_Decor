@@ -1,0 +1,26 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+
+.title {
+  font-family: $font-serif;
+  font-size: 1.5rem;
+  color: $admin-text;
+  margin-bottom: 1.5rem;
+}
+
+.status {
+  padding: 1.5rem;
+  color: $admin-text-muted;
+  font-size: 0.9rem;
+}
+
+.error {
+  padding: 0.75rem 1rem;
+  background: $admin-danger-subtle;
+  border: 1px solid rgba($admin-danger, 0.3);
+  color: $admin-danger;
+  border-radius: $radius-s;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}

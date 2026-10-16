@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
-const PUBLIC_DIR = path.resolve('client/public');
-const IMAGES_DIR = path.resolve('client/public/images');
+const PUBLIC_DIR = path.resolve('apps/web/public');
+const IMAGES_DIR = path.resolve('apps/web/public/images');
 
 async function processFavicon() {
   const svgPath = path.join(PUBLIC_DIR, 'favicon.svg');

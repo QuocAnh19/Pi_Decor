@@ -17,7 +17,7 @@ Tài liệu hướng dẫn quy trình triển khai (deploy), khôi phục (rollb
 Migration được thiết kế an toàn, có thể chạy lặp lại (`idempotent`). Trước khi ứng dụng phiên bản code mới, chạy lệnh migration từ môi trường CI/CD hoặc máy quản trị:
 
 ```bash
-cd server
+cd apps/api
 DATABASE_URL="<production_database_url>" npm run migrate
 ```
 
@@ -28,8 +28,8 @@ DATABASE_URL="<production_database_url>" npm run migrate
 
 - Nếu dùng Docker:
   ```bash
-  docker build -t pidecor-api:latest -f server/Dockerfile .
-  docker run -d --name pidecor-api -p 4000:4000 --env-file server/.env pidecor-api:latest
+  docker build -t pidecor-api:latest -f apps/api/Dockerfile apps/api
+  docker run -d --name pidecor-api -p 4000:4000 --env-file apps/api/.env pidecor-api:latest
   ```
 - Nếu dùng Web Service (Render):
   - Kích hoạt bản build mới qua Git push hoặc webhook.
@@ -109,10 +109,10 @@ Khóa `JWT_SECRET` dùng để ký số và xác thực các Access Token của 
 
 Trong trường hợp quên mật khẩu quản trị viên hoặc cần đặt lại mật khẩu khẩn cấp:
 
-1. Chỉnh sửa mật khẩu mong muốn vào biến `ADMIN_PASSWORD` trong file `server/.env`.
+1. Chỉnh sửa mật khẩu mong muốn vào biến `ADMIN_PASSWORD` trong file `apps/api/.env`.
 2. Chạy lệnh seed kèm cờ `--reset-password`:
    ```bash
-   cd server
+   cd apps/api
    npm run seed -- --reset-password
    ```
 3. Script sẽ tự động băm mật khẩu mới bằng `bcryptjs` (với 10 salt rounds) và cập nhật trực tiếp vào bản ghi tài khoản `ADMIN_EMAIL` trong bảng `admins`.
@@ -126,7 +126,7 @@ Trong trường hợp quên mật khẩu quản trị viên hoặc cần đặt 
 - **Triệu chứng**: Trình duyệt báo lỗi `Access to fetch at ... has been blocked by CORS policy`.
 - **Nguyên nhân**: Domain của Client không nằm trong danh sách trắng `CORS_ORIGIN` của Server.
 - **Cách xử lý**:
-  1. Kiểm tra biến `CORS_ORIGIN` tại `server/.env` (hoặc dashboard Render).
+  1. Kiểm tra biến `CORS_ORIGIN` tại `apps/api/.env` (hoặc dashboard Render).
   2. Bổ sung domain chính xác của client, ví dụ: `CORS_ORIGIN=https://pidecor.vn,https://www.pidecor.vn`.
   3. Nếu server nằm sau Reverse Proxy / Cloudflare, kiểm tra cấu hình `TRUST_PROXY=1` để Express đọc đúng header `X-Forwarded-*`.
 
@@ -140,7 +140,7 @@ Trong trường hợp quên mật khẩu quản trị viên hoặc cần đặt 
 - **Cách xử lý**:
   1. Mở Console trình duyệt, xóa `sessionStorage.removeItem("pidecor_admin_auth")`.
   2. Đăng nhập lại bằng tài khoản admin.
-  3. Chạy `npm run cleanup-tokens` trên server để dọn dẹp các token rác.
+  3. Chạy `npm run cleanup-tokens` trong `apps/api` để dọn dẹp các token rác.
 
 ### c. Lỗi Tải lên Ảnh (Upload Failure)
 

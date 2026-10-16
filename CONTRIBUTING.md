@@ -63,10 +63,10 @@ Dự án áp dụng chặt chẽ chuẩn **Conventional Commits**:
 
 Trước khi commit và gửi Pull Request, lập trình viên phải đảm bảo toàn bộ các bước kiểm tra sau đây đều vượt qua mà không có lỗi:
 
-### Phía Client (`client/`)
+### Phía Web Client (`apps/web/`)
 
 ```bash
-cd client
+cd apps/web
 npx tsc --noEmit        # Kiểm tra kiểu dữ liệu TypeScript không lỗi
 npm run lint           # Kiểm tra quy chuẩn ESLint (0 errors)
 npm run lint:styles    # Kiểm tra SCSS module qua Stylelint
@@ -75,10 +75,10 @@ npm run knip           # Kiểm tra không có code/export/dependency thừa
 npm run build          # Đảm bảo đóng gói Vite thành công
 ```
 
-### Phía Server (`server/`)
+### Phía API Server (`apps/api/`)
 
 ```bash
-cd server
+cd apps/api
 node --check src/**/*.js   # Kiểm tra cú pháp toàn bộ file JS ESM
 npm run lint              # Kiểm tra quy chuẩn ESLint cho server
 npm test                  # Chạy test suite backend (Postgres test)

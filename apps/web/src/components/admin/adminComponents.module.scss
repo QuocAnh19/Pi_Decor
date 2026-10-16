@@ -1,0 +1,307 @@
+@use "../../styles/variables" as *;
+@use "../../styles/tokens" as *;
+@use "../../styles/admin-variables" as *;
+
+/* Header Row dùng chung cho trang admin */
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $admin-border;
+  margin-bottom: 20px;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-family: $font-serif;
+  font-size: $text-xl;
+  font-weight: 700;
+  color: $admin-text;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.subtitle {
+  font-size: $text-sm;
+  color: $admin-text-faint;
+  margin: 4px 0 0;
+}
+
+/* Nút thêm mới chính */
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: $admin-accent;
+  color: var(--color-surface);
+  border: none;
+  border-radius: $radius-pill;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(161, 92, 46, 0.28);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  text-decoration: none;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(161, 92, 46, 0.36);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* Bộ chuyển đổi chế độ xem Grid / Table */
+.viewToggle {
+  display: flex;
+  gap: 4px;
+  background-color: var(--color-surface);
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--color-line);
+}
+
+.viewToggleBtn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: transparent;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: var(--color-ink);
+  }
+}
+
+.viewToggleActive {
+  background-color: var(--color-accent);
+  color: var(--color-surface) !important;
+}
+
+/* Dải tabs trạng thái / phân mục */
+.tabsRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.tabButton {
+  padding: 6px 14px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background-color: $admin-bg;
+  color: $admin-text-muted;
+  font-size: $text-xs;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $admin-text;
+    border-color: $admin-text-faint;
+  }
+}
+
+.tabActive {
+  background-color: $admin-accent;
+  color: var(--color-surface);
+  border-color: $admin-accent;
+  font-weight: 700;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+    color: var(--color-surface);
+  }
+}
+
+/* Trạng thái trống (Empty State) */
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+  background-color: var(--color-surface);
+  border-radius: 16px;
+  border: 1px dashed $admin-border;
+  color: $admin-text-muted;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+  width: 100%;
+}
+
+.emptyIcon {
+  margin-bottom: 12px;
+  color: var(--color-ink-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: $admin-text;
+  margin: 0;
+}
+
+.emptyDesc {
+  font-size: 13px;
+  color: $admin-text-faint;
+  margin: 6px 0 0;
+}
+
+.emptyAction {
+  margin-top: 16px;
+}
+
+/* Bảng dữ liệu chuẩn hoá cho admin */
+.tableWrapper {
+  background-color: var(--color-surface);
+  border-radius: 16px;
+  border: 1px solid var(--color-line);
+  box-shadow: 0 4px 16px rgba(39, 22, 32, 0.04);
+  overflow: hidden;
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: var(--color-ink);
+}
+
+.tableHeaderRow {
+  background-color: var(--color-paper);
+  border-bottom: 1px solid var(--color-line);
+  text-align: left;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tableTh {
+  padding: 14px 16px;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--color-line);
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: #fdf7f5;
+  }
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+/* Hộp thoại xác nhận xoá */
+.confirmDeleteBody {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 8px 0 16px;
+}
+
+.confirmDeleteIconWrap {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #fee2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirmDeleteText {
+  flex: 1;
+  font-size: 14px;
+  color: $admin-text;
+  line-height: 1.5;
+
+  p {
+    margin: 0;
+  }
+}
+
+.confirmDeleteWarning {
+  margin-top: 8px !important;
+  font-size: 13px;
+  color: #b91c1c;
+  font-weight: 500;
+}
+
+.confirmDeleteFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid $admin-border;
+}
+
+.buttonSecondary {
+  padding: 8px 18px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background-color: var(--color-surface);
+  color: $admin-text;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: $admin-bg;
+    border-color: $admin-text-faint;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.buttonDanger {
+  padding: 8px 20px;
+  border-radius: $radius-pill;
+  border: none;
+  background-color: #dc2626;
+  color: var(--color-surface);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #b91c1c;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

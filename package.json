@@ -2,8 +2,19 @@
   "name": "pi-decor-workspace",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:api": "npm --prefix apps/api run dev",
+    "build:web": "npm --prefix apps/web run build",
+    "test:web": "npm --prefix apps/web run test",
+    "test:api": "npm --prefix apps/api run test",
+    "lint:web": "npm --prefix apps/web run lint",
+    "lint:api": "npm --prefix apps/api run lint"
   },
   "devDependencies": {
     "husky": "^9.1.7",

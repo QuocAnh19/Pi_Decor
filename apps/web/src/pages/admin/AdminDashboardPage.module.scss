@@ -1,0 +1,112 @@
+@use "@/styles/variables" as *;
+@use "@/styles/tokens" as *;
+@use "@/styles/admin-variables" as *;
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $admin-border;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: $font-serif;
+  font-size: $text-xl;
+  font-weight: 700;
+  color: $admin-text;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: $text-sm;
+  color: $admin-text-faint;
+  margin-top: 4px;
+}
+
+.status {
+  font-size: $text-sm;
+  color: $admin-text-muted;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $space-4;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-l;
+  padding: $space-4;
+  box-shadow: $admin-shadow-card;
+  transition:
+    border-color $transition-default,
+    box-shadow $transition-default,
+    transform $transition-default;
+
+  &:hover {
+    border-color: $admin-accent-subtle;
+    box-shadow: $admin-shadow-card-hover;
+    transform: translateY(-2px);
+  }
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-s;
+  background: $admin-surface-raised;
+  color: $admin-text-muted;
+  margin-bottom: $space-4;
+}
+
+.cardIconAccent {
+  background: $admin-accent-subtle;
+  color: $admin-accent;
+}
+
+.cardValue {
+  font-family: $font-serif;
+  font-size: $text-3xl;
+  color: $admin-text;
+}
+
+.cardLabel {
+  font-size: $text-xs;
+  color: $admin-text-faint;
+  margin-top: $space-1;
+}
+
+.quickLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-3;
+  margin-top: $space-8;
+}
+
+.quickLink {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $text-xs;
+  color: $admin-accent;
+  padding: $space-2 $space-4;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+
+  &:hover {
+    border-color: $admin-accent;
+  }
+}

@@ -1,6 +1,6 @@
 # Pi Decor
 
-Nền tảng website và ứng dụng Studio tương tác phục vụ thiết kế, tư vấn trang trí tiệc cưới & sự kiện cao cấp. Hệ thống tích hợp bản đồ địa điểm tổ chức (Interactive Map), bộ công cụ phối cảnh canvas trực quan (Studio Builder), hệ thống quản lý khách hàng tiềm năng (Leads CRM) và tạo báo giá tự động (Quotations).
+Nền tảng website và ứng dụng Studio tương tác phục vụ thiết kế, tư vấn trang trí tiệc cưới & sự kiện cao cấp. Hệ thống được tổ chức theo cấu trúc npm workspaces monorepo với frontend web (`apps/web`), backend API (`apps/api`) và các gói thư viện dùng chung (`packages/*`).
 
 ---
 
@@ -8,13 +8,13 @@ Nền tảng website và ứng dụng Studio tương tác phục vụ thiết k�
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                 Client (React 18 + Vite)                    │
+│                 Web Client (apps/web - React 18 + Vite)     │
 │   Trang chủ (Bento) │ Bản đồ (Leaflet) │ Studio Canvas      │
 │   Quản trị Admin (CRM, Báo giá, Dự án, Vật liệu, Templates) │
 └──────────────────────────────┬──────────────────────────────┘
                                │ REST API (JSON / HTTPS)
 ┌──────────────────────────────▼──────────────────────────────┐
-│                 Server (Express 5 ESM)                      │
+│                 API Server (apps/api - Express 5 ESM)       │
 │   verifyToken (JWT) │ Zod Validation │ Rate Limit (Helmet)  │
 │   Domain Routers: leads, auth, quotations, studio, venues   │
 └──────────────────────────────┬──────────────────────────────┘
@@ -48,10 +48,10 @@ docker compose up -d
 
 Cơ sở dữ liệu sẽ lắng nghe tại cổng `localhost:5432` với tài khoản mặc định `pidecor` / `pidecor_dev_only`.
 
-### 2. Cài đặt và Khởi chạy Backend Server
+### 2. Cài đặt và Khởi chạy Backend Server API
 
 ```bash
-cd server
+cd apps/api
 cp .env.example .env
 npm install
 npm run migrate      # Áp dụng 29 migrations schema
@@ -65,24 +65,24 @@ Kiểm tra kết nối server:
 curl http://localhost:4000/api/health
 ```
 
-### 3. Cài đặt và Khởi chạy Frontend Client
+### 3. Cài đặt và Khởi chạy Frontend Web Client
 
 Mở một terminal mới:
 
 ```bash
-cd client
+cd apps/web
 cp .env.example .env
 npm install
 npm run dev          # Giao diện chạy tại http://localhost:5173
 ```
 
-Tài khoản admin mặc định khi seed: `admin@pidecor.vn` / mật khẩu được cấu hình trong `ADMIN_PASSWORD` của `server/.env`.
+Tài khoản admin mặc định khi seed: `admin@pidecor.vn` / mật khẩu được cấu hình trong `ADMIN_PASSWORD` của `apps/api/.env`.
 
 ---
 
 ## Bảng Biến Môi trường
 
-### Server (`server/.env`)
+### API Server (`apps/api/.env`)
 
 | Tên biến                | Bắt buộc  | Mặc định                | Mô tả                                             | Giá trị ví dụ (Dev)                                                 |
 | ----------------------- | :-------: | ----------------------- | ------------------------------------------------- | ------------------------------------------------------------------- |
@@ -103,7 +103,7 @@ Tài khoản admin mặc định khi seed: `admin@pidecor.vn` / mật khẩu đ�
 | `ADMIN_PASSWORD`        | Có (seed) | —                       | Mật khẩu admin khi seed (>= 12 ký tự)             | `Admin@PiDecor2026!`                                                |
 | `SENTRY_DSN`            |   Không   | —                       | DSN giám sát lỗi qua Sentry                       | `https://examplePublicKey@o0.ingest.sentry.io/0`                    |
 
-### Client (`client/.env`)
+### Web Client (`apps/web/.env`)
 
 | Tên biến          | Bắt buộc | Mặc định                | Mô tả                       | Giá trị ví dụ                                    |
 | ----------------- | :------: | ----------------------- | --------------------------- | ------------------------------------------------ |
@@ -114,7 +114,7 @@ Tài khoản admin mặc định khi seed: `admin@pidecor.vn` / mật khẩu đ�
 
 ## Các Lệnh Thường Dùng
 
-### Client (`client/`)
+### Web Client (`apps/web/`)
 
 - `npm run dev`: Khởi chạy môi trường phát triển Vite với Hot Module Replacement.
 - `npx tsc --noEmit`: Kiểm tra tính hợp lệ kiểu dữ liệu TypeScript.
@@ -122,9 +122,9 @@ Tài khoản admin mặc định khi seed: `admin@pidecor.vn` / mật khẩu đ�
 - `npm run lint:styles`: Chạy Stylelint kiểm tra SCSS modules.
 - `npm run test`: Chạy bộ kiểm thử tự động với Vitest và React Testing Library.
 - `npm run knip`: Kiểm tra mã nguồn, exports và dependencies không dùng đến.
-- `npm run build`: Đóng gói ứng dụng production vào thư mục `client/dist`.
+- `npm run build`: Đóng gói ứng dụng production vào thư mục `apps/web/dist`.
 
-### Server (`server/`)
+### API Server (`apps/api/`)
 
 - `npm run dev`: Chạy server chế độ watch với nodemon.
 - `npm run start`: Chạy server chế độ production.

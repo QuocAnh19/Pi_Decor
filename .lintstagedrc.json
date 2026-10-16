@@ -1,6 +1,7 @@
 {
-  "client/src/**/*.{ts,tsx}": ["prettier --write", "npm --prefix client run lint"],
-  "server/src/**/*.js": ["prettier --write", "npm --prefix server run lint"],
-  "client/src/**/*.scss": ["prettier --write", "npm --prefix client run lint:styles"],
+  "apps/web/src/**/*.{ts,tsx}": ["prettier --write", "npm --prefix apps/web run lint"],
+  "apps/api/src/**/*.js": ["prettier --write", "npm --prefix apps/api run lint"],
+  "apps/web/src/**/*.scss": ["prettier --write", "npm --prefix apps/web run lint:styles"],
+  "packages/**/*.{ts,tsx,js}": ["prettier --write"],
   "*.{json,md,yml,yaml}": ["prettier --write"]
 }

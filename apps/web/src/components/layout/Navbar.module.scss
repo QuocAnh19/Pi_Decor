@@ -1,0 +1,68 @@
+@use "@/styles/variables" as *;
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  transition:
+    background-color $transition-default,
+    border-color $transition-default;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.headerSolid {
+  background: rgba(251, 247, 241, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid $color-line;
+}
+
+.bar {
+  display: flex;
+  height: 64px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: $font-serif;
+  font-size: $text-lg;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.nav {
+  display: none;
+  align-items: center;
+  gap: $space-8;
+  font-size: $text-sm;
+  font-weight: 500;
+  color: $color-ink;
+
+  @media (min-width: 768px) {
+    display: flex;
+  }
+}
+
+.navLink {
+  color: $color-ink-muted;
+  transition: color $transition-default;
+
+  &:hover {
+    color: $color-ink;
+  }
+}
+
+.cta {
+  border-radius: $radius-pill;
+  background: $color-accent;
+  padding: $space-2 $space-4;
+  font-size: $text-sm;
+  font-weight: 500;
+  color: $color-paper;
+  transition: background-color $transition-default;
+
+  &:hover {
+    background: $color-accent-hover;
+  }
+}

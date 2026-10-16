@@ -1,0 +1,298 @@
+@use "@/styles/variables" as *;
+@use "@/styles/tokens" as *;
+@use "@/styles/admin-variables" as *;
+@use "@/styles/mixins" as *;
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $admin-border;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: $font-serif;
+  font-size: $text-xl;
+  font-weight: 700;
+  color: $admin-text;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: $text-sm;
+  color: $admin-text-faint;
+  margin-top: 4px;
+}
+
+.addVenueButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: $radius-pill;
+  background-color: $admin-accent;
+  color: var(--color-surface);
+  font-size: $text-xs;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(161, 92, 46, 0.25);
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(161, 92, 46, 0.35);
+  }
+}
+
+.status {
+  font-size: $text-sm;
+  color: $admin-text-muted;
+  padding: 40px;
+  text-align: center;
+}
+
+.error {
+  font-size: 13px;
+  color: $admin-danger;
+  background: $admin-danger-subtle;
+  border: 1px solid rgba($admin-danger, 0.3);
+  border-radius: $radius-s;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+/* Filter Bar */
+.filterBar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: $admin-surface;
+  padding: 16px;
+  border-radius: $radius-l;
+  border: 1px solid $admin-border;
+  box-shadow: $admin-shadow-card;
+  margin-bottom: 20px;
+}
+
+.searchRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.tabButton {
+  padding: 6px 14px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background-color: $admin-bg;
+  color: $admin-text-muted;
+  font-size: $text-xs;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: $admin-text-faint;
+    color: $admin-text;
+    background-color: #fdfaf6;
+  }
+}
+
+.tabActive {
+  background-color: $admin-accent;
+  color: var(--color-surface) !important;
+  border-color: $admin-accent !important;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(161, 92, 46, 0.25);
+
+  &:hover {
+    background-color: $admin-accent-hover;
+  }
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: $space-4;
+  align-items: start;
+
+  @media (max-width: 1023px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detailPanel {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-l;
+  padding: $space-4;
+  min-height: 200px;
+  box-shadow: $admin-shadow-card;
+}
+
+.placeholder {
+  font-size: $text-sm;
+  color: $admin-text-faint;
+  padding: $space-6 0;
+  text-align: center;
+}
+
+.detailHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $space-3;
+  padding-bottom: $space-4;
+  margin-bottom: $space-4;
+  border-bottom: 1px solid $admin-border;
+}
+
+.detailName {
+  font-family: $font-serif;
+  font-size: $text-lg;
+  color: $admin-text;
+}
+
+.detailMeta {
+  font-size: $text-xs;
+  color: $admin-text-faint;
+  margin-top: 2px;
+}
+
+.addProjectButton {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $text-xs;
+  font-weight: 600;
+  color: $admin-accent;
+  background: $admin-accent-subtle;
+  padding: $space-2 $space-4;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(161, 92, 46, 0.2);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(161, 92, 46, 0.2);
+    color: $admin-accent-hover;
+  }
+
+  @include focus-ring;
+}
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+}
+
+.projectItem {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: $space-3;
+  border-radius: $radius-s;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-surface-raised;
+  }
+}
+
+.projectThumb {
+  width: 48px;
+  height: 48px;
+  border-radius: $radius-s;
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $admin-text-faint;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.projectThumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.projectBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.projectTitle {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  font-size: $text-sm;
+  font-weight: 600;
+  color: $admin-text;
+}
+
+.unpublished {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: $text-xs;
+  font-weight: 600;
+  color: $admin-warning;
+  background: $admin-warning-subtle;
+  padding: 2px 8px;
+  border-radius: $radius-pill;
+}
+
+.projectMeta {
+  font-size: $text-xs;
+  color: $admin-text-faint;
+  margin-top: 2px;
+}
+
+.projectActions {
+  display: flex;
+  gap: $space-1;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  color: $admin-text-faint;
+  padding: $space-2;
+  border-radius: $radius-s;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $admin-text;
+    background: $admin-surface;
+  }
+
+  @include focus-ring;
+}
+
+.iconButtonDanger:hover {
+  color: $admin-danger;
+  background: $admin-danger-subtle;
+}

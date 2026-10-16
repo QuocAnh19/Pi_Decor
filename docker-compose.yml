@@ -19,7 +19,7 @@ services:
 
   api:
     build:
-      context: ./server
+      context: ./apps/api
       dockerfile: Dockerfile
     container_name: pidecor-api
     restart: unless-stopped

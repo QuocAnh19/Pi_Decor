@@ -1,0 +1,70 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+
+.errorMessage {
+  background-color: $admin-danger-subtle;
+  border: 1px solid $admin-danger;
+  color: $admin-danger;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: $admin-text;
+  cursor: pointer;
+  user-select: none;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.cancelBtn {
+  padding: 8px 16px;
+  background-color: $admin-bg;
+  color: $admin-text-muted;
+  border: 1px solid $admin-border;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: $admin-surface-raised;
+    color: $admin-text;
+  }
+}
+
+.submitBtn {
+  padding: 8px 20px;
+  background-color: $admin-accent;
+  color: var(--color-surface);
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(161, 92, 46, 0.25);
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+  }
+}

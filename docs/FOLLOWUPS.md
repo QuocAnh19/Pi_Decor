@@ -43,9 +43,9 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 
 ## II. Các hạng mục đã giải quyết (Resolved Items)
 
-### 1. [Đã giải quyết - P21] Xung đột Peer Dependency tại `server/` khi chạy `npm ci`
+### 1. [Đã giải quyết - P21] Xung đột Peer Dependency tại `apps/api/` khi chạy `npm ci`
 
-- **Mô tả trước đây**: `server/package.json` dùng `cloudinary: "^2.5.0"` xung đột peer dependency với `multer-storage-cloudinary@4.0.0`.
+- **Mô tả trước đây**: `apps/api/package.json` dùng `cloudinary: "^2.5.0"` xung đột peer dependency với `multer-storage-cloudinary@4.0.0`.
 - **Giải pháp**: Đã cấu hình `.npmrc` hỗ trợ `legacy-peer-deps=true` đồng thời chuẩn hóa package-lock, cho phép CI chạy `npm ci` thành công tuyệt đối.
 
 ### 2. [Đã giải quyết - P17a & P17b] Cảnh báo kích thước file vượt 300 dòng và Lint
@@ -61,7 +61,7 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 ### 4. [Đã giải quyết - P10] Quản lý vòng đời Refresh Token và Xoay vòng an toàn
 
 - **Mô tả trước đây**: Cần cơ chế dọn dẹp token định kỳ và phát hiện tái sử dụng token.
-- **Giải pháp**: Đã triển khai script `server/scripts/cleanup-tokens.js` cho Cron job, đồng thời xây dựng bảng gia phả và logic phát hiện reuse token ở migration 0028.
+- **Giải pháp**: Đã triển khai script `apps/api/scripts/cleanup-tokens.js` cho Cron job, đồng thời xây dựng bảng gia phả và logic phát hiện reuse token ở migration 0028.
 
 ### 5. [Đã giải quyết - P10] Đánh giá phương án Refresh Token Cookie vs SessionStorage
 

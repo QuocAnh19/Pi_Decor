@@ -1,6 +1,6 @@
 # Đặc tả Giao diện Lập trình REST API (API.md)
 
-Tài liệu đặc tả toàn bộ các điểm cuối (endpoints) của hệ thống Pi Decor API (`server/src/app.js`). Mọi endpoint tuân thủ chuẩn RESTful, dữ liệu trao đổi định dạng JSON (snake_case).
+Tài liệu đặc tả toàn bộ các điểm cuối (endpoints) của hệ thống Pi Decor API (`apps/api/src/app.js`). Mọi endpoint tuân thủ chuẩn RESTful, dữ liệu trao đổi định dạng JSON (snake_case).
 
 ---
 

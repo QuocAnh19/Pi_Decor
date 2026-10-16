@@ -77,7 +77,7 @@ Dự án sử dụng PostgreSQL 16 thuần với 29 bước migration có thứ 
 ### a. Lớp Lưu trữ Trực tiếp (No Heavy ORM)
 
 - **Lý do**: Tránh sự cồng kềnh, chậm chạp và khó kiểm soát câu lệnh SQL của các ORM phức tạp.
-- **Giải pháp**: Xây dựng adapter parameterized SQL duy nhất `server/src/config/database.pg.js`. Mọi thao tác CRUD đều đi qua allowlist tên bảng và cột nghiêm ngặt, đảm bảo an toàn 100% trước lỗi SQL Injection.
+- **Giải pháp**: Xây dựng adapter parameterized SQL duy nhất `apps/api/src/config/database.pg.js`. Mọi thao tác CRUD đều đi qua allowlist tên bảng và cột nghiêm ngặt, đảm bảo an toàn 100% trước lỗi SQL Injection.
 
 ### b. Quản lý Phiên Đăng nhập & Xoay vòng Refresh Token
 
@@ -85,13 +85,13 @@ Dự án sử dụng PostgreSQL 16 thuần với 29 bước migration có thứ 
 - **Giải pháp**:
   - Access Token (JWT) lưu trong bộ nhớ / sessionStorage, thời hạn ngắn (15 phút).
   - Refresh Token được xoay vòng mỗi khi cấp lại token (Refresh Token Rotation).
-  - Phía Client sử dụng cơ chế **Single-Flight Refresh Promise** trong `authStore.ts` để ngăn chặn các request đồng thời gửi nhiều lệnh refresh gây khóa phiên.
+  - Phía Client sử dụng cơ chế **Single-Flight Refresh Promise** trong `apps/web/src/lib/authStore.ts` để ngăn chặn các request đồng thời gửi nhiều lệnh refresh gây khóa phiên.
   - Phía Server lưu vết dòng họ token (`family_id`). Nếu một refresh token đã bị thu hồi được sử dụng lại, server lập tức thu hồi toàn bộ dòng họ token đó để chống tấn công đánh cắp phiên.
 
 ### c. Chuẩn hóa Định dạng Dữ liệu (Data Mapping Layer)
 
 - **Lý do**: Database và API backend tuân thủ chuẩn `snake_case` của PostgreSQL, trong khi code React/TypeScript tuân thủ `camelCase`.
-- **Giải pháp**: Tách tầng mapper độc lập tại `client/src/lib/mappers/` (`lead.mapper.ts`, `quotation.mapper.ts`, `studio.mapper.ts`). Mọi dữ liệu vào/ra đều được chuyển đổi nhất quán, không làm ô nhiễm mã nguồn giao diện.
+- **Giải pháp**: Tách tầng mapper độc lập tại `apps/web/src/lib/mappers/` (`lead.mapper.ts`, `quotation.mapper.ts`, `studio.mapper.ts`). Mọi dữ liệu vào/ra đều được chuyển đổi nhất quán, không làm ô nhiễm mã nguồn giao diện.
 
 ### d. Tuân thủ Bảo vệ Dữ liệu Cá nhân (Privacy Compliance)
 

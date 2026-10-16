@@ -1,0 +1,25 @@
+@use "@/styles/variables" as *;
+
+.toast {
+  position: fixed;
+  left: 50%;
+  z-index: 3000;
+  transform: translateX(-50%);
+  border-radius: 8px;
+  background: $color-ink;
+  padding: 12px 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $color-paper;
+  box-shadow: $shadow-default;
+  transition:
+    bottom $transition-default,
+    opacity $transition-default;
+  bottom: -64px;
+  opacity: 0;
+}
+
+.visible {
+  bottom: 32px;
+  opacity: 1;
+}

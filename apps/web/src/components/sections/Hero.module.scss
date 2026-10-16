@@ -1,0 +1,155 @@
+@use "@/styles/variables" as *;
+
+.hero {
+  position: relative;
+  height: 92vh;
+  min-height: 560px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.parallaxLayer {
+  position: absolute;
+  inset-inline: 0;
+  top: -12%;
+  height: 124%;
+  will-change: transform;
+}
+
+.media {
+  height: 100%;
+  width: 100%;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(39, 22, 32, 0.75),
+    rgba(39, 22, 32, 0.1) 60%,
+    transparent
+  );
+}
+
+.collage {
+  pointer-events: none;
+  position: absolute;
+  right: 24px;
+  top: 96px;
+  z-index: 10;
+  display: none;
+  transform: rotate(-2deg);
+  gap: $space-3;
+
+  @media (min-width: 640px) {
+    right: 40px;
+    top: 112px;
+  }
+
+  @media (min-width: 768px) {
+    display: flex;
+  }
+}
+
+.collagePhotoTwo {
+  margin-top: $space-6;
+}
+
+.feather {
+  pointer-events: none;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  z-index: 10;
+  display: none;
+  height: 96px;
+  width: auto;
+  color: rgba($color-material-champagne, 0.7);
+
+  @media (min-width: 768px) {
+    display: block;
+  }
+}
+
+.content {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-bottom: $space-16;
+  padding-top: $space-20;
+
+  @media (min-width: 768px) {
+    // giá trị layout đặc thù, không thuộc spacing scale
+    padding-bottom: 170px;
+  }
+}
+
+.eyebrow {
+  @include text-eyebrow;
+  color: rgba($color-paper, 0.8);
+}
+
+.title {
+  @include text-display;
+  margin-top: $space-4;
+  max-width: 36rem;
+  color: $color-paper;
+}
+
+.titleAccent {
+  font-style: italic;
+  color: $color-material-champagne;
+}
+
+.subtitle {
+  @include text-subtitle;
+  margin-top: $space-6;
+  max-width: 28rem;
+  color: rgba($color-paper, 0.85);
+}
+
+.script {
+  @include text-script;
+  margin-top: $space-2;
+  font-style: italic;
+  color: $color-material-champagne;
+}
+
+.actions {
+  margin-top: $space-8;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: $space-4;
+}
+
+.ctaPrimary {
+  border-radius: $radius-pill;
+  background: $color-accent;
+  padding: $space-3 $space-6;
+  font-size: $text-sm;
+  font-weight: $weight-semibold;
+  color: $color-paper;
+  box-shadow: $shadow-sm;
+  transition: background-color $transition-default;
+
+  &:hover {
+    background: $color-accent-hover;
+  }
+}
+
+.ctaGhost {
+  border-radius: $radius-pill;
+  padding: $space-3 $space-6;
+  font-size: $text-sm;
+  font-weight: $weight-semibold;
+  color: $color-paper;
+  transition: color $transition-default;
+
+  &:hover {
+    color: $color-material-champagne;
+  }
+}

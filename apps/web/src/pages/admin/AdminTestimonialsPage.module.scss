@@ -1,0 +1,308 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+@use "@/styles/mixins" as *;
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $admin-border;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: $font-serif;
+  font-size: $text-xl;
+  font-weight: 700;
+  color: $admin-text;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: $text-sm;
+  color: $admin-text-faint;
+  margin-top: 4px;
+}
+
+/* Filter Bar */
+.filterBar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: $admin-surface;
+  padding: 16px;
+  border-radius: $radius-l;
+  border: 1px solid $admin-border;
+  box-shadow: $admin-shadow-card;
+  margin-bottom: 20px;
+}
+
+.searchRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.tabButton {
+  padding: 6px 14px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background-color: $admin-bg;
+  color: $admin-text-muted;
+  font-size: $text-xs;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $admin-text;
+    border-color: $admin-text-faint;
+  }
+}
+
+.tabActive {
+  background-color: $admin-accent;
+  color: var(--color-surface);
+  border-color: $admin-accent;
+  font-weight: 700;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+    color: var(--color-surface);
+  }
+}
+
+.empty {
+  padding: 48px 24px;
+  text-align: center;
+  background: $admin-surface;
+  border: 1px dashed $admin-border;
+  border-radius: $radius-l;
+  color: $admin-text-muted;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* Grid View */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.card {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-l;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: $admin-shadow-card;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $admin-shadow-card-hover;
+  }
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.authorName {
+  font-size: 14px;
+  font-weight: 700;
+  color: $admin-text;
+}
+
+.authorRole {
+  font-size: 12px;
+  color: $admin-text-muted;
+}
+
+.quoteText {
+  font-size: 13px;
+  color: $admin-text;
+  font-style: italic;
+  line-height: 1.5;
+  margin: 12px 0;
+  flex: 1;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid $admin-border;
+  gap: 8px;
+}
+
+/* Table View */
+.tableWrapper {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-l;
+  box-shadow: $admin-shadow-card;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: $admin-text;
+
+  th,
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid $admin-border;
+    text-align: left;
+  }
+
+  th {
+    background: var(--color-paper);
+    color: var(--color-ink-muted);
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  tbody tr {
+    transition: background-color 0.15s ease;
+    &:hover {
+      background-color: #fdf7f5;
+    }
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: $radius-pill;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badgePending {
+  background: $admin-warning-subtle;
+  color: $admin-warning;
+  border: 1px solid rgba(185, 138, 62, 0.3);
+}
+
+.badgeApproved {
+  background: #eef4ea;
+  color: #47663b;
+  border: 1px solid rgba(71, 102, 59, 0.3);
+}
+
+.badgeRejected {
+  background: $admin-danger-subtle;
+  color: $admin-danger;
+  border: 1px solid rgba(162, 70, 87, 0.3);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.btnApprove {
+  padding: 5px 10px;
+  border: 1px solid #47663b;
+  background: #eef4ea;
+  color: #47663b;
+  border-radius: $radius-s;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #47663b;
+    color: var(--color-surface);
+  }
+}
+
+.btnReject {
+  padding: 5px 10px;
+  border: 1px solid rgba(162, 70, 87, 0.4);
+  background: $admin-danger-subtle;
+  color: $admin-danger;
+  border-radius: $radius-s;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-danger;
+    color: var(--color-surface);
+  }
+}
+
+.btnDelete {
+  padding: 5px 8px;
+  border: 1px solid $admin-border;
+  background: $admin-bg;
+  color: $admin-text-faint;
+  border-radius: $radius-s;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $admin-danger;
+    border-color: $admin-danger;
+  }
+}
+
+.status {
+  padding: 40px;
+  text-align: center;
+  color: $admin-text-muted;
+}
+
+.error {
+  padding: 10px 16px;
+  background: $admin-danger-subtle;
+  border: 1px solid rgba($admin-danger, 0.3);
+  color: $admin-danger;
+  border-radius: $radius-s;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
