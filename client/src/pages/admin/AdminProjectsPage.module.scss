@@ -40,7 +40,7 @@
   justify-content: center;
   gap: 8px;
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border: none;
   border-radius: $radius-pill;
   padding: 10px 22px;
@@ -140,13 +140,13 @@
 
 .tabActive {
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border-color: $admin-accent;
   font-weight: 700;
 
   &:hover {
     background-color: $admin-accent-hover;
-    color: #ffffff;
+    color: var(--color-surface);
   }
 }
 
@@ -207,7 +207,7 @@
 .categoryBadge {
   background-color: rgba(39, 22, 32, 0.72);
   backdrop-filter: blur(4px);
-  color: #ffffff;
+  color: var(--color-surface);
   border: 1px solid rgba(255, 255, 255, 0.3);
   font-size: $text-xs;
   font-weight: 700;
@@ -225,17 +225,17 @@
 
 .statusActive {
   background-color: $admin-success;
-  color: #ffffff;
+  color: var(--color-surface);
 }
 
 .statusFeatured {
   background-color: $admin-warning;
-  color: #ffffff;
+  color: var(--color-surface);
 }
 
 .statusDraft {
   background-color: $admin-text-faint;
-  color: #ffffff;
+  color: var(--color-surface);
 }
 
 .tierBadge {
@@ -251,7 +251,7 @@
 
 .tierPremium {
   background: linear-gradient(135deg, #b45309, #d97706);
-  color: #ffffff;
+  color: var(--color-surface);
   border: 1px solid rgba(251, 191, 36, 0.4);
   box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
 }
@@ -547,7 +547,7 @@
 
 .makeCoverBtn {
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
 
   &:hover {
     background-color: $admin-accent-hover;
@@ -556,7 +556,7 @@
 
 .deleteThumbBtn {
   background-color: $admin-danger;
-  color: #ffffff;
+  color: var(--color-surface);
 
   &:hover {
     background-color: #C97188;
@@ -678,7 +678,7 @@
 .visualSlotFilled {
   border-style: solid;
   border-color: $admin-border;
-  background: #ffffff;
+  background: var(--color-surface);
 
   &:hover {
     border-color: $admin-accent;
@@ -735,7 +735,7 @@
   font-size: 10px;
   font-weight: 700;
   background: $admin-warning;
-  color: #ffffff;
+  color: var(--color-surface);
   padding: 2px 6px;
   border-radius: $radius-s;
   box-shadow: 0 2px 4px rgba(39, 22, 32, 0.25);
@@ -753,7 +753,7 @@
   font-weight: 700;
   background: rgba(39, 22, 32, 0.72);
   backdrop-filter: blur(4px);
-  color: #ffffff;
+  color: var(--color-surface);
   padding: 2px 6px;
   border-radius: $radius-s;
 }
@@ -792,7 +792,7 @@
 
 .makeCoverBtn {
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
 
   &:hover {
     background-color: $admin-accent-hover;
@@ -801,7 +801,7 @@
 
 .deleteThumbBtn {
   background-color: $admin-danger;
-  color: #ffffff;
+  color: var(--color-surface);
 
   &:hover {
     background-color: #C97188;
@@ -835,7 +835,7 @@
 .submitBtn {
   padding: 9px 20px;
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border: none;
   border-radius: $radius-s;
   font-size: $text-sm;

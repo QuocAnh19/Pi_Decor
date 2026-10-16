@@ -120,7 +120,7 @@
 .publishBtn {
   padding: 6px 14px;
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border: none;
   border-radius: 8px;
   font-size: $text-xs;
@@ -153,7 +153,7 @@
 
   &.previewBtnActive {
     background-color: $admin-danger;
-    color: #ffffff;
+    color: var(--color-surface);
     border-color: $admin-danger;
   }
 }

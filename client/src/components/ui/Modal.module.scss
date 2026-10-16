@@ -14,7 +14,7 @@
 
 .modal {
   position: relative;
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid $color-line;
   border-radius: $radius-l;
   width: 100%;
@@ -34,7 +34,7 @@
   bottom: 0;
   width: 100%;
   max-width: 540px;
-  background: #ffffff;
+  background: var(--color-surface);
   border-left: 1px solid $color-line;
   z-index: 10001;
   display: flex;
@@ -83,7 +83,7 @@
 
   &:hover {
     background: $color-accent;
-    color: #ffffff;
+    color: var(--color-surface);
     border-color: $color-accent;
     transform: scale(1.06);
   }
@@ -115,7 +115,7 @@
 
   &:hover {
     background: $color-accent;
-    color: #ffffff;
+    color: var(--color-surface);
     border-color: $color-accent;
     transform: scale(1.08);
   }
@@ -148,7 +148,7 @@
 
   &:hover {
     background: $color-accent;
-    color: #ffffff;
+    color: var(--color-surface);
     border-color: $color-accent;
     transform: scale(1.12);
     box-shadow: 0 8px 24px rgba(161, 92, 46, 0.35);
@@ -177,7 +177,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  background: #ffffff;
+  background: var(--color-surface);
   color: $color-ink;
   scroll-behavior: smooth;
 }

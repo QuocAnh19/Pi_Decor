@@ -43,7 +43,7 @@
   justify-content: center;
   gap: 8px;
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border: none;
   border-radius: $radius-pill;
   padding: 10px 22px;
@@ -69,10 +69,10 @@
 .viewToggle {
   display: flex;
   gap: 4px;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   padding: 4px;
   border-radius: 8px;
-  border: 1px solid #e7ded0;
+  border: 1px solid var(--color-line);
 }
 
 .viewToggleBtn {
@@ -80,19 +80,19 @@
   border: none;
   border-radius: 6px;
   background-color: transparent;
-  color: #6e6259;
+  color: var(--color-ink-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
 
-  &:hover { color: #271620; }
+  &:hover { color: var(--color-ink); }
 }
 
 .viewToggleActive {
-  background-color: #a15c2e;
-  color: #ffffff !important;
+  background-color: var(--color-accent);
+  color: var(--color-surface) !important;
 }
 
 /* Dải tabs trạng thái / phân mục */
@@ -123,13 +123,13 @@
 
 .tabActive {
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border-color: $admin-accent;
   font-weight: 700;
 
   &:hover {
     background-color: $admin-accent-hover;
-    color: #ffffff;
+    color: var(--color-surface);
   }
 }
 
@@ -137,7 +137,7 @@
 .emptyState {
   text-align: center;
   padding: 48px 24px;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   border-radius: 16px;
   border: 1px dashed $admin-border;
   color: $admin-text-muted;
@@ -151,7 +151,7 @@
 
 .emptyIcon {
   margin-bottom: 12px;
-  color: #9c9186;
+  color: var(--color-ink-faint);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -176,9 +176,9 @@
 
 /* Bảng dữ liệu chuẩn hoá cho admin */
 .tableWrapper {
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   border-radius: 16px;
-  border: 1px solid #e7ded0;
+  border: 1px solid var(--color-line);
   box-shadow: 0 4px 16px rgba(39, 22, 32, 0.04);
   overflow: hidden;
   width: 100%;
@@ -188,14 +188,14 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
-  color: #271620;
+  color: var(--color-ink);
 }
 
 .tableHeaderRow {
-  background-color: #fbf7f1;
-  border-bottom: 1px solid #e7ded0;
+  background-color: var(--color-paper);
+  border-bottom: 1px solid var(--color-line);
   text-align: left;
-  color: #6e6259;
+  color: var(--color-ink-muted);
   font-size: 12px;
   font-weight: 700;
 }
@@ -205,7 +205,7 @@
 }
 
 .tableRow {
-  border-bottom: 1px solid #e7ded0;
+  border-bottom: 1px solid var(--color-line);
   transition: background-color 0.15s ease;
 
   &:hover { background-color: #fdf7f5; }
@@ -259,7 +259,7 @@
   padding: 8px 18px;
   border-radius: $radius-pill;
   border: 1px solid $admin-border;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   color: $admin-text;
   font-size: 13px;
   font-weight: 600;
@@ -281,7 +281,7 @@
   border-radius: $radius-pill;
   border: none;
   background-color: #dc2626;
-  color: #ffffff;
+  color: var(--color-surface);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;

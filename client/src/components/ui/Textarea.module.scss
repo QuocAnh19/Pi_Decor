@@ -22,7 +22,7 @@
 }
 
 .required {
-  color: #b4586b;
+  color: var(--color-danger);
   margin-left: 3px;
 }
 
@@ -30,7 +30,7 @@
   width: 100%;
   min-height: 90px;
   padding: 9px 12px;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   border: 1px solid $color-line;
   border-radius: $radius-s;
   color: $color-ink;
@@ -63,10 +63,10 @@
   }
 
   &.hasError {
-    border-color: #b4586b;
+    border-color: var(--color-danger);
 
     &:focus {
-      border-color: #b4586b;
+      border-color: var(--color-danger);
       box-shadow: 0 0 0 3px rgba(180, 88, 107, 0.15);
     }
   }
@@ -75,7 +75,7 @@
 .errorMessage,
 .errorText {
   font-size: 11px;
-  color: #b4586b;
+  color: var(--color-danger);
   font-weight: 500;
   margin-top: 2px;
   line-height: 1.3;

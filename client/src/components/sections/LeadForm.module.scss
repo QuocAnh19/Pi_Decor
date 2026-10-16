@@ -95,7 +95,7 @@
   border-radius: $radius-pill;
   border: none;
   background: linear-gradient(135deg, $color-accent 0%, #884c24 100%);
-  color: #ffffff;
+  color: var(--color-surface);
   font-size: $text-sm;
   font-weight: 600;
   cursor: pointer;

@@ -13,7 +13,7 @@
   padding: $space-2 18px;
   border-radius: $radius-pill;
   border: 1px solid rgba(161, 92, 46, 0.25);
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   color: $color-ink-muted;
   font-size: $text-sm;
   font-weight: $weight-semibold;
@@ -24,20 +24,20 @@
   &:hover {
     color: $color-ink;
     border-color: $color-accent;
-    background-color: #ffffff;
+    background-color: var(--color-surface);
   }
 }
 
 .filterActive {
   background-color: $color-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border-color: $color-accent;
   font-weight: $weight-bold;
   box-shadow: 0 4px 12px rgba(161, 92, 46, 0.25);
 
   &:hover {
     background-color: $color-accent-hover;
-    color: #ffffff;
+    color: var(--color-surface);
   }
 }
 
@@ -108,7 +108,7 @@
   border-radius: $radius-pill;
   background: rgba(185, 138, 62, 0.92);
   backdrop-filter: blur(4px);
-  color: #ffffff;
+  color: var(--color-surface);
   @include text-caption;
   font-weight: $weight-bold;
   letter-spacing: $tracking-wide;
@@ -123,7 +123,7 @@
   background: linear-gradient(135deg, #b45309, #d97706);
   border: 1px solid rgba(251, 191, 36, 0.4);
   backdrop-filter: blur(4px);
-  color: #ffffff;
+  color: var(--color-surface);
   @include text-caption;
   font-weight: $weight-bold;
   letter-spacing: $tracking-wide;
@@ -142,7 +142,7 @@
   border-radius: $radius-pill;
   background: rgba(39, 22, 32, 0.65);
   backdrop-filter: blur(6px);
-  color: #ffffff;
+  color: var(--color-surface);
   @include text-caption;
   font-weight: $weight-semibold;
   opacity: 0;
@@ -231,7 +231,7 @@
   gap: 8px;
   padding: $space-2 20px;
   background: $color-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border-radius: $radius-pill;
   font-size: $text-sm;
   font-weight: $weight-medium;

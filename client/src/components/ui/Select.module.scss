@@ -22,7 +22,7 @@
 }
 
 .required {
-  color: #b4586b;
+  color: var(--color-danger);
   margin-left: 3px;
 }
 
@@ -36,7 +36,7 @@
 .select {
   width: 100%;
   padding: 9px 34px 9px 12px;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   border: 1px solid $color-line;
   border-radius: $radius-s;
   color: $color-ink;
@@ -50,7 +50,7 @@
   transition: border-color $transition-default, box-shadow $transition-default, background-color $transition-default;
 
   option {
-    background-color: #ffffff;
+    background-color: var(--color-surface);
     color: $color-ink;
     padding: 6px 10px;
   }
@@ -77,10 +77,10 @@
   }
 
   &.hasError {
-    border-color: #b4586b;
+    border-color: var(--color-danger);
 
     &:focus {
-      border-color: #b4586b;
+      border-color: var(--color-danger);
       box-shadow: 0 0 0 3px rgba(180, 88, 107, 0.15);
     }
   }
@@ -113,7 +113,7 @@
 .errorMessage,
 .errorText {
   font-size: 11px;
-  color: #b4586b;
+  color: var(--color-danger);
   font-weight: 500;
   margin-top: 2px;
   line-height: 1.3;

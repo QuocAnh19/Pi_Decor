@@ -34,7 +34,7 @@
 }
 
 .section {
-  background: #ffffff;
+  background: var(--color-surface);
   border: 1px solid $admin-border;
   border-radius: $radius-l;
   padding: 18px;
@@ -97,7 +97,7 @@
   font-weight: 700;
   text-decoration: none;
   background: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   transition: all 0.15s ease;
 
   &:hover {
@@ -187,32 +187,32 @@
 .statusButtonActive {
   background: $admin-accent;
   border-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   font-weight: 700;
 
   &:hover {
     background: $admin-accent-hover;
-    color: #ffffff;
+    color: var(--color-surface);
   }
 }
 
 .statusNewActive {
   background: $admin-warning;
   border-color: $admin-warning;
-  color: #ffffff;
+  color: var(--color-surface);
 }
 
 .statusClosedActive {
   background: $admin-success;
   border-color: $admin-success;
-  color: #ffffff;
+  color: var(--color-surface);
 }
 
 .createQuoteBtn {
   width: 100%;
   padding: 12px 18px;
   background: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border: none;
   border-radius: $radius-pill;
   font-size: 13px;
@@ -279,7 +279,7 @@
   padding: 8px 18px;
   border-radius: $radius-pill;
   border: 1px solid $admin-border;
-  background: #ffffff;
+  background: var(--color-surface);
   color: $admin-text;
   font-size: 13px;
   font-weight: 600;

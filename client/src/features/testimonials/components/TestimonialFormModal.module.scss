@@ -111,7 +111,7 @@
   height: 18px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.6);
-  color: #ffffff;
+  color: var(--color-surface);
   border: none;
   font-size: 10px;
   cursor: pointer;
@@ -130,7 +130,7 @@
   border-radius: $radius-pill;
   border: none;
   background: $color-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;

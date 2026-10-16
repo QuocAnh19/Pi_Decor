@@ -74,13 +74,13 @@
 
 .tabActive {
   background-color: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   border-color: $admin-accent;
   font-weight: 700;
 
   &:hover {
     background-color: $admin-accent-hover;
-    color: #ffffff;
+    color: var(--color-surface);
   }
 }
 
@@ -182,8 +182,8 @@
   }
 
   th {
-    background: #fbf7f1;
-    color: #6e6259;
+    background: var(--color-paper);
+    color: var(--color-ink-muted);
     font-weight: 700;
     font-size: 12px;
   }
@@ -248,7 +248,7 @@
 
   &:hover {
     background: #47663b;
-    color: #ffffff;
+    color: var(--color-surface);
   }
 }
 
@@ -268,7 +268,7 @@
 
   &:hover {
     background: $admin-danger;
-    color: #ffffff;
+    color: var(--color-surface);
   }
 }
 

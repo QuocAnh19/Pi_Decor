@@ -1,25 +1,179 @@
 // ─────────────────────────────────────────────────────────────────────────
-// Core Design Tokens for Pi Decor (Unified Tokens)
+// Core Design Tokens for Pi Decor (Single Source of Truth)
 // ─────────────────────────────────────────────────────────────────────────
 
-// Admin & Studio theme (Slate / Sky / Rose / Emerald / Amber)
-$color-admin-bg: #0f172a;
-$color-admin-surface: #1e293b;
-$color-admin-surface-darkest: #0b1120;
-$color-admin-border: #334155;
-$color-admin-border-light: #475569;
-$color-admin-accent: #38bdf8;
-$color-admin-accent-hover: #0284c7;
-$color-admin-text-muted: #94a3b8;
-$color-admin-text-light: #cbd5e1;
-$color-danger: #e11d48;
-$color-success: #10b981;
-$color-warning: #f59e0b;
+// [CSS Custom Properties] Xuất biến CSS dùng runtime trong trình duyệt
+:root {
+  /* stylelint-disable color-no-hex -- Nguồn khai báo token màu chuẩn duy nhất */
+  // ── Base & Surface ───────────────────────────────────────────────────
+  --color-surface: #ffffff;
+  --color-surface-rgb: 255, 255, 255;
+  --color-surface-dark: #0b1120;
+  --color-surface-dark-rgb: 11, 17, 32;
 
-// Client theme
-$color-paper: #fbf7f1;
-$color-ink: #271620;
-$color-accent-brand: #a15c2e;
+  --color-paper: #fbf7f1;
+  --color-paper-rgb: 251, 247, 241;
+  --color-paper-dim: #f4eee3;
+  --color-paper-dim-rgb: 244, 238, 227;
+
+  // ── Text & Lines ─────────────────────────────────────────────────────
+  --color-ink: #271620;
+  --color-ink-rgb: 39, 22, 32;
+  --color-ink-muted: #6e6259;
+  --color-ink-muted-rgb: 110, 98, 89;
+  --color-ink-faint: #9c9186;
+  --color-ink-faint-rgb: 156, 145, 134;
+
+  --color-line: #e7ded0;
+  --color-line-rgb: 231, 222, 208;
+
+  // ── Brand Accent ─────────────────────────────────────────────────────
+  --color-accent: #a15c2e;
+  --color-accent-rgb: 161, 92, 46;
+  --color-accent-hover: #874c25;
+  --color-accent-hover-rgb: 135, 76, 37;
+  --color-accent-subtle: #f1e4d8;
+  --color-accent-subtle-rgb: 241, 228, 216;
+
+  // ── Blush & Plum ─────────────────────────────────────────────────────
+  --color-blush: #f8e9e7;
+  --color-blush-rgb: 248, 233, 231;
+  --color-blush-dim: #f1dedb;
+  --color-blush-dim-rgb: 241, 222, 219;
+  --color-plum: #3b141f;
+  --color-plum-rgb: 59, 20, 31;
+  --color-plum-light: #5c2433;
+  --color-plum-light-rgb: 92, 36, 51;
+
+  // ── Materials Swatches ───────────────────────────────────────────────
+  --color-material-rose: #e7b6bb;
+  --color-material-rose-rgb: 231, 182, 187;
+  --color-material-sage: #afc49c;
+  --color-material-sage-rgb: 175, 196, 156;
+  --color-material-sand: #c99f6f;
+  --color-material-sand-rgb: 201, 159, 111;
+  --color-material-lavender: #b98ac9;
+  --color-material-lavender-rgb: 185, 138, 201;
+  --color-material-champagne: #e7be79;
+  --color-material-champagne-rgb: 231, 190, 121;
+  --color-material-smoke: #8a9bae;
+  --color-material-smoke-rgb: 138, 155, 174;
+
+  // ── Service Accents ──────────────────────────────────────────────────
+  --color-kids-accent: #e59a6b;
+  --color-kids-accent-rgb: 229, 154, 107;
+  --color-kids-accent-dim: #f6ddc6;
+  --color-kids-accent-dim-rgb: 246, 221, 198;
+  --color-event-accent: #4f6b63;
+  --color-event-accent-rgb: 79, 107, 99;
+  --color-event-accent-dim: #dbe6e0;
+  --color-event-accent-dim-rgb: 219, 230, 224;
+
+  // ── Status (Handmade Muted Palette) ──────────────────────────────────
+  --color-danger: #b4586b;
+  --color-danger-rgb: 180, 88, 107;
+  --color-danger-subtle: #f7e4e6;
+  --color-danger-subtle-rgb: 247, 228, 230;
+
+  --color-success: #6e8f5c;
+  --color-success-rgb: 110, 143, 92;
+  --color-success-subtle: #e7eee1;
+  --color-success-subtle-rgb: 231, 238, 225;
+
+  --color-warning: #b98a3e;
+  --color-warning-rgb: 185, 138, 62;
+  --color-warning-subtle: #f5ead6;
+  --color-warning-subtle-rgb: 245, 234, 214;
+  /* stylelint-enable color-no-hex */
+
+  // ── Layout & Radius ──────────────────────────────────────────────────
+  --max-width-content: 1240px;
+  --radius-s: 8px;
+  --radius-m: 16px;
+  --radius-l: 24px;
+  --radius-pill: 999px;
+
+  // ── Transitions & Shadows ────────────────────────────────────────────
+  --transition-default: 200ms ease-in-out;
+  --shadow-sm: 0 1px 2px rgba(39, 22, 32, 0.06);
+  --shadow-default: 0 4px 16px rgba(39, 22, 32, 0.08);
+  --shadow-lg: 0 30px 70px -20px rgba(39, 22, 32, 0.28);
+  --admin-shadow-card: 0 2px 8px rgba(161, 92, 46, 0.06), 0 1px 2px rgba(39, 22, 32, 0.04);
+  --admin-shadow-card-hover: 0 12px 28px -8px rgba(161, 92, 46, 0.16), 0 2px 6px rgba(39, 22, 32, 0.05);
+  --admin-shadow-modal: 0 30px 70px -20px rgba(39, 22, 32, 0.22);
+}
+
+// ── BIẾN SCSS ÁNH XẠ VÀO CSS CUSTOM PROPERTIES ──────────────────────────
+
+// Base & Surface
+$color-surface: var(--color-surface);
+$color-surface-dark: var(--color-surface-dark);
+$color-admin-surface-darkest: var(--color-surface-dark);
+$color-paper: var(--color-paper);
+$color-paper-dim: var(--color-paper-dim);
+
+// Text & Lines
+$color-ink: var(--color-ink);
+$color-ink-muted: var(--color-ink-muted);
+$color-ink-faint: var(--color-ink-faint);
+$color-line: var(--color-line);
+
+// Brand Accent
+$color-accent: var(--color-accent);
+$color-accent-brand: var(--color-accent);
+$color-accent-hover: var(--color-accent-hover);
+$color-accent-subtle: var(--color-accent-subtle);
+
+// Blush & Plum
+$color-blush: var(--color-blush);
+$color-blush-dim: var(--color-blush-dim);
+$color-plum: var(--color-plum);
+$color-plum-light: var(--color-plum-light);
+
+// Material Swatches
+$color-material-rose: var(--color-material-rose);
+$color-material-sage: var(--color-material-sage);
+$color-material-sand: var(--color-material-sand);
+$color-material-lavender: var(--color-material-lavender);
+$color-material-champagne: var(--color-material-champagne);
+$color-material-smoke: var(--color-material-smoke);
+
+// Service Accents
+$color-kids-accent: var(--color-kids-accent);
+$color-kids-accent-dim: var(--color-kids-accent-dim);
+$color-wedding-accent: var(--color-accent);
+$color-wedding-accent-dim: var(--color-accent-subtle);
+$color-event-accent: var(--color-event-accent);
+$color-event-accent-dim: var(--color-event-accent-dim);
+
+// Status
+$color-danger: var(--color-danger);
+$color-danger-subtle: var(--color-danger-subtle);
+$color-success: var(--color-success);
+$color-success-subtle: var(--color-success-subtle);
+$color-warning: var(--color-warning);
+$color-warning-subtle: var(--color-warning-subtle);
+
+// Admin Aliases
+$admin-bg: var(--color-paper-dim);
+$admin-surface: var(--color-surface);
+$admin-surface-raised: var(--color-blush);
+$admin-border: var(--color-line);
+$admin-text: var(--color-ink);
+$admin-text-muted: var(--color-ink-muted);
+$admin-text-faint: var(--color-ink-faint);
+$admin-accent: var(--color-accent);
+$admin-accent-hover: var(--color-accent-hover);
+$admin-accent-subtle: var(--color-accent-subtle);
+$admin-danger: var(--color-danger);
+$admin-danger-subtle: var(--color-danger-subtle);
+$admin-success: var(--color-success);
+$admin-success-subtle: var(--color-success-subtle);
+$admin-warning: var(--color-warning);
+$admin-warning-subtle: var(--color-warning-subtle);
+$admin-shadow-card: var(--admin-shadow-card);
+$admin-shadow-card-hover: var(--admin-shadow-card-hover);
+$admin-shadow-modal: var(--admin-shadow-modal);
 
 // Font Families
 $font-serif: "Fraunces", serif;
@@ -27,30 +181,30 @@ $font-sans: "Be Vietnam Pro", sans-serif;
 $font-script: "Cormorant Garamond", serif;
 
 // Typography Scale
-$text-xs: 0.75rem; // 12px
-$text-sm: 0.875rem; // 14px
-$text-base: 1rem; // 16px
-$text-lg: 1.125rem; // 18px
-$text-xl: 1.25rem; // 20px
-$text-2xl: 1.5rem; // 24px
-$text-3xl: 1.875rem; // 30px
-$text-4xl: 2.25rem; // 36px
-$text-5xl: 3.85rem;      // 61.6px — Hero H1 desktop lớn nhất hiện tại
+$text-xs: 0.75rem;
+$text-sm: 0.875rem;
+$text-base: 1rem;
+$text-lg: 1.125rem;
+$text-xl: 1.25rem;
+$text-2xl: 1.5rem;
+$text-3xl: 1.875rem;
+$text-4xl: 2.25rem;
+$text-5xl: 3.85rem;
 
 $weight-regular: 400;
 $weight-medium: 500;
 $weight-semibold: 600;
 $weight-bold: 700;
 
-$leading-tight: 1.04;    // Hero H1
-$leading-snug: 1.2;      // H2/H3
-$leading-normal: 1.4;    // caption/small
-$leading-relaxed: 1.6;   // body/subtitle
+$leading-tight: 1.04;
+$leading-snug: 1.2;
+$leading-normal: 1.4;
+$leading-relaxed: 1.6;
 
-$tracking-tight: -0.01em;   // headings
+$tracking-tight: -0.01em;
 $tracking-normal: 0;
-$tracking-wide: 0.02em;     // badge/label nhỏ
-$tracking-widest: 0.2em;    // eyebrow/kicker uppercase
+$tracking-wide: 0.02em;
+$tracking-widest: 0.2em;
 
 // Spacing Scale
 $space-1: 4px;
@@ -65,6 +219,19 @@ $space-0-5: 6px;
 $space-2-5: 10px;
 $space-16: 64px;
 $space-24: 96px;
+
+// Layout & Radius
+$max-width-content: var(--max-width-content);
+$radius-s: var(--radius-s);
+$radius-m: var(--radius-m);
+$radius-l: var(--radius-l);
+$radius-pill: var(--radius-pill);
+
+// Transitions & Shadows
+$transition-default: var(--transition-default);
+$shadow-sm: var(--shadow-sm);
+$shadow-default: var(--shadow-default);
+$shadow-lg: var(--shadow-lg);
 
 // Breakpoints
 $bp-sm: 640px;

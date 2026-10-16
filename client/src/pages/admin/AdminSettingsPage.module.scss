@@ -164,7 +164,7 @@
 
   &:focus {
     border-color: $admin-accent;
-    background: #fff;
+    background: var(--color-surface);
   }
 
   &::placeholder {
@@ -188,7 +188,7 @@
   border-radius: $radius-pill;
   border: none;
   background: $admin-accent;
-  color: #fff;
+  color: var(--color-surface);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -215,7 +215,7 @@
   padding: 8px 16px;
   border-radius: $radius-pill;
   border: 1px solid $admin-border;
-  background: #fff;
+  background: var(--color-surface);
   color: $admin-text;
   font-size: 13px;
   font-weight: 600;
@@ -250,7 +250,7 @@
 
   &:hover:not(:disabled) {
     background: $admin-danger;
-    color: #fff;
+    color: var(--color-surface);
     border-color: $admin-danger;
   }
 
@@ -370,7 +370,7 @@
 }
 
 .modalContent {
-  background: #fff;
+  background: var(--color-surface);
   border-radius: $radius-l;
   width: 100%;
   max-width: 440px;

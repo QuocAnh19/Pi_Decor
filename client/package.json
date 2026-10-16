@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src --ext .ts,.tsx",
+    "lint:styles": "stylelint \"src/**/*.scss\"",
     "preview": "vite preview",
     "knip": "knip"
   },
@@ -34,6 +35,8 @@
     "knip": "^6.41.0",
     "postcss": "^8.4.38",
     "sass": "^1.77.6",
+    "stylelint": "^17.16.0",
+    "stylelint-config-standard-scss": "^17.0.0",
     "typescript": "^5.5.2",
     "vite": "^5.3.1"
   }

@@ -59,7 +59,7 @@
   border-radius: $radius-s;
   border: none;
   background: $admin-accent;
-  color: #ffffff;
+  color: var(--color-surface);
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;

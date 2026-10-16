@@ -73,12 +73,12 @@
 
 .navLinkActive {
   background: $admin-accent;
-  color: #fff;
+  color: var(--color-surface);
   font-weight: 600;
 
   &:hover {
     background: $admin-accent-hover;
-    color: #fff;
+    color: var(--color-surface);
   }
 }
 
