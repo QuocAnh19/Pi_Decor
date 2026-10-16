@@ -1,11 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  CheckCircleIcon,
-  XCircleIcon,
-  TrashIcon,
-  ChatBubbleBottomCenterTextIcon,
-} from "@heroicons/react/24/outline";
-import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
+import { ChatBubbleBottomCenterTextIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
 import { SearchInput, Select } from "../../components/ui";
 import {
@@ -21,19 +15,8 @@ import {
   useUpdateTestimonialStatusMutation,
   useDeleteTestimonialMutation,
 } from "../../features/testimonials";
+import { AdminTestimonialsListView } from "./components/AdminTestimonialsListView";
 import styles from "./AdminTestimonialsPage.module.scss";
-
-const statusBadgeClass: Record<string, string> = {
-  pending: styles.badgePending,
-  approved: styles.badgeApproved,
-  rejected: styles.badgeRejected,
-};
-
-const statusTextMap: Record<string, string> = {
-  pending: "Chờ duyệt",
-  approved: "Đã duyệt",
-  rejected: "Từ chối",
-};
 
 export function AdminTestimonialsPage() {
   const { token } = useAuth();
@@ -52,13 +35,14 @@ export function AdminTestimonialsPage() {
   const status: "loading" | "ready" | "error" = query.isLoading
     ? "loading"
     : query.isError
-    ? "error"
-    : "ready";
+      ? "error"
+      : "ready";
 
   const counts = useMemo(() => {
     return {
       all: testimonials.length,
-      pending: testimonials.filter((t) => (t.status ?? "pending") === "pending").length,
+      pending: testimonials.filter((t) => (t.status ?? "pending") === "pending")
+        .length,
       approved: testimonials.filter((t) => t.status === "approved").length,
       rejected: testimonials.filter((t) => t.status === "rejected").length,
     };
@@ -91,7 +75,7 @@ export function AdminTestimonialsPage() {
       setSuccessMsg(
         newStatus === "approved"
           ? "✓ Đã duyệt đánh giá thành công!"
-          : "✓ Đã chuyển trạng thái từ chối."
+          : "✓ Đã chuyển trạng thái từ chối.",
       );
       setTimeout(() => setSuccessMsg(null), 3000);
     } finally {
@@ -135,7 +119,18 @@ export function AdminTestimonialsPage() {
       />
 
       {successMsg && (
-        <div style={{ padding: "10px 16px", backgroundColor: "#eef4ea", color: "#47663b", borderRadius: "8px", marginBottom: "16px", fontSize: "14px", fontWeight: "600", border: "1px solid rgba(71, 102, 59, 0.3)" }}>
+        <div
+          style={{
+            padding: "10px 16px",
+            backgroundColor: "#eef4ea",
+            color: "#47663b",
+            borderRadius: "8px",
+            marginBottom: "16px",
+            fontSize: "14px",
+            fontWeight: "600",
+            border: "1px solid rgba(71, 102, 59, 0.3)",
+          }}
+        >
           {successMsg}
         </div>
       )}
@@ -193,11 +188,15 @@ export function AdminTestimonialsPage() {
         />
       </div>
 
-      {status === "loading" && <p className={styles.status}>Đang tải danh sách đánh giá…</p>}
-      {status === "error" && <p className={styles.status}>Không tải được danh sách đánh giá.</p>}
+      {status === "loading" && (
+        <p className={styles.status}>Đang tải danh sách đánh giá…</p>
+      )}
+      {status === "error" && (
+        <p className={styles.status}>Không tải được danh sách đánh giá.</p>
+      )}
 
-      {status === "ready" && (
-        filteredTestimonials.length === 0 ? (
+      {status === "ready" &&
+        (filteredTestimonials.length === 0 ? (
           <EmptyState
             icon={
               <ChatBubbleBottomCenterTextIcon
@@ -208,149 +207,15 @@ export function AdminTestimonialsPage() {
             title="Không tìm thấy đánh giá phù hợp"
             description="Thử thay đổi từ khóa hoặc bộ lọc trạng thái."
           />
-        ) : viewMode === "grid" ? (
-          <div className={styles.grid}>
-            {filteredTestimonials.map((t) => (
-              <div key={t.id} className={styles.card}>
-                <div>
-                  <div className={styles.cardHeader}>
-                    <div>
-                      <div className={styles.authorName}>{t.author}</div>
-                      <div className={styles.authorRole}>{t.role ?? "Khách hàng"}</div>
-                    </div>
-                    <span className={`${styles.badge} ${statusBadgeClass[t.status ?? "pending"]}`}>
-                      {statusTextMap[t.status ?? "pending"] ?? t.status}
-                    </span>
-                  </div>
-
-                  <div style={{ display: "flex", gap: "2px", marginBottom: "8px" }}>
-                    {Array.from({ length: t.rating ?? 5 }).map((_, i) => (
-                      <StarSolid key={i} className="h-3.5 w-3.5" style={{ width: 14, height: 14, color: "#b98a3e" }} />
-                    ))}
-                  </div>
-
-                  <p className={styles.quoteText}>"{t.quote}"</p>
-                </div>
-
-                <div className={styles.cardFooter}>
-                  <div className={styles.actions}>
-                    {t.status !== "approved" && (
-                      <button
-                        type="button"
-                        className={styles.btnApprove}
-                        onClick={() => handleUpdateStatus(t.id, "approved")}
-                        disabled={updatingId === t.id}
-                        title="Duyệt đánh giá"
-                      >
-                        <CheckCircleIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                        {updatingId === t.id ? "Đang lưu..." : "Duyệt"}
-                      </button>
-                    )}
-                    {t.status !== "rejected" && (
-                      <button
-                        type="button"
-                        className={styles.btnReject}
-                        onClick={() => handleUpdateStatus(t.id, "rejected")}
-                        disabled={updatingId === t.id}
-                        title="Từ chối"
-                      >
-                        <XCircleIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                        Từ chối
-                      </button>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.btnDelete}
-                    onClick={() => requestDelete(t.id)}
-                    disabled={updatingId === t.id}
-                    title="Xoá đánh giá"
-                  >
-                    <TrashIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
         ) : (
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Tác giả / Dịch vụ</th>
-                  <th>Đánh giá</th>
-                  <th>Nội dung</th>
-                  <th>Trạng thái</th>
-                  <th style={{ textAlign: "right" }}>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTestimonials.map((t) => (
-                  <tr key={t.id}>
-                    <td>
-                      <strong>{t.author}</strong>
-                      <br />
-                      <span style={{ fontSize: "12px", color: "#6e6259" }}>{t.role ?? "—"}</span>
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", gap: "2px" }}>
-                        {Array.from({ length: t.rating ?? 5 }).map((_, i) => (
-                          <StarSolid key={i} className="h-3 w-3" style={{ width: 13, height: 13, color: "#b98a3e" }} />
-                        ))}
-                      </div>
-                    </td>
-                    <td style={{ maxWidth: "340px", wordBreak: "break-word" }}>
-                      <em>"{t.quote}"</em>
-                    </td>
-                    <td>
-                      <span className={`${styles.badge} ${statusBadgeClass[t.status ?? "pending"]}`}>
-                        {statusTextMap[t.status ?? "pending"] ?? t.status}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: "right" }}>
-                      <div className={styles.actions} style={{ justifyContent: "flex-end" }}>
-                        {t.status !== "approved" && (
-                          <button
-                            type="button"
-                            className={styles.btnApprove}
-                            onClick={() => handleUpdateStatus(t.id, "approved")}
-                            disabled={updatingId === t.id}
-                            title="Duyệt đánh giá"
-                          >
-                            <CheckCircleIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                            {updatingId === t.id ? "Đang..." : "Duyệt"}
-                          </button>
-                        )}
-                        {t.status !== "rejected" && (
-                          <button
-                            type="button"
-                            className={styles.btnReject}
-                            onClick={() => handleUpdateStatus(t.id, "rejected")}
-                            disabled={updatingId === t.id}
-                            title="Từ chối"
-                          >
-                            <XCircleIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                            Từ chối
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          className={styles.btnDelete}
-                          onClick={() => requestDelete(t.id)}
-                          disabled={updatingId === t.id}
-                          title="Xoá"
-                        >
-                          <TrashIcon className="h-3.5 w-3.5" style={{ width: 14, height: 14 }} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )
-      )}
+          <AdminTestimonialsListView
+            testimonials={filteredTestimonials}
+            viewMode={viewMode}
+            updatingId={updatingId}
+            onUpdateStatus={handleUpdateStatus}
+            onDelete={requestDelete}
+          />
+        ))}
 
       <ConfirmDeleteModal
         isOpen={isDeleteOpen}
