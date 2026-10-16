@@ -5,18 +5,9 @@ import { MediaSlot } from "../ui/MediaSlot";
 import { Reveal } from "../ui/Reveal";
 import { ProjectAlbumModal } from "../../features/projects";
 import { api } from "../../lib/api";
+import { toCategoryPortfolioItem } from "../../lib/mappers";
 import type { Project, CategoryPortfolioItem } from "../../lib/types";
 import styles from "./Lookbook.module.scss";
-
-function resolveCover(cover: string | null, gallery: (string | { url: string; span?: string })[] | undefined): string {
-  if (cover) return cover;
-  if (Array.isArray(gallery) && gallery.length > 0) {
-    const first = gallery[0];
-    if (typeof first === "string") return first;
-    if (first && typeof first === "object" && "url" in first) return first.url;
-  }
-  return "/images/portfolio/piwedding-gia-tien-1.jpg";
-}
 
 type LookbookFilter = "all" | "featured" | "premium" | "standard";
 
@@ -32,23 +23,7 @@ export function Lookbook() {
     setError(null);
     try {
       const data: Project[] = await api.getProjects();
-      const mapped: CategoryPortfolioItem[] = data.map((p) => {
-        const tags = Array.isArray(p.style_tags) ? p.style_tags : [];
-        return {
-          id: p.id,
-          categoryId: p.category_id || tags[0] || "piwedding",
-          tag: p.tag || tags[1] || tags[0] || "Gia Tiên",
-          title: p.title,
-          location: p.location || "Đà Nẵng",
-          src: resolveCover(p.cover_image, p.gallery),
-          gallery: Array.isArray(p.gallery) ? p.gallery : [],
-          priceTier: (p.price_tier as "standard" | "premium") || "standard",
-          featured: p.status === "featured",
-          status: p.status || "active",
-        };
-      });
-
-      setProjects(mapped);
+      setProjects(data.map((p) => toCategoryPortfolioItem(p)));
     } catch (err) {
       const msg =
         err instanceof Error

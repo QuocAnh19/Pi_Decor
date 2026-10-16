@@ -1,10 +1,10 @@
 import { useState, useCallback, useMemo } from "react";
 import { useAuth } from "../../../lib/authContext";
 import { toast } from "../../../lib/toast";
+import { toProjectItem } from "../../../lib/mappers";
 import type { ProjectPayload } from "../../../lib/types";
 import {
   ProjectItem,
-  dbToProjectItem,
   ASYMMETRIC_SLOT_DESCS,
 } from "../types";
 import {
@@ -40,10 +40,10 @@ export function useProjects(selectedVenueId?: string | null) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ProjectItem | null>(null);
 
-  // Chuyển đổi dữ liệu từ DB sang UI model
+  // Chuyển đổi dữ liệu từ DB sang UI model qua lớp mappers tập trung
   const projects = useMemo<ProjectItem[]>(() => {
     if (!Array.isArray(projectsQuery.data)) return [];
-    return projectsQuery.data.map(dbToProjectItem);
+    return projectsQuery.data.map(toProjectItem);
   }, [projectsQuery.data]);
 
   const loadProjects = useCallback(async () => {

@@ -14,6 +14,7 @@ import type {
   StudioAssetRow,
   StudioSlotDefinitionRow,
   StudioSlotRuleRow,
+  StudioTemplatePublishPayload,
   StudioTemplateRow,
   TestimonialItem,
   TestimonialPayload,
@@ -208,16 +209,7 @@ export const api = {
 
   publishStudioTemplate: (
     id: string,
-    payload: {
-      name: string;
-      svg_base: string;
-      is_active?: boolean;
-      thumbnail?: string | null;
-      category?: string | null;
-      slots?: unknown[];
-      rules?: unknown[];
-      slot_config?: Record<string, unknown>;
-    }
+    payload: StudioTemplatePublishPayload
   ) =>
     authRequest<{ message: string; template: StudioTemplateRow }>(
       `/studio/templates/${id}/publish`,

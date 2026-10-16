@@ -1,21 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import type { CategoryPortfolioItem, ServiceCategory } from "../../../lib/types";
 import { api } from "../../../lib/api";
+import { toCategoryPortfolioItem } from "../../../lib/mappers";
 import { Container, Section, SectionHeader } from "../../../components/ui/Layout";
 import { Reveal } from "../../../components/ui/Reveal";
 import { ServiceCategoryCard } from "./ServiceCategoryCard";
 import { ServiceDetailModal } from "./ServiceDetailModal";
 import styles from "./ServicesSection.module.scss";
-
-function resolveCover(cover: string | null, gallery: (string | { url: string; span?: string })[] | undefined): string {
-  if (cover) return cover;
-  if (Array.isArray(gallery) && gallery.length > 0) {
-    const first = gallery[0];
-    if (typeof first === "string") return first;
-    if (first && typeof first === "object" && "url" in first) return first.url;
-  }
-  return "/images/portfolio/piwedding-gia-tien-1.jpg";
-}
 
 export function ServicesSection() {
   const [services, setServices] = useState<ServiceCategory[]>([]);
@@ -33,24 +24,7 @@ export function ServicesSection() {
         api.getProjects(),
       ]);
       setServices(servicesRes);
-
-      const mappedPortfolio: CategoryPortfolioItem[] = projectsRes.map((p) => {
-        const styleTags = Array.isArray(p.style_tags) ? p.style_tags : [];
-        return {
-          id: String(p.id),
-          categoryId: p.category_id || styleTags[0] || "piwedding",
-          tag: p.tag || styleTags[1] || "Gia Tiên",
-          title: p.title || "Dự án mới",
-          location: p.location || "Đà Nẵng",
-          src: resolveCover(p.cover_image, p.gallery),
-          gallery: Array.isArray(p.gallery) ? p.gallery : [],
-          priceTier: (p.price_tier as "standard" | "premium") || "standard",
-          featured: p.status === "featured",
-          status: p.status || "active",
-        };
-      });
-
-      setPortfolio(mappedPortfolio);
+      setPortfolio(projectsRes.map((p) => toCategoryPortfolioItem(p)));
     } catch (err) {
       const msg =
         err instanceof Error

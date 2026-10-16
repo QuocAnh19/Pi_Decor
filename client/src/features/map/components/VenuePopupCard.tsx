@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import type { VenueDetail, Project, CategoryPortfolioItem } from "../../../lib/types";
 import { formatDate } from "../../../lib/formatters";
+import { toCategoryPortfolioItem } from "../../../lib/mappers";
 import { ProjectAlbumModal } from "../../projects";
 import styles from "./VenuePopupCard.module.scss";
 
@@ -34,33 +35,9 @@ export function VenuePopupCard({ venue, loading, onClose }: VenuePopupCardProps)
 
   const handleOpenProject = (project: Project) => {
     if (!venue) return;
-
-    // Build rich gallery list
-    let galleryList: (string | { url: string; span?: string })[] = [];
-    if (Array.isArray(project.gallery) && project.gallery.length > 0) {
-      galleryList = project.gallery;
-    } else if (project.cover_image) {
-      galleryList = [project.cover_image];
-    }
-
-    const firstGalleryUrl =
-      typeof galleryList[0] === "string" ? galleryList[0] : galleryList[0]?.url;
-
-    const portfolioItem: CategoryPortfolioItem = {
-      id: project.id,
-      title: project.title,
-      tag: project.tag || project.style_tags?.[1] || project.style_tags?.[0] || "Dự án thực tế",
-      src:
-        project.cover_image ||
-        firstGalleryUrl ||
-        "/images/portfolio/piwedding-gia-tien-1.jpg",
-      categoryId: project.category_id || project.style_tags?.[0] || "piwedding",
-      location: venue.name
-        ? `${venue.name}${venue.city ? ` · ${venue.city}` : ""}`
-        : project.location || undefined,
-      gallery: galleryList,
-    };
-    setSelectedProject(portfolioItem);
+    setSelectedProject(
+      toCategoryPortfolioItem(project, { name: venue.name, city: venue.city }),
+    );
   };
 
 

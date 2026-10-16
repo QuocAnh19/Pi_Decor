@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Template, SlotDefinition, SlotConfig, Asset } from "../../types";
+import { Template, SlotDefinition, SlotConfig, SlotRule, Asset } from "../../types";
 import type { StudioTemplateRow, MaterialItem } from "../../../../lib/types";
 import {
   seedTemplates,
   seedSlots,
   seedPublishedSlotConfig,
 } from "../../data/seed/templates";
-import { toStudioTemplate, toStudioSlot } from "../../utils/adapters";
+import {
+  toStudioTemplate,
+  toStudioSlot,
+  parseTemplateDefaultConfig,
+  buildDesignSnapshot,
+} from "../../../../lib/mappers";
 import { api } from "../../../../lib/api";
 
 import { useNavigate } from "react-router-dom";
@@ -24,7 +29,7 @@ export interface CustomerEditorProps {
   templateId?: string;
   overrideSlots?: SlotDefinition[];
   overrideSlotConfig?: SlotConfig;
-  overrideRules?: any[];
+  overrideRules?: SlotRule[];
   editingLead?: Lead | null;
   onBackToGallery?: () => void;
 }
@@ -79,10 +84,7 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
     setTemplate(tpl);
     originalTemplateRef.current = tpl;
 
-    const initialConfig =
-      matched.default_config && Object.keys(matched.default_config).length > 0
-        ? (matched.default_config as SlotConfig)
-        : {};
+    const initialConfig = parseTemplateDefaultConfig(matched.default_config);
     setSlotConfig(initialConfig);
     originalConfigRef.current = initialConfig;
 
@@ -318,16 +320,14 @@ export const CustomerEditor: React.FC<CustomerEditorProps> = ({
       await api.updateLead(
         editingLead.id,
         {
-          design_snapshot: {
-            template_id: template.id,
-            template_name: template.name,
-            slot_config: slotConfig,
-            custom_slots: slots,
-            ...slotConfig,
-            preview_image: brandedImage || rawCapture,
-            saved_by: "admin",
-            saved_at: new Date().toISOString(),
-          },
+          design_snapshot: buildDesignSnapshot({
+            templateId: template.id,
+            templateName: template.name,
+            slotConfig,
+            slots,
+            previewImage: brandedImage || rawCapture,
+            savedBy: "admin",
+          }),
         }
       );
 

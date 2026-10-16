@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { CustomerEditor, CustomerTemplateGallery } from '../features/studio';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/authContext';
+import { parseDesignSnapshot } from '../lib/mappers';
 import type { Lead } from '../lib/types';
 import styles from './StudioPage.module.scss';
 
@@ -22,12 +23,8 @@ export function StudioPage() {
         .getLead(leadId)
         .then((lead) => {
           setEditingLead(lead);
-          const snapshot = lead.design_snapshot as any;
-          if (snapshot?.template_id) {
-            setSelectedTemplateId(snapshot.template_id);
-          } else {
-            setSelectedTemplateId("tpl-classic-01");
-          }
+          const parsed = parseDesignSnapshot(lead.design_snapshot);
+          setSelectedTemplateId(parsed.templateId);
         })
         .catch((err) => {
           console.error("Failed to load lead for studio editing:", err);
@@ -65,14 +62,14 @@ export function StudioPage() {
     );
   }
 
-  const snapshot = editingLead?.design_snapshot as any;
+  const parsedSnapshot = parseDesignSnapshot(editingLead?.design_snapshot);
 
   return (
     <div className={styles.page}>
       <CustomerEditor
         templateId={selectedTemplateId}
-        overrideSlots={snapshot?.custom_slots}
-        overrideSlotConfig={snapshot?.slot_config || (snapshot?.baseFabric ? snapshot : undefined)}
+        overrideSlots={parsedSnapshot.customSlots}
+        overrideSlotConfig={parsedSnapshot.slotConfig}
         editingLead={editingLead}
         onBackToGallery={() => {
           setSelectedTemplateId(null);

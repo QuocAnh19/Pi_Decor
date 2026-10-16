@@ -173,7 +173,7 @@ export const RuleEditor: React.FC<RuleEditorProps> = ({
               <Select
                 label="Hành Động:"
                 value={action}
-                onChange={(e) => setAction(e.target.value as any)}
+                onChange={(e) => setAction(e.target.value as SlotRule["action"])}
                 options={ACTION_OPTIONS}
               />
 

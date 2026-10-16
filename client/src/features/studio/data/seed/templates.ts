@@ -1,4 +1,4 @@
-import { Template, SlotDefinition, Asset, SlotRule } from "../../types";
+import { Template, SlotDefinition, Asset, SlotRule, SlotConfig } from "../../types";
 import { extractSVGColors } from "../../utils/svgColorUtils";
 
 /**
@@ -278,7 +278,7 @@ export const seedRules: SlotRule[] = [
   },
 ];
 
-export const seedPublishedSlotConfig: Record<string, any> = {
+export const seedPublishedSlotConfig: SlotConfig = {
   "drape-main": {
     assetId: "asset-drape-red",
     asset: seedAssets[0],

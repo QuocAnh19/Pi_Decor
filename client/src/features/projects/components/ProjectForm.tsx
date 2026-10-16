@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, FormEvent } from "react";
 import { PlusIcon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { Modal, Input, Select, Textarea } from "../../../components/ui";
-import type { ProjectPayload } from "../../../lib/types";
+import { toProjectItem, extractGalleryState, extractGalleryUrls } from "../../../lib/mappers";
+import type { Project, ProjectPayload } from "../../../lib/types";
 import {
   ProjectItem,
   CATEGORY_TAG_OPTIONS,
@@ -26,7 +27,7 @@ export type ProjectFormProps =
     }
   | {
       venueName: string;
-      project: any;
+      project: Project | ProjectItem | null;
       onCancel: () => void;
       onSubmit: (payload: ProjectPayload) => Promise<void>;
     };
@@ -43,77 +44,53 @@ const STATUS_OPTIONS = [
   { value: "draft", label: "Bản nháp" },
 ];
 
+function buildInitialFormData(
+  project: Project | ProjectItem | null,
+  venueName?: string,
+): Omit<ProjectItem, "id"> {
+  const normalized = project ? toProjectItem(project) : null;
+  return {
+    title: normalized?.title ?? "",
+    categoryId: normalized?.categoryId ?? "piwedding",
+    tag: normalized?.tag ?? "Gia Tiên",
+    location:
+      normalized?.location ?? (venueName ? `Tại ${venueName}` : "Tư gia, Đà Nẵng"),
+    src: normalized?.src ?? SAMPLE_STOCK_IMAGES[0],
+    gallery: normalized?.gallery ?? [],
+    description: normalized?.description ?? "",
+    date: normalized?.date || new Date().toISOString().split("T")[0],
+    budget: normalized?.budget ?? "Thỏa thuận",
+    status: normalized?.status ?? "active",
+    priceTier: normalized?.priceTier ?? "standard",
+  };
+}
+
 export function ProjectForm(props: ProjectFormProps) {
   const { venueName, project, onCancel } = props;
   const isSimpleMode = Boolean(venueName);
 
-  // Form states
-  const [formData, setFormData] = useState<Omit<ProjectItem, "id">>({
-    title: project?.title ?? "",
-    categoryId: project?.categoryId ?? "piwedding",
-    tag: project?.tag ?? (Array.isArray(project?.style_tags) ? project.style_tags[0] : "Gia Tiên"),
-    location: project?.location ?? (venueName ? `Tại ${venueName}` : "Tư gia, Đà Nẵng"),
-    src: project?.cover_image ?? project?.src ?? SAMPLE_STOCK_IMAGES[0],
-    gallery: project?.gallery ?? [],
-    description: project?.description ?? "",
-    date: project?.wedding_date ?? project?.date ?? new Date().toISOString().split("T")[0],
-    budget: project?.budget ?? "Thỏa thuận",
-    status: project?.published === false ? "draft" : project?.status ?? "active",
-    priceTier: project?.priceTier ?? (project as any)?.price_tier ?? "standard",
-  });
+  const [formData, setFormData] = useState<Omit<ProjectItem, "id">>(() =>
+    buildInitialFormData(project, venueName),
+  );
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [galleryUrls, setGalleryUrls] = useState<string[]>(() => {
-    if (!project?.gallery) return [];
-    return (project.gallery as any[])
-      .slice(0, 10)
-      .map((item: any) => (typeof item === "string" ? item : item?.url || ""))
-      .filter(Boolean);
+    const normalized = project ? toProjectItem(project) : null;
+    return extractGalleryState(normalized?.gallery).urls;
   });
 
   const [customSpans, setCustomSpans] = useState<Record<number, string>>(() => {
-    const spans: Record<number, string> = {};
-    if (project?.gallery) {
-      (project.gallery as any[]).slice(0, 10).forEach((item: any, idx: number) => {
-        if (item && typeof item === "object" && item.span) {
-          spans[idx] = item.span;
-        }
-      });
-    }
-    return spans;
+    const normalized = project ? toProjectItem(project) : null;
+    return extractGalleryState(normalized?.gallery).spans;
   });
 
   useEffect(() => {
     if (project) {
-      setFormData({
-        title: project.title ?? "",
-        categoryId: project.categoryId ?? (Array.isArray((project as any).style_tags) ? (project as any).style_tags[0] : "piwedding"),
-        tag: project.tag ?? (Array.isArray((project as any).style_tags) ? (project as any).style_tags[1] || (project as any).style_tags[0] : "Gia Tiên"),
-        location: project.location ?? (venueName ? `Tại ${venueName}` : "Tư gia, Đà Nẵng"),
-        src: project.src ?? (project as any).cover_image ?? SAMPLE_STOCK_IMAGES[0],
-        gallery: project.gallery ?? [],
-        description: project.description ?? "",
-        date: project.date ?? (project as any).wedding_date ?? new Date().toISOString().split("T")[0],
-        budget: project.budget ?? "Thỏa thuận",
-        status: (project as any).published === false ? "draft" : project.status ?? "active",
-        priceTier: project.priceTier ?? (project as any).price_tier ?? "standard",
-      });
-
-      if (project.gallery) {
-        const urls = (project.gallery as any[])
-          .slice(0, 10)
-          .map((item: any) => (typeof item === "string" ? item : item?.url || ""))
-          .filter(Boolean);
-        setGalleryUrls(urls);
-
-        const spans: Record<number, string> = {};
-        (project.gallery as any[]).slice(0, 10).forEach((item: any, idx: number) => {
-          if (item && typeof item === "object" && item.span) {
-            spans[idx] = item.span;
-          }
-        });
-        setCustomSpans(spans);
-      }
+      const normalized = toProjectItem(project);
+      setFormData(buildInitialFormData(normalized, venueName));
+      const { urls, spans } = extractGalleryState(normalized.gallery);
+      setGalleryUrls(urls);
+      setCustomSpans(spans);
     }
   }, [project, venueName]);
 
@@ -252,7 +229,7 @@ export function ProjectForm(props: ProjectFormProps) {
           wedding_date: formData.date || null,
           style_tags: [formData.categoryId, formData.tag],
           cover_image: formData.src,
-          gallery: (formData.gallery as any[]) || [],
+          gallery: extractGalleryUrls(formData.gallery),
           published: formData.status !== "draft",
           price_tier: formData.priceTier || "standard",
         };
@@ -369,7 +346,12 @@ export function ProjectForm(props: ProjectFormProps) {
               <Select
                 label="Trạng Thái Hiển Thị"
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    status: e.target.value as ProjectItem["status"],
+                  })
+                }
                 options={STATUS_OPTIONS}
               />
             </div>
@@ -378,7 +360,12 @@ export function ProjectForm(props: ProjectFormProps) {
               <Select
                 label="Hạng Mục Giá"
                 value={formData.priceTier}
-                onChange={(e) => setFormData({ ...formData, priceTier: e.target.value as any })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    priceTier: e.target.value as ProjectItem["priceTier"],
+                  })
+                }
                 options={PRICE_TIER_OPTIONS}
               />
             </div>

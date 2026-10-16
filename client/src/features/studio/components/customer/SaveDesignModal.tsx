@@ -8,7 +8,8 @@ import {
 import { api } from "../../../../lib/api";
 import { Input, Textarea } from "../../../../components/ui";
 import { captureStudioThumbnail, generateBrandedDesignImage } from "../../utils/captureThumbnail";
-import type { SlotConfig } from "../../types";
+import { buildDesignSnapshot } from "../../../../lib/mappers";
+import type { SlotConfig, SlotDefinition } from "../../types";
 
 interface SaveDesignModalProps {
   isOpen: boolean;
@@ -16,7 +17,7 @@ interface SaveDesignModalProps {
   slotConfig: SlotConfig;
   templateId?: string;
   templateName?: string;
-  slots?: any[];
+  slots?: SlotDefinition[];
 }
 
 function triggerDownload(dataUrl: string, fileName: string) {
@@ -98,16 +99,14 @@ export const SaveDesignModal: React.FC<SaveDesignModalProps> = ({
         email: email.trim() || undefined,
         wedding_date: weddingDate || undefined,
         message: message.trim() ? `[Lưu thiết kế Studio]\n${message.trim()}` : "[Lưu thiết kế Studio]",
-        design_snapshot: {
-          template_id: templateId,
-          template_name: templateName,
-          slot_config: slotConfig,
-          custom_slots: slots,
-          ...slotConfig,
-          ...(finalPreviewImage ? { preview_image: finalPreviewImage } : {}),
-          saved_by: "customer",
-          saved_at: new Date().toISOString(),
-        },
+        design_snapshot: buildDesignSnapshot({
+          templateId,
+          templateName,
+          slotConfig,
+          slots,
+          previewImage: finalPreviewImage,
+          savedBy: "customer",
+        }),
       });
 
       // 4. Trigger automatic file download for customer

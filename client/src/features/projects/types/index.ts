@@ -1,5 +1,3 @@
-import type { Project } from "../../../lib/types";
-
 export interface ProjectItem {
   id: string;
   categoryId: string; // 'piwedding' | 'pikids' | 'pievent'
@@ -55,24 +53,3 @@ export const ASYMMETRIC_SLOT_DESCS: SlotDesc[] = [
   { label: "Khung 9 (Dọc 1x2)", spanKey: "span1x2", hint: "Ảnh đứng 1x2" },
   { label: "Khung 10 (Nổi bật 2x2)", spanKey: "span2x2", hint: "Ảnh vuông vừa 2x2" },
 ];
-
-export function dbToProjectItem(item: Project): ProjectItem {
-  const tags = Array.isArray(item.style_tags) ? item.style_tags : [];
-  const gallery = Array.isArray(item.gallery) ? item.gallery : [];
-  return {
-    id: String(item.id),
-    title: item.title ?? "Dự án mới",
-    categoryId: item.category_id ?? tags[0] ?? "piwedding",
-    tag: item.tag ?? tags[1] ?? "Gia Tiên",
-    location: item.location ?? "Tư gia, Đà Nẵng",
-    src: item.cover_image ?? SAMPLE_STOCK_IMAGES[0],
-    gallery,
-    description: item.description ?? "",
-    date: item.wedding_date ? String(item.wedding_date).split("T")[0] : "",
-    budget: item.budget ?? "Thỏa thuận",
-    status: (item.status as "active" | "featured" | "draft") ?? (item.published === false ? "draft" : "active"),
-    priceTier: (item.price_tier as "standard" | "premium") || "standard",
-    createdAt: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
-    venue_id: item.venue_id ?? undefined,
-  };
-}

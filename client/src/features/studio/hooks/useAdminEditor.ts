@@ -6,7 +6,9 @@ import {
   toStudioSlot,
   toStudioAsset,
   toStudioRule,
-} from "../utils/adapters";
+  toTemplatePublishPayload,
+  parseTemplateDefaultConfig,
+} from "../../../lib/mappers";
 import { captureStudioThumbnail } from "../utils/captureThumbnail";
 import {
   seedTemplates,
@@ -103,13 +105,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
             );
             if (matched) {
               setTemplate(toStudioTemplate(matched));
-
-              if (
-                matched.default_config &&
-                Object.keys(matched.default_config).length > 0
-              ) {
-                setSlotConfig(matched.default_config as SlotConfig);
-              }
+              setSlotConfig(parseTemplateDefaultConfig(matched.default_config));
 
               try {
                 const sRows = await api.getStudioSlotDefinitions(matched.id);
@@ -166,15 +162,7 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
     if (!matched) return;
 
     setTemplate(toStudioTemplate(matched));
-
-    if (
-      matched.default_config &&
-      Object.keys(matched.default_config).length > 0
-    ) {
-      setSlotConfig(matched.default_config as SlotConfig);
-    } else {
-      setSlotConfig({});
-    }
+    setSlotConfig(parseTemplateDefaultConfig(matched.default_config));
 
     try {
       const sRows = await api.getStudioSlotDefinitions(matched.id);
@@ -212,16 +200,14 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
       if (token) {
         const res = await api.publishStudioTemplate(
           template.id,
-          {
-            name: template.name,
+          toTemplatePublishPayload({
+            template,
+            isActive,
             thumbnail: thumbnailData,
-            svg_base: template.svgBase,
-            is_active: isActive,
-            category: template.category ?? null,
             slots,
             rules,
-            slot_config: slotConfig as Record<string, unknown>,
-          }
+            slotConfig,
+          }),
         );
         const savedId = res?.template?.id || template.id;
         const savedThumbnail = res?.template?.thumbnail || thumbnailData;
@@ -270,16 +256,14 @@ export const useAdminEditor = ({ templateId = "tpl-classic-01" }: UseAdminEditor
       if (token) {
         const res = await api.publishStudioTemplate(
           template.id,
-          {
-            name: template.name,
+          toTemplatePublishPayload({
+            template,
+            isActive: template.isActive,
             thumbnail: captured,
-            svg_base: template.svgBase,
-            is_active: template.isActive,
-            category: template.category ?? null,
             slots,
             rules,
-            slot_config: slotConfig as Record<string, unknown>,
-          }
+            slotConfig,
+          }),
         );
         const savedThumbnail = res?.template?.thumbnail || captured;
         setTemplate((prev) => ({

@@ -40,8 +40,8 @@ module.exports = {
       },
     ],
 
-    // Tắt các warning không quá khẩn cấp
-    '@typescript-eslint/no-explicit-any': 'warn',
+    // Cấm dùng any sau khi chuẩn hóa hệ thống mappers
+    '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
   },
 };

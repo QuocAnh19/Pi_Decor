@@ -32,28 +32,9 @@ export const updateTemplateSchema = createTemplateSchema.partial();
 // ============================================================================
 
 /**
- * Preprocess hỗ trợ cả camelCase và snake_case cho slot khi publish template.
+ * Schema cho từng slot khi publish template (chỉ chấp nhận snake_case khớp DB).
  */
-export const publishSlotItemSchema = z.preprocess((val) => {
-  if (typeof val !== "object" || val === null) return val;
-  const raw = { ...val };
-  return {
-    id: raw.id,
-    slot_key: raw.slotKey ?? raw.slot_key,
-    label: raw.label,
-    slot_type: raw.slotType ?? raw.slot_type ?? "drape",
-    norm_x: raw.normX ?? raw.norm_x ?? 0.5,
-    norm_y: raw.normY ?? raw.norm_y ?? 0.5,
-    norm_width: raw.normWidth !== undefined ? raw.normWidth : raw.norm_width !== undefined ? raw.norm_width : null,
-    norm_height: raw.normHeight !== undefined ? raw.normHeight : raw.norm_height !== undefined ? raw.norm_height : null,
-    allow_scale: raw.allowScale ?? raw.allow_scale ?? true,
-    allow_rotate: raw.allowRotate ?? raw.allow_rotate ?? false,
-    mirror_x: raw.mirrorX ?? raw.mirror_x ?? false,
-    z_index: raw.zIndex ?? raw.z_index ?? 0,
-    sort_order: raw.sortOrder ?? raw.sort_order ?? 0,
-    required: raw.required ?? false,
-  };
-}, z.object({
+export const publishSlotItemSchema = z.object({
   id: z.string().optional(),
   slot_key: z.string().trim().min(1),
   label: z.string().trim().min(1),
@@ -68,34 +49,21 @@ export const publishSlotItemSchema = z.preprocess((val) => {
   z_index: z.coerce.number().default(0),
   sort_order: z.coerce.number().default(0),
   required: z.coerce.boolean().default(false),
-}));
+});
 
 /**
- * Preprocess hỗ trợ cả camelCase và snake_case cho rule khi publish template.
+ * Schema cho từng rule khi publish template (chỉ chấp nhận snake_case khớp DB).
  */
-export const publishRuleItemSchema = z.preprocess((val) => {
-  if (typeof val !== "object" || val === null) return val;
-  const raw = { ...val };
-  return {
-    id: raw.id,
-    rule_name: raw.ruleName ?? raw.rule_name ?? null,
-    condition_slot: raw.conditionSlot ?? raw.condition_slot,
-    condition_value: raw.conditionValue ?? raw.condition_value ?? {},
-    target_slot: raw.targetSlot ?? raw.target_slot,
-    action: raw.action,
-    action_value: raw.actionValue ?? raw.action_value ?? null,
-    priority: raw.priority ?? 0,
-  };
-}, z.object({
+export const publishRuleItemSchema = z.object({
   id: z.string().optional(),
   rule_name: z.string().nullable().optional(),
   condition_slot: z.string().trim().min(1),
-  condition_value: z.any().default({}),
+  condition_value: z.record(z.unknown()).default({}),
   target_slot: z.string().trim().min(1),
   action: z.string().trim().min(1),
-  action_value: z.any().nullable().optional(),
+  action_value: z.record(z.unknown()).nullable().optional(),
   priority: z.coerce.number().default(0),
-}));
+});
 
 export const publishTemplateSchema = z.object({
   name: z

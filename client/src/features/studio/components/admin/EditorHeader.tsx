@@ -11,7 +11,7 @@ import {
   PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import type { Template } from "../../types";
-import type { StudioTemplateRow } from "../../../../lib/types";
+import type { StudioTemplateRow, Lead } from "../../../../lib/types";
 import { Badge, Select } from "../../../../components/ui";
 import styles from "./EditorHeader.module.scss";
 import { formatDate } from "../../../../lib/formatters";
@@ -22,7 +22,7 @@ export interface EditorHeaderProps {
   isDirty: boolean;
   showGrid: boolean;
   mode?: "admin" | "customer";
-  editingLead?: any;
+  editingLead?: Lead | null;
   onBackToHome?: () => void;
   onSelectTemplate: (templateId: string) => void;
   onSaveDraft?: () => void;
