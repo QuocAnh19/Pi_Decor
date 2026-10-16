@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: pidecor-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pidecor
+      POSTGRES_PASSWORD: pidecor_dev_only
+      POSTGRES_DB: pidecor
+    ports:
+      - "5432:5432"
+    volumes:
+      - pidecor_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pidecor -d pidecor"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: pidecor-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      DATABASE_URL: postgresql://pidecor:pidecor_dev_only@postgres:5432/pidecor
+      JWT_SECRET: dev_jwt_secret_must_be_at_least_32_characters_long_for_security
+      CORS_ORIGIN: http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - full
+      - api
+
+volumes:
+  pidecor_pg_data:

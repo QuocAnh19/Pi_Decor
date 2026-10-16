@@ -1,0 +1,6 @@
+{
+  "client/src/**/*.{ts,tsx}": ["prettier --write", "npm --prefix client run lint"],
+  "server/src/**/*.js": ["prettier --write", "npm --prefix server run lint"],
+  "client/src/**/*.scss": ["prettier --write", "npm --prefix client run lint:styles"],
+  "*.{json,md,yml,yaml}": ["prettier --write"]
+}

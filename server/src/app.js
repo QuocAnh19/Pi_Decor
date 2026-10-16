@@ -33,8 +33,7 @@ app.use(httpLogger);
 // Security headers (X-Content-Type-Options, X-Frame-Options, gỡ bỏ X-Powered-By)
 app.use(helmet());
 
-const allowedOrigins = env.CORS_ORIGIN
-  .split(",")
+const allowedOrigins = env.CORS_ORIGIN.split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
@@ -49,7 +48,10 @@ app.use(
         return callback(null, true);
       }
       // Chỉ cho phép localhost regex ở môi trường development/test
-      if (env.NODE_ENV !== "production" && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      if (
+        env.NODE_ENV !== "production" &&
+        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+      ) {
         return callback(null, true);
       }
       const corsErr = new Error("CORS policy violation");
@@ -108,7 +110,6 @@ app.use((req, res) => {
   res.status(404).json({ message: `Không tìm thấy route: ${req.method} ${req.path}` });
 });
 
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {
   const reqId = req.id || req.headers?.["x-request-id"];
   if (req.log) {

@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  client:
+    name: Client Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: "client/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Stylelint
+        run: npm run lint:styles
+
+      - name: Knip unused code check
+        run: npm run knip
+
+      - name: Client unit and integration tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+  server:
+    name: Server Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: pidecor
+          POSTGRES_PASSWORD: pidecor_dev_only
+          POSTGRES_DB: pidecor_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+          cache-dependency-path: "server/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Node syntax check
+        run: find src -name '*.js' -exec node --check {} +
+
+      - name: Run database migrations
+        env:
+          DATABASE_URL: postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test
+        run: npm run migrate
+
+      - name: Server tests
+        env:
+          DATABASE_URL: postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test
+          DATABASE_URL_TEST: postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test
+          JWT_SECRET: test_jwt_secret_must_be_at_least_32_characters_long
+        run: npm test

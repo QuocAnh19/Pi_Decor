@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+uploads
+.git
+package-lock.json
+*.svg
+.husky
+.github
+client/dist
+server/uploads

@@ -1,5 +1,14 @@
 {
+  "name": "pi-decor-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "husky"
+  },
   "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.10",
     "sharp": "^0.35.5"
   }
 }
