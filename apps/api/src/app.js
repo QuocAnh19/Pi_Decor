@@ -11,7 +11,7 @@ import { hasCloudinary } from "./utils/uploadImage.js";
 import { loginLimiter } from "./middlewares/rateLimiters.js";
 import { leadsRouter } from "./modules/leads/leads.routes.js";
 import { errorHandler } from "./shared/errorHandler.js";
-import { materialsRouter } from "./routes/materials/index.js";
+import { materialsRouter } from "./modules/materials/materials.routes.js";
 import { servicesRouter } from "./routes/services/index.js";
 import { venuesRouter } from "./modules/venues/venues.routes.js";
 import { projectsRouter } from "./modules/projects/projects.routes.js";
