@@ -1,21 +1,54 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Outlet, useLocation } from "react-router-dom";
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
 import { HomePage } from "./pages/HomePage";
-import { StudioPage } from "./pages/StudioPage";
-import { MapPage } from "./pages/MapPage";
 import { AdminGuard } from "./components/admin/AdminGuard";
 import { AdminLayout } from "./components/admin/AdminLayout";
-import { AdminLoginPage } from "./pages/admin/AdminLoginPage";
-import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
-import { AdminLeadsPage } from "./pages/admin/AdminLeadsPage";
-import { AdminProjectsPage } from "./pages/admin/AdminProjectsPage";
-import { AdminVenuesPage } from "./pages/admin/AdminVenuesPage";
-import { AdminMaterialsPage } from "./pages/admin/AdminMaterialsPage";
-import { AdminTestimonialsPage } from "./pages/admin/AdminTestimonialsPage";
-import { AdminStudioPage } from "./pages/admin/AdminStudioPage";
-import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 import styles from "./App.module.scss";
+
+// Lazy routes
+const StudioPage = lazy(() =>
+  import("./pages/StudioPage").then((m) => ({ default: m.StudioPage }))
+);
+const MapPage = lazy(() =>
+  import("./pages/MapPage").then((m) => ({ default: m.MapPage }))
+);
+const AdminLoginPage = lazy(() =>
+  import("./pages/admin/AdminLoginPage").then((m) => ({ default: m.AdminLoginPage }))
+);
+const AdminDashboardPage = lazy(() =>
+  import("./pages/admin/AdminDashboardPage").then((m) => ({ default: m.AdminDashboardPage }))
+);
+const AdminLeadsPage = lazy(() =>
+  import("./pages/admin/AdminLeadsPage").then((m) => ({ default: m.AdminLeadsPage }))
+);
+const AdminProjectsPage = lazy(() =>
+  import("./pages/admin/AdminProjectsPage").then((m) => ({ default: m.AdminProjectsPage }))
+);
+const AdminVenuesPage = lazy(() =>
+  import("./pages/admin/AdminVenuesPage").then((m) => ({ default: m.AdminVenuesPage }))
+);
+const AdminMaterialsPage = lazy(() =>
+  import("./pages/admin/AdminMaterialsPage").then((m) => ({ default: m.AdminMaterialsPage }))
+);
+const AdminTestimonialsPage = lazy(() =>
+  import("./pages/admin/AdminTestimonialsPage").then((m) => ({ default: m.AdminTestimonialsPage }))
+);
+const AdminStudioPage = lazy(() =>
+  import("./pages/admin/AdminStudioPage").then((m) => ({ default: m.AdminStudioPage }))
+);
+const AdminSettingsPage = lazy(() =>
+  import("./pages/admin/AdminSettingsPage").then((m) => ({ default: m.AdminSettingsPage }))
+);
+
+function RouteLoadingFallback() {
+  return (
+    <div className={styles.loadingFallback} role="status" aria-label="Đang tải trang">
+      <div className={styles.spinner} />
+    </div>
+  );
+}
 
 /** Chrome for every public page. Never mounted under /admin — per
  * PiDecor_AdminPanel.md §2/§5 the admin area has its own layout and no
@@ -28,7 +61,9 @@ function PublicLayout() {
     <div className={styles.shell}>
       <Navbar />
       <main className={styles.main}>
-        <Outlet />
+        <Suspense fallback={<RouteLoadingFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
       {!isStudio && <Footer />}
     </div>
@@ -45,9 +80,22 @@ export default function App() {
       </Route>
 
       {/* Admin — public login, then everything else behind AdminGuard. */}
-      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route
+        path="/admin/login"
+        element={
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <AdminLoginPage />
+          </Suspense>
+        }
+      />
       <Route path="/admin" element={<AdminGuard />}>
-        <Route element={<AdminLayout />}>
+        <Route
+          element={
+            <Suspense fallback={<RouteLoadingFallback />}>
+              <AdminLayout />
+            </Suspense>
+          }
+        >
           <Route index element={<AdminDashboardPage />} />
           <Route path="leads" element={<AdminLeadsPage />} />
           <Route path="projects" element={<AdminProjectsPage />} />

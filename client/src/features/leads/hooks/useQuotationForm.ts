@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { toPng } from "html-to-image";
-import jsPDF from "jspdf";
 import { useAuth } from "../../../lib/authContext";
 import { api } from "../../../lib/api";
 import type { Lead, Quotation, QuotationItem } from "../../../lib/types";
@@ -162,6 +160,11 @@ export function useQuotationForm({
     if (!pdfRef.current) return;
     setExportingPdf(true);
     try {
+      const [{ toPng }, { default: jsPDF }] = await Promise.all([
+        import("html-to-image"),
+        import("jspdf"),
+      ]);
+
       const imgData = await toPng(pdfRef.current, {
         pixelRatio: 2,
         backgroundColor: "#ffffff",

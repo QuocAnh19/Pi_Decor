@@ -51,8 +51,11 @@ export interface CategoryPortfolioItem {
 }
 
 export interface HeroMedia {
-  /** Path relative to /public, e.g. "/images/hero.jpg" or "/images/hero.mp4" */
+  /** Path relative to /public, e.g. "/images/hero.webp" or "/images/hero.mp4" */
   src: string | null;
+  srcSet?: string;
+  width?: number;
+  height?: number;
   alt: string;
 }
 

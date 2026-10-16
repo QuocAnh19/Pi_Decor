@@ -1,5 +1,3 @@
-import { toJpeg, toPng } from 'html-to-image';
-
 export interface CaptureOptions {
   quality?: number;
   width?: number;
@@ -68,6 +66,8 @@ export async function captureStudioThumbnail(
       }
       return true;
     };
+
+    const { toJpeg, toPng } = await import('html-to-image');
 
     // Primary: toJpeg
     try {

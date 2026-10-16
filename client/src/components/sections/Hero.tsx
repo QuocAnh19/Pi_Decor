@@ -37,9 +37,13 @@ export function Hero() {
       >
         <MediaSlot
           src={heroMedia.src}
+          srcSet={heroMedia.srcSet}
+          sizes="100vw"
+          width={heroMedia.width}
+          height={heroMedia.height}
           alt={heroMedia.alt}
           label="Ảnh/video hero Pi Decor"
-          hint="public/images/hero.jpg · ngang · ánh sáng ấm"
+          hint="public/images/hero.webp · ngang · ánh sáng ấm"
           className={styles.media}
           priority
         />
@@ -50,21 +54,27 @@ export function Hero() {
       <div className={styles.collage}>
         <Polaroid
           src={heroCollageMedia[0].src}
+          srcSet={heroCollageMedia[0].srcSet}
+          sizes="128px"
           alt={heroCollageMedia[0].alt}
           label="Ảnh polaroid 1"
-          hint="public/images/hero-collage-1.jpg · dọc 4:5"
+          hint="public/images/hero-collage-1.webp · dọc 4:5"
           caption="Caption"
           rotate={-6}
           width={128}
+          height={160}
         />
         <Polaroid
           src={heroCollageMedia[1].src}
+          srcSet={heroCollageMedia[1].srcSet}
+          sizes="128px"
           alt={heroCollageMedia[1].alt}
           label="Ảnh polaroid 2"
-          hint="public/images/hero-collage-2.jpg · dọc 4:5"
+          hint="public/images/hero-collage-2.webp · dọc 4:5"
           caption="Caption"
           rotate={4}
           width={128}
+          height={160}
           className={styles.collagePhotoTwo}
         />
       </div>

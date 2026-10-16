@@ -32,7 +32,15 @@ export function ServiceCategoryCard({
       >
         <span className={styles.mediaWrap}>
           <MediaSlot
-            src={category.cover}
+            src={category.cover ? category.cover.replace(/\.png$/i, '.webp') : null}
+            srcSet={
+              category.cover
+                ? `${category.cover.replace(/\.png$/i, '-800w.webp')} 800w, ${category.cover.replace(/\.png$/i, '.webp')} 1200w`
+                : undefined
+            }
+            sizes="(max-width: 768px) 100vw, 33vw"
+            width={800}
+            height={600}
             alt={category.title}
             label={`Ảnh ${category.brand}`}
             className={styles.media}

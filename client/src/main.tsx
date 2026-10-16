@@ -8,6 +8,14 @@ import { AuthProvider } from "./lib/authContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { GlobalToast } from "./components/ui";
 import "./styles/main.scss";
+// Self-hosted fonts
+import "@fontsource/fraunces/400.css";
+import "@fontsource/fraunces/600.css";
+import "@fontsource/be-vietnam-pro/400.css";
+import "@fontsource/be-vietnam-pro/500.css";
+import "@fontsource/be-vietnam-pro/600.css";
+import "@fontsource/cormorant-garamond/500.css";
+import "@fontsource/cormorant-garamond/500-italic.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

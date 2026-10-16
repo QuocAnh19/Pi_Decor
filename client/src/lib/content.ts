@@ -11,7 +11,10 @@ import type { HeroMedia } from "./types";
  *       tiên khách thấy nên chọn ảnh mạnh nhất.
  */
 export const heroMedia: HeroMedia = {
-  src: "/images/hero.jpg", // or "/images/hero.mp4" for a looping video hero
+  src: "/images/hero.webp",
+  srcSet: "/images/hero-800w.webp 800w, /images/hero-1600w.webp 1600w",
+  width: 1600,
+  height: 1067,
   alt: "Không gian tiệc cưới Pi Decor",
 };
 
@@ -19,6 +22,18 @@ export const heroMedia: HeroMedia = {
 // overlapping frames). Two portrait (4:5) photos is enough — more starts to
 // compete with the main hero image instead of supporting it.
 export const heroCollageMedia: HeroMedia[] = [
-  { src: "/images/hero-collage-1.jpg", alt: "Khoảnh khắc cô dâu chú rể" },
-  { src: "/images/hero-collage-2.jpg", alt: "Chi tiết decor bàn tiệc" },
+  {
+    src: "/images/hero-collage-1.webp",
+    srcSet: "/images/hero-collage-1-800w.webp 800w, /images/hero-collage-1-1600w.webp 1600w",
+    width: 800,
+    height: 534,
+    alt: "Khoảnh khắc cô dâu chú rể",
+  },
+  {
+    src: "/images/hero-collage-2.webp",
+    srcSet: "/images/hero-collage-2-800w.webp 800w, /images/hero-collage-2.webp 1365w",
+    width: 800,
+    height: 1200,
+    alt: "Chi tiết decor bàn tiệc",
+  },
 ];

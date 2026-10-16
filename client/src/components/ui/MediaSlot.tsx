@@ -5,6 +5,10 @@ import styles from "./MediaSlot.module.scss";
 export interface MediaSlotProps {
   /** Path relative to /public, e.g. "/images/hero.jpg" */
   src?: string | null;
+  srcSet?: string;
+  sizes?: string;
+  width?: number | string;
+  height?: number | string;
   alt: string;
   /** Shown in the placeholder so whoever preps assets knows exactly what to export. */
   label: string;
@@ -22,6 +26,10 @@ function isVideoSrc(src: string) {
 
 export function MediaSlot({
   src,
+  srcSet,
+  sizes,
+  width,
+  height,
   alt,
   label,
   hint,
@@ -54,9 +62,14 @@ export function MediaSlot({
       {showReal && src && !isVideoSrc(src) && (
         <img
           src={src}
+          srcSet={srcSet}
+          sizes={sizes}
+          width={width}
+          height={height}
           alt={alt}
           className={`${styles.media} ${mediaClassName}`}
           loading={priority ? "eager" : "lazy"}
+          {...(priority ? { fetchPriority: "high" as const } : {})}
           onError={() => setFailed(true)}
         />
       )}
