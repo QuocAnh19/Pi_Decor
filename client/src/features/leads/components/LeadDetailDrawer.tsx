@@ -3,7 +3,6 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   DocumentTextIcon,
-  SwatchIcon,
   UserIcon,
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
@@ -12,6 +11,7 @@ import {
 import type { Lead, LeadStatus } from "../../../lib/types";
 import { formatDateTime, formatWeddingDate } from "../../../lib/formatters";
 import { Modal } from "../../../components/ui";
+import { LeadDesignSnapshotSection } from "./LeadDesignSnapshotSection";
 import styles from "./LeadDetailDrawer.module.scss";
 
 const statusLabel: Record<LeadStatus, string> = {
@@ -48,7 +48,10 @@ export function LeadDetailDrawer({
     const tagContent = cleanMessage.substring(1, endIdx).trim();
     if (tagContent.toLowerCase().startsWith("loại sự kiện:")) {
       eventType = tagContent.substring(13).trim();
-    } else if (tagContent.toLowerCase().includes("studio") || tagContent.toLowerCase().includes("thiết kế")) {
+    } else if (
+      tagContent.toLowerCase().includes("studio") ||
+      tagContent.toLowerCase().includes("thiết kế")
+    ) {
       eventType = "PiWedding — Studio Phối Cảnh";
     } else if (!eventType) {
       eventType = tagContent;
@@ -61,9 +64,6 @@ export function LeadDetailDrawer({
   }
 
   const snapshot = lead.design_snapshot;
-  const flowerEntries = snapshot?.flowers
-    ? Object.entries(snapshot.flowers).filter(([, v]) => v)
-    : [];
 
   const drawerTitle = (
     <div className={styles.headerContent}>
@@ -87,7 +87,14 @@ export function LeadDetailDrawer({
       closeOnBackdropClick={false}
     >
       {/* Action Buttons: Lập Báo Giá & Mở Trong Studio */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+          marginBottom: "20px",
+        }}
+      >
         <button
           type="button"
           className={styles.createQuoteBtn}
@@ -128,7 +135,10 @@ export function LeadDetailDrawer({
               transition: "all 0.15s ease",
             }}
           >
-            <SparklesIcon className="h-4 w-4" style={{ width: 16, height: 16, color: "#fbbf24" }} />
+            <SparklesIcon
+              className="h-4 w-4"
+              style={{ width: 16, height: 16, color: "#fbbf24" }}
+            />
             <span>Mở &amp; Tinh Chỉnh Trong Studio 3D</span>
           </button>
         )}
@@ -156,15 +166,6 @@ export function LeadDetailDrawer({
                 {lead.email || "Chưa cung cấp email"}
               </span>
             </div>
-            {/* {lead.email && (
-              <a
-                href={`mailto:${lead.email}`}
-                className={styles.contactActionBtn}
-                style={{ backgroundColor: "#6e6259" }}
-              >
-                Gửi Mail
-              </a>
-            )} */}
           </div>
         </div>
       </section>
@@ -263,89 +264,7 @@ export function LeadDetailDrawer({
         </div>
       </section>
 
-      {/* Phối cảnh thiết kế từ Studio 3D (nếu có) */}
-      {snapshot && (
-        <section className={styles.section}>
-          <p className={styles.sectionTitle}>
-            <SwatchIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-            Phối Cảnh Thiết Kế Khách Hàng Đã Tự Phối
-          </p>
-
-          <div className={styles.snapshotContainer}>
-            {snapshot.preview_image && (
-              <div
-                style={{
-                  marginBottom: "14px",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  border: "1px solid #e7ded0",
-                }}
-              >
-                <img
-                  src={snapshot.preview_image}
-                  alt="Ảnh phối cảnh thiết kế của khách hàng"
-                  style={{
-                    width: "100%",
-                    maxHeight: "260px",
-                    objectFit: "contain",
-                    backgroundColor: "#0f172a",
-                    display: "block",
-                  }}
-                />
-              </div>
-            )}
-
-            {snapshot.baseFabric && (
-              <div className={styles.snapshotRow}>
-                {snapshot.baseFabric.hex && (
-                  <span
-                    className={styles.swatch}
-                    style={{ background: snapshot.baseFabric.hex }}
-                  />
-                )}
-                <span className={styles.snapshotLabel}>Vải rèm nền:</span>
-                <span className={styles.snapshotValue}>
-                  {snapshot.baseFabric.style} · {snapshot.baseFabric.color}
-                </span>
-              </div>
-            )}
-
-            {snapshot.valance?.enabled !== false && snapshot.valance?.style && (
-              <div className={styles.snapshotRow}>
-                <span className={styles.snapshotLabel}>Mảng rèm vắt:</span>
-                <span className={styles.snapshotValue}>
-                  {snapshot.valance.style} · {snapshot.valance.color}
-                </span>
-              </div>
-            )}
-
-            {flowerEntries.map(([key, value]) => (
-              <div key={key} className={styles.snapshotRow}>
-                <span className={styles.snapshotLabel}>{value!.slot}:</span>
-                <span className={styles.snapshotValue}>
-                  {value!.shape} · {value!.tone}
-                </span>
-              </div>
-            ))}
-
-            {snapshot.details && (
-              <div className={styles.snapshotRow}>
-                <span className={styles.snapshotLabel}>Chi tiết bảng tên:</span>
-                <span className={styles.snapshotValue}>
-                  {[
-                    snapshot.details.monogram?.enabled &&
-                      `Tên "${snapshot.details.monogram.text || "—"}"`,
-                    snapshot.details.ribbon && "Dải ruy băng",
-                    snapshot.details.lights && "Dây đèn LED",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ") || "Không có chi tiết phụ"}
-                </span>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      {snapshot && <LeadDesignSnapshotSection snapshot={snapshot} />}
     </Modal>
   );
 }
