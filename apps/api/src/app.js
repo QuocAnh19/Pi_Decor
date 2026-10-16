@@ -19,7 +19,7 @@ import { authRouter } from "./modules/auth/auth.routes.js";
 import { adminRouter } from "./routes/admin/index.js";
 import { quotationsRouter } from "./modules/quotations/quotations.routes.js";
 import { testimonialsRouter } from "./modules/testimonials/testimonials.routes.js";
-import { studioRouter } from "./routes/studio/index.js";
+import { studioRouter } from "./modules/studio/studio.routes.js";
 
 import { initSentry } from "./config/sentry.js";
 
