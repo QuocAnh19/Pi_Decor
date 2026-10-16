@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Input } from "../../../../components/ui";
+import { CurtainColorPresetsGrid } from "./CurtainColorPresetsGrid";
 
 export interface CurtainColorFilterControlProps {
   slotLabel?: string;
@@ -12,19 +13,6 @@ export interface CurtainColorFilterControlProps {
     saturation?: number,
   ) => void;
 }
-
-const DEFAULT_PRESETS = [
-  { name: "Đỏ Đô", hex: "#6A040F" },
-  { name: "Trắng", hex: "#FFFFFF" },
-  { name: "Vàng Champagne", hex: "#D97706" },
-  { name: "Hồng Phấn Pastel", hex: "#F43F5E" },
-  { name: "Xanh Navy Cổ Vịt", hex: "#1D4ED8" },
-  { name: "Xanh Lục Bảo", hex: "#047857" },
-  { name: "Hồng Rose Gold", hex: "#BE185D" },
-  { name: "Tím Thạch Anh", hex: "#A21CAF" },
-  { name: "Cam Đất Terracotta", hex: "#C2410C" },
-  { name: "Ghi Xám Khói", hex: "#64748B" },
-];
 
 export const CurtainColorFilterControl: React.FC<
   CurtainColorFilterControlProps
@@ -40,7 +28,6 @@ export const CurtainColorFilterControl: React.FC<
   const filterMode = currentFilterMode;
   const [saturation, setSaturation] = useState<number>(currentColorSaturation);
 
-  // Validate and normalize hex color
   const normalizeHex = (hexStr: string): string | null => {
     let clean = hexStr.trim().replace(/^#/, "");
     if (clean.length === 3) {
@@ -55,7 +42,6 @@ export const CurtainColorFilterControl: React.FC<
     return null;
   };
 
-  // Handle typing inside text box with instant real-time hex application
   const handleInputChange = (val: string) => {
     setCustomInput(val);
     const validHex = normalizeHex(val);
@@ -64,7 +50,6 @@ export const CurtainColorFilterControl: React.FC<
     }
   };
 
-  // Parse multi-color hex codes entered by user (comma / space separated)
   const handleAddCustomColors = () => {
     if (!customInput.trim()) return;
     const rawTokens = customInput.split(/[,;\s]+/);
@@ -168,7 +153,6 @@ export const CurtainColorFilterControl: React.FC<
           Nhập mã màu tùy chọn (gõ mã hex hoặc chọn từ bảng màu):
         </label>
         <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-          {/* Real-time Text Input */}
           <div style={{ flex: 1 }}>
             <Input
               placeholder="Ví dụ: #991B1B, #D97706, #1D4ED8..."
@@ -180,7 +164,6 @@ export const CurtainColorFilterControl: React.FC<
             />
           </div>
 
-          {/* Fully Clickable Color Picker Badge */}
           <label
             style={{
               display: "flex",
@@ -195,7 +178,7 @@ export const CurtainColorFilterControl: React.FC<
               position: "relative",
               overflow: "hidden",
               flexShrink: 0,
-              boxShadow: "0 2px 6px rgba(161, 92, 46, 0.2)"
+              boxShadow: "0 2px 6px rgba(161, 92, 46, 0.2)",
             }}
             title="Nhấp để chọn màu bất kỳ từ bảng màu"
           >
@@ -222,14 +205,19 @@ export const CurtainColorFilterControl: React.FC<
                 cursor: "pointer",
               }}
             />
-            <span style={{ fontSize: "14px", filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))" }}>
+            <span
+              style={{
+                fontSize: "14px",
+                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.5))",
+              }}
+            >
               🎨
             </span>
           </label>
         </div>
       </div>
 
-      {/* 3. Color Saturation / Intensity Slider */}
+      {/* 2. Color Saturation / Intensity Slider */}
       <div
         style={{
           display: "flex",
@@ -275,7 +263,6 @@ export const CurtainColorFilterControl: React.FC<
           style={{ width: "100%", cursor: "pointer", accentColor: "#a15c2e" }}
         />
 
-        {/* Quick Saturation Presets */}
         <div
           style={{
             display: "grid",
@@ -317,131 +304,13 @@ export const CurtainColorFilterControl: React.FC<
         </div>
       </div>
 
-      {/* 3. User-Added Custom Color Chips */}
-      {customColors.length > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          <span
-            style={{ fontSize: "11px", fontWeight: "600", color: "#6e6259" }}
-          >
-            Mã màu bạn đã nhập ({customColors.length}):
-          </span>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-            {customColors.map((hex) => {
-              const isSelected =
-                currentColorOverride.toUpperCase() === hex.toUpperCase();
-              return (
-                <button
-                  key={hex}
-                  type="button"
-                  onClick={() => handleSelectColor(hex)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "5px 10px",
-                    borderRadius: "14px",
-                    border: isSelected
-                      ? "2px solid #a15c2e"
-                      : "1px solid #e7ded0",
-                    backgroundColor: isSelected ? "#fdf7f5" : "#ffffff",
-                    color: "#271620",
-                    fontSize: "11px",
-                    fontFamily: "monospace",
-                    cursor: "pointer",
-                    boxShadow: isSelected ? "0 2px 6px rgba(161, 92, 46, 0.15)" : "none",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "12px",
-                      height: "12px",
-                      borderRadius: "50%",
-                      backgroundColor: hex,
-                      border: "1px solid rgba(39,22,32,0.2)",
-                    }}
-                  />
-                  <span>{hex}</span>
-                  <span
-                    onClick={(e) => handleRemoveCustomColor(hex, e)}
-                    style={{
-                      marginLeft: "4px",
-                      color: "#b4586b",
-                      fontWeight: "bold",
-                      fontSize: "12px",
-                      padding: "0 2px",
-                    }}
-                    title="Xóa mã màu này"
-                  >
-                    ×
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* 4. Preset Color Chips */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-        <span style={{ fontSize: "11px", fontWeight: "600", color: "#6e6259" }}>
-          Bảng màu rèm phông cưới tiêu chuẩn:
-        </span>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: "6px",
-          }}
-        >
-          {DEFAULT_PRESETS.map((p) => {
-            const isSelected =
-              currentColorOverride.toLowerCase() === p.hex.toLowerCase();
-            return (
-              <button
-                key={p.hex}
-                type="button"
-                onClick={() => handleSelectColor(p.hex)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 10px",
-                  borderRadius: "8px",
-                  border: isSelected
-                    ? "2px solid #a15c2e"
-                    : "1px solid #e7ded0",
-                  backgroundColor: isSelected ? "#fdf7f5" : "#fbf7f1",
-                  color: "#271620",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all 0.15s ease",
-                  boxShadow: isSelected ? "0 2px 6px rgba(161, 92, 46, 0.12)" : "none",
-                }}
-              >
-                <div
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    borderRadius: "50%",
-                    backgroundColor: p.hex,
-                    border: "1.5px solid rgba(255,255,255,0.8)",
-                    boxShadow: "0 1px 3px rgba(39,22,32,0.15)",
-                    flexShrink: 0,
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: "11px",
-                    fontWeight: isSelected ? "700" : "500",
-                  }}
-                >
-                  {p.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {/* 3 & 4. Custom & Preset Color Chips */}
+      <CurtainColorPresetsGrid
+        currentColorOverride={currentColorOverride}
+        customColors={customColors}
+        onSelectColor={handleSelectColor}
+        onRemoveCustomColor={handleRemoveCustomColor}
+      />
     </div>
   );
 };
