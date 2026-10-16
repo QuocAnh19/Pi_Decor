@@ -3,6 +3,7 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
 import { Input } from "../../components/ui";
+import { SEO } from "../../components/common/SEO";
 import styles from "./AdminLoginPage.module.scss";
 
 /**
@@ -41,6 +42,7 @@ export function AdminLoginPage() {
 
   return (
     <div className={styles.page}>
+      <SEO title="Đăng nhập quản trị" noindex />
       <form onSubmit={handleSubmit} className={styles.card}>
         <div className={styles.iconWrap}>
           <LockClosedIcon className="h-5 w-5" />

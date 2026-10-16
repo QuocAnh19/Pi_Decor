@@ -8,7 +8,10 @@ function parsePhotos(photos) {
       const parsed = JSON.parse(photos);
       if (Array.isArray(parsed)) return parsed;
     } catch {
-      return photos.split(",").map((s) => s.trim()).filter(Boolean);
+      return photos
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
     }
   }
   return [];
@@ -31,6 +34,13 @@ export const createTestimonialSchema = z.object({
   rating: z.coerce.number().min(1).max(5).optional(),
   lead_id: z.string().trim().nullable().optional(),
   photos: z.preprocess((val) => parsePhotos(val), z.array(z.string())).optional(),
+  consent: z.preprocess(
+    (v) => (v === true || v === "true" || v === 1 || v === "1" ? true : v),
+    z.literal(true, {
+      errorMap: () => ({ message: "Bạn phải đồng ý với chính sách xử lý dữ liệu cá nhân." }),
+    })
+  ),
+  consent_version: z.string().default("v1.0"),
 });
 
 /**

@@ -59,4 +59,6 @@ export interface TestimonialPayload {
   rating?: number;
   photos?: string[];
   lead_id?: string;
+  consent?: boolean;
+  consent_version?: string;
 }

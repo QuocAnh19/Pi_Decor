@@ -7,28 +7,20 @@ import { z } from "zod";
  */
 const envSchema = z
   .object({
-    NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     PORT: z.coerce.number().int().positive().default(4000),
     CORS_ORIGIN: z.string().default("http://localhost:5173"),
-    TRUST_PROXY: z
-      .union([z.coerce.number(), z.string()])
-      .optional(),
+    TRUST_PROXY: z.union([z.coerce.number(), z.string()]).optional(),
     JWT_SECRET: z
       .string({
         required_error: "JWT_SECRET là bắt buộc ở mọi môi trường.",
       })
       .min(32, "JWT_SECRET phải có độ dài tối thiểu 32 ký tự."),
     JWT_EXPIRES_IN: z.string().default("15m"),
-    DATABASE_URL: z
-      .string()
-      .optional(),
+    DATABASE_URL: z.string().optional(),
     DATABASE_URL_TEST: z.string().optional(),
     DB_POOL_MAX: z.coerce.number().int().positive().default(10),
-    DB_SSL: z
-      .enum(["disable", "require", "verify-full"])
-      .optional(),
+    DB_SSL: z.enum(["disable", "require", "verify-full"]).optional(),
     DB_SSL_CA: z.string().optional(),
     LOG_LEVEL: z
       .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
@@ -38,6 +30,7 @@ const envSchema = z
     CLOUDINARY_API_SECRET: z.string().optional(),
     ADMIN_EMAIL: z.string().optional(),
     ADMIN_PASSWORD: z.string().optional(),
+    SENTRY_DSN: z.string().optional(),
   })
   .transform((data) => {
     // Mặc định trust proxy: 1 khi ở production (phía sau reverse proxy Render/Railway), 0 khi dev
@@ -97,7 +90,9 @@ export function validateEnv(source = process.env) {
     const hasJwtError = result.error.issues.some((i) => i.path.includes("JWT_SECRET"));
     if (hasJwtError) {
       process.stderr.write("\nHướng dẫn tạo JWT_SECRET ngẫu nhiên an toàn (tối thiểu 32 ký tự):\n");
-      process.stderr.write('  node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"\n');
+      process.stderr.write(
+        "  node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"\n"
+      );
     }
     process.stderr.write("================================================================\n");
     process.exit(1);

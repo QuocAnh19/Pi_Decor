@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   UserIcon,
   PhoneIcon,
@@ -36,6 +37,7 @@ export function LeadForm() {
     const eventType = String(form.get("event_type") ?? "").trim();
     const weddingDate = String(form.get("wedding_date") ?? "").trim();
     const rawMessage = String(form.get("message") ?? "").trim();
+    const consentChecked = form.get("consent") === "on";
 
     const cleanPhone = phone.replace(/[\s.\-()]/g, "");
     const VN_PHONE_REGEX = /^(0|\+84)[0-9]{8,10}$/;
@@ -47,6 +49,11 @@ export function LeadForm() {
 
     if (!VN_PHONE_REGEX.test(cleanPhone)) {
       setError("Số điện thoại không đúng định dạng (VD: 0905 123 456).");
+      return;
+    }
+
+    if (!consentChecked) {
+      setError("Vui lòng đồng ý để Pi Decor xử lý dữ liệu cá nhân theo Chính sách bảo mật.");
       return;
     }
 
@@ -64,14 +71,14 @@ export function LeadForm() {
         email: email || undefined,
         wedding_date: weddingDate || undefined,
         message: fullMessage || undefined,
+        consent: true,
+        consent_version: "v1.0",
       });
       setStatus("success");
       formEl.reset();
     } catch (err) {
       setStatus("error");
-      setError(
-        err instanceof Error ? err.message : "Có lỗi xảy ra, thử lại sau.",
-      );
+      setError(err instanceof Error ? err.message : "Có lỗi xảy ra, thử lại sau.");
     }
   }
 
@@ -83,8 +90,7 @@ export function LeadForm() {
         </div>
         <h3 className={styles.successTitle}>Gửi thông tin thành công!</h3>
         <p className={styles.successText}>
-          Cảm ơn bạn đã tin tưởng Pi Decor. Đội ngũ tư vấn sẽ liên hệ lại với
-          bạn trong vòng 24 giờ.
+          Cảm ơn bạn đã tin tưởng Pi Decor. Đội ngũ tư vấn sẽ liên hệ lại với bạn trong vòng 24 giờ.
         </p>
       </div>
     );
@@ -103,11 +109,13 @@ export function LeadForm() {
         {/* Name & Phone Grid */}
         <div className={styles.gridRow}>
           <Input
+            id="lead-name"
             name="name"
             type="text"
             label={
               <span className={styles.labelSpan}>
-                <UserIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Họ và tên
+                <UserIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Họ và
+                tên
               </span>
             }
             placeholder="VD: Nguyễn Văn A"
@@ -115,11 +123,13 @@ export function LeadForm() {
           />
 
           <Input
+            id="lead-phone"
             name="phone"
             type="tel"
             label={
               <span className={styles.labelSpan}>
-                <PhoneIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Số điện thoại
+                <PhoneIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Số
+                điện thoại
               </span>
             }
             placeholder="VD: 0905 123 456"
@@ -129,12 +139,13 @@ export function LeadForm() {
 
         {/* Email Field */}
         <Input
+          id="lead-email"
           name="email"
           type="email"
           label={
             <span className={styles.labelSpan}>
-              <EnvelopeIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Email{" "}
-              {/* <span className={styles.optionalTag}>(Không bắt buộc)</span> */}
+              <EnvelopeIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} />{" "}
+              Email{" "}
             </span>
           }
           placeholder="VD: email@example.com"
@@ -142,10 +153,12 @@ export function LeadForm() {
 
         {/* Event Type Select */}
         <Select
+          id="lead-event-type"
           name="event_type"
           label={
             <span className={styles.labelSpan}>
-              <SparklesIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Loại sự kiện
+              <SparklesIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Loại
+              sự kiện
             </span>
           }
           defaultValue="PiWedding — Trang Trí Cưới Hỏi"
@@ -154,11 +167,13 @@ export function LeadForm() {
 
         {/* Expected Event Date Field */}
         <Input
+          id="lead-wedding-date"
           name="wedding_date"
           type="date"
           label={
             <span className={styles.labelSpan}>
-              <CalendarIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Chọn ngày tổ chức dự kiến
+              <CalendarIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Chọn
+              ngày tổ chức dự kiến
             </span>
           }
           aria-label="Chọn ngày tổ chức dự kiến"
@@ -166,25 +181,52 @@ export function LeadForm() {
 
         {/* Message Field */}
         <Textarea
+          id="lead-message"
           name="message"
           label={
             <span className={styles.labelSpan}>
-              <ChatBubbleLeftRightIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Ý tưởng hoặc ghi chú thêm{" "}
-              {/* <span className={styles.optionalTag}>(Không bắt buộc)</span> */}
+              <ChatBubbleLeftRightIcon
+                className="h-3.5 w-3.5 inline"
+                style={{ width: 14, height: 14 }}
+              />{" "}
+              Ý tưởng hoặc ghi chú thêm{" "}
             </span>
           }
           placeholder="VD: Mong muốn tông màu pastel, tiệc ngoài trời, khoảng 200 khách..."
           rows={3}
         />
 
+        {/* Consent Checkbox */}
+        <div className={styles.consentGroup}>
+          <label className={styles.consentLabel} htmlFor="lead-consent">
+            <input
+              id="lead-consent"
+              name="consent"
+              type="checkbox"
+              className={styles.consentCheckbox}
+            />
+            <span>
+              Tôi đồng ý để Pi Decor xử lý dữ liệu cá nhân theo{" "}
+              <Link
+                to="/chinh-sach-bao-mat"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.consentLink}
+              >
+                Chính sách bảo mật
+              </Link>
+              <span className={styles.requiredStar}>*</span>
+            </span>
+          </label>
+        </div>
+
         {error && <p className={styles.error}>{error}</p>}
 
-        <button
-          type="submit"
-          disabled={status === "sending"}
-          className={styles.submitBtn}
-        >
-          <PaperAirplaneIcon className="h-4 w-4 inline mr-1" style={{ display: 'inline', width: 16, height: 16 }} />
+        <button type="submit" disabled={status === "sending"} className={styles.submitBtn}>
+          <PaperAirplaneIcon
+            className="h-4 w-4 inline mr-1"
+            style={{ display: "inline", width: 16, height: 16 }}
+          />
           {status === "sending" ? "Đang gửi thông tin…" : "Gửi Đăng Ký Tư Vấn"}
         </button>
       </form>

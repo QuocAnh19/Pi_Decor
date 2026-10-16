@@ -11,8 +11,9 @@ import styles from "./App.module.scss";
 const StudioPage = lazy(() =>
   import("./pages/StudioPage").then((m) => ({ default: m.StudioPage }))
 );
-const MapPage = lazy(() =>
-  import("./pages/MapPage").then((m) => ({ default: m.MapPage }))
+const MapPage = lazy(() => import("./pages/MapPage").then((m) => ({ default: m.MapPage })));
+const PrivacyPolicyPage = lazy(() =>
+  import("./pages/PrivacyPolicyPage").then((m) => ({ default: m.PrivacyPolicyPage }))
 );
 const AdminLoginPage = lazy(() =>
   import("./pages/admin/AdminLoginPage").then((m) => ({ default: m.AdminLoginPage }))
@@ -77,6 +78,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/studio" element={<StudioPage />} />
         <Route path="/ban-do" element={<MapPage />} />
+        <Route path="/chinh-sach-bao-mat" element={<PrivacyPolicyPage />} />
       </Route>
 
       {/* Admin — public login, then everything else behind AdminGuard. */}

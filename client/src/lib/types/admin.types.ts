@@ -44,6 +44,8 @@ export interface Lead {
   message: string | null;
   design_snapshot: DesignSnapshot | null;
   status: LeadStatus;
+  consent_at?: string | null;
+  consent_version?: string | null;
   created_at: string;
 }
 

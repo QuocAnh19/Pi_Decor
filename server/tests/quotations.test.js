@@ -14,7 +14,7 @@ describe("Quotations Integration Tests", () => {
     // Tạo một lead mẫu để tạo quotation
     const leadRes = await request(app)
       .post("/api/leads")
-      .send({ name: "Khách Hàng Test", phone: "0905111222" });
+      .send({ name: "Khách Hàng Test", phone: "0905111222", consent: true });
     leadId = leadRes.body.id;
   });
 

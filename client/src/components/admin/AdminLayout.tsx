@@ -12,6 +12,7 @@ import {
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
+import { SEO } from "../common/SEO";
 import styles from "./AdminLayout.module.scss";
 
 const navItems = [
@@ -56,11 +57,12 @@ export function AdminLayout() {
 
   const pageTitle =
     navItems.find(({ to, end }) =>
-      end ? location.pathname === to : location.pathname.startsWith(to),
+      end ? location.pathname === to : location.pathname.startsWith(to)
     )?.label ?? navItems[0].label;
 
   return (
     <div className={styles.shell}>
+      <SEO title={`Admin — ${pageTitle}`} noindex />
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
           Pi Decor <span className={styles.brandTag}>Admin</span>
@@ -83,10 +85,7 @@ export function AdminLayout() {
         </nav>
 
         <a href="/" className={styles.viewSite}>
-          <ArrowTopRightOnSquareIcon
-            className="h-4 w-4"
-            style={{ width: 16, height: 16 }}
-          />
+          <ArrowTopRightOnSquareIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
           Xem web công khai
         </a>
       </aside>
@@ -97,15 +96,8 @@ export function AdminLayout() {
 
           <div className={styles.headerRight}>
             <span className={styles.headerEmail}>{admin?.email}</span>
-            <button
-              type="button"
-              className={styles.logoutButton}
-              onClick={handleLogout}
-            >
-              <ArrowRightOnRectangleIcon
-                className="h-4 w-4"
-                style={{ width: 16, height: 16 }}
-              />
+            <button type="button" className={styles.logoutButton} onClick={handleLogout}>
+              <ArrowRightOnRectangleIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
               Đăng xuất
             </button>
           </div>

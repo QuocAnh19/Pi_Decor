@@ -6,9 +6,9 @@ import { generateTestAdminToken } from "./helpers.js";
 describe("Leads Integration Tests", () => {
   it("tạo lead thành công với số điện thoại Việt Nam hợp lệ", async () => {
     const validLeads = [
-      { name: "Nguyễn Văn A", phone: "0905123456", email: "vana@gmail.com" },
-      { name: "Trần Thị B", phone: "+84912345678" },
-      { name: "Lê Văn C", phone: "038 123 4567" }, // sẽ được strip ký tự trắng
+      { name: "Nguyễn Văn A", phone: "0905123456", email: "vana@gmail.com", consent: true },
+      { name: "Trần Thị B", phone: "+84912345678", consent: true },
+      { name: "Lê Văn C", phone: "038 123 4567", consent: true }, // sẽ được strip ký tự trắng
     ];
 
     for (const lead of validLeads) {
@@ -18,11 +18,23 @@ describe("Leads Integration Tests", () => {
     }
   });
 
+  it("từ chối tạo lead khi không đồng ý chính sách bảo mật (consent: false hoặc thiếu)", async () => {
+    const resNoConsent = await request(app)
+      .post("/api/leads")
+      .send({ name: "Nguyễn Văn A", phone: "0905123456" });
+    expect(resNoConsent.status).toBe(400);
+
+    const resFalseConsent = await request(app)
+      .post("/api/leads")
+      .send({ name: "Nguyễn Văn A", phone: "0905123456", consent: false });
+    expect(resFalseConsent.status).toBe(400);
+  });
+
   it("từ chối tạo lead với số điện thoại không hợp lệ", async () => {
     const invalidLeads = [
-      { name: "Nguyễn Văn A", phone: "123456" },
-      { name: "Trần Thị B", phone: "abc0905123456" },
-      { name: "Lê Văn C", phone: "012345678901234" }, // quá dài
+      { name: "Nguyễn Văn A", phone: "123456", consent: true },
+      { name: "Trần Thị B", phone: "abc0905123456", consent: true },
+      { name: "Lê Văn C", phone: "012345678901234", consent: true }, // quá dài
     ];
 
     for (const lead of invalidLeads) {

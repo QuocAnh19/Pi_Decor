@@ -146,3 +146,37 @@
     cursor: not-allowed;
   }
 }
+
+.consentGroup {
+  margin-top: 4px;
+}
+
+.consentLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.consentCheckbox {
+  margin-top: 2px;
+  width: 15px;
+  height: 15px;
+  accent-color: $color-accent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.consentLink {
+  color: $color-accent;
+  text-decoration: underline;
+  font-weight: 500;
+
+  &:hover {
+    color: var(--color-accent-hover);
+  }
+}

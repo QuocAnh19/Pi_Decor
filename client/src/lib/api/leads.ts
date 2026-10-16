@@ -8,6 +8,8 @@ export interface LeadPayload {
   wedding_date?: string;
   message?: string;
   design_snapshot?: unknown;
+  consent?: boolean;
+  consent_version?: string;
 }
 
 export const leadsApi = {
@@ -17,12 +19,7 @@ export const leadsApi = {
       body: JSON.stringify(payload),
     }),
 
-  getLeads: (params?: {
-    page?: number;
-    limit?: number;
-    q?: string;
-    status?: string;
-  }) => {
+  getLeads: (params?: { page?: number; limit?: number; q?: string; status?: string }) => {
     const searchParams = new URLSearchParams();
     if (params?.page) searchParams.set("page", String(params.page));
     if (params?.limit) searchParams.set("limit", String(params.limit));
@@ -32,17 +29,12 @@ export const leadsApi = {
     }
 
     const queryStr = searchParams.toString();
-    return authRequest<PaginatedLeadsResponse>(
-      `/leads${queryStr ? `?${queryStr}` : ""}`
-    );
+    return authRequest<PaginatedLeadsResponse>(`/leads${queryStr ? `?${queryStr}` : ""}`);
   },
 
   getLead: (id: string) => authRequest<Lead>(`/leads/${id}`),
 
-  updateLead: (
-    id: string,
-    payload: { status?: LeadStatus; design_snapshot?: unknown }
-  ) =>
+  updateLead: (id: string, payload: { status?: LeadStatus; design_snapshot?: unknown }) =>
     authRequest<Lead>(`/leads/${id}`, {
       method: "PATCH",
       body: JSON.stringify(payload),

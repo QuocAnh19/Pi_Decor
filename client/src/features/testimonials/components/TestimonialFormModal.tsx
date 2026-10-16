@@ -1,4 +1,5 @@
 import { useState, FormEvent, ChangeEvent } from "react";
+import { Link } from "react-router-dom";
 import { StarIcon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { Modal, Input, Select, Textarea } from "../../../components/ui";
@@ -26,6 +27,7 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [consent, setConsent] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const handlePhotoUpload = (e: ChangeEvent<HTMLInputElement>) => {
@@ -74,6 +76,11 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
       return;
     }
 
+    if (!consent) {
+      alert("Vui lòng đồng ý để Pi Decor xử lý dữ liệu cá nhân theo Chính sách bảo mật.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       if (photoFiles.length > 0) {
@@ -82,6 +89,8 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
         formData.append("role", roleText.trim());
         formData.append("quote", quoteText.trim());
         formData.append("rating", String(rating));
+        formData.append("consent", "true");
+        formData.append("consent_version", "v1.0");
         photoFiles.forEach((file) => formData.append("photos", file));
 
         await api.submitTestimonial(formData);
@@ -92,6 +101,8 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
           quote: quoteText.trim(),
           rating,
           photos: [],
+          consent: true,
+          consent_version: "v1.0",
         });
       }
 
@@ -106,6 +117,7 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
       setSelectedPhotos([]);
       setPhotoFiles([]);
       setUploadError(null);
+      setConsent(false);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Gửi đánh giá thất bại.");
     } finally {
@@ -114,12 +126,7 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Gửi Đánh Giá Cảm Nhận"
-      maxWidth="500px"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Gửi Đánh Giá Cảm Nhận" maxWidth="500px">
       <form onSubmit={handleSubmitReview} className={styles.form}>
         <div className={styles.starRatingContainer}>
           <label className={styles.starLabel}>Đánh giá số sao</label>
@@ -128,12 +135,19 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
               <button
                 key={starVal}
                 type="button"
+                aria-label={`Đánh giá ${starVal} sao`}
                 onClick={() => setRating(starVal)}
               >
                 {starVal <= rating ? (
-                  <StarSolid className="h-5.5 w-5.5" style={{ width: 22, height: 22, color: "#f59e0b" }} />
+                  <StarSolid
+                    className="h-5.5 w-5.5"
+                    style={{ width: 22, height: 22, color: "#f59e0b" }}
+                  />
                 ) : (
-                  <StarIcon className="h-5.5 w-5.5" style={{ width: 22, height: 22, color: "#cbd5e1" }} />
+                  <StarIcon
+                    className="h-5.5 w-5.5"
+                    style={{ width: 22, height: 22, color: "#cbd5e1" }}
+                  />
                 )}
               </button>
             ))}
@@ -141,6 +155,7 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
         </div>
 
         <Input
+          id="review-author"
           label="Họ và tên"
           required
           type="text"
@@ -150,6 +165,7 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
         />
 
         <Select
+          id="review-role"
           label="Dịch vụ đã sử dụng"
           value={roleText}
           onChange={(e) => setRoleText(e.target.value)}
@@ -157,6 +173,7 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
         />
 
         <Textarea
+          id="review-quote"
           label="Nội dung cảm nhận"
           required
           placeholder="Chia sẻ trải nghiệm của bạn về thiết kế, tone màu, độ chỉn chu & dịch vụ của Pi Decor..."
@@ -169,7 +186,10 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
           <label className={styles.uploadFieldLabel}>Tải ảnh thực tế (Tối đa 3 ảnh)</label>
           {selectedPhotos.length < 3 && (
             <label className={styles.uploadDropzone}>
-              <CloudArrowUpIcon className={`h-6 w-6 ${styles.uploadIcon}`} style={{ width: 24, height: 24 }} />
+              <CloudArrowUpIcon
+                className={`h-6 w-6 ${styles.uploadIcon}`}
+                style={{ width: 24, height: 24 }}
+              />
               <span className={styles.uploadText}>
                 Chọn ảnh chụp từ thiết bị ({selectedPhotos.length}/3)
               </span>
@@ -200,6 +220,7 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
                     onClick={() => handleRemovePhoto(pIdx)}
                     className={styles.removeImgBtn}
                     title="Xóa ảnh"
+                    aria-label="Xóa ảnh"
                   >
                     ✕
                   </button>
@@ -207,6 +228,30 @@ export function TestimonialFormModal({ isOpen, onClose, onSuccess }: Testimonial
               ))}
             </div>
           )}
+        </div>
+
+        <div className={styles.consentGroup}>
+          <label htmlFor="testimonial-consent" className={styles.consentLabel}>
+            <input
+              id="testimonial-consent"
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className={styles.consentCheckbox}
+            />
+            <span>
+              Tôi đồng ý để Pi Decor xử lý dữ liệu cá nhân theo{" "}
+              <Link
+                to="/chinh-sach-bao-mat"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.consentLink}
+              >
+                Chính sách bảo mật
+              </Link>
+              <span style={{ color: "#b4586b", marginLeft: "2px" }}>*</span>
+            </span>
+          </label>
         </div>
 
         <button type="submit" className={styles.submitModalBtn} disabled={submitting}>

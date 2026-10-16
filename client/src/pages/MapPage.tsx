@@ -1,6 +1,7 @@
 import { MapPinIcon } from "@heroicons/react/24/outline";
 import { Container, Section } from "../components/ui/Layout";
 import { useMap, MapExplorer } from "../features/map";
+import { SEO } from "../components/common/SEO";
 import styles from "./MapPage.module.scss";
 
 export function MapPage() {
@@ -8,15 +9,21 @@ export function MapPage() {
 
   return (
     <Section padding="compact">
+      <SEO
+        title="Bản Đồ Dự Án & Địa Điểm Tổ Chức"
+        description="Khám phá các không gian và địa điểm tổ chức tiệc cưới, sự kiện thực tế đã được trang trí bởi Pi Decor trên toàn quốc."
+        canonical="/ban-do"
+      />
       <Container>
         <div className={styles.intro}>
           <p className={styles.eyebrow}>
-            <MapPinIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Bản đồ dự án
+            <MapPinIcon className="h-3.5 w-3.5 inline" style={{ width: 14, height: 14 }} /> Bản đồ
+            dự án
           </p>
           <h1 className={styles.title}>Xem decor Pi Decor tại đúng nơi bạn sẽ tổ chức</h1>
           <p className={styles.subtitle}>
-            Mỗi pin là một địa điểm chúng tôi đã từng dựng tiệc. Bấm vào để xem lại những dự án thật —
-            hoặc mở Studio để thử phối màu theo phong cách tương tự.
+            Mỗi pin là một địa điểm chúng tôi đã từng dựng tiệc. Bấm vào để xem lại những dự án thật
+            — hoặc mở Studio để thử phối màu theo phong cách tương tự.
           </p>
         </div>
 

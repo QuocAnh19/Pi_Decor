@@ -20,7 +20,11 @@ import { quotationsRouter } from "./routes/quotations/index.js";
 import { testimonialsRouter } from "./routes/testimonials/index.js";
 import { studioRouter } from "./routes/studio/index.js";
 
+import { initSentry, captureServerError } from "./config/sentry.js";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+initSentry();
 
 export const app = express();
 
@@ -111,6 +115,7 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, _next) => {
+  captureServerError(err, req);
   const reqId = req.id || req.headers?.["x-request-id"];
   if (req.log) {
     req.log.error({ reqId, err }, err.message || "Unhandled server error");

@@ -18,7 +18,12 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    // Sau này đặt logger/Sentry ở đây
+    // Ghi nhận lỗi vào Sentry nếu đã cấu hình DSN
+    if (import.meta.env.VITE_SENTRY_DSN) {
+      import("@sentry/react").then((Sentry) => {
+        Sentry.captureException(error, { extra: { componentStack: info.componentStack } });
+      });
+    }
     console.error("[ErrorBoundary]", error, info.componentStack);
   }
 
@@ -29,12 +34,8 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div style={{ padding: "2rem", textAlign: "center" }}>
           <h2>Đã xảy ra lỗi không mong muốn.</h2>
-          <p style={{ color: "#666", marginBottom: "1rem" }}>
-            {this.state.error?.message}
-          </p>
-          <button onClick={() => window.location.reload()}>
-            Tải lại trang
-          </button>
+          <p style={{ color: "#666", marginBottom: "1rem" }}>{this.state.error?.message}</p>
+          <button onClick={() => window.location.reload()}>Tải lại trang</button>
         </div>
       );
     }

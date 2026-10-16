@@ -34,6 +34,7 @@ export function useSaveDesignForm({
   const [email, setEmail] = useState("");
   const [weddingDate, setWeddingDate] = useState("");
   const [message, setMessage] = useState("");
+  const [consent, setConsent] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,6 +52,11 @@ export function useSaveDesignForm({
     const VN_PHONE_REGEX = /^(0|\+84)[0-9]{8,10}$/;
     if (!VN_PHONE_REGEX.test(cleanPhone)) {
       setError("Số điện thoại không đúng định dạng VN (VD: 0905 123 456).");
+      return;
+    }
+
+    if (!consent) {
+      setError("Vui lòng đồng ý để Pi Decor xử lý dữ liệu cá nhân theo Chính sách bảo mật.");
       return;
     }
 
@@ -96,21 +102,18 @@ export function useSaveDesignForm({
           previewImage: finalPreviewImage,
           savedBy: "customer",
         }),
+        consent: true,
+        consent_version: "v1.0",
       });
 
       if (finalPreviewImage) {
-        const sanitizedName =
-          name.trim().replace(/[^a-zA-Z0-9à-ỹÀ-Ỹ_]/g, "_") || "Studio";
+        const sanitizedName = name.trim().replace(/[^a-zA-Z0-9à-ỹÀ-Ỹ_]/g, "_") || "Studio";
         triggerDownload(finalPreviewImage, `PiDecor_ThietKe_${sanitizedName}.jpg`);
       }
 
       setSuccess(true);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Gửi thiết kế thất bại, thử lại sau."
-      );
+      setError(err instanceof Error ? err.message : "Gửi thiết kế thất bại, thử lại sau.");
     } finally {
       setLoading(false);
     }
@@ -118,8 +121,7 @@ export function useSaveDesignForm({
 
   const handleManualDownload = () => {
     if (exportedImageUrl) {
-      const sanitizedName =
-        name.trim().replace(/[^a-zA-Z0-9à-ỹÀ-Ỹ_]/g, "_") || "Studio";
+      const sanitizedName = name.trim().replace(/[^a-zA-Z0-9à-ỹÀ-Ỹ_]/g, "_") || "Studio";
       triggerDownload(exportedImageUrl, `PiDecor_ThietKe_${sanitizedName}.jpg`);
     }
   };
@@ -135,6 +137,8 @@ export function useSaveDesignForm({
     setWeddingDate,
     message,
     setMessage,
+    consent,
+    setConsent,
     loading,
     error,
     success,
