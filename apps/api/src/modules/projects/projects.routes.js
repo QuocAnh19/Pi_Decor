@@ -3,7 +3,7 @@ import { projectsController } from "./projects.controller.js";
 import { projectUpload } from "./projects.service.js";
 import { createProjectSchema, updateProjectSchema } from "./projects.schema.js";
 import { verifyToken, requireAdmin } from "../../shared/verifyToken.js";
-import { validate } from "../../shared/validate.js";
+import { validate, validateIdParam } from "../../shared/validate.js";
 
 export const projectsRouter = Router();
 
@@ -21,8 +21,15 @@ projectsRouter.patch(
   "/:id",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   projectUpload,
   validate(updateProjectSchema),
   projectsController.updateProject
 );
-projectsRouter.delete("/:id", verifyToken, requireAdmin, projectsController.deleteProject);
+projectsRouter.delete(
+  "/:id",
+  verifyToken,
+  requireAdmin,
+  validateIdParam,
+  projectsController.deleteProject
+);

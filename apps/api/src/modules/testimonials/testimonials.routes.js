@@ -4,7 +4,7 @@ import { createTestimonialSchema, updateTestimonialSchema } from "./testimonials
 import { uploadImage } from "../../utils/uploadImage.js";
 import { testimonialLimiter } from "../../shared/rateLimiter.js";
 import { verifyToken, requireAdmin } from "../../shared/verifyToken.js";
-import { validate } from "../../shared/validate.js";
+import { validate, validateIdParam } from "../../shared/validate.js";
 
 export const testimonialsRouter = Router();
 
@@ -26,6 +26,7 @@ testimonialsRouter.patch(
   "/:id",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   validate(updateTestimonialSchema),
   testimonialsController.updateTestimonial
 );
@@ -33,5 +34,6 @@ testimonialsRouter.delete(
   "/:id",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   testimonialsController.deleteTestimonial
 );

@@ -26,10 +26,7 @@ export const authService = {
       throw createHttpError(400, "Thiếu email hoặc mật khẩu.");
     }
 
-    if (!EMAIL_REGEX.test(cleanEmail)) {
-      throw createHttpError(400, "Định dạng email không hợp lệ.");
-    }
-
+    // Luôn hash/so sánh dummy hash nếu admin không tồn tại để chống timing attack
     const admin = await authRepository.findAdminByEmail(cleanEmail);
     const passwordHash = admin ? admin.password_hash : DUMMY_HASH;
     const isPasswordValid = await bcrypt.compare(cleanPassword, passwordHash);
@@ -136,16 +133,32 @@ export const authService = {
     };
   },
 
-  async updateMe(adminId, { email, password, current_password }) {
+  async updateMe(adminId, { email, newPassword, password, currentPassword, current_password }) {
     const admin = await authRepository.findAdminById(adminId);
     if (!admin) {
       throw createHttpError(404, "Không tìm thấy tài khoản admin.");
     }
 
     const patch = {};
+    const nextPassword = newPassword || password;
+    const currentPass = currentPassword || current_password;
 
-    if (email !== undefined) {
-      const cleanEmail = String(email).trim().toLowerCase();
+    const isEmailProvided = email !== undefined;
+    const cleanEmail = isEmailProvided ? String(email).trim().toLowerCase() : "";
+    const isEmailChanging = isEmailProvided && cleanEmail !== admin.email.toLowerCase();
+    const isPasswordChanging = Boolean(nextPassword);
+
+    if (isEmailChanging || isPasswordChanging) {
+      if (!currentPass) {
+        throw createHttpError(400, "Vui lòng nhập mật khẩu hiện tại để xác nhận thay đổi.");
+      }
+      const isCurrentValid = await bcrypt.compare(currentPass, admin.password_hash);
+      if (!isCurrentValid) {
+        throw createHttpError(400, "Mật khẩu hiện tại không chính xác.");
+      }
+    }
+
+    if (isEmailChanging) {
       if (!cleanEmail) {
         throw createHttpError(400, "Email không được để trống.");
       }
@@ -157,23 +170,20 @@ export const authService = {
         (a) => a.id !== admin.id && a.email && a.email.trim().toLowerCase() === cleanEmail
       );
       if (duplicate) {
-        throw createHttpError(400, "Email này đã được sử dụng bởi tài khoản khác.");
+        throw createHttpError(409, "Email này đã được sử dụng bởi tài khoản khác.");
       }
       patch.email = cleanEmail;
     }
 
-    if (password !== undefined) {
-      if (typeof password !== "string" || password.length < 6) {
-        throw createHttpError(400, "Mật khẩu mới phải có ít nhất 6 ký tự.");
+    if (isPasswordChanging) {
+      if (
+        typeof nextPassword !== "string" ||
+        nextPassword.length < 12 ||
+        nextPassword.length > 128
+      ) {
+        throw createHttpError(400, "Mật khẩu mới phải từ 12 đến 128 ký tự.");
       }
-      if (!current_password) {
-        throw createHttpError(400, "Vui lòng nhập mật khẩu hiện tại để xác nhận.");
-      }
-      const isCurrentValid = await bcrypt.compare(current_password, admin.password_hash);
-      if (!isCurrentValid) {
-        throw createHttpError(400, "Mật khẩu hiện tại không chính xác.");
-      }
-      patch.password_hash = await bcrypt.hash(password, 10);
+      patch.password_hash = await bcrypt.hash(nextPassword, 10);
     }
 
     if (Object.keys(patch).length === 0) {
@@ -183,20 +193,33 @@ export const authService = {
       };
     }
 
-    const updated = await authRepository.updateAdminById(admin.id, patch);
-    const updatedAdmin = updated || { ...admin, ...patch };
-    const role = updatedAdmin.role ?? admin.role ?? "admin";
-    const newToken = jwt.sign(
-      { sub: updatedAdmin.id, email: updatedAdmin.email, role },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    try {
+      const updated = await authRepository.updateAdminById(admin.id, patch);
+      const updatedAdmin = updated || { ...admin, ...patch };
 
-    return {
-      message: "Cập nhật thông tin thành công.",
-      token: newToken,
-      admin: { id: updatedAdmin.id, email: updatedAdmin.email, role },
-    };
+      // Khi đổi mật khẩu thành công, thu hồi toàn bộ refresh token cũ của admin
+      if (isPasswordChanging) {
+        await authRepository.revokeAllRefreshTokensForAdmin(admin.id);
+      }
+
+      const role = updatedAdmin.role ?? admin.role ?? "admin";
+      const newToken = jwt.sign(
+        { sub: updatedAdmin.id, email: updatedAdmin.email, role },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+      );
+
+      return {
+        message: "Cập nhật thông tin thành công.",
+        token: newToken,
+        admin: { id: updatedAdmin.id, email: updatedAdmin.email, role },
+      };
+    } catch (err) {
+      if (err.code === "23505") {
+        throw createHttpError(409, "Email này đã được sử dụng bởi tài khoản khác.");
+      }
+      throw err;
+    }
   },
 
   async getAllAdmins() {
@@ -219,33 +242,40 @@ export const authService = {
     if (!EMAIL_REGEX.test(cleanEmail)) {
       throw createHttpError(400, "Định dạng email không hợp lệ.");
     }
-    if (cleanPassword.length < 6) {
-      throw createHttpError(400, "Mật khẩu phải có ít nhất 6 ký tự.");
+    if (cleanPassword.length < 12 || cleanPassword.length > 128) {
+      throw createHttpError(400, "Mật khẩu phải từ 12 đến 128 ký tự.");
     }
 
     const existing = await authRepository.findAdminByEmail(cleanEmail);
     if (existing) {
-      throw createHttpError(400, "Email này đã được sử dụng.");
+      throw createHttpError(409, "Email này đã được sử dụng.");
     }
 
     const password_hash = await bcrypt.hash(cleanPassword, 10);
-    const inserted = await authRepository.insertAdmin({
-      email: cleanEmail,
-      password_hash,
-      role: "admin",
-    });
+    try {
+      const inserted = await authRepository.insertAdmin({
+        email: cleanEmail,
+        password_hash,
+        role: "admin",
+      });
 
-    return {
-      id: inserted.id,
-      email: inserted.email,
-      role: inserted.role,
-      created_at: inserted.created_at,
-    };
+      return {
+        id: inserted.id,
+        email: inserted.email,
+        role: inserted.role,
+        created_at: inserted.created_at,
+      };
+    } catch (err) {
+      if (err.code === "23505") {
+        throw createHttpError(409, "Email này đã được sử dụng.");
+      }
+      throw err;
+    }
   },
 
   async deleteAdmin(id, currentAdminId) {
     if (id === currentAdminId) {
-      throw createHttpError(400, "Không thể tự xoá tài khoản đang đăng nhập.");
+      throw createHttpError(400, "Không thể tự xoá tài khoản của chính mình.");
     }
 
     const target = await authRepository.findAdminById(id);
@@ -253,8 +283,13 @@ export const authService = {
       throw createHttpError(404, "Không tìm thấy tài khoản admin.");
     }
 
+    // Không cho phép xoá owner cuối cùng trong hệ thống
     if (target.role === "owner") {
-      throw createHttpError(403, "Không thể xoá tài khoản owner qua API.");
+      const allAdmins = await authRepository.findAllAdmins();
+      const ownerCount = allAdmins.filter((a) => a.role === "owner").length;
+      if (ownerCount <= 1) {
+        throw createHttpError(400, "Không thể xoá tài khoản owner cuối cùng.");
+      }
     }
 
     await authRepository.removeAdminById(id);

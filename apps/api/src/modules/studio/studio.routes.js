@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { studioController } from "./studio.controller.js";
 import { verifyToken, requireAdmin } from "../../shared/verifyToken.js";
-import { validate } from "../../shared/validate.js";
+import { validate, validateIdParam } from "../../shared/validate.js";
+import { slotIdParamSchema, ruleIdParamSchema } from "@pidecor/shared";
 import {
   createTemplateSchema,
   updateTemplateSchema,
@@ -31,6 +32,7 @@ studioRouter.patch(
   "/templates/:id",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   validate(updateTemplateSchema),
   studioController.updateTemplate
 );
@@ -38,17 +40,25 @@ studioRouter.put(
   "/templates/:id/publish",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   validate(publishTemplateSchema),
   studioController.publishTemplate
 );
-studioRouter.delete("/templates/:id", verifyToken, requireAdmin, studioController.deleteTemplate);
+studioRouter.delete(
+  "/templates/:id",
+  verifyToken,
+  requireAdmin,
+  validateIdParam,
+  studioController.deleteTemplate
+);
 
 // Slot Definitions
-studioRouter.get("/templates/:id/slots", studioController.getSlots);
+studioRouter.get("/templates/:id/slots", validateIdParam, studioController.getSlots);
 studioRouter.post(
   "/templates/:id/slots",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   validate(createSlotSchema),
   studioController.createSlot
 );
@@ -56,6 +66,7 @@ studioRouter.patch(
   "/templates/:id/slots/reorder",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   validate(reorderSlotsSchema),
   studioController.reorderSlots
 );
@@ -63,10 +74,17 @@ studioRouter.patch(
   "/slots/:slotId",
   verifyToken,
   requireAdmin,
+  validate(slotIdParamSchema, "params"),
   validate(updateSlotSchema),
   studioController.updateSlot
 );
-studioRouter.delete("/slots/:slotId", verifyToken, requireAdmin, studioController.deleteSlot);
+studioRouter.delete(
+  "/slots/:slotId",
+  verifyToken,
+  requireAdmin,
+  validate(slotIdParamSchema, "params"),
+  studioController.deleteSlot
+);
 
 // Studio Assets
 studioRouter.get("/assets", studioController.getAssets);
@@ -82,17 +100,25 @@ studioRouter.patch(
   "/assets/:id",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   validate(updateAssetSchema),
   studioController.updateAsset
 );
-studioRouter.delete("/assets/:id", verifyToken, requireAdmin, studioController.deleteAsset);
+studioRouter.delete(
+  "/assets/:id",
+  verifyToken,
+  requireAdmin,
+  validateIdParam,
+  studioController.deleteAsset
+);
 
 // Slot Rules
-studioRouter.get("/templates/:id/rules", studioController.getRules);
+studioRouter.get("/templates/:id/rules", validateIdParam, studioController.getRules);
 studioRouter.post(
   "/templates/:id/rules",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   validate(createRuleSchema),
   studioController.createRule
 );
@@ -100,7 +126,14 @@ studioRouter.patch(
   "/rules/:ruleId",
   verifyToken,
   requireAdmin,
+  validate(ruleIdParamSchema, "params"),
   validate(updateRuleSchema),
   studioController.updateRule
 );
-studioRouter.delete("/rules/:ruleId", verifyToken, requireAdmin, studioController.deleteRule);
+studioRouter.delete(
+  "/rules/:ruleId",
+  verifyToken,
+  requireAdmin,
+  validate(ruleIdParamSchema, "params"),
+  studioController.deleteRule
+);

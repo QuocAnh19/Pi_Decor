@@ -10,6 +10,13 @@ export const TEST_ADMIN = {
   role: "admin",
 };
 
+export const TEST_OWNER = {
+  id: "a0000000-0000-4000-8000-000000000002",
+  email: "owner.test@pidecor.vn",
+  password: "OwnerPassword123!",
+  role: "owner",
+};
+
 /**
  * Tạo admin test trong database nếu chưa tồn tại
  */
@@ -23,6 +30,22 @@ export async function seedTestAdmin() {
        password_hash = excluded.password_hash,
        role = excluded.role`,
     [TEST_ADMIN.id, TEST_ADMIN.email, passwordHash, TEST_ADMIN.role]
+  );
+}
+
+/**
+ * Tạo owner test trong database nếu chưa tồn tại
+ */
+export async function seedTestOwner() {
+  const passwordHash = await bcrypt.hash(TEST_OWNER.password, 10);
+  await pool.query(
+    `insert into admins (id, email, password_hash, role)
+     values ($1, $2, $3, $4)
+     on conflict (id) do update set
+       email = excluded.email,
+       password_hash = excluded.password_hash,
+       role = excluded.role`,
+    [TEST_OWNER.id, TEST_OWNER.email, passwordHash, TEST_OWNER.role]
   );
 }
 

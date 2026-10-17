@@ -72,18 +72,19 @@ export function AdminProfileCard({
     }
 
     if (isPasswordChanging) {
-      if (newPassword.length < 6) {
-        setProfileError("Mật khẩu mới phải có ít nhất 6 ký tự.");
+      if (newPassword.length < 12) {
+        setProfileError("Mật khẩu mới phải từ 12 đến 128 ký tự.");
         return;
       }
       if (newPassword !== confirmPassword) {
         setProfileError("Mật khẩu xác nhận không khớp.");
         return;
       }
-      if (!currentPassword) {
-        setProfileError("Vui lòng nhập mật khẩu hiện tại để xác nhận thay đổi.");
-        return;
-      }
+    }
+
+    if ((isEmailChanged || isPasswordChanging) && !currentPassword) {
+      setProfileError("Vui lòng nhập mật khẩu hiện tại để xác nhận thay đổi.");
+      return;
     }
 
     setIsProfileSubmitting(true);
@@ -95,8 +96,10 @@ export function AdminProfileCard({
       } = {};
       if (isEmailChanged) payload.email = cleanEmail;
       if (isPasswordChanging) {
-        payload.current_password = currentPassword;
         payload.password = newPassword;
+      }
+      if (currentPassword) {
+        payload.current_password = currentPassword;
       }
 
       const res = await api.updateMe(payload);
@@ -188,7 +191,7 @@ export function AdminProfileCard({
               className={styles.input}
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Bắt buộc nếu đổi mật khẩu mới"
+              placeholder="Bắt buộc nếu đổi mật khẩu hoặc email"
               autoComplete="current-password"
             />
           </div>
@@ -203,7 +206,7 @@ export function AdminProfileCard({
               className={styles.input}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Tối thiểu 6 ký tự (để trống nếu không đổi)"
+              placeholder="Tối thiểu 12 ký tự (để trống nếu không đổi)"
               autoComplete="new-password"
             />
           </div>

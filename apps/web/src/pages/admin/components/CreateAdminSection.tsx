@@ -43,8 +43,8 @@ export function CreateAdminSection({ token, isOwner, onAdminCreated }: CreateAdm
       setCreateAdminError("Định dạng email không hợp lệ.");
       return;
     }
-    if (newAdminPassword.length < 6) {
-      setCreateAdminError("Mật khẩu phải có ít nhất 6 ký tự.");
+    if (newAdminPassword.length < 12) {
+      setCreateAdminError("Mật khẩu phải từ 12 đến 128 ký tự.");
       return;
     }
     if (newAdminPassword !== newAdminConfirmPassword) {
@@ -129,7 +129,7 @@ export function CreateAdminSection({ token, isOwner, onAdminCreated }: CreateAdm
 
           <div className={styles.formGroup}>
             <label className={styles.label} htmlFor="newAdminPassword">
-              Mật khẩu (tối thiểu 6 ký tự)
+              Mật khẩu (tối thiểu 12 ký tự)
             </label>
             <input
               id="newAdminPassword"

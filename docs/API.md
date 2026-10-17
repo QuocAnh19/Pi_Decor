@@ -34,18 +34,18 @@ Tài liệu đặc tả toàn bộ các điểm cuối (endpoints) của hệ th
 
 ## 2. Xác thực & Quản lý Quản trị viên (Auth & Admins)
 
-| Method   | Endpoint               | Quyền  | Request Body / Params                          | Phản hồi tóm tắt                      |
-| -------- | ---------------------- | :----: | ---------------------------------------------- | ------------------------------------- |
-| `POST`   | `/api/auth/login`      | Public | `{ email, password }` (Rate limit: 5 lần/15p)  | `200 { user, token, refreshToken }`   |
-| `POST`   | `/api/auth/refresh`    | Public | `{ refreshToken }`                             | `200 { token, refreshToken }`         |
-| `POST`   | `/api/auth/logout`     | Public | `{ refreshToken }`                             | `200 { success: true }`               |
-| `POST`   | `/api/auth/logout-all` | Admin  | —                                              | `200 { success: true, count }`        |
-| `GET`    | `/api/auth/me`         | Admin  | —                                              | `200 { user: { id, email, role } }`   |
-| `PATCH`  | `/api/auth/me`         | Admin  | `{ email?, current_password?, new_password? }` | `200 { success: true, user }`         |
-| `GET`    | `/api/auth/admins`     | Admin  | —                                              | `200 Admin[]`                         |
-| `POST`   | `/api/auth/admins`     | Owner  | `{ email, password, role? }`                   | `201 { success: true, admin }`        |
-| `DELETE` | `/api/auth/admins/:id` | Owner  | Path: `id`                                     | `200 { success: true }`               |
-| `GET`    | `/api/admin/summary`   | Admin  | —                                              | `200 { leads_total, leads_new, ... }` |
+| Method   | Endpoint               | Quyền  | Schema / Request Body / Params                                        | Phản hồi tóm tắt                      |
+| -------- | ---------------------- | :----: | --------------------------------------------------------------------- | ------------------------------------- |
+| `POST`   | `/api/auth/login`      | Public | `loginSchema`: `{ email, password }` (Rate limit: 10 lần/15p/IP)      | `200 { admin, token, refreshToken }`  |
+| `POST`   | `/api/auth/refresh`    | Public | `refreshTokenSchema`: `{ refresh_token }` (Rate limit: 30 lần/15p/IP) | `200 { token, refreshToken }`         |
+| `POST`   | `/api/auth/logout`     | Public | `logoutSchema`: `{ refresh_token? }`                                  | `200 { message }`                     |
+| `POST`   | `/api/auth/logout-all` | Admin  | —                                                                     | `200 { message }`                     |
+| `GET`    | `/api/auth/me`         | Admin  | —                                                                     | `200 { admin: { id, email, role } }`  |
+| `PATCH`  | `/api/auth/me`         | Admin  | `updateMeSchema`: `{ email?, newPassword?, currentPassword }`         | `200 { message, token, admin }`       |
+| `GET`    | `/api/auth/admins`     | Admin  | —                                                                     | `200 Admin[]`                         |
+| `POST`   | `/api/auth/admins`     | Owner  | `createAdminSchema`: `{ email, password (12–128 ký tự), name? }`      | `201 Admin`                           |
+| `DELETE` | `/api/auth/admins/:id` | Owner  | `adminIdParamSchema` / `uuidParamSchema`: Path `id` (UUID)            | `204 No Content`                      |
+| `GET`    | `/api/admin/summary`   | Admin  | —                                                                     | `200 { leads_total, leads_new, ... }` |
 
 ---
 

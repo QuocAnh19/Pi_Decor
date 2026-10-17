@@ -3,7 +3,7 @@ import { materialsController } from "./materials.controller.js";
 import { createMaterialSchema, updateMaterialSchema } from "./materials.schema.js";
 import { uploadImage } from "../../utils/uploadImage.js";
 import { verifyToken, requireAdmin } from "../../shared/verifyToken.js";
-import { validate } from "../../shared/validate.js";
+import { validate, validateIdParam } from "../../shared/validate.js";
 
 export const materialsRouter = Router();
 
@@ -20,8 +20,15 @@ materialsRouter.patch(
   "/:id",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   uploadImage.single("image"),
   validate(updateMaterialSchema),
   materialsController.updateMaterial
 );
-materialsRouter.delete("/:id", verifyToken, requireAdmin, materialsController.deleteMaterial);
+materialsRouter.delete(
+  "/:id",
+  verifyToken,
+  requireAdmin,
+  validateIdParam,
+  materialsController.deleteMaterial
+);

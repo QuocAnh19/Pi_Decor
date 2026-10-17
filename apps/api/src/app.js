@@ -8,7 +8,6 @@ import { env } from "./config/env.js";
 import { pool } from "./config/database.js";
 import { httpLogger } from "./config/logger.js";
 import { hasCloudinary } from "./utils/uploadImage.js";
-import { loginLimiter } from "./middlewares/rateLimiters.js";
 import { leadsRouter } from "./modules/leads/leads.routes.js";
 import { errorHandler } from "./shared/errorHandler.js";
 import { materialsRouter } from "./modules/materials/materials.routes.js";
@@ -97,8 +96,6 @@ app.get("/api/health", async (_req, res) => {
     res.status(503).json({ status: "degraded", db: "unreachable" });
   }
 });
-
-app.use("/api/auth/login", loginLimiter);
 
 app.use("/api/leads", leadsRouter);
 app.use("/api/materials", materialsRouter);

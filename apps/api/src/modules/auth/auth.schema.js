@@ -1,1 +1,8 @@
-export { loginSchema, refreshTokenSchema, logoutSchema } from "../../schemas/auth.schema.js";
+export {
+  loginSchema,
+  refreshTokenSchema,
+  logoutSchema,
+  createAdminSchema,
+  updateMeSchema,
+  adminIdParamSchema,
+} from "@pidecor/shared";

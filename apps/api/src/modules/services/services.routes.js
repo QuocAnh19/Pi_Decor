@@ -2,7 +2,7 @@ import { Router } from "express";
 import { servicesController } from "./services.controller.js";
 import { createServiceSchema, updateServiceSchema } from "./services.schema.js";
 import { verifyToken, requireAdmin } from "../../shared/verifyToken.js";
-import { validate } from "../../shared/validate.js";
+import { validate, validateIdParam } from "../../shared/validate.js";
 
 export const servicesRouter = Router();
 
@@ -18,7 +18,14 @@ servicesRouter.patch(
   "/:id",
   verifyToken,
   requireAdmin,
+  validateIdParam,
   validate(updateServiceSchema),
   servicesController.updateService
 );
-servicesRouter.delete("/:id", verifyToken, requireAdmin, servicesController.deleteService);
+servicesRouter.delete(
+  "/:id",
+  verifyToken,
+  requireAdmin,
+  validateIdParam,
+  servicesController.deleteService
+);
