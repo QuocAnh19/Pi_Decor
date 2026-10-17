@@ -9,6 +9,9 @@ import {
   parseWeddingInfo,
 } from "../../utils/weddingTextSvgUtils";
 import { TextLineInspector } from "./TextLineInspector";
+import { EventTitleSelector } from "./EventTitleSelector";
+import { LineTabSelector } from "./LineTabSelector";
+import { TextColorPresets } from "./TextColorPresets";
 
 export {
   EVENT_TITLES,
@@ -218,84 +221,16 @@ export const TextAssetCustomizer: React.FC<TextAssetCustomizerProps> = ({
         </span>
       </div>
 
-      <div>
-        <label
-          style={{
-            fontSize: "11px",
-            color: "#6e6259",
-            fontWeight: "600",
-            display: "block",
-            marginBottom: "6px",
-          }}
-        >
-          Tên Lễ Nhanh (Dòng 1):
-        </label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
-          {EVENT_TITLES.map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => {
-                hasUserEdited.current = true;
-                setLine1((prev) => ({ ...prev, text: t }));
-                setActiveLineTab(1);
-              }}
-              style={{
-                padding: "4px 10px",
-                fontSize: "11px",
-                fontWeight: "600",
-                border: line1.text === t ? "1px solid #a15c2e" : "1px solid #e7ded0",
-                borderRadius: "6px",
-                backgroundColor: line1.text === t ? "#a15c2e" : "#fbf7f1",
-                color: line1.text === t ? "#ffffff" : "#6e6259",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-              }}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          gap: "4px",
-          backgroundColor: "#f4eee3",
-          padding: "4px",
-          borderRadius: "8px",
-          border: "1px solid #e7ded0",
+      <EventTitleSelector
+        currentTitle={line1.text}
+        onSelectTitle={(t) => {
+          hasUserEdited.current = true;
+          setLine1((prev) => ({ ...prev, text: t }));
+          setActiveLineTab(1);
         }}
-      >
-        {[
-          { id: 1, label: "Dòng 1 (Lễ)" },
-          { id: 2, label: "Dòng 2 (Cô Dâu)" },
-          { id: 3, label: "Dòng 3 (Chú Rể)" },
-          { id: 4, label: "Dòng 4 (Ngày)" },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setActiveLineTab(tab.id as 1 | 2 | 3 | 4)}
-            style={{
-              flex: 1,
-              padding: "6px 2px",
-              fontSize: "11px",
-              fontWeight: "600",
-              border: "none",
-              borderRadius: "6px",
-              backgroundColor: activeLineTab === tab.id ? "#a15c2e" : "transparent",
-              color: activeLineTab === tab.id ? "#ffffff" : "#6e6259",
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              boxShadow: activeLineTab === tab.id ? "0 1px 3px rgba(161, 92, 46, 0.25)" : "none",
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      />
+
+      <LineTabSelector activeLineTab={activeLineTab} onSelectTab={setActiveLineTab} />
 
       <TextLineInspector
         activeLineTab={activeLineTab}
@@ -305,46 +240,13 @@ export const TextAssetCustomizer: React.FC<TextAssetCustomizerProps> = ({
         onFontFamilyChange={handleFontFamilyChange}
       />
 
-      <div>
-        <label
-          style={{
-            fontSize: "11px",
-            color: "#6e6259",
-            fontWeight: "600",
-            display: "block",
-            marginBottom: "6px",
-          }}
-        >
-          Phối Màu &amp; Hiệu Ứng 3D Ánh Kim:
-        </label>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "6px" }}>
-          {COLOR_PRESETS.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => {
-                hasUserEdited.current = true;
-                setSelectedColor(c);
-              }}
-              style={{
-                padding: "8px 10px",
-                fontSize: "11px",
-                fontWeight: "600",
-                border: selectedColor.id === c.id ? "2px solid #a15c2e" : "1px solid #e7ded0",
-                borderRadius: "8px",
-                backgroundColor: selectedColor.id === c.id ? "#fdf7f5" : "#fbf7f1",
-                color: "#271620",
-                textAlign: "left",
-                cursor: "pointer",
-                transition: "all 0.15s ease",
-                boxShadow: selectedColor.id === c.id ? "0 2px 6px rgba(161, 92, 46, 0.12)" : "none",
-              }}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-      </div>
+      <TextColorPresets
+        selectedColor={selectedColor}
+        onSelectColor={(c) => {
+          hasUserEdited.current = true;
+          setSelectedColor(c);
+        }}
+      />
     </div>
   );
 };
