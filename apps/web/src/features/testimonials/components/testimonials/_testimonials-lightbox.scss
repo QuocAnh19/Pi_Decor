@@ -1,0 +1,174 @@
+@use "@/styles/variables" as *;
+
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lightboxTopBar {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-surface);
+  padding-bottom: 12px;
+}
+
+.lightboxInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lightboxAuthor {
+  font-family: $font-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-surface);
+}
+
+.lightboxCounter {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--color-surface);
+  padding: 3px 10px;
+  border-radius: $radius-pill;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.lightboxCloseBtn {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-surface);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: var(--color-surface);
+    color: var(--color-surface-inverse);
+    transform: scale(1.08);
+  }
+}
+
+.lightboxMain {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 0;
+  min-height: 0;
+}
+
+.lightboxImgWrapper {
+  position: relative;
+  max-width: 90vw;
+  max-height: 72vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightboxImg {
+  max-width: 85vw;
+  max-height: 70vh;
+  border-radius: $radius-m;
+  object-fit: contain;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+  user-select: none;
+}
+
+.lightboxNavBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  color: var(--color-surface);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+  &:hover {
+    background: var(--color-surface);
+    color: var(--color-surface-inverse);
+    transform: translateY(-50%) scale(1.1);
+  }
+}
+
+.lightboxNavBtnPrev {
+  left: 0;
+}
+
+.lightboxNavBtnNext {
+  right: 0;
+}
+
+.lightboxThumbs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 14px;
+  max-width: 100%;
+}
+
+.lightboxThumb {
+  width: 52px;
+  height: 52px;
+  border-radius: $radius-s;
+  object-fit: cover;
+  border: 2px solid transparent;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+.lightboxThumbActive {
+  opacity: 1;
+  border-color: var(--color-surface);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+  transform: scale(1.08);
+}

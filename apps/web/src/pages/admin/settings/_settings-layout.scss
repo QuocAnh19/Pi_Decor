@@ -1,0 +1,199 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.headerRow {
+  margin-bottom: 8px;
+}
+
+.title {
+  font-family: $font-serif;
+  font-size: $text-2xl;
+  font-weight: 700;
+  color: $admin-text;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: $text-sm;
+  color: $admin-text-faint;
+  margin-top: 6px;
+  margin-bottom: 0;
+}
+
+/* Status alerts */
+.alertSuccess {
+  font-size: 13px;
+  color: $admin-success;
+  background: $admin-success-subtle;
+  border: 1px solid rgba($admin-success, 0.3);
+  border-radius: $radius-s;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.alertError {
+  font-size: 13px;
+  color: $admin-danger;
+  background: $admin-danger-subtle;
+  border: 1px solid rgba($admin-danger, 0.3);
+  border-radius: $radius-s;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.alertClose {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.infoBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: $admin-text-muted;
+  background: $admin-surface-raised;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  padding: 12px 16px;
+}
+
+/* Card Section */
+.card {
+  background: $admin-surface;
+  border: 1px solid $admin-border;
+  border-radius: $radius-l;
+  padding: 24px;
+  box-shadow: $admin-shadow-card;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  border-bottom: 1px solid $admin-border;
+  padding-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  font-family: $font-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: $admin-text;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardDesc {
+  font-size: 13px;
+  color: $admin-text-faint;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+/* Badges */
+.badgeOwner {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: $radius-pill;
+  font-size: 11px;
+  font-weight: 700;
+  /* stylelint-disable-next-line color-no-hex -- Màu avatar quản trị viên */
+  color: #7b471f;
+  /* stylelint-disable-next-line color-no-hex -- Nền avatar quản trị viên */
+  background: #f8e3cd;
+  border: 1px solid rgba(161, 92, 46, 0.3);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.badgeAdmin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: $radius-pill;
+  font-size: 11px;
+  font-weight: 600;
+  color: $admin-text-muted;
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.currentBadge {
+  font-size: 11px;
+  color: $admin-text-faint;
+  font-style: italic;
+}
+
+/* Table */
+.tableWrapper {
+  overflow-x: auto;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+
+  th {
+    background: $admin-bg;
+    color: $admin-text-muted;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 1px solid $admin-border;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid $admin-border;
+    color: $admin-text;
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: rgba(244, 238, 227, 0.4);
+  }
+}

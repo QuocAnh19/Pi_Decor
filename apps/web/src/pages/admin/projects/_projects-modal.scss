@@ -1,0 +1,267 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(39, 22, 32, 0.4);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modalContent {
+  background-color: $admin-surface;
+  border-radius: $radius-l;
+  border: 1px solid $admin-border;
+  box-shadow: $admin-shadow-modal;
+  width: 100%;
+  max-width: 980px;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  padding: 20px 24px;
+  border-bottom: 1px solid $admin-border;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    font-family: $font-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: $admin-text;
+    margin: 0;
+  }
+}
+
+.modalBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: $admin-text-muted;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 9px 12px;
+    background-color: $admin-bg;
+    border: 1px solid $admin-border;
+    border-radius: $radius-s;
+    color: $admin-text;
+    font-size: 13px;
+    outline: none;
+
+    &:focus {
+      border-color: $admin-accent;
+    }
+  }
+
+  textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+}
+
+.formFull {
+  grid-column: 1 / -1;
+}
+
+.imagePreviewBox {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 240px;
+  border-radius: $radius-m;
+  overflow: hidden;
+  border: 1px solid $admin-border;
+  background-color: $admin-bg;
+  margin-top: 8px;
+}
+
+.imagePreview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.uploadDropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 16px;
+  background-color: $admin-bg;
+  border: 2px dashed $admin-border;
+  border-radius: $radius-m;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+
+  &:hover {
+    border-color: $admin-accent;
+    background-color: $admin-accent-subtle;
+  }
+}
+
+.uploadIcon {
+  color: $admin-accent;
+}
+
+.uploadText {
+  font-size: 13px;
+  font-weight: 600;
+  color: $admin-text;
+}
+
+.uploadHint {
+  font-size: 11px;
+  color: $admin-text-faint;
+}
+
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.galleryItem {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: $radius-s;
+  overflow: hidden;
+  border: 1px solid $admin-border;
+  background-color: $admin-bg;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    border-color: $admin-accent;
+    transform: translateY(-2px);
+  }
+}
+
+.galleryThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.galleryItemActions {
+  position: absolute;
+  inset: 0;
+  background: rgba(39, 22, 32, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+
+  .galleryItem:hover & {
+    opacity: 1;
+  }
+}
+
+.galleryActionBtn {
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: $radius-s;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.makeCoverBtn {
+  background-color: $admin-accent;
+  color: var(--color-surface);
+
+  &:hover {
+    background-color: $admin-accent-hover;
+  }
+}
+
+.deleteThumbBtn {
+  background-color: $admin-danger;
+  color: var(--color-surface);
+
+  &:hover {
+    /* stylelint-disable-next-line color-no-hex -- Màu tag thể loại dự án đặc thù */
+    background-color: #c97188;
+  }
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  border-top: 1px solid $admin-border;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancelBtn {
+  padding: 9px 18px;
+  background-color: $admin-bg;
+  color: $admin-text-muted;
+  border: 1px solid $admin-border;
+  border-radius: $radius-s;
+  font-size: $text-sm;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    color: $admin-text;
+    background-color: $admin-surface-raised;
+  }
+}
+
+.submitBtn {
+  padding: 9px 20px;
+  background-color: $admin-accent;
+  color: var(--color-surface);
+  border: none;
+  border-radius: $radius-s;
+  font-size: $text-sm;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+  }
+}

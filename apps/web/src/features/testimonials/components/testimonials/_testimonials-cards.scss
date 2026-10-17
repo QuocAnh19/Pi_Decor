@@ -1,0 +1,188 @@
+@use "@/styles/variables" as *;
+
+.sectionHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.writeReviewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(161, 92, 46, 0.3);
+  background: rgba(161, 92, 46, 0.08);
+  color: $color-accent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $color-accent;
+    color: var(--color-surface);
+    border-color: $color-accent;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(161, 92, 46, 0.25);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: $radius-l;
+  border: 1px solid $color-line;
+  background: $color-paper;
+  padding: 24px;
+  box-shadow: $shadow-sm;
+  transition: all $transition-default;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-default;
+  }
+}
+
+.quoteMark {
+  font-family: $font-serif;
+  font-size: 3rem;
+  line-height: 1;
+  color: rgba(161, 92, 46, 0.2);
+  margin-bottom: -16px;
+}
+
+.starsRow {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+
+.quote {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: $color-ink;
+  flex: 1;
+}
+
+.photosRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.photoThumb {
+  width: 56px;
+  height: 56px;
+  border-radius: $radius-s;
+  object-fit: cover;
+  border: 1px solid $color-line;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+
+  &:hover {
+    transform: scale(1.08);
+  }
+}
+
+.figcaption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid $color-line;
+}
+
+.avatar {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.avatarRose {
+  background: rgba($color-material-rose, 0.35);
+  /* stylelint-disable-next-line color-no-hex -- Màu trích dẫn khách hàng PiKids */
+  color: #7a3540;
+}
+
+.avatarSage {
+  background: rgba($color-material-sage, 0.4);
+  /* stylelint-disable-next-line color-no-hex -- Màu trích dẫn khách hàng PiEvent */
+  color: #3e5a32;
+}
+
+.avatarSand {
+  background: rgba($color-material-sand, 0.4);
+  /* stylelint-disable-next-line color-no-hex -- Màu trích dẫn khách hàng PiWedding */
+  color: #6e4a20;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $color-ink;
+}
+
+.role {
+  font-size: 0.75rem;
+  color: $color-ink-muted;
+}
+
+.loadMoreWrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.loadMoreBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: $radius-pill;
+  border: 1px solid $color-line;
+  background: $color-paper;
+  color: $color-ink;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-default;
+
+  &:hover {
+    background: $color-paper-dim;
+    border-color: $color-accent;
+  }
+}

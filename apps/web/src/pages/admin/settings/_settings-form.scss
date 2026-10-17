@@ -1,0 +1,168 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+@use "@/styles/mixins" as *;
+
+/* Forms */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: $admin-text;
+}
+
+.input {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: $admin-text;
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  outline: none;
+  transition:
+    border-color $transition-default,
+    background-color $transition-default;
+
+  &:focus {
+    border-color: $admin-accent;
+    background: var(--color-surface);
+  }
+
+  &::placeholder {
+    color: $admin-text-faint;
+  }
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.buttonPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: $radius-pill;
+  border: none;
+  background: $admin-accent;
+  color: var(--color-surface);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color $transition-default,
+    transform $transition-default;
+
+  &:hover:not(:disabled) {
+    background: $admin-accent-hover;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @include focus-ring;
+}
+
+.buttonSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: var(--color-surface);
+  color: $admin-text;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color $transition-default,
+    border-color $transition-default;
+
+  &:hover:not(:disabled) {
+    background: $admin-surface-raised;
+    border-color: $admin-text-faint;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.buttonDanger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: $radius-pill;
+  border: 1px solid rgba($admin-danger, 0.3);
+  background: $admin-danger-subtle;
+  color: $admin-danger;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all $transition-default;
+
+  &:hover:not(:disabled) {
+    background: $admin-danger;
+    color: var(--color-surface);
+    border-color: $admin-danger;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Create Form Collapsible / Card */
+.createSection {
+  background: $admin-bg;
+  border: 1px solid $admin-border;
+  border-radius: $radius-m;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.createSectionTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: $admin-text;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

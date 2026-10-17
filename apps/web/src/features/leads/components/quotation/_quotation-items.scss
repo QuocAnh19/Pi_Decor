@@ -1,0 +1,171 @@
+@use "@/styles/variables" as *;
+@use "@/styles/admin-variables" as *;
+
+.fetchingNotice {
+  color: $admin-accent;
+  font-size: 13px;
+  margin: 0 0 12px;
+  font-style: italic;
+}
+
+.errorBanner {
+  color: $admin-danger;
+  background: $admin-danger-subtle;
+  border: 1px solid rgba(180, 88, 107, 0.3);
+  padding: 10px 14px;
+  border-radius: $radius-s;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.successNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: $admin-success;
+  background: $admin-success-subtle;
+  border: 1px solid rgba(110, 143, 92, 0.3);
+  padding: 10px 14px;
+  border-radius: $radius-s;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.itemsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  h4 {
+    font-family: $font-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: $admin-text;
+    margin: 0;
+  }
+}
+
+.addItemBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid $admin-border;
+  background: $admin-accent-subtle;
+  border-radius: $radius-pill;
+  font-size: 12px;
+  font-weight: 700;
+  color: $admin-accent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-accent;
+    color: var(--color-surface);
+    border-color: $admin-accent;
+  }
+}
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: $radius-m;
+  border: 1px solid $admin-border;
+  background: var(--color-surface);
+}
+
+.itemsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 680px;
+
+  th,
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid $admin-border;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    background: $admin-bg;
+    color: $admin-text-muted;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  tbody tr {
+    background: var(--color-surface);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: var(--color-surface-hover);
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+.colDesc {
+  width: 44%;
+}
+.colQty {
+  width: 12%;
+  text-align: center;
+}
+.colPrice {
+  width: 22%;
+}
+.colSubtotal {
+  width: 16%;
+  white-space: nowrap;
+  font-weight: 700;
+  color: $admin-accent;
+  font-size: 14px;
+}
+.colAction {
+  width: 6%;
+  text-align: center;
+}
+
+.removeBtn {
+  border: 1px solid $admin-danger-subtle;
+  background: $admin-danger-subtle;
+  color: $admin-danger;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: $admin-danger;
+    color: var(--color-surface);
+    border-color: $admin-danger;
+  }
+}
