@@ -50,7 +50,7 @@
   transition: background-color 0.15s ease;
 
   &:hover td {
-    background: #fdf7f5;
+    background: var(--color-surface-hover);
   }
 
   &:last-child td {
@@ -158,18 +158,19 @@
 
 .statusNew {
   color: $admin-warning;
-  background: #fdfaf3;
+  background: var(--color-paper);
   border-color: rgba($admin-warning, 0.5);
 }
 
 .statusContacted {
   color: $admin-accent;
-  background: #faf4ee;
+  background: var(--color-paper);
   border-color: rgba($admin-accent, 0.5);
 }
 
 .statusClosed {
   color: $admin-success;
+  /* stylelint-disable-next-line color-no-hex -- Nền dòng lead đã chuyển đổi */
   background: #f4f8f1;
   border-color: rgba($admin-success, 0.5);
 }

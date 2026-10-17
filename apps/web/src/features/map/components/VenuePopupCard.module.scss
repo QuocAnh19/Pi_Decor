@@ -175,7 +175,7 @@
 
   &:hover {
     border-color: $color-accent;
-    background: #fdf7f5;
+    background: var(--color-surface-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 14px rgba(161, 92, 46, 0.12);
 

@@ -82,8 +82,9 @@
 .submitBtn {
   padding: 8px 16px;
   border-radius: 8px;
+  /* stylelint-disable-next-line color-no-hex -- Màu sắc đặc thù riêng cho component */
   background: #a15c2e;
-  color: #ffffff;
+  color: var(--color-surface);
   border: none;
   font-size: 13px;
   font-weight: 600;
@@ -102,7 +103,7 @@
 
 .errorMessage {
   font-size: 12px;
-  color: #dc2626;
+  color: var(--color-status-danger-hover);
   margin: 0;
 }
 
@@ -189,32 +190,44 @@
 }
 
 .badgeStatus {
+  /* stylelint-disable-next-line color-no-hex -- Nền badge ghi chú timeline */
   background: #fef3c7;
+  /* stylelint-disable-next-line color-no-hex -- Màu chữ badge ghi chú timeline */
   color: #92400e;
 }
 
 .badgeNote {
+  /* stylelint-disable-next-line color-no-hex -- Nền badge cuộc gọi timeline */
   background: #e0e7ff;
+  /* stylelint-disable-next-line color-no-hex -- Chữ badge cuộc gọi timeline */
   color: #3730a3;
 }
 
 .badgeCall {
+  /* stylelint-disable-next-line color-no-hex -- Nền badge đổi trạng thái timeline */
   background: #dcfce7;
+  /* stylelint-disable-next-line color-no-hex -- Chữ badge đổi trạng thái timeline */
   color: #166534;
 }
 
 .badgeEmail {
+  /* stylelint-disable-next-line color-no-hex -- Nền badge báo giá timeline */
   background: #f3e8ff;
+  /* stylelint-disable-next-line color-no-hex -- Chữ badge báo giá timeline */
   color: #6b21a8;
 }
 
 .badgeQuotation {
+  /* stylelint-disable-next-line color-no-hex -- Nền nút xóa xác nhận modal cảnh báo */
   background: #fee2e2;
+  /* stylelint-disable-next-line color-no-hex -- Chữ badge hủy lead timeline */
   color: #991b1b;
 }
 
 .badgeSystem {
+  /* stylelint-disable-next-line color-no-hex -- Nền badge hệ thống timeline */
   background: #f1f5f9;
+  /* stylelint-disable-next-line color-no-hex -- Chữ badge hệ thống timeline */
   color: #475569;
 }
 
@@ -274,5 +287,5 @@
 }
 
 .errorTimeline {
-  color: #dc2626;
+  color: var(--color-status-danger-hover);
 }

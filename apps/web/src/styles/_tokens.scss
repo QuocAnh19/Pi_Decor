@@ -84,6 +84,35 @@
   --color-warning-rgb: 185, 138, 62;
   --color-warning-subtle: #f5ead6;
   --color-warning-subtle-rgb: 245, 234, 214;
+
+  // ── Extended Semantic Tokens (P36) ──────────────────────────────────
+  --color-status-success: #47663b;
+  --color-status-success-bg: #eef4ea;
+  --color-status-success-rgb: 71, 102, 59;
+  --color-status-danger: #ef4444;
+  --color-status-danger-hover: #dc2626;
+  --color-status-danger-rgb: 239, 68, 68;
+  --color-action-danger: #e53e3e;
+  --color-action-danger-rgb: 229, 62, 62;
+  --color-badge-gold-from: #b45309;
+  --color-badge-gold-to: #d97706;
+
+  --color-surface-hover: #fdf7f5;
+  --color-surface-muted: #f7fafc;
+  --color-surface-cream: #fdfaf6;
+  --color-surface-inverse: #0f172a;
+  --color-alert-danger-bg: #fff5f5;
+  --color-alert-danger-border: #feb2b2;
+  --color-skeleton-base: #ede7df;
+  --color-skeleton-highlight: #f5efe8;
+
+  --color-border-subtle: #e2e8f0;
+  --color-border-dark: #334155;
+  --color-text-primary: #2d3748;
+  --color-text-secondary: #4a5568;
+  --color-text-subtle: #718096;
+  --color-text-muted-alt: #94a3b8;
+  --color-text-inverse: #f8fafc;
   /* stylelint-enable color-no-hex */
 
   // ── Layout & Radius ──────────────────────────────────────────────────
@@ -154,6 +183,32 @@ $color-success: var(--color-success);
 $color-success-subtle: var(--color-success-subtle);
 $color-warning: var(--color-warning);
 $color-warning-subtle: var(--color-warning-subtle);
+
+// Extended Semantic Tokens (P36)
+$color-status-success: var(--color-status-success);
+$color-status-success-bg: var(--color-status-success-bg);
+$color-status-danger: var(--color-status-danger);
+$color-status-danger-hover: var(--color-status-danger-hover);
+$color-action-danger: var(--color-action-danger);
+$color-badge-gold-from: var(--color-badge-gold-from);
+$color-badge-gold-to: var(--color-badge-gold-to);
+
+$color-surface-hover: var(--color-surface-hover);
+$color-surface-muted: var(--color-surface-muted);
+$color-surface-cream: var(--color-surface-cream);
+$color-surface-inverse: var(--color-surface-inverse);
+$color-alert-danger-bg: var(--color-alert-danger-bg);
+$color-alert-danger-border: var(--color-alert-danger-border);
+$color-skeleton-base: var(--color-skeleton-base);
+$color-skeleton-highlight: var(--color-skeleton-highlight);
+
+$color-border-subtle: var(--color-border-subtle);
+$color-border-dark: var(--color-border-dark);
+$color-text-primary: var(--color-text-primary);
+$color-text-secondary: var(--color-text-secondary);
+$color-text-subtle: var(--color-text-subtle);
+$color-text-muted-alt: var(--color-text-muted-alt);
+$color-text-inverse: var(--color-text-inverse);
 
 // Admin Aliases
 $admin-bg: var(--color-paper-dim);

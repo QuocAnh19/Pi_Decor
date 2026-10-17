@@ -30,6 +30,7 @@
 
 .published {
   background: var(--color-success-subtle);
+  /* stylelint-disable-next-line color-no-hex -- Màu chữ badge đã duyệt */
   color: #436a32;
   border: 1px solid rgba(67, 106, 50, 0.3);
 }
@@ -42,6 +43,7 @@
 
 .warning {
   background: var(--color-warning-subtle);
+  /* stylelint-disable-next-line color-no-hex -- Màu chữ badge đang xử lý */
   color: #8e631d;
   border: 1px solid rgba(142, 99, 29, 0.3);
 }

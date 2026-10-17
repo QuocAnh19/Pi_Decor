@@ -38,7 +38,12 @@
   height: 100%;
   min-height: 340px;
   border-radius: $radius-l;
-  background: linear-gradient(90deg, #ede7df 25%, #f5efe8 50%, #ede7df 75%);
+  background: linear-gradient(
+    90deg,
+    var(--color-skeleton-base) 25%,
+    var(--color-skeleton-highlight) 50%,
+    var(--color-skeleton-base) 75%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -60,7 +65,9 @@
 .errorBox {
   padding: 40px 24px;
   text-align: center;
+  /* stylelint-disable-next-line color-no-hex -- Nền thẻ rỗng Lookbook/Services */
   background: #fdf6f0;
+  /* stylelint-disable-next-line color-no-hex -- Viền thẻ thông báo Lookbook/Services */
   border: 1px solid #f0d5c0;
   border-radius: $radius-l;
   color: $color-ink;
@@ -69,6 +76,7 @@
 .errorMessage {
   font-size: 0.9375rem;
   margin-bottom: 16px;
+  /* stylelint-disable-next-line color-no-hex -- Chữ tiêu đề thẻ thông báo Lookbook/Services */
   color: #a1421f;
 }
 
@@ -95,8 +103,10 @@
   padding: 48px 24px;
   text-align: center;
   background: rgba(251, 247, 241, 0.6);
+  /* stylelint-disable-next-line color-no-hex -- Viền nét đứt khung upload/empty */
   border: 1px dashed #d5c8b8;
   border-radius: $radius-l;
+  /* stylelint-disable-next-line color-no-hex -- Chữ mô tả khung rỗng */
   color: #7a6e60;
   font-size: 0.9375rem;
 }

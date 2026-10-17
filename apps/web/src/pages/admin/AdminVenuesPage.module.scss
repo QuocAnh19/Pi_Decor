@@ -110,7 +110,7 @@
   &:hover {
     border-color: $admin-text-faint;
     color: $admin-text;
-    background-color: #fdfaf6;
+    background-color: var(--color-surface-cream);
   }
 }
 

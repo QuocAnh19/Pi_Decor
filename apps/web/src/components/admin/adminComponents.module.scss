@@ -211,7 +211,7 @@
   transition: background-color 0.15s ease;
 
   &:hover {
-    background-color: #fdf7f5;
+    background-color: var(--color-surface-hover);
   }
   &:last-child {
     border-bottom: none;
@@ -231,6 +231,7 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
+  /* stylelint-disable-next-line color-no-hex -- Nền nút xóa xác nhận modal cảnh báo */
   background-color: #fee2e2;
   display: flex;
   align-items: center;
@@ -251,6 +252,7 @@
 .confirmDeleteWarning {
   margin-top: 8px !important;
   font-size: 13px;
+  /* stylelint-disable-next-line color-no-hex -- Chữ cảnh báo nút xóa nguy hiểm */
   color: #b91c1c;
   font-weight: 500;
 }
@@ -288,7 +290,7 @@
   padding: 8px 20px;
   border-radius: $radius-pill;
   border: none;
-  background-color: #dc2626;
+  background-color: var(--color-status-danger-hover);
   color: var(--color-surface);
   font-size: 13px;
   font-weight: 600;
@@ -297,6 +299,7 @@
   transition: all 0.15s ease;
 
   &:hover:not(:disabled) {
+    /* stylelint-disable-next-line color-no-hex -- Chữ cảnh báo nút xóa nguy hiểm */
     background-color: #b91c1c;
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
   }

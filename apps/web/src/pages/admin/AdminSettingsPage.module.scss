@@ -275,7 +275,9 @@
   border-radius: $radius-pill;
   font-size: 11px;
   font-weight: 700;
+  /* stylelint-disable-next-line color-no-hex -- Màu avatar quản trị viên */
   color: #7b471f;
+  /* stylelint-disable-next-line color-no-hex -- Nền avatar quản trị viên */
   background: #f8e3cd;
   border: 1px solid rgba(161, 92, 46, 0.3);
   letter-spacing: 0.3px;

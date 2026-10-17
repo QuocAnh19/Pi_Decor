@@ -23,6 +23,7 @@
 .gmapsHeader {
   font-size: 12px;
   font-weight: 600;
+  /* stylelint-disable-next-line color-no-hex -- Màu ghim bản đồ địa điểm */
   color: #38bdf8;
   display: flex;
   align-items: center;
@@ -35,8 +36,9 @@
 
 .searchLocationBtn {
   padding: 0 14px;
+  /* stylelint-disable-next-line color-no-hex -- Màu ghim bản đồ địa điểm */
   background-color: #38bdf8;
-  color: #0f172a;
+  color: var(--color-surface-inverse);
   border: none;
   border-radius: 6px;
   font-weight: 600;
@@ -49,6 +51,7 @@
   transition: background-color 0.15s ease;
 
   &:hover:not(:disabled) {
+    /* stylelint-disable-next-line color-no-hex -- Màu pin bản đồ được chọn */
     background-color: #0284c7;
     color: var(--color-surface);
   }
@@ -61,12 +64,13 @@
 
 .gmapsHint {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--color-text-muted-alt);
   margin: 2px 0 0 0;
 }
 
 .gmapsSuccess {
   font-size: 12px;
+  /* stylelint-disable-next-line color-no-hex -- Màu icon đánh dấu thành công */
   color: #10b981;
   font-weight: 600;
   display: flex;
@@ -78,7 +82,7 @@
 .toggleCoordsBtn {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--color-text-muted-alt);
   font-size: 11px;
   cursor: pointer;
   display: flex;
@@ -87,7 +91,7 @@
   padding: 0;
 
   &:hover {
-    color: #f8fafc;
+    color: var(--color-text-inverse);
   }
 }
 

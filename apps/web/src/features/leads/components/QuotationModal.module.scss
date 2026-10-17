@@ -121,7 +121,7 @@
     transition: background-color 0.15s ease;
 
     &:hover {
-      background: #fdf7f5;
+      background: var(--color-surface-hover);
     }
 
     &:last-child td {

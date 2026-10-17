@@ -129,14 +129,17 @@
 
 .avatarRose {
   background: rgba($color-material-rose, 0.35);
+  /* stylelint-disable-next-line color-no-hex -- Màu trích dẫn khách hàng PiKids */
   color: #7a3540;
 }
 .avatarSage {
   background: rgba($color-material-sage, 0.4);
+  /* stylelint-disable-next-line color-no-hex -- Màu trích dẫn khách hàng PiEvent */
   color: #3e5a32;
 }
 .avatarSand {
   background: rgba($color-material-sand, 0.4);
+  /* stylelint-disable-next-line color-no-hex -- Màu trích dẫn khách hàng PiWedding */
   color: #6e4a20;
 }
 
@@ -254,7 +257,7 @@
 
   &:hover {
     background: var(--color-surface);
-    color: #0f172a;
+    color: var(--color-surface-inverse);
     transform: scale(1.08);
   }
 }
@@ -310,7 +313,7 @@
 
   &:hover {
     background: var(--color-surface);
-    color: #0f172a;
+    color: var(--color-surface-inverse);
     transform: translateY(-50%) scale(1.1);
   }
 }

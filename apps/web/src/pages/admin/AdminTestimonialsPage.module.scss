@@ -193,7 +193,7 @@
   tbody tr {
     transition: background-color 0.15s ease;
     &:hover {
-      background-color: #fdf7f5;
+      background-color: var(--color-surface-hover);
     }
   }
 
@@ -217,8 +217,8 @@
 }
 
 .badgeApproved {
-  background: #eef4ea;
-  color: #47663b;
+  background: var(--color-status-success-bg);
+  color: var(--color-status-success);
   border: 1px solid rgba(71, 102, 59, 0.3);
 }
 
@@ -236,9 +236,9 @@
 
 .btnApprove {
   padding: 5px 10px;
-  border: 1px solid #47663b;
-  background: #eef4ea;
-  color: #47663b;
+  border: 1px solid var(--color-status-success);
+  background: var(--color-status-success-bg);
+  color: var(--color-status-success);
   border-radius: $radius-s;
   font-weight: 700;
   font-size: 12px;
@@ -249,7 +249,7 @@
   transition: all 0.15s ease;
 
   &:hover {
-    background: #47663b;
+    background: var(--color-status-success);
     color: var(--color-surface);
   }
 }

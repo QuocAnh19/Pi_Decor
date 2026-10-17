@@ -16,7 +16,7 @@
 .starLabel {
   font-size: 12px;
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--color-text-inverse);
 }
 
 .starRating {
@@ -45,7 +45,7 @@
 .uploadFieldLabel {
   font-size: 12px;
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--color-text-inverse);
 }
 
 .uploadDropzone {
@@ -54,9 +54,9 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  border: 2px dashed #334155;
+  border: 2px dashed var(--color-border-dark);
   border-radius: $radius-m;
-  background: #0f172a;
+  background: var(--color-surface-inverse);
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -74,12 +74,12 @@
 .uploadText {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--color-text-inverse);
 }
 
 .uploadHint {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--color-text-muted-alt);
 }
 
 .previewThumbRow {
@@ -94,7 +94,7 @@
   height: 64px;
   border-radius: $radius-s;
   overflow: hidden;
-  border: 1px solid #334155;
+  border: 1px solid var(--color-border-dark);
 
   img {
     width: 100%;
@@ -120,7 +120,7 @@
   justify-content: center;
 
   &:hover {
-    background: #ef4444;
+    background: var(--color-status-danger);
   }
 }
 

@@ -4,7 +4,7 @@
     "color-no-hex": [
       true,
       {
-        "severity": "warning",
+        "severity": "error",
         "message": "Không sử dụng mã hex viết cứng trong SCSS module mới. Hãy sử dụng CSS Custom Properties var(--token) hoặc biến SCSS tương ứng từ styles/tokens."
       }
     ],
@@ -29,5 +29,17 @@
     "property-no-vendor-prefix": null,
     "declaration-block-no-redundant-longhand-properties": null
   },
+  "overrides": [
+    {
+      "files": [
+        "src/styles/_tokens.scss",
+        "src/styles/_variables.scss",
+        "src/styles/_admin-variables.scss"
+      ],
+      "rules": {
+        "color-no-hex": null
+      }
+    }
+  ],
   "ignoreFiles": ["dist/**", "node_modules/**"]
 }

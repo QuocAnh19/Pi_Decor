@@ -89,7 +89,7 @@
   &:hover {
     border-color: $admin-text-faint;
     color: $admin-text;
-    background: #fdfaf6;
+    background: var(--color-surface-cream);
   }
 }
 
@@ -150,14 +150,14 @@
   transition: all 0.15s ease;
 
   &:hover {
-    background: #fdfaf6;
+    background: var(--color-surface-cream);
     border-color: rgba(161, 92, 46, 0.4);
     transform: translateX(2px);
   }
 }
 
 .itemActive {
-  background: #fdf7f5 !important;
+  background: var(--color-surface-hover) !important;
   border-color: $admin-accent !important;
   box-shadow: 0 2px 8px rgba(161, 92, 46, 0.15);
 
@@ -228,6 +228,6 @@
 }
 
 .iconButtonDanger:hover {
-  color: #ef4444;
+  color: var(--color-status-danger);
   background: rgba(239, 68, 68, 0.1);
 }

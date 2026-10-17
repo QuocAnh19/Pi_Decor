@@ -23,12 +23,12 @@
 .label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-text-main, #2d3748);
+  color: var(--color-text-main, var(--color-text-primary));
 }
 
 .hint {
   font-size: 0.75rem;
-  color: var(--color-text-muted, #718096);
+  color: var(--color-text-muted, var(--color-text-subtle));
 }
 
 .accentPicker {
@@ -46,18 +46,21 @@
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
-  border: 1px solid #e2e8f0;
-  background: #fff;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
   transition: all 0.15s ease-in-out;
 
   &:hover {
+    /* stylelint-disable-next-line color-no-hex -- Viền input khi chưa tương tác */
     border-color: #cbd5e0;
   }
 }
 
 .accentActive {
+  /* stylelint-disable-next-line color-no-hex -- Màu sắc đặc thù riêng cho component */
   border-color: var(--color-primary, #a15c2e);
   background: rgba(161, 92, 46, 0.08);
+  /* stylelint-disable-next-line color-no-hex -- Màu sắc đặc thù riêng cho component */
   color: var(--color-primary, #a15c2e);
 }
 
@@ -68,14 +71,17 @@
 }
 
 .dotWedding {
+  /* stylelint-disable-next-line color-no-hex -- Màu swatch mẫu Sand */
   background: #c88a58;
 }
 
 .dotKids {
+  /* stylelint-disable-next-line color-no-hex -- Màu swatch mẫu Terracotta */
   background: #e07a5f;
 }
 
 .dotEvent {
+  /* stylelint-disable-next-line color-no-hex -- Màu swatch mẫu Deep Blue */
   background: #2a4365;
 }
 
@@ -92,8 +98,9 @@
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: #f7fafc;
-  border: 1px solid #e2e8f0;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-subtle);
+  /* stylelint-disable-next-line color-no-hex -- Màu sắc đặc thù riêng cho component */
   color: #a15c2e;
 }
 
@@ -120,14 +127,14 @@
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  color: #4a5568;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   cursor: pointer;
 
   &:hover:not(:disabled) {
-    background: #f7fafc;
-    color: #2d3748;
+    background: var(--color-surface-muted);
+    color: var(--color-text-primary);
   }
 
   &:disabled {
@@ -138,15 +145,16 @@
 
 .itemDeleteBtn {
   &:hover:not(:disabled) {
-    background: #fff5f5;
-    color: #e53e3e;
-    border-color: #feb2b2;
+    background: var(--color-alert-danger-bg);
+    color: var(--color-action-danger);
+    border-color: var(--color-alert-danger-border);
   }
 }
 
 .addItemBtn {
   align-self: flex-start;
   font-size: 0.8125rem;
+  /* stylelint-disable-next-line color-no-hex -- Màu sắc đặc thù riêng cho component */
   color: #a15c2e;
   background: none;
   border: none;
@@ -174,7 +182,7 @@
   height: 44px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-border-subtle);
 }
 
 .checkboxLabel {
@@ -188,7 +196,7 @@
 
 .errorText {
   font-size: 0.75rem;
-  color: #e53e3e;
+  color: var(--color-action-danger);
 }
 
 .actions {
@@ -197,5 +205,5 @@
   gap: 0.75rem;
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-border-subtle);
 }

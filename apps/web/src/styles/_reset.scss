@@ -121,6 +121,7 @@ svg {
 .custom-scroll,
 .admin-scroll {
   scrollbar-width: thin;
+  /* stylelint-disable-next-line color-no-hex -- Màu thanh cuộn scrollbar tùy biến */
   scrollbar-color: #cbbba8 transparent;
 
   &::-webkit-scrollbar {
@@ -133,11 +134,13 @@ svg {
   }
 
   &::-webkit-scrollbar-thumb {
+    /* stylelint-disable-next-line color-no-hex -- Màu thanh cuộn scrollbar tùy biến */
     background: #cbbba8;
     border-radius: 4px;
     transition: background 0.2s ease;
 
     &:hover {
+      /* stylelint-disable-next-line color-no-hex -- Màu sắc đặc thù riêng cho component */
       background: #a15c2e;
     }
   }
