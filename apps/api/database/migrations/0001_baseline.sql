@@ -49,7 +49,7 @@ comment on table designs is 'Saved Konva canvas snapshots (Interactive Workspace
 create table if not exists materials (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  category text not null check (category in ('fabric', 'flower', 'arch', 'prop', 'lighting')),
+  category text not null check (category in ('fabric', 'flower', 'flowers', 'arch', 'prop', 'lighting', 'drape_detail', 'text_name')),
   color_hex text,
   image_url text,
   created_at timestamptz not null default now(),
@@ -114,7 +114,7 @@ create table if not exists lead_activities (
   id uuid primary key default gen_random_uuid(),
   lead_id uuid not null references leads(id) on delete cascade,
   admin_id uuid references admins(id) on delete set null,
-  activity_type text not null check (activity_type in ('status_change', 'note', 'quotation_sent', 'call_logged', 'system')),
+  activity_type text not null check (activity_type in ('status_change', 'note', 'quotation_sent', 'call_logged', 'system', 'call', 'email', 'design_saved')),
   body text, metadata jsonb,
   created_at timestamptz not null default now()
 );
@@ -128,7 +128,7 @@ create table if not exists quotations (
   subtotal int not null default 0,
   discount int not null default 0,
   total int not null default 0,
-  status text not null default 'draft' check (status in ('draft', 'sent', 'accepted', 'rejected', 'expired')),
+  status text not null default 'draft' check (status in ('draft', 'sent', 'accepted', 'rejected', 'declined', 'expired')),
   valid_until date, notes text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

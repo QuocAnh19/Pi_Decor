@@ -26,6 +26,10 @@ ENV PORT=4000
 # Nâng cấp các gói hệ điều hành Alpine lên bản vá bảo mật mới nhất
 RUN apk upgrade --no-cache
 
+# Gỡ bỏ npm, npx và cache toàn cục không sử dụng trong production runtime
+# Loại trừ diện tích tấn công và các lỗ hổng phụ thuộc đi kèm npm (như CVE tar)
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx /root/.npm
+
 # Tạo thư mục uploads và phân quyền cho user non-root (node)
 RUN mkdir -p /app/uploads && chown -R node:node /app
 
