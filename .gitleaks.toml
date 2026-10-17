@@ -1,0 +1,18 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist cho file cấu hình mẫu, test fixtures và biến môi trường dev/CI"
+paths = [
+  '''\.env\.example$''',
+  '''apps/api/\.env\.example$''',
+  '''apps/web/\.env\.example$''',
+  '''apps/api/tests/.*''',
+  '''apps/web/src/.*\.test\..*''',
+  '''e2e/.*''',
+]
+regexes = [
+  '''pidecor_dev_only''',
+  '''test_jwt_secret_.*''',
+  '''e2e_jwt_secret_.*''',
+]

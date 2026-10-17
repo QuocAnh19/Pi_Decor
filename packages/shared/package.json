@@ -1,6 +1,8 @@
 {
   "name": "@pidecor/shared",
+  "private": true,
   "version": "1.0.0",
+  "license": "UNLICENSED",
   "type": "module",
   "description": "Shared Zod schemas, DTO types, and constants for Pi Decor monorepo",
   "main": "./dist/index.js",

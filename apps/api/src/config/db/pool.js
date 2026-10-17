@@ -1,7 +1,7 @@
 import pg from "pg";
 import { env } from "../env.js";
 import { logger } from "../logger.js";
-import { resolveSslConfig } from "./ssl.js";
+import { resolveDbConnectionOptions } from "./ssl.js";
 
 /**
  * Kiểm tra xem lỗi có phải do mất kết nối hoặc DB compute đang thức dậy hay không.
@@ -47,9 +47,10 @@ export async function runWithRetry(fn) {
   }
 }
 
+const mainDbOptions = resolveDbConnectionOptions(env.DATABASE_URL, env.DB_SSL, env.DB_SSL_CA);
 export const pool = new pg.Pool({
-  connectionString: env.DATABASE_URL,
-  ssl: resolveSslConfig(env.DATABASE_URL),
+  connectionString: mainDbOptions.connectionString,
+  ssl: mainDbOptions.ssl,
   max: env.DB_POOL_MAX,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 10_000,
@@ -97,9 +98,14 @@ export async function testDbConnection(targetPool = pool, maxRetries = 3, delayM
 let _directPool = null;
 export function getDirectPool() {
   if (!_directPool) {
+    const directDbOptions = resolveDbConnectionOptions(
+      env.DATABASE_URL_DIRECT || env.DATABASE_URL,
+      env.DB_SSL,
+      env.DB_SSL_CA
+    );
     _directPool = new pg.Pool({
-      connectionString: env.DATABASE_URL_DIRECT || env.DATABASE_URL,
-      ssl: resolveSslConfig(env.DATABASE_URL_DIRECT || env.DATABASE_URL),
+      connectionString: directDbOptions.connectionString,
+      ssl: directDbOptions.ssl,
       max: env.DB_POOL_MAX,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,

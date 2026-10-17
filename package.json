@@ -23,7 +23,9 @@
     "e2e": "playwright test",
     "e2e:update": "playwright test -u",
     "launch:check": "node scripts/check-launch-readiness.mjs",
-    "audit:prod": "npm audit --omit=dev --audit-level=high"
+    "audit:prod": "npm audit --omit=dev --audit-level=high",
+    "check:licenses": "node scripts/check-licenses.mjs",
+    "sbom": "npx @cyclonedx/cyclonedx-npm --ignore-npm-errors --output-format JSON --output-file bom.json"
   },
   "overrides": {
     "dompurify": "^3.4.17",

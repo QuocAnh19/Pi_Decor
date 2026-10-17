@@ -29,7 +29,7 @@ Cách tạo role này: xem hướng dẫn từng bước ngay trong file
   - `require`: Mã hóa kết nối nhưng bỏ qua kiểm tra CA (`rejectUnauthorized: false`). Chỉ sử dụng khi bắt buộc và sẽ in cảnh báo bảo mật rõ ràng.
   - `disable`: Tắt SSL (mặc định khi kết nối tới `localhost`, `127.0.0.1` hoặc container `postgres` trong Docker).
 - Hỗ trợ biến `DB_SSL_CA` để truyền chứng chỉ CA tùy chỉnh (chuỗi PEM hoặc đường dẫn file cert) cho các nhà cung cấp sử dụng private CA.
-- Luôn dùng `?sslmode=require` hoặc `?sslmode=verify-full` trong connection string Neon/Supabase.
+- Luôn dùng `?sslmode=verify-full` (hoặc `?uselibpqcompat=true&sslmode=require` cho pg v9) trong connection string Neon/Supabase.
 - Không tắt SSL để "cho dễ debug" kể cả ở staging — dữ liệu `leads` chứa số
   điện thoại, email khách hàng thật.
 
@@ -128,6 +128,6 @@ Không cần tự dựng cơ chế backup riêng ở giai đoạn này.
 - [ ] `JWT_SECRET` là chuỗi random thật, khác giữa các môi trường.
 - [ ] `ADMIN_PASSWORD` đã đổi khỏi giá trị mặc định trong `.env.example`.
 - [ ] `CORS_ORIGIN` chỉ liệt kê domain thật, không có `*`.
-- [ ] `sslmode=require` (hoặc tương đương) có trong connection string.
+- [ ] `sslmode=verify-full` (hoặc tương đương) có trong connection string.
 - [ ] Ảnh upload đã chuyển sang Cloudinary, không còn ghi vào ổ đĩa local.
 - [ ] `.env` không nằm trong git history (`git log --all -- .env`).

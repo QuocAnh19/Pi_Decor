@@ -73,7 +73,7 @@ Sử dụng công cụ tiêu chuẩn `pg_dump` với định dạng nén tùy bi
 ```bash
 # Sao lưu toàn bộ schema và dữ liệu
 pg_dump -Fc -v \
-  -d "postgresql://user:password@host:port/database?sslmode=require" \
+  -d "postgresql://user:password@host:port/database?sslmode=verify-full" \
   -f "pidecor_backup_$(date +%Y%m%d_%H%M%S).dump"
 ```
 
@@ -86,7 +86,7 @@ Sử dụng `pg_restore` để khôi phục dữ liệu từ bản dump:
 ```bash
 # Phục hồi vào cơ sở dữ liệu trống hoặc ghi đè
 pg_restore -v --clean --no-acl --no-owner \
-  -d "postgresql://user:password@host:port/database?sslmode=require" \
+  -d "postgresql://user:password@host:port/database?sslmode=verify-full" \
   "pidecor_backup_YYYYMMDD_HHMMSS.dump"
 ```
 
@@ -184,6 +184,10 @@ Neon Postgres cung cấp 2 chuỗi kết nối riêng biệt cho từng mục đ
 Neon bắt buộc mã hóa SSL cho toàn bộ kết nối từ bên ngoài:
 
 - Mặc định, hệ thống tự động bật chế độ `DB_SSL=verify-full` (xác thực toàn diện chứng chỉ máy chủ nhằm chống tấn công Man-in-the-Middle) cho mọi hostname ngoài `localhost`/`postgres`.
+- **Tương thích `pg v9` và `pg-connection-string v3`**: Thư viện `pg` chuẩn bị đổi ngữ nghĩa `sslmode=require` từ alias của `verify-full` sang chuẩn libpq (chỉ mã hóa, không verify host/CA). Do đó, hệ thống chuẩn hóa chuỗi kết nối tự động:
+  - Khi dùng `DB_SSL=verify-full` (khuyến nghị cho Neon): luôn gắn `sslmode=verify-full` tường minh.
+  - Khi cần chế độ `require` (không verify chứng chỉ): tự động gắn cờ `uselibpqcompat=true&sslmode=require` để tắt cảnh báo deprecation.
+  - Khi dùng local (`disable`): gắn `sslmode=disable`.
 - Nếu container chạy trên Alpine Linux thiếu CA Root ISRG Root X1 của Let's Encrypt, tải chứng chỉ CA và truyền vào biến:
   ```env
   DB_SSL=verify-full

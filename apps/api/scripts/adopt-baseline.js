@@ -1,6 +1,12 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import pg from "pg";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 /**
  * Script đồng bộ cơ sở dữ liệu đã có sang 0001_baseline.sql.
@@ -38,17 +44,42 @@ async function adoptBaseline(customConnectionString) {
   console.log("trước khi áp dụng trên môi trường staging hoặc production.");
   console.log("========================================================\n");
 
-  const isLocalHost = ["localhost", "127.0.0.1", "postgres"].some((h) =>
-    dbUrl.includes(h)
+  let host = "";
+  try {
+    const parsed = new URL(dbUrl);
+    host = parsed.hostname;
+  } catch {
+    const match = dbUrl.match(/@([^:/]+)/);
+    host = match ? match[1] : "";
+  }
+  const isLocalHost = ["localhost", "127.0.0.1", "postgres"].includes(
+    (host || "").toLowerCase()
   );
+  const effectiveSslMode =
+    process.env.DB_SSL || (isLocalHost ? "disable" : "verify-full");
   let ssl = false;
-  const sslMode = process.env.DB_SSL;
-  if (sslMode === "disable") {
-    ssl = false;
-  } else if (sslMode === "require") {
+  if (effectiveSslMode === "require") {
     ssl = { rejectUnauthorized: false };
-  } else if (sslMode === "verify-full" || (!sslMode && !isLocalHost)) {
+  } else if (effectiveSslMode === "verify-full") {
     ssl = { rejectUnauthorized: true };
+  }
+
+  let normalizedDbUrl = dbUrl;
+  try {
+    const parsedUrl = new URL(dbUrl);
+    if (effectiveSslMode === "disable") {
+      parsedUrl.searchParams.set("sslmode", "disable");
+      parsedUrl.searchParams.delete("uselibpqcompat");
+    } else if (effectiveSslMode === "require") {
+      parsedUrl.searchParams.set("sslmode", "require");
+      parsedUrl.searchParams.set("uselibpqcompat", "true");
+    } else if (effectiveSslMode === "verify-full") {
+      parsedUrl.searchParams.set("sslmode", "verify-full");
+      parsedUrl.searchParams.delete("uselibpqcompat");
+    }
+    normalizedDbUrl = parsedUrl.toString();
+  } catch {
+    normalizedDbUrl = dbUrl;
   }
 
   if (ssl && process.env.DB_SSL_CA) {
@@ -65,7 +96,7 @@ async function adoptBaseline(customConnectionString) {
   }
 
   const pool = new pg.Pool({
-    connectionString: dbUrl,
+    connectionString: normalizedDbUrl,
     ssl,
   });
 
