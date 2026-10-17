@@ -3,13 +3,7 @@ import { createServiceSchema, updateServiceSchema } from "../src/schemas/service
 import { createProjectSchema, updateProjectSchema } from "../src/schemas/projects.schema.js";
 import { createTestimonialSchema, updateTestimonialSchema } from "../src/schemas/testimonials.schema.js";
 import { createQuotationSchema, updateQuotationSchema } from "../src/schemas/quotations.schema.js";
-import {
-  createTemplateSchema,
-  publishTemplateSchema,
-  createSlotSchema,
-  createAssetSchema,
-  createRuleSchema,
-} from "../src/schemas/studio.schema.js";
+import { publishTemplateSchema } from "../src/schemas/studio.schema.js";
 import { updateLeadStatusSchema, createLeadActivitySchema } from "../src/schemas/leads.schema.js";
 import { refreshTokenSchema } from "../src/schemas/auth.schema.js";
 import { validate } from "../src/middlewares/validate.js";
@@ -160,14 +154,6 @@ console.log("Running P06 validation tests...");
   assert.equal(pub.rules[0].condition_slot, "slot_a");
   assert.equal(pub.rules[0].target_slot, "slot_b");
 
-  // createSlot
-  assert.throws(() => createSlotSchema.parse({}), /Thiếu thông tin slot_key, label/);
-
-  // createAsset
-  assert.throws(() => createAssetSchema.parse({}), /Thiếu loại asset/);
-
-  // createRule
-  assert.throws(() => createRuleSchema.parse({}), /Thiếu thông tin điều kiện hoặc hành động/);
 }
 
 // 7. Leads PATCH and Lead Activity

@@ -44,10 +44,6 @@ export const studioRepository = {
     return db.insert("studio_slot_definitions", data);
   },
 
-  async updateSlotById(id, patch) {
-    return db.updateById("studio_slot_definitions", id, patch);
-  },
-
   async removeSlotById(id) {
     return db.removeById("studio_slot_definitions", id);
   },
@@ -68,44 +64,8 @@ export const studioRepository = {
     return db.insert("studio_slot_rules", data);
   },
 
-  async updateRuleById(id, patch) {
-    return db.updateById("studio_slot_rules", id, patch);
-  },
-
-  async removeRuleById(id) {
-    return db.removeById("studio_slot_rules", id);
-  },
-
   // Assets
-  async findActiveAssets() {
-    return db.query(`select * from studio_assets where is_active = true order by created_at desc`);
-  },
-
   async findAllAssets() {
     return db.query(`select * from studio_assets order by created_at desc`);
-  },
-
-  async findAssetById(id) {
-    return db.findById("studio_assets", id);
-  },
-
-  async findAssetByNameAndType(name, assetType) {
-    const rows = await db.query(
-      `select * from studio_assets where name = $1 and asset_type = $2 limit 1`,
-      [name, assetType]
-    );
-    return rows[0] ?? null;
-  },
-
-  async insertAsset(data) {
-    return db.insert("studio_assets", data);
-  },
-
-  async updateAssetById(id, patch) {
-    return db.updateById("studio_assets", id, patch);
-  },
-
-  async removeAssetById(id) {
-    return db.removeById("studio_assets", id);
   },
 };

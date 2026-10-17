@@ -1,12 +1,1 @@
-export {
-  createTemplateSchema,
-  updateTemplateSchema,
-  publishTemplateSchema,
-  createSlotSchema,
-  updateSlotSchema,
-  reorderSlotsSchema,
-  createAssetSchema,
-  updateAssetSchema,
-  createRuleSchema,
-  updateRuleSchema,
-} from "../../schemas/studio.schema.js";
+export { updateTemplateSchema, publishTemplateSchema } from "../../schemas/studio.schema.js";

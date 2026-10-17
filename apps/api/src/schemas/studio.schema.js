@@ -1,19 +1,12 @@
 import { z } from "zod";
-import { parseArrayField } from "../utils/parseArrayField.js";
 
 // ============================================================================
 // 1. Studio Templates
 // ============================================================================
 
-export const createTemplateSchema = z.object({
-  name: z
-    .string({ required_error: "Thiếu tên hoặc nội dung SVG của template." })
-    .trim()
-    .min(1, "Thiếu tên hoặc nội dung SVG của template."),
-  svg_base: z
-    .string({ required_error: "Thiếu tên hoặc nội dung SVG của template." })
-    .trim()
-    .min(1, "Thiếu tên hoặc nội dung SVG của template."),
+export const updateTemplateSchema = z.object({
+  name: z.string().trim().min(1, "Thiếu tên hoặc nội dung SVG của template.").optional(),
+  svg_base: z.string().trim().min(1, "Thiếu tên hoặc nội dung SVG của template.").optional(),
   thumbnail: z.string().trim().nullable().optional(),
   category: z.string().trim().nullable().optional(),
   is_active: z
@@ -25,8 +18,6 @@ export const createTemplateSchema = z.object({
     .optional(),
   default_config: z.record(z.any()).optional(),
 });
-
-export const updateTemplateSchema = createTemplateSchema.partial();
 
 // ============================================================================
 // 2. Studio Template Publish / Draft Save
@@ -88,106 +79,3 @@ export const publishTemplateSchema = z.object({
   slots: z.array(publishSlotItemSchema).optional(),
   rules: z.array(publishRuleItemSchema).optional(),
 });
-
-// ============================================================================
-// 3. Studio Slot Definitions
-// ============================================================================
-
-export const createSlotSchema = z.object({
-  slot_key: z
-    .string({
-      required_error: "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y.",
-    })
-    .trim()
-    .min(1, "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y."),
-  label: z
-    .string({
-      required_error: "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y.",
-    })
-    .trim()
-    .min(1, "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y."),
-  slot_type: z
-    .string({
-      required_error: "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y.",
-    })
-    .trim()
-    .min(1, "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y."),
-  norm_x: z.coerce.number({
-    required_error: "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y.",
-  }),
-  norm_y: z.coerce.number({
-    required_error: "Thiếu thông tin slot_key, label, slot_type hoặc vị trí norm_x/norm_y.",
-  }),
-  norm_width: z.coerce.number().nullable().optional(),
-  norm_height: z.coerce.number().nullable().optional(),
-  allow_scale: z.coerce.boolean().optional(),
-  allow_rotate: z.coerce.boolean().optional(),
-  mirror_x: z.coerce.boolean().optional(),
-  z_index: z.coerce.number().optional(),
-  sort_order: z.coerce.number().optional(),
-  required: z.coerce.boolean().optional(),
-});
-
-export const updateSlotSchema = createSlotSchema.partial();
-
-export const reorderSlotsSchema = z.array(
-  z.object({
-    id: z.string().trim().min(1),
-    sort_order: z.coerce.number(),
-  })
-);
-
-// ============================================================================
-// 4. Studio Assets
-// ============================================================================
-
-export const createAssetSchema = z.object({
-  asset_type: z
-    .string({ required_error: "Thiếu loại asset (asset_type) hoặc tên." })
-    .trim()
-    .min(1, "Thiếu loại asset (asset_type) hoặc tên."),
-  name: z
-    .string({ required_error: "Thiếu loại asset (asset_type) hoặc tên." })
-    .trim()
-    .min(1, "Thiếu loại asset (asset_type) hoặc tên."),
-  thumbnail: z.string().trim().nullable().optional(),
-  svg_data: z.string().trim().nullable().optional(),
-  color_hex: z.string().trim().nullable().optional(),
-  font_family: z.string().trim().nullable().optional(),
-  tags: z.preprocess((val) => parseArrayField(val), z.array(z.string())).optional(),
-  is_active: z
-    .preprocess(
-      (val) =>
-        val === undefined || val === null ? undefined : val === "false" ? false : Boolean(val),
-      z.boolean()
-    )
-    .optional(),
-  dominant_colors: z.any().optional(),
-});
-
-export const updateAssetSchema = createAssetSchema.partial();
-
-// ============================================================================
-// 5. Studio Slot Rules
-// ============================================================================
-
-export const createRuleSchema = z.object({
-  condition_slot: z
-    .string({ required_error: "Thiếu thông tin điều kiện hoặc hành động của rule." })
-    .trim()
-    .min(1, "Thiếu thông tin điều kiện hoặc hành động của rule."),
-  condition_value: z.any({ required_error: "Thiếu thông tin điều kiện hoặc hành động của rule." }),
-  target_slot: z
-    .string({ required_error: "Thiếu thông tin điều kiện hoặc hành động của rule." })
-    .trim()
-    .min(1, "Thiếu thông tin điều kiện hoặc hành động của rule."),
-  action: z
-    .string({ required_error: "Thiếu thông tin điều kiện hoặc hành động của rule." })
-    .trim()
-    .min(1, "Thiếu thông tin điều kiện hoặc hành động của rule."),
-  rule_name: z.string().trim().nullable().optional(),
-  action_value: z.any().nullable().optional(),
-  priority: z.coerce.number().optional(),
-});
-
-export const updateRuleSchema = createRuleSchema.partial();

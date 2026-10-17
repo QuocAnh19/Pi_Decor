@@ -57,32 +57,16 @@ describe("Studio Integration Tests", () => {
     expect(auth.body.some((t) => t.name === "Test Template Inactive")).toBe(true);
   });
 
-  it("admin tạo template mới và làm sạch mã độc trong svg_base", async () => {
-    const maliciousSvg = '<svg><script>alert("xss")</script><rect width="100" height="100"/></svg>';
-    const res = await request(app)
-      .post("/api/studio/templates")
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        name: "Test Template XSS Sanitized",
-        svg_base: maliciousSvg,
-        category: "backdrop",
-        is_active: true,
-      });
-
-    expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty("id");
-    expect(res.body.svg_base).not.toContain("<script>");
-    expect(res.body.svg_base).toContain("<rect");
-  });
-
-  it("admin xuất bản (publish) template nguyên tử kèm slots và rules", async () => {
+  it("admin xuất bản (publish) template nguyên tử kèm slots và rules và làm sạch mã độc SVG", async () => {
     const templateId = "dddddddd-dddd-dddd-dddd-dddddddddddd";
+    const maliciousSvg =
+      '<svg><script>alert("xss")</script><rect width="100" height="100"/><g id="bg"/></svg>';
     const res = await request(app)
       .put(`/api/studio/templates/${templateId}/publish`)
       .set("Authorization", `Bearer ${token}`)
       .send({
         name: "Test Template Published",
-        svg_base: "<svg><g id='bg'/></svg>",
+        svg_base: maliciousSvg,
         is_active: true,
         slots: [
           {
@@ -108,6 +92,8 @@ describe("Studio Integration Tests", () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("template");
     expect(res.body.template.name).toBe("Test Template Published");
+    expect(res.body.template.svg_base).not.toContain("<script>");
+    expect(res.body.template.svg_base).toContain("<rect");
 
     // Kiểm tra slots đã lưu
     const slotsRes = await request(app).get(`/api/studio/templates/${templateId}/slots`);
@@ -122,25 +108,72 @@ describe("Studio Integration Tests", () => {
     expect(rulesRes.body[0].condition_slot).toBe("slot-main");
   });
 
-  it("cho phép truy cập danh sách assets công khai và admin tạo asset mới", async () => {
-    const listRes = await request(app).get("/api/studio/assets");
-    expect(listRes.status).toBe(200);
-    expect(Array.isArray(listRes.body)).toBe(true);
-    expect(listRes.body.some((a) => a.name === "Test Asset Drapery")).toBe(true);
+  it("admin có thể xem danh sách assets qua GET /api/studio/assets/admin", async () => {
+    const unauth = await request(app).get("/api/studio/assets/admin");
+    expect(unauth.status).toBe(401);
 
-    const createRes = await request(app)
-      .post("/api/studio/assets")
-      .set("Authorization", `Bearer ${token}`)
-      .send({
-        asset_type: "flower",
-        name: "Test Asset Rose Arch",
-        color_hex: "#e11d48",
-        tags: ["rose", "floral"],
-        is_active: true,
-      });
+    const auth = await request(app)
+      .get("/api/studio/assets/admin")
+      .set("Authorization", `Bearer ${token}`);
+    expect(auth.status).toBe(200);
+    expect(Array.isArray(auth.body)).toBe(true);
+    expect(auth.body.some((a) => a.name === "Test Asset Drapery")).toBe(true);
+  });
 
-    expect(createRes.status).toBe(201);
-    expect(createRes.body).toHaveProperty("id");
-    expect(createRes.body.name).toBe("Test Asset Rose Arch");
+  it("admin có thể xóa slot riêng lẻ qua DELETE /api/studio/slots/:slotId", async () => {
+    const slotId = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee";
+    await pool.query(
+      `insert into studio_slot_definitions (id, template_id, slot_key, label, slot_type, norm_x, norm_y)
+       values ($1, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'slot-delete-test', 'Label', 'drape', 0.5, 0.5)`,
+      [slotId]
+    );
+
+    const unauth = await request(app).delete(`/api/studio/slots/${slotId}`);
+    expect(unauth.status).toBe(401);
+
+    const res = await request(app)
+      .delete(`/api/studio/slots/${slotId}`)
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(204);
+  });
+
+  it("các endpoint chi tiết không còn sử dụng phải trả về 404 Not Found", async () => {
+    const id = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+    const removedRequests = [
+      request(app).post("/api/studio/templates").set("Authorization", `Bearer ${token}`).send({}),
+      request(app)
+        .post(`/api/studio/templates/${id}/slots`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({}),
+      request(app)
+        .patch(`/api/studio/templates/${id}/slots/reorder`)
+        .set("Authorization", `Bearer ${token}`)
+        .send([]),
+      request(app)
+        .patch(`/api/studio/slots/${id}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({}),
+      request(app)
+        .post(`/api/studio/templates/${id}/rules`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({}),
+      request(app)
+        .patch(`/api/studio/rules/${id}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({}),
+      request(app).delete(`/api/studio/rules/${id}`).set("Authorization", `Bearer ${token}`),
+      request(app).get("/api/studio/assets"),
+      request(app).post("/api/studio/assets").set("Authorization", `Bearer ${token}`).send({}),
+      request(app)
+        .patch(`/api/studio/assets/${id}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({}),
+      request(app).delete(`/api/studio/assets/${id}`).set("Authorization", `Bearer ${token}`),
+    ];
+
+    for (const reqPromise of removedRequests) {
+      const res = await reqPromise;
+      expect(res.status).toBe(404);
+    }
   });
 });

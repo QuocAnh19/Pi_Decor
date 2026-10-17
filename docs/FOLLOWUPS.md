@@ -12,26 +12,11 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 - **Vấn đề cần quyết định**: Mốc thời gian lưu trữ `N` ngày (hiện tại script đang đặt giá trị kỹ thuật mặc định là 180 ngày) và điều khoản trong Chính sách bảo mật (`/chinh-sach-bao-mat`) cần được người có chuyên môn pháp lý rà soát và chốt chính thức trước khi cấu hình Cron chạy tự động kèm cờ `--confirm`.
 - **Trạng thái**: Đang chờ rà soát pháp lý.
 
-### 2. [Ưu tiên Trung bình] Rà soát vòng đời các endpoint backend chưa có client consumer (P11)
+### 2. [Theo dõi Kỹ thuật] Quản lý vòng đời ảnh Cloudinary cho bảng `studio_assets` (P30)
 
-- **Mô tả**: Sau khi dọn dẹp các hàm client API thừa không có component nào gọi, các endpoint backend tương ứng sau đây hiện không còn client consumer trong codebase hiện tại:
-  1. `GET /api/leads/:leadId/activities` - Lấy lịch sử hoạt động của lead (admin UI hiện xem snapshot trực tiếp).
-  2. `POST /api/leads/:leadId/activities` - Ghi hoạt động lead thủ công.
-  3. `GET /api/quotations/:id` - Lấy chi tiết báo giá theo ID đơn lẻ (client tra cứu qua `GET /api/quotations?lead_id=...`).
-  4. `DELETE /api/quotations/:id` - Xóa báo giá đơn lẻ.
-  5. `POST /api/studio/templates` - Tạo mới template studio đơn lẻ (hiện dùng `PUT /api/studio/templates/:id/publish`).
-  6. `POST /api/studio/templates/:templateId/slots` - Tạo slot đơn lẻ.
-  7. `PATCH /api/studio/templates/:templateId/slots/reorder` - Sắp xếp lại thứ tự slots.
-  8. `PATCH /api/studio/slots/:slotId` - Cập nhật slot đơn lẻ.
-  9. `GET /api/studio/assets` - Lấy tài nguyên studio công khai (admin dùng `GET /api/studio/assets/admin`).
-  10. `POST /api/studio/assets` - Tạo tài nguyên studio qua API.
-  11. `PATCH /api/studio/assets/:id` - Sửa tài nguyên studio.
-  12. `DELETE /api/studio/assets/:id` - Xóa tài nguyên studio.
-  13. `POST /api/studio/templates/:templateId/rules` - Tạo rule đơn lẻ.
-  14. `PATCH /api/studio/rules/:ruleId` - Sửa rule đơn lẻ.
-  15. `DELETE /api/studio/rules/:ruleId` - Xóa rule đơn lẻ.
-- **Đề xuất xử lý**: Quyết định duy trì làm API nội bộ mở rộng cho phiên bản nâng cấp Studio Editor & CRM tương lai hoặc đánh dấu deprecate.
-- **Trạng thái**: Chờ kế hoạch roadmap tiếp theo.
+- **Mô tả**: Sau khi xóa các endpoint granular `POST`, `PATCH`, `DELETE /api/studio/assets` ở P30, API runtime hiện tại không còn luồng endpoint nào trực tiếp tạo/xóa và dọn dẹp ảnh thumbnail Cloudinary của `studio_assets`. Flow `PUT /api/studio/templates/:id/publish` chỉ quản lý `studio_templates`, `studio_slot_definitions` và `studio_slot_rules` (không quản lý bảng `studio_assets`). Đồng thời backend chưa có script seed riêng cho bảng `studio_assets` (client đang dựa vào fallback seed local `apps/web/src/features/studio/data/seed/templates.ts`).
+- **Đề xuất xử lý**: Khi xây dựng tính năng CMS quản lý thư viện tài nguyên Studio (Asset Management) trong tương lai, cần bổ sung endpoint quản lý asset tập trung kèm cơ chế dọn dẹp ảnh Cloudinary (hoặc script đồng bộ định kỳ kết hợp `apps/api/scripts/media-audit.js` để rà soát media mồ côi).
+- **Trạng thái**: Đang theo dõi, hiện `scripts/media-audit.js` vẫn quét cột `thumbnail` của `studio_assets` để phát hiện ảnh mồ côi.
 
 ### 3. [Theo dõi Nghiệp vụ] Đánh giá việc sử dụng hai cột `projects.tag` và `projects.budget` (P29)
 
@@ -56,7 +41,34 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 
 ## II. Các hạng mục đã giải quyết (Resolved Items)
 
-### 1. [Đã giải quyết - P29] Xóa bỏ các bảng và view mồ côi (`designs`, `media_assets`, `admin_dashboard_summary`, `venues_with_project_count`)
+### 1. [Đã giải quyết - P30] Rà soát và loại bỏ các endpoint Studio chi tiết không có client consumer
+
+- **Mô tả trước đây**: Sau khi tối ưu hóa Studio sang luồng lưu/xuất bản nguyên tử `PUT /api/studio/templates/:id/publish`, hàng loạt endpoint granular quản lý slot, rule, asset đơn lẻ không còn client consumer trong codebase (`apps/web`).
+- **Danh sách 11 endpoint đã xóa**:
+  1. `POST /api/studio/templates` (thay bằng `PUT /api/studio/templates/:id/publish`).
+  2. `POST /api/studio/templates/:id/slots`
+  3. `PATCH /api/studio/templates/:id/slots/reorder`
+  4. `PATCH /api/studio/slots/:slotId`
+  5. `POST /api/studio/templates/:id/rules`
+  6. `PATCH /api/studio/rules/:ruleId`
+  7. `DELETE /api/studio/rules/:ruleId`
+  8. `GET /api/studio/assets` (công khai - admin dùng `GET /api/studio/assets/admin`, customer dùng catalog đã nạp hoặc seed fallback).
+  9. `POST /api/studio/assets`
+  10. `PATCH /api/studio/assets/:id`
+  11. `DELETE /api/studio/assets/:id`
+- **Danh sách endpoint giữ lại kèm lý do**:
+  1. `GET /api/leads/:leadId/activities` & `POST /api/leads/:leadId/activities`: Giữ lại để phục vụ tính năng CRM timeline/activity log trong P32.
+  2. `GET /api/quotations/:id` & `DELETE /api/quotations/:id`: Chuẩn REST API cho tài nguyên báo giá.
+  3. `GET /api/studio/assets/admin`: Admin Studio đang gọi để tải danh mục tài nguyên phục vụ thiết kế canvas.
+  4. `DELETE /api/studio/slots/:slotId`: Admin Studio (`useAdminEditor.ts`) đang gọi trực tiếp khi xóa slot lẻ trên canvas.
+  5. `GET /api/studio/templates/:id/slots` & `GET /api/studio/templates/:id/rules`: Cho phép client tải slots/rules của template.
+  6. `PATCH /api/studio/templates/:id` & `DELETE /api/studio/templates/:id`: Cập nhật metadata hoặc xóa template và thumbnail.
+- **Giải pháp**:
+  - Gỡ bỏ route khỏi `studio.routes.js`, gỡ controller methods khỏi `studio.controller.js`, gỡ service methods khỏi `studio.service.js`, gỡ các method chỉ phục vụ chúng khỏi `studio.repository.js`.
+  - Gỡ các schema thừa: `ruleIdParamSchema` trong `packages/shared`, `createSlotSchema`, `updateSlotSchema`, `reorderSlotsSchema`, `createAssetSchema`, `updateAssetSchema`, `createRuleSchema`, `updateRuleSchema` trong `apps/api`.
+  - Cập nhật test integration `studio.test.js` kiểm tra toàn bộ 11 route đã xóa trả về 404, giữ nguyên kiểm thử luồng publish nguyên tử.
+
+### 2. [Đã giải quyết - P29] Xóa bỏ các bảng và view mồ côi (`designs`, `media_assets`, `admin_dashboard_summary`, `venues_with_project_count`)
 
 - **Mô tả trước đây**: Bảng `designs` là tàn dư từ bản vẽ canvas cũ (nay snapshot đã tích hợp vào `leads.design_snapshot`), bảng `media_assets` không có consumer, hai view `admin_dashboard_summary` và `venues_with_project_count` không có route nào gọi.
 - **Giải pháp**:

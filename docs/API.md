@@ -119,24 +119,14 @@ Tài liệu đặc tả toàn bộ các điểm cuối (endpoints) của hệ th
 
 ## 8. Studio Thiết kế Tương tác (Studio Templates & Assets)
 
-| Method   | Endpoint                                          | Quyền  | Request Body / Params                                     | Phản hồi tóm tắt                   |
-| -------- | ------------------------------------------------- | :----: | --------------------------------------------------------- | ---------------------------------- |
-| `GET`    | `/api/studio/templates`                           | Public | — (chỉ lấy template `is_active = true`)                   | `200 Template[]`                   |
-| `GET`    | `/api/studio/templates/admin`                     | Admin  | — (lấy toàn bộ template)                                  | `200 Template[]`                   |
-| `GET`    | `/api/studio/templates/:id`                       | Public | Path: `id`                                                | `200 Template` (kèm slots & rules) |
-| `POST`   | `/api/studio/templates`                           | Admin  | `{ name, thumbnail?, svg_base, category?, is_active? }`   | `201 Template` (SVG được sanitize) |
-| `PUT`    | `/api/studio/templates/:id/publish`               | Admin  | `{ slots, rules, default_config? }` (Limit 10MB)          | `200 Template`                     |
-| `PATCH`  | `/api/studio/templates/:id`                       | Admin  | Cập nhật thông tin template                               | `200 Template`                     |
-| `DELETE` | `/api/studio/templates/:id`                       | Admin  | Path: `id`                                                | `200 { success: true }`            |
-| `POST`   | `/api/studio/templates/:templateId/slots`         | Admin  | `{ slot_name, slot_type, z_index, default_asset_id? }`    | `201 SlotDefinition`               |
-| `PATCH`  | `/api/studio/templates/:templateId/slots/reorder` | Admin  | `{ ordered_slot_ids: string[] }`                          | `200 { success: true }`            |
-| `PATCH`  | `/api/studio/slots/:slotId`                       | Admin  | Cập nhật thông tin slot                                   | `200 SlotDefinition`               |
-| `DELETE` | `/api/studio/slots/:slotId`                       | Admin  | Path: `slotId`                                            | `200 { success: true }`            |
-| `GET`    | `/api/studio/assets`                              | Public | Query: `slot_type?`                                       | `200 Asset[]`                      |
-| `GET`    | `/api/studio/assets/admin`                        | Admin  | —                                                         | `200 Asset[]`                      |
-| `POST`   | `/api/studio/assets`                              | Admin  | `{ name, type, svg_content, thumbnail?, metadata? }`      | `201 Asset`                        |
-| `PATCH`  | `/api/studio/assets/:id`                          | Admin  | Cập nhật thông tin asset                                  | `200 Asset`                        |
-| `DELETE` | `/api/studio/assets/:id`                          | Admin  | Path: `id`                                                | `200 { success: true }`            |
-| `POST`   | `/api/studio/templates/:templateId/rules`         | Admin  | `{ trigger_slot_id, target_slot_id, action, condition? }` | `201 SlotRule`                     |
-| `PATCH`  | `/api/studio/rules/:ruleId`                       | Admin  | Cập nhật rule                                             | `200 SlotRule`                     |
-| `DELETE` | `/api/studio/rules/:ruleId`                       | Admin  | Path: `ruleId`                                            | `200 { success: true }`            |
+| Method   | Endpoint                            | Quyền  | Request Body / Params                                                                                   | Phản hồi tóm tắt            |
+| -------- | ----------------------------------- | :----: | ------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `GET`    | `/api/studio/templates`             | Public | — (chỉ lấy template `is_active = true`)                                                                 | `200 Template[]`            |
+| `GET`    | `/api/studio/templates/admin`       | Admin  | — (lấy toàn bộ template cả nháp)                                                                        | `200 Template[]`            |
+| `PATCH`  | `/api/studio/templates/:id`         | Admin  | `{ name?, thumbnail?, svg_base?, category?, is_active?, default_config? }`                              | `200 Template`              |
+| `PUT`    | `/api/studio/templates/:id/publish` | Admin  | `{ name, svg_base, thumbnail?, category?, is_active?, slot_config?, slots?, rules? }` (Body limit 10MB) | `200 { message, template }` |
+| `DELETE` | `/api/studio/templates/:id`         | Admin  | Path: `id` (xóa template và dọn thumbnail Cloudinary)                                                   | `204 No Content`            |
+| `GET`    | `/api/studio/templates/:id/slots`   | Public | Path: `id` (danh sách slot definitions theo `sort_order`)                                               | `200 SlotDefinition[]`      |
+| `DELETE` | `/api/studio/slots/:slotId`         | Admin  | Path: `slotId`                                                                                          | `204 No Content`            |
+| `GET`    | `/api/studio/assets/admin`          | Admin  | — (danh mục tài nguyên decor rèm, hoa, bảng chữ dùng trong Studio)                                      | `200 Asset[]`               |
+| `GET`    | `/api/studio/templates/:id/rules`   | Public | Path: `id` (danh sách slot rules theo `priority`)                                                       | `200 SlotRule[]`            |
