@@ -10,6 +10,7 @@ import {
   SquaresPlusIcon,
   ChatBubbleLeftRightIcon,
   Cog6ToothIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../../lib/authContext";
 import { SEO } from "../common/SEO";
@@ -19,7 +20,9 @@ const navItems = [
   { to: "/admin", label: "Tổng quan", icon: Squares2X2Icon, end: true },
   { to: "/admin/leads", label: "Khách hàng", icon: UsersIcon, end: false },
   { to: "/admin/projects", label: "Dự án", icon: FolderIcon, end: false },
+  { to: "/admin/services", label: "Dịch vụ", icon: SparklesIcon, end: false },
   { to: "/admin/venues", label: "Bản đồ", icon: MapPinIcon, end: false },
+
   {
     to: "/admin/materials",
     label: "Vật liệu",

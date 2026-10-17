@@ -12,7 +12,7 @@ export const servicesController = {
 
   async createService(req, res, next) {
     try {
-      const created = await servicesService.createService(req.body);
+      const created = await servicesService.createService(req.body, req.files, req);
       res.status(201).json(created);
     } catch (err) {
       next(err);
@@ -21,7 +21,7 @@ export const servicesController = {
 
   async updateService(req, res, next) {
     try {
-      const updated = await servicesService.updateService(req.params.id, req.body);
+      const updated = await servicesService.updateService(req.params.id, req.body, req.files, req);
       res.json(updated);
     } catch (err) {
       next(err);

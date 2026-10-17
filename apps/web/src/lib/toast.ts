@@ -19,6 +19,9 @@ export const toast = {
       listeners.forEach((l) => l());
     }, duration);
   },
+  success(message: string, duration = 3500) {
+    toast.show(message, duration);
+  },
   error(err: unknown, fallback = "Có lỗi xảy ra, vui lòng thử lại.") {
     const msg = err instanceof Error ? err.message : fallback;
     toast.show(msg);

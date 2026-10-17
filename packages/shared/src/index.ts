@@ -5,3 +5,4 @@ export * from "./schemas/testimonials.js";
 export * from "./schemas/quotations.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/params.js";
+export * from "./schemas/services.js";

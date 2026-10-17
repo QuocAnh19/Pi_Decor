@@ -6,6 +6,7 @@ import { authApi } from "./auth";
 import { quotationsApi } from "./quotations";
 import { testimonialsApi } from "./testimonials";
 import { studioApi } from "./studio";
+import { servicesApi } from "./services";
 
 export { ApiError, type LeadPayload };
 
@@ -17,4 +18,5 @@ export const api = {
   ...quotationsApi,
   ...testimonialsApi,
   ...studioApi,
+  ...servicesApi,
 };

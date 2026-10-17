@@ -8,31 +8,43 @@ import { ServiceCategoryCard } from "./ServiceCategoryCard";
 import { ServiceDetailModal } from "./ServiceDetailModal";
 import styles from "./ServicesSection.module.scss";
 
+import { useServicesQuery } from "../hooks/services.queries";
+
 export function ServicesSection() {
-  const [services, setServices] = useState<ServiceCategory[]>([]);
+  const servicesQuery = useServicesQuery();
   const [portfolio, setPortfolio] = useState<CategoryPortfolioItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [portfolioLoading, setPortfolioLoading] = useState<boolean>(true);
+  const [portfolioError, setPortfolioError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<ServiceCategory | null>(null);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const loadPortfolio = useCallback(async () => {
+    setPortfolioLoading(true);
+    setPortfolioError(null);
     try {
-      const [servicesRes, projectsRes] = await Promise.all([api.getServices(), api.getProjects()]);
-      setServices(servicesRes);
+      const projectsRes = await api.getProjects();
       setPortfolio(projectsRes.map((p) => toCategoryPortfolioItem(p)));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Không thể kết nối máy chủ để tải dịch vụ.";
-      setError(msg);
+      const msg = err instanceof Error ? err.message : "Không thể kết nối máy chủ để tải dự án.";
+      setPortfolioError(msg);
     } finally {
-      setLoading(false);
+      setPortfolioLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadPortfolio();
+  }, [loadPortfolio]);
+
+  const services = servicesQuery.data ?? [];
+  const loading = servicesQuery.isLoading || portfolioLoading;
+  const error = servicesQuery.isError
+    ? "Không thể kết nối máy chủ để tải dịch vụ."
+    : portfolioError;
+
+  const loadData = () => {
+    servicesQuery.refetch();
+    loadPortfolio();
+  };
 
   const featured = services.find((c) => c.featured) || services[0];
   const rest = services.filter((c) => c.id !== featured?.id);

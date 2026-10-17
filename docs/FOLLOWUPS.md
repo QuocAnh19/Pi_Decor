@@ -112,3 +112,15 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
   - Không sử dụng Prepared Statements có tên (toàn bộ truy vấn qua `pg` dùng parameterized queries `$1, $2, ...` ẩn danh).
   - Chỉ có duy nhất câu lệnh `SET enable_seqscan = off` trong script benchmark `apps/api/scripts/explain-leads.mjs` (chạy cục bộ độc lập). Runtime API hoàn toàn không gọi session `SET`.
 - **Kết luận & Giải pháp**: Codebase runtime API tương thích 100% với PgBouncer Transaction Mode của Neon qua `DATABASE_URL`. Các tác vụ DDL/Admin (migrations, seed, backup/restore, scripts quản trị) được phân tách chạy qua kết nối trực tiếp `DATABASE_URL_DIRECT`.
+
+### 7. [Đã giải quyết - P31] Hoàn thiện giao diện quản trị Dịch vụ Bento (`/admin/services`)
+
+- **Mô tả trước đây**: Backend đã cung cấp đầy đủ các endpoint CRUD `/api/services` và schema Zod nhưng phía frontend thiếu trang quản trị cho admin.
+- **Giải pháp**:
+  - Xây dựng trang `/admin/services` được bảo vệ bởi `AdminGuard`, tích hợp mục điều hướng trên thanh sidebar (`AdminLayout`).
+  - Sử dụng lại các thành phần chuẩn hóa: `AdminPageHeader`, `StatusTabs` (lọc theo danh mục nhãn hiệu PiWedding, PiKids, PiEvent), `SearchInput`, `ConfirmDeleteModal`, `EmptyState`.
+  - Hiển thị danh sách dịch vụ sắp xếp theo thứ tự `order`, cho phép dịch chuyển vị trí nhanh bằng nút lên/xuống (gọi `PATCH /api/services/:id`), công tắc bật/tắt hiển thị `featured`.
+  - Form tạo/sửa (`ServiceFormModal`) hỗ trợ nhập liệu đầy đủ: `title`, `brand`, `tagline`, `icon`, `accent`, `description`, danh sách gạch đầu dòng `items` động (thêm/xóa/sắp xếp), link `href`, `cta_label`, tải ảnh cover/image trực tiếp hoặc dán URL.
+  - Hỗ trợ tải ảnh `multipart/form-data` hoặc gửi JSON body ở API backend, tự động dọn dẹp ảnh cũ trên Cloudinary khi thay thế hoặc xóa (`cleanupRemovedMedia`).
+  - Quản lý state và server cache bằng TanStack Query (`useServicesQuery`, `useCreateServiceMutation`, `useUpdateServiceMutation`, `useDeleteServiceMutation`), đồng bộ tự động vô hiệu hóa cache khi cập nhật dữ liệu.
+  - Đảm bảo toàn bộ các file mới đều tuân thủ dưới 300 dòng theo quy định dự án (`max-lines`).

@@ -75,16 +75,16 @@ Tài liệu đặc tả toàn bộ các điểm cuối (endpoints) của hệ th
 
 ## 5. Vật liệu & Gói Dịch vụ Bento (Materials & Services)
 
-| Method   | Endpoint             | Quyền  | Request Body / Params                                          | Phản hồi tóm tắt        |
-| -------- | -------------------- | :----: | -------------------------------------------------------------- | ----------------------- |
-| `GET`    | `/api/materials`     | Public | —                                                              | `200 Material[]`        |
-| `POST`   | `/api/materials`     | Admin  | Multipart: `{ name, category?, description?, price?, image? }` | `201 Material`          |
-| `PATCH`  | `/api/materials/:id` | Admin  | Multipart: cập nhật thông tin/ảnh vật liệu                     | `200 Material`          |
-| `DELETE` | `/api/materials/:id` | Admin  | Path: `id`                                                     | `200 { success: true }` |
-| `GET`    | `/api/services`      | Public | —                                                              | `200 Service[]`         |
-| `POST`   | `/api/services`      | Admin  | `{ title, slug, description, image, features }`                | `201 Service`           |
-| `PATCH`  | `/api/services/:id`  | Admin  | Cập nhật thông tin dịch vụ                                     | `200 Service`           |
-| `DELETE` | `/api/services/:id`  | Admin  | Path: `id`                                                     | `200 { success: true }` |
+| Method   | Endpoint             | Quyền  | Request Body / Params                                                                                                                                                    | Phản hồi tóm tắt        |
+| -------- | -------------------- | :----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| `GET`    | `/api/materials`     | Public | —                                                                                                                                                                        | `200 Material[]`        |
+| `POST`   | `/api/materials`     | Admin  | Multipart: `{ name, category?, description?, price?, image? }`                                                                                                           | `201 Material`          |
+| `PATCH`  | `/api/materials/:id` | Admin  | Multipart: cập nhật thông tin/ảnh vật liệu                                                                                                                               | `200 Material`          |
+| `DELETE` | `/api/materials/:id` | Admin  | Path: `id`                                                                                                                                                               | `200 { success: true }` |
+| `GET`    | `/api/services`      | Public | —                                                                                                                                                                        | `200 Service[]`         |
+| `POST`   | `/api/services`      | Admin  | Multipart / JSON: `{ title, brand?, tagline?, description?, icon?, accent?, items?, href?, cta_label?, featured?, order?, cover? (file/url), image? (file)/image_url? }` | `201 Service`           |
+| `PATCH`  | `/api/services/:id`  | Admin  | Multipart / JSON: cập nhật thông tin dịch vụ, hỗ trợ đổi thứ tự `order`, bật tắt `featured`, thay ảnh `cover`/`image`                                                    | `200 Service`           |
+| `DELETE` | `/api/services/:id`  | Admin  | Path: `id` (xoá dịch vụ và tự động dọn dẹp media liên quan trên Cloudinary)                                                                                              | `200 { success: true }` |
 
 ---
 
