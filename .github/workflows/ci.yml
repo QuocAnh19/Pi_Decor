@@ -81,7 +81,6 @@ jobs:
           DATABASE_URL: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
           DATABASE_URL_DIRECT: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
           DATABASE_URL_TEST: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
-          DB_SSL: disable
           JWT_SECRET: test_jwt_secret_must_be_at_least_32_characters_long
         run: npm run verify:api
 
@@ -140,7 +139,6 @@ jobs:
           DATABASE_URL_TEST: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
           DATABASE_URL: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
           DATABASE_URL_DIRECT: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
-          DB_SSL: disable
           JWT_SECRET: e2e_jwt_secret_key_minimum_32_characters_long
           CI: "true"
         run: npm run e2e
