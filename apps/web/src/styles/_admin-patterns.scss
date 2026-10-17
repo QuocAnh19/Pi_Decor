@@ -1,0 +1,256 @@
+@use "tokens" as *;
+
+// ── Admin Page Header & Layout ──────────────────────────────────────────
+@mixin admin-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $admin-border;
+  margin-bottom: 20px;
+}
+
+@mixin admin-title {
+  font-family: $font-serif;
+  font-size: $text-2xl;
+  color: $admin-text;
+  margin: 0;
+}
+
+@mixin admin-subtitle {
+  font-size: $text-sm;
+  color: $admin-text-faint;
+  margin-top: 4px;
+}
+
+// ── Admin Filter Bar, Search & Tabs ──────────────────────────────────────
+@mixin admin-filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: $admin-surface;
+  padding: 16px;
+  border-radius: $radius-m;
+  border: 1px solid $admin-border;
+  box-shadow: $admin-shadow-card;
+}
+
+@mixin admin-search-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+@mixin admin-search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border-radius: $radius-s;
+  border: 1px solid $admin-border;
+  font-size: $text-sm;
+  outline: none;
+  transition: border-color $transition-default;
+
+  &:focus {
+    border-color: $admin-accent;
+  }
+}
+
+@mixin admin-tabs-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+@mixin admin-tab-btn {
+  padding: 6px 14px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background-color: $admin-bg;
+  color: $admin-text-muted;
+  font-size: $text-xs;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $admin-text;
+    border-color: $admin-text-faint;
+  }
+}
+
+@mixin admin-tab-btn-active {
+  background-color: $admin-accent;
+  color: var(--color-surface);
+  border-color: $admin-accent;
+  font-weight: 700;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+    color: var(--color-surface);
+  }
+}
+
+@mixin admin-page-filter-tabs {
+  .filterBar {
+    @include admin-filter-bar;
+    margin-bottom: 20px;
+  }
+  .searchRow {
+    @include admin-search-row;
+  }
+  .tabsRow {
+    @include admin-tabs-row;
+  }
+  .tabButton {
+    @include admin-tab-btn;
+  }
+  .tabActive {
+    @include admin-tab-btn-active;
+  }
+}
+
+// ── Admin Card & Empty State ─────────────────────────────────────────────
+@mixin admin-card {
+  background-color: $admin-surface;
+  border-radius: $radius-l;
+  border: 1px solid $admin-border;
+  box-shadow: $admin-shadow-card;
+  overflow: hidden;
+}
+
+@mixin admin-empty-state {
+  padding: 48px 24px;
+  text-align: center;
+  background: $admin-surface;
+  border: 1px dashed $admin-border;
+  border-radius: $radius-l;
+  color: $admin-text-muted;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+// ── Action Buttons & Pills ───────────────────────────────────────────────
+@mixin button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: $admin-accent;
+  color: var(--color-surface);
+  border: none;
+  border-radius: $radius-pill;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(161, 92, 46, 0.28);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+
+  &:hover {
+    background-color: $admin-accent-hover;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(161, 92, 46, 0.36);
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(161, 92, 46, 0.24);
+  }
+}
+
+@mixin button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: var(--color-surface);
+  color: $admin-text;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-bg;
+    border-color: $admin-accent;
+    color: $admin-accent;
+  }
+}
+
+@mixin button-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: var(--color-surface);
+  color: $admin-danger;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: $admin-danger;
+    color: $admin-danger;
+    background-color: $admin-danger-subtle;
+  }
+}
+
+@mixin pill-action-quote {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: $radius-pill;
+  border: 1px solid rgba(161, 92, 46, 0.3);
+  background: $admin-accent-subtle;
+  color: $admin-accent;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-accent;
+    color: var(--color-surface);
+    border-color: $admin-accent;
+    transform: translateY(-1px);
+  }
+}
+
+@mixin pill-action-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: $radius-pill;
+  border: 1px solid $admin-border;
+  background: var(--color-surface);
+  color: $admin-text;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: $admin-bg;
+    border-color: $admin-accent;
+    color: $admin-accent;
+  }
+}

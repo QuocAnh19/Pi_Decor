@@ -3,100 +3,24 @@
 @use "@/styles/mixins" as *;
 
 .headerRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid $admin-border;
-  margin-bottom: 20px;
+  @include admin-page-header;
 }
 
 .title {
-  font-family: $font-serif;
+  @include admin-title;
   font-size: $text-xl;
   font-weight: 700;
-  color: $admin-text;
-  margin: 0;
 }
 
 .subtitle {
-  font-size: $text-sm;
-  color: $admin-text-faint;
-  margin-top: 4px;
+  @include admin-subtitle;
 }
 
 /* Filter Bar */
-.filterBar {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background-color: $admin-surface;
-  padding: 16px;
-  border-radius: $radius-l;
-  border: 1px solid $admin-border;
-  box-shadow: $admin-shadow-card;
-  margin-bottom: 20px;
-}
-
-.searchRow {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.tabsRow {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.tabButton {
-  padding: 6px 14px;
-  border-radius: $radius-pill;
-  border: 1px solid $admin-border;
-  background-color: $admin-bg;
-  color: $admin-text-muted;
-  font-size: $text-xs;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-
-  &:hover {
-    color: $admin-text;
-    border-color: $admin-text-faint;
-  }
-}
-
-.tabActive {
-  background-color: $admin-accent;
-  color: var(--color-surface);
-  border-color: $admin-accent;
-  font-weight: 700;
-
-  &:hover {
-    background-color: $admin-accent-hover;
-    color: var(--color-surface);
-  }
-}
+@include admin-page-filter-tabs;
 
 .empty {
-  padding: 48px 24px;
-  text-align: center;
-  background: $admin-surface;
-  border: 1px dashed $admin-border;
-  border-radius: $radius-l;
-  color: $admin-text-muted;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 14px;
+  @include admin-empty-state;
 }
 
 /* Grid View */

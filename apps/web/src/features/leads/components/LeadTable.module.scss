@@ -101,46 +101,13 @@
 }
 
 .quoteBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  @include pill-action-quote;
   padding: 5px 10px;
-  border-radius: $radius-pill;
-  border: 1px solid rgba(161, 92, 46, 0.3);
-  background: $admin-accent-subtle;
-  color: $admin-accent;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: $admin-accent;
-    color: var(--color-surface);
-    border-color: $admin-accent;
-    transform: translateY(-1px);
-  }
 }
 
 .detailBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  @include pill-action-detail;
   padding: 5px 10px;
-  border-radius: $radius-pill;
-  border: 1px solid $admin-border;
-  background: var(--color-surface);
-  color: $admin-text;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: $admin-bg;
-    border-color: $admin-accent;
-    color: $admin-accent;
-  }
 }
 
 .statusSelect {

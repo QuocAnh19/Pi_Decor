@@ -1,93 +1,12 @@
 @use "@/styles/variables" as *;
 @use "@/styles/mixins" as *;
 
-.container {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-
-  &.inline {
-    width: auto;
-  }
-}
-
-.label {
-  font-size: 13px;
-  font-weight: 600;
-  color: $color-ink;
-  display: flex;
-  align-items: center;
-  user-select: none;
-}
-
-.required {
-  color: var(--color-danger);
-  margin-left: 3px;
-}
+@include form-field-common;
 
 .textarea {
-  width: 100%;
+  @include form-input-base;
   min-height: 90px;
   padding: 9px 12px;
-  background-color: var(--color-surface);
-  border: 1px solid $color-line;
-  border-radius: $radius-s;
-  color: $color-ink;
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
   resize: vertical;
   line-height: 1.5;
-  transition:
-    border-color $transition-default,
-    box-shadow $transition-default,
-    background-color $transition-default;
-
-  &::placeholder {
-    color: $color-ink-faint;
-  }
-
-  &:hover:not(:disabled):not(.hasError) {
-    border-color: $color-ink-muted;
-  }
-
-  &:focus {
-    border-color: $color-accent;
-    box-shadow: 0 0 0 3px rgba($color-accent, 0.12);
-  }
-
-  &:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-    background-color: $color-paper-dim;
-    border-color: $color-line;
-    color: $color-ink-faint;
-  }
-
-  &.hasError {
-    border-color: var(--color-danger);
-
-    &:focus {
-      border-color: var(--color-danger);
-      box-shadow: 0 0 0 3px rgba(180, 88, 107, 0.15);
-    }
-  }
-}
-
-.errorMessage,
-.errorText {
-  font-size: 11px;
-  color: var(--color-danger);
-  font-weight: 500;
-  margin-top: 2px;
-  line-height: 1.3;
-}
-
-.hint,
-.hintText {
-  font-size: 11px;
-  color: $color-ink-muted;
-  margin-top: 2px;
-  line-height: 1.3;
 }

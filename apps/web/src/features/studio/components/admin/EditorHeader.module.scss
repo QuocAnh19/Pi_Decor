@@ -24,10 +24,8 @@
   gap: 10px;
 }
 
-.backBtn {
+%header-btn-base {
   padding: 6px 12px;
-  background-color: $admin-bg;
-  color: $admin-text;
   border: 1px solid $admin-border;
   border-radius: 8px;
   font-size: $text-xs;
@@ -37,6 +35,12 @@
   align-items: center;
   gap: 6px;
   transition: all 0.15s ease;
+}
+
+.backBtn {
+  @extend %header-btn-base;
+  background-color: $admin-bg;
+  color: $admin-text;
 
   &:hover {
     background-color: $admin-surface-raised;
@@ -57,18 +61,9 @@
 }
 
 .gridBtn {
-  padding: 6px 12px;
+  @extend %header-btn-base;
   background-color: transparent;
   color: $admin-text-muted;
-  border: 1px solid $admin-border;
-  border-radius: 8px;
-  font-size: $text-xs;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s ease;
 
   &.gridBtnActive {
     background-color: $admin-accent-subtle;
@@ -78,18 +73,9 @@
 }
 
 .statusBtn {
-  padding: 6px 12px;
+  @extend %header-btn-base;
   background-color: $admin-bg;
-  border: 1px solid $admin-border;
   color: $admin-text-muted;
-  border-radius: 8px;
-  font-size: $text-xs;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s ease;
 
   &.statusBtnActive {
     background-color: $admin-success-subtle;
@@ -99,18 +85,10 @@
 }
 
 .saveDraftBtn {
+  @extend %header-btn-base;
   padding: 6px 14px;
   background-color: $admin-surface;
   color: $admin-text;
-  border: 1px solid $admin-border;
-  border-radius: 8px;
-  font-size: $text-xs;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.15s ease;
 
   &:hover {
     background-color: $admin-surface-raised;

@@ -268,25 +268,9 @@
 }
 
 .pdfBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  @include button-secondary;
   padding: 10px 18px;
-  border: 1px solid $admin-border;
-  background: var(--color-surface);
-  color: $admin-text;
-  border-radius: $radius-pill;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s ease;
   box-shadow: 0 1px 3px rgba(39, 22, 32, 0.05);
-
-  &:hover {
-    background: $admin-bg;
-    border-color: $admin-accent;
-    color: $admin-accent;
-  }
 
   &:disabled {
     opacity: 0.6;
@@ -326,24 +310,8 @@
 }
 
 .cancelBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  @include button-secondary;
   padding: 10px 18px;
-  border: 1px solid $admin-border;
-  background: var(--color-surface);
-  color: $admin-text;
-  border-radius: $radius-pill;
-  font-weight: 600;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: $admin-bg;
-    border-color: $admin-accent;
-    color: $admin-accent;
-  }
 }
 
 /* Printable PDF Styling */

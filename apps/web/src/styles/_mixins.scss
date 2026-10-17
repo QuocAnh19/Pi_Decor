@@ -1,4 +1,6 @@
 @use "variables" as *;
+@forward "patterns";
+@forward "admin-patterns";
 
 // Enforces the single max content width + horizontal padding rule site-wide.
 // Used inside every component's .module.scss instead of a shared <Container>
