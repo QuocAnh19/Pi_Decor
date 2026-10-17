@@ -7,8 +7,8 @@ export interface Admin {
   created_at?: string;
 }
 
-import type { LeadStatus } from "@pidecor/shared";
-export type { LeadStatus };
+import type { LeadStatus, LeadActivityDto } from "@pidecor/shared";
+export type { LeadStatus, LeadActivityDto as LeadActivity };
 
 /**
  * Mirrors `buildDesignSnapshot()` in `BuilderShell.tsx` — what a Studio

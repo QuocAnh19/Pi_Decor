@@ -124,3 +124,14 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
   - Hỗ trợ tải ảnh `multipart/form-data` hoặc gửi JSON body ở API backend, tự động dọn dẹp ảnh cũ trên Cloudinary khi thay thế hoặc xóa (`cleanupRemovedMedia`).
   - Quản lý state và server cache bằng TanStack Query (`useServicesQuery`, `useCreateServiceMutation`, `useUpdateServiceMutation`, `useDeleteServiceMutation`), đồng bộ tự động vô hiệu hóa cache khi cập nhật dữ liệu.
   - Đảm bảo toàn bộ các file mới đều tuân thủ dưới 300 dòng theo quy định dự án (`max-lines`).
+
+### 8. [Đã giải quyết - P32] Hoàn thiện dòng thời gian hoạt động & lịch sử chăm sóc khách hàng (`LeadDetailDrawer`)
+
+- **Mô tả trước đây**: Bảng `lead_activities` đã ghi nhận các sự kiện chuyển trạng thái, tạo báo giá, lưu thiết kế nhưng chưa có giao diện hiển thị cho chuyên viên CSKH trong LeadDetailDrawer.
+- **Giải pháp**:
+  - **API Backend**: Bổ sung `LEFT JOIN admins` lấy thông tin `admin_email` và `admin_name` thực hiện hành động (giữ `null` đối với hoạt động hệ thống hoặc admin đã bị xóa). Hỗ trợ lọc phân trang cursor đơn giản qua `limit` (1–100) và `before` (timestamptz), sắp xếp theo `created_at desc`.
+  - **Shared Schemas**: Khai báo `getLeadActivitiesQuerySchema`, `LeadActivityDto` và `createLeadActivitySchema` trong `packages/shared`.
+  - **Frontend Client**: Thêm tab "Hoạt động & Lịch sử" cạnh tab "Thông tin chi tiết" trong `LeadDetailDrawer`. Tách component `LeadOverviewTab` và `LeadActivityTimeline` để đảm bảo mỗi file dưới 300 dòng.
+  - **Dòng thời gian (Timeline)**: Hiển thị icon và huy hiệu tiếng Việt trực quan cho từng loại hoạt động (Ghi chú, Cuộc gọi, Email, Đổi trạng thái, Báo giá, Hệ thống), thời gian tương đối ("vừa xong", "5 phút trước",...) kèm tooltip hiển thị timestamp đầy đủ, tên admin phụ trách.
+  - **Form tương tác**: Hỗ trợ chuyển đổi nhanh ghi chú, cuộc gọi, email kèm validation độ dài tối đa 2000 ký tự.
+  - **TanStack Query Caching**: Tích hợp `useLeadActivitiesQuery` và `useAddLeadActivityMutation`. Tự động vô hiệu hóa khóa `activities` khi thêm ghi chú mới hoặc khi đổi trạng thái lead (`useUpdateLeadStatusMutation`).

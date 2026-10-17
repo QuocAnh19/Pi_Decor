@@ -4,6 +4,7 @@ import {
   createLeadSchema,
   updateLeadStatusSchema,
   createLeadActivitySchema,
+  getLeadActivitiesQuerySchema,
 } from "./leads.schema.js";
 import { verifyToken, requireAdmin } from "../../shared/verifyToken.js";
 import { validate, validateIdParam } from "../../shared/validate.js";
@@ -19,6 +20,7 @@ leadsRouter.get(
   verifyToken,
   requireAdmin,
   validateIdParam,
+  validate(getLeadActivitiesQuerySchema, "query"),
   leadsController.getLeadActivities
 );
 leadsRouter.post(

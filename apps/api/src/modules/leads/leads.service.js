@@ -37,10 +37,10 @@ export const leadsService = {
     return leadsRepository.findById(id);
   },
 
-  async getLeadActivities(leadId) {
+  async getLeadActivities(leadId, query = {}) {
     const existing = await leadsRepository.findById(leadId);
     if (!existing) return null;
-    return leadsRepository.findActivities(leadId);
+    return leadsRepository.findActivities(leadId, query);
   },
 
   async addLeadActivity(leadId, { activity_type, body }, adminId) {

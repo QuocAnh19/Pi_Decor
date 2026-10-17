@@ -17,6 +17,7 @@ export const leadsKeys = {
   all: ["leads"] as const,
   list: (params: { page: number; limit: number; q: string; status: string }) =>
     [...leadsKeys.all, "list", params] as const,
+  activities: (leadId: string) => [...leadsKeys.all, "activities", leadId] as const,
 };
 
 /** Query lấy danh sách leads phân trang và tìm kiếm */
@@ -40,11 +41,43 @@ export function useUpdateLeadStatusMutation() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: LeadStatus }) =>
       api.updateLeadStatus(id, status),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: leadsKeys.all });
+      queryClient.invalidateQueries({ queryKey: leadsKeys.activities(variables.id) });
     },
     onError: (err) => {
       toast.error(err, "Không cập nhật được trạng thái khách hàng.");
+    },
+  });
+}
+
+/** Query lấy dòng thời gian hoạt động của một lead */
+export function useLeadActivitiesQuery(leadId: string, enabled = true) {
+  return useQuery({
+    queryKey: leadsKeys.activities(leadId),
+    queryFn: () => api.getLeadActivities(leadId, { limit: 50 }),
+    enabled: Boolean(leadId) && enabled,
+  });
+}
+
+/** Mutation thêm hoạt động/ghi chú mới cho lead */
+export function useAddLeadActivityMutation() {
+  return useMutation({
+    mutationFn: ({
+      leadId,
+      activity_type,
+      body,
+    }: {
+      leadId: string;
+      activity_type: string;
+      body?: string | null;
+    }) => api.addLeadActivity(leadId, { activity_type, body }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: leadsKeys.activities(variables.leadId) });
+      toast.success("Đã thêm hoạt động vào dòng thời gian!");
+    },
+    onError: (err) => {
+      toast.error(err, "Không thể thêm hoạt động.");
     },
   });
 }

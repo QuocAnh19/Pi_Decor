@@ -20,7 +20,7 @@ export const leadsController = {
   },
 
   async getLeadActivities(req, res) {
-    const activities = await leadsService.getLeadActivities(req.params.id);
+    const activities = await leadsService.getLeadActivities(req.params.id, req.query);
     if (!activities) {
       return res.status(404).json({ message: "Không tìm thấy lead." });
     }

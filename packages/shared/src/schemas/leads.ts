@@ -52,6 +52,27 @@ export const createLeadActivitySchema = z.object({
   body: z.string().max(2000, "Nội dung hoạt động tối đa 2000 ký tự.").nullable().optional(),
 });
 
+export const getLeadActivitiesQuerySchema = z.object({
+  limit: z.preprocess(
+    (val) => (val !== undefined && val !== null ? parseInt(String(val), 10) : 20),
+    z.number().int().min(1).max(100).default(20)
+  ),
+  before: z.string().trim().optional(),
+});
+
+export interface LeadActivityDto {
+  id: string;
+  lead_id: string;
+  admin_id: string | null;
+  admin_email: string | null;
+  admin_name: string | null;
+  activity_type: string;
+  body: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
 export type CreateLeadDto = z.infer<typeof createLeadSchema>;
 export type UpdateLeadStatusDto = z.infer<typeof updateLeadStatusSchema>;
 export type CreateLeadActivityDto = z.infer<typeof createLeadActivitySchema>;
+export type GetLeadActivitiesQueryDto = z.infer<typeof getLeadActivitiesQuerySchema>;

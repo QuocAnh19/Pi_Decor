@@ -3,4 +3,5 @@ export {
   createLeadSchema,
   updateLeadStatusSchema,
   createLeadActivitySchema,
+  getLeadActivitiesQuerySchema,
 } from "@pidecor/shared";

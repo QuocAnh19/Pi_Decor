@@ -1,17 +1,15 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import {
-  PhoneIcon,
-  EnvelopeIcon,
-  DocumentTextIcon,
   UserIcon,
-  CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
-  SparklesIcon,
+  ClockIcon,
+  IdentificationIcon,
 } from "@heroicons/react/24/outline";
 import type { Lead, LeadStatus } from "../../../lib/types";
-import { formatDateTime, formatWeddingDate } from "../../../lib/formatters";
+import { formatDateTime } from "../../../lib/formatters";
 import { Modal } from "../../../components/ui";
-import { LeadDesignSnapshotSection } from "./LeadDesignSnapshotSection";
+import { LeadOverviewTab } from "./LeadOverviewTab";
+import { LeadActivityTimeline } from "./LeadActivityTimeline";
 import styles from "./LeadDetailDrawer.module.scss";
 
 const statusLabel: Record<LeadStatus, string> = {
@@ -35,7 +33,8 @@ export function LeadDetailDrawer({
   onStatusChange,
   onOpenQuotation,
 }: LeadDetailDrawerProps) {
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"overview" | "activities">("overview");
+
   if (!lead) return null;
 
   let eventType = "";
@@ -63,8 +62,6 @@ export function LeadDetailDrawer({
     eventType = "PiWedding — Studio Phối Cảnh";
   }
 
-  const snapshot = lead.design_snapshot;
-
   const drawerTitle = (
     <div className={styles.headerContent}>
       <span className={styles.eyebrow}>Đăng ký lúc: {formatDateTime(lead.created_at)}</span>
@@ -84,84 +81,32 @@ export function LeadDetailDrawer({
       maxWidth="540px"
       closeOnBackdropClick={false}
     >
-      {/* Action Buttons: Lập Báo Giá & Mở Trong Studio */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-          marginBottom: "20px",
-        }}
-      >
+      {/* Thanh chuyển Tab: Tổng quan vs Hoạt động */}
+      <div className={styles.drawerTabs} role="tablist">
         <button
           type="button"
-          className={styles.createQuoteBtn}
-          onClick={() => {
-            if (onOpenQuotation) {
-              onOpenQuotation(lead);
-            }
-          }}
+          role="tab"
+          aria-selected={activeTab === "overview"}
+          className={`${styles.tabItem} ${activeTab === "overview" ? styles.tabItemActive : ""}`}
+          onClick={() => setActiveTab("overview")}
         >
-          <DocumentTextIcon className="h-4 w-4" style={{ width: 18, height: 18 }} />
-          <span>Lập Báo Giá Chi Tiết &amp; Xuất PDF</span>
+          <IdentificationIcon style={{ width: 16, height: 16 }} />
+          <span>Thông tin chi tiết</span>
         </button>
-
-        {snapshot && (
-          <button
-            type="button"
-            onClick={() => {
-              onClose();
-              navigate(`/studio?leadId=${lead.id}`);
-            }}
-            style={{
-              padding: "10px 16px",
-              backgroundColor: "#271620",
-              color: "#fbf7f1",
-              border: "1px solid #a15c2e",
-              borderRadius: "10px",
-              fontSize: "13px",
-              fontWeight: "700",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              boxShadow: "0 2px 8px rgba(39, 22, 32, 0.15)",
-              transition: "all 0.15s ease",
-            }}
-          >
-            <SparklesIcon className="h-4 w-4" style={{ width: 16, height: 16, color: "#fbbf24" }} />
-            <span>Mở &amp; Tinh Chỉnh Trong Studio 3D</span>
-          </button>
-        )}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "activities"}
+          className={`${styles.tabItem} ${activeTab === "activities" ? styles.tabItemActive : ""}`}
+          onClick={() => setActiveTab("activities")}
+        >
+          <ClockIcon style={{ width: 16, height: 16 }} />
+          <span>Hoạt động &amp; Lịch sử</span>
+        </button>
       </div>
 
-      {/* Thông tin liên hệ */}
-      <section className={styles.section}>
-        <p className={styles.sectionTitle}>
-          <PhoneIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-          Thông Tin Liên Hệ Khách Hàng
-        </p>
-
-        <div className={styles.infoGrid}>
-          <div className={styles.contactRow}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <PhoneIcon className={styles.contactIcon} />
-              <span className={styles.contactValue}>{lead.phone}</span>
-            </div>
-          </div>
-
-          <div className={styles.contactRow}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <EnvelopeIcon className={styles.contactIcon} />
-              <span className={styles.contactValue}>{lead.email || "Chưa cung cấp email"}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trạng thái xử lý */}
-      <section className={styles.section}>
+      {/* Trạng thái xử lý luôn xuất hiện trên cả 2 tab để thao tác nhanh */}
+      <section className={styles.section} style={{ marginBottom: 16 }}>
         <p className={styles.sectionTitle}>
           <ChatBubbleLeftRightIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
           Trạng Thái Xử Lý &amp; Tư Vấn
@@ -196,52 +141,18 @@ export function LeadDetailDrawer({
         </div>
       </section>
 
-      {/* Chi tiết đơn đăng ký */}
-      <section className={styles.section}>
-        <p className={styles.sectionTitle}>
-          <CalendarDaysIcon className="h-4 w-4" style={{ width: 16, height: 16 }} />
-          Nhu Cầu Sự Kiện &amp; Ghi Chú
-        </p>
-
-        <div className={styles.infoGrid}>
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Phân mục dịch vụ quan tâm:</span>
-            <div>
-              <span className={styles.eventTypeBadge}>
-                {eventType || "PiWedding — Trang Trí Cưới Hỏi Cao Cấp"}
-              </span>
-            </div>
-          </div>
-
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Ngày tổ chức tiệc dự kiến:</span>
-            <div className={styles.formValueCard}>
-              <span className={styles.dateText}>{formatWeddingDate(lead.wedding_date)}</span>
-            </div>
-          </div>
-
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Ý tưởng &amp; Ghi chú của khách hàng:</span>
-            <div className={styles.formValueCard}>
-              {cleanMessage ? (
-                <p
-                  style={{
-                    margin: 0,
-                    fontStyle: "italic",
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
-                  "{cleanMessage}"
-                </p>
-              ) : (
-                <p className={styles.emptyNotes}>Khách hàng không để lại ghi chú thêm.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {snapshot && <LeadDesignSnapshotSection snapshot={snapshot} />}
+      {activeTab === "overview" ? (
+        <LeadOverviewTab
+          lead={lead}
+          eventType={eventType}
+          cleanMessage={cleanMessage}
+          snapshot={lead.design_snapshot}
+          onClose={onClose}
+          onOpenQuotation={onOpenQuotation}
+        />
+      ) : (
+        <LeadActivityTimeline leadId={lead.id} />
+      )}
     </Modal>
   );
 }

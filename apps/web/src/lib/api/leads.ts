@@ -1,5 +1,5 @@
 import { request, authRequest } from "../http";
-import type { Lead, LeadStatus, PaginatedLeadsResponse } from "../types";
+import type { Lead, LeadStatus, PaginatedLeadsResponse, LeadActivity } from "../types";
 
 export interface LeadPayload {
   name: string;
@@ -44,5 +44,21 @@ export const leadsApi = {
     authRequest<Lead>(`/leads/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
+    }),
+
+  getLeadActivities: (leadId: string, params?: { limit?: number; before?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.limit) searchParams.set("limit", String(params.limit));
+    if (params?.before) searchParams.set("before", params.before);
+    const queryStr = searchParams.toString();
+    return authRequest<LeadActivity[]>(
+      `/leads/${leadId}/activities${queryStr ? `?${queryStr}` : ""}`
+    );
+  },
+
+  addLeadActivity: (leadId: string, payload: { activity_type: string; body?: string | null }) =>
+    authRequest<LeadActivity>(`/leads/${leadId}/activities`, {
+      method: "POST",
+      body: JSON.stringify(payload),
     }),
 };

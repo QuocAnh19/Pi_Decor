@@ -292,3 +292,38 @@
     color: $admin-accent;
   }
 }
+
+.drawerTabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid $admin-border;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.tabItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: $radius-m;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  color: $admin-text-muted;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: $admin-text;
+    background: $admin-bg;
+  }
+}
+
+.tabItemActive {
+  color: $admin-accent;
+  background: var(--color-surface);
+  border-color: $admin-border;
+  box-shadow: $admin-shadow-card;
+}

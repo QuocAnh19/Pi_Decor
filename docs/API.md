@@ -51,14 +51,14 @@ Tài liệu đặc tả toàn bộ các điểm cuối (endpoints) của hệ th
 
 ## 3. Quản lý Khách hàng Tiềm năng (Leads CRM)
 
-| Method  | Endpoint                        | Quyền  | Request Body / Params                                                                     | Phản hồi tóm tắt                    |
-| ------- | ------------------------------- | :----: | ----------------------------------------------------------------------------------------- | ----------------------------------- |
-| `POST`  | `/api/leads`                    | Public | `{ name, phone, email?, wedding_date?, message?, design_snapshot?, consent }` (Limit 5MB) | `201 { success: true, data: Lead }` |
-| `GET`   | `/api/leads`                    | Admin  | Query: `page`, `limit`, `q`, `status`, `sort`                                             | `200 { data: Lead[], pagination }`  |
-| `GET`   | `/api/leads/:id`                | Admin  | Path: `id`                                                                                | `200 { success: true, data: Lead }` |
-| `PATCH` | `/api/leads/:id`                | Admin  | `{ status: "new" \| "contacted" \| "closed" }`                                            | `200 { success: true, data: Lead }` |
-| `GET`   | `/api/leads/:leadId/activities` | Admin  | Path: `leadId`                                                                            | `200 Activity[]`                    |
-| `POST`  | `/api/leads/:leadId/activities` | Admin  | `{ action, notes? }`                                                                      | `201 Activity`                      |
+| Method  | Endpoint                    | Quyền  | Request Body / Params                                                                               | Phản hồi tóm tắt                                                     |
+| ------- | --------------------------- | :----: | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `POST`  | `/api/leads`                | Public | `{ name, phone, email?, wedding_date?, message?, design_snapshot?, consent }` (Limit 5MB)           | `201 { success: true, data: Lead }`                                  |
+| `GET`   | `/api/leads`                | Admin  | Query: `page`, `limit`, `q`, `status`, `sort`                                                       | `200 { data: Lead[], pagination }`                                   |
+| `GET`   | `/api/leads/:id`            | Admin  | Path: `id`                                                                                          | `200 { success: true, data: Lead }`                                  |
+| `PATCH` | `/api/leads/:id`            | Admin  | `{ status: "new" \| "contacted" \| "closed" }`                                                      | `200 { success: true, data: Lead }`                                  |
+| `GET`   | `/api/leads/:id/activities` | Admin  | Path: `id` (UUID), Query: `limit?` (1–100, default 20), `before?` (cursor timestamptz)              | `200 Activity[]` (sắp xếp giảm dần, kèm `admin_email`, `admin_name`) |
+| `POST`  | `/api/leads/:id/activities` | Admin  | Path: `id` (UUID), Body: `createLeadActivitySchema`: `{ activity_type, body? }` (tối đa 2000 ký tự) | `201 Activity` (ghi nhận `admin_id` từ token)                        |
 
 ---
 

@@ -18,7 +18,17 @@ export function validate(schema, source = "body") {
       }));
       return res.status(400).json({ message, errors });
     }
-    req[source] = result.data;
+    if (source === "query" && req.query && typeof req.query === "object") {
+      // Trong Express 5, req.query có thể là getter thuần túy. Ta gán đè các thuộc tính đã validate.
+      for (const key of Object.keys(req.query)) {
+        if (!(key in result.data)) {
+          delete req.query[key];
+        }
+      }
+      Object.assign(req.query, result.data);
+    } else {
+      req[source] = result.data;
+    }
     next();
   };
 }
