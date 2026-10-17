@@ -9,19 +9,13 @@ database/
 ├── README.md          — Tài liệu này
 ├── migrate.js         — Áp dụng migrations/*.sql theo thứ tự, ghi vết qua schema_migrations
 ├── security/          — Script tạo role giới hạn quyền pidecor_app (hướng dẫn cho Neon/Postgres)
-└── migrations/        — Thư mục chứa migration: 0001_baseline.sql
+└── migrations/        — Thư mục chứa migrations (0001_baseline.sql, 0002_drop_orphan_objects.sql)
 ```
 
-### Baseline Migration (`0001_baseline.sql`)
+### Danh sách Migrations
 
-Dự án đã gộp toàn bộ 30 file migration ban đầu (từ 0001 đến 0029) thành một file baseline duy nhất: `0001_baseline.sql`:
-
-- **Extensions**: `pgcrypto` (hàm `gen_random_uuid`), `pg_trgm` (tìm kiếm mờ trigram).
-- **Triggers**: Hàm trigger chung `set_updated_at()` tự động cập nhật `updated_at` cho 8 bảng nghiệp vụ.
-- **17 Bảng nghiệp vụ**: `admins`, `leads`, `designs`, `materials`, `services`, `venues`, `projects`, `media_assets`, `lead_activities`, `quotations`, `testimonials`, `studio_templates`, `studio_slot_definitions`, `studio_assets`, `studio_slot_rules`, `refresh_tokens`, `quotation_counters`.
-- **2 Views**: `venues_with_project_count`, `admin_dashboard_summary`.
-- **Indexes**: Toàn bộ B-tree, Partial index, GIN Trigram index.
-- **DML Seed/Backfill**: Khởi tạo giá trị bộ đếm `quotation_counters` theo năm.
+1. `0001_baseline.sql`: Baseline schema tổng hợp đầy đủ extensions, hàm trigger, 17 bảng, 2 view, toàn bộ index và seed counters.
+2. `0002_drop_orphan_objects.sql`: Dọn dẹp 2 view mồ côi (`admin_dashboard_summary`, `venues_with_project_count`) và 2 bảng không còn sử dụng (`designs`, `media_assets`).
 
 ## Ánh xạ Bảng đến Module API (`apps/api/src/modules/`)
 
@@ -29,12 +23,10 @@ Dự án đã gộp toàn bộ 30 file migration ban đầu (từ 0001 đến 00
 | ------------------------- | -------------------------------- | ----------------------------------------------- |
 | `admins`                  | `auth`                           | Tài khoản admin/owner, xác thực phiên đăng nhập |
 | `leads`                   | `leads`                          | Khách gửi liên hệ hoặc lưu thiết kế Studio      |
-| `designs`                 | —                                | Snapshot canvas tương tác (lịch sử)             |
 | `materials`               | `materials`                      | Danh mục vật liệu trang trí                     |
 | `services`                | `services`                       | Danh mục dịch vụ Bento trang chủ                |
 | `venues`                  | `venues`                         | Ghim địa điểm trên bản đồ tương tác Leaflet     |
 | `projects`                | `projects`                       | Dự án thực tế gắn với từng địa điểm             |
-| `media_assets`            | `media`                          | Quản lý tài nguyên media tải lên Cloudinary     |
 | `lead_activities`         | `leads`                          | Lịch sử tương tác chăm sóc khách hàng           |
 | `quotations`              | `quotations`                     | Báo giá chi tiết xuất cho lead                  |
 | `quotation_counters`      | `quotations`                     | Đếm số thứ tự báo giá nguyên tử theo năm        |
@@ -74,14 +66,15 @@ DATABASE_URL_DIRECT=postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor
 - **Cơ sở dữ liệu mới (Fresh DB)**:
   ```bash
   cd apps/api
-  npm run migrate    # Áp dụng 0001_baseline.sql
-  npm run seed       # Khởi tạo tài khoản admin và dữ liệu mẫu
+  npm run migrate    # Áp dụng 0001_baseline.sql và 0002_drop_orphan_objects.sql
+  npm run seed       # Khởi tạo tài khoản admin và dữ liệu danh mục mẫu
   ```
 - **Chuyển đổi từ database cũ sang Baseline (Adopt Baseline)**:
   Nếu cơ sở dữ liệu đã tồn tại các bảng từ các migration trước:
   ```bash
   cd apps/api
   npm run migrate:adopt-baseline   # Đồng bộ schema_migrations sang 0001_baseline.sql
+  npm run migrate                  # Chạy các migration tiếp theo (0002_...)
   ```
 
 ## Bảo mật cơ sở dữ liệu

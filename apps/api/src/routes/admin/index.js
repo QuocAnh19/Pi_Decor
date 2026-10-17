@@ -9,28 +9,19 @@ adminRouter.use(verifyToken, requireAdmin);
 
 // GET /api/admin/summary — quick counts for the dashboard home.
 adminRouter.get("/summary", async (_req, res) => {
-  const [
-    leadsTotal,
-    leadsNew,
-    designsTotal,
-    materialsTotal,
-    servicesTotal,
-    venuesTotal,
-    projectsPublishedTotal,
-  ] = await Promise.all([
-    db.count("leads"),
-    db.count("leads", "status = $1", ["new"]),
-    db.count("designs"),
-    db.count("materials"),
-    db.count("services"),
-    db.count("venues"),
-    db.count("projects", "published = true"),
-  ]);
+  const [leadsTotal, leadsNew, materialsTotal, servicesTotal, venuesTotal, projectsPublishedTotal] =
+    await Promise.all([
+      db.count("leads"),
+      db.count("leads", "status = $1", ["new"]),
+      db.count("materials"),
+      db.count("services"),
+      db.count("venues"),
+      db.count("projects", "published = true"),
+    ]);
 
   res.json({
     leads_total: leadsTotal,
     leads_new: leadsNew,
-    designs_total: designsTotal,
     materials_total: materialsTotal,
     services_total: servicesTotal,
     venues_total: venuesTotal,

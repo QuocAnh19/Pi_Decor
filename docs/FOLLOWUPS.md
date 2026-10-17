@@ -33,11 +33,18 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 - **Đề xuất xử lý**: Quyết định duy trì làm API nội bộ mở rộng cho phiên bản nâng cấp Studio Editor & CRM tương lai hoặc đánh dấu deprecate.
 - **Trạng thái**: Chờ kế hoạch roadmap tiếp theo.
 
-### 3. [Ưu tiên Thấp] Cân nhắc drop bảng `designs` ở migration tương lai (P07)
+### 3. [Theo dõi Nghiệp vụ] Đánh giá việc sử dụng hai cột `projects.tag` và `projects.budget` (P29)
 
-- **Mô tả**: Route công khai `/api/designs` đã được gỡ bỏ khỏi server. Bảng `designs` và các migration liên quan vẫn đang được giữ nguyên để bảo toàn dữ liệu lịch sử. Phần đếm `designs_total` trong `/api/admin/summary` vẫn đang được giữ phục vụ dashboard.
-- **Đề xuất xử lý**: Khi chắc chắn không cần đối chiếu các bản vẽ cũ, tạo migration mới để drop bảng `designs` và dọn dẹp trường `designs_total`.
-- **Trạng thái**: Chờ xác nhận nghiệp vụ.
+- **Mô tả**: Hai cột `tag` và `budget` trong bảng `projects` từng bị nghi là cột thừa sau khi có `style_tags` và `price_tier`.
+- **Kết quả rà soát codebase thực tế**: Cả hai cột đang được sử dụng tích cực ở nhiều luồng nghiệp vụ quan trọng:
+  - **`projects.tag`**:
+    - Web Client: Hiển thị hashtag Lookbook (`#PiDecor_{item.tag}` trong `Lookbook.tsx`), badge album (`ProjectAlbumModal.tsx`), dropdown chọn tag phân loại con theo category (`ProjectForm.tsx`), lọc danh mục dịch vụ (`ServiceDetailModal.tsx`), bảng và lưới quản trị (`AdminProjectsGridView.tsx`, `AdminProjectsTableView.tsx`).
+    - API Server: `projects.service.js` (gán tag mặc định hoặc lấy từ style_tags), `projects.schema.js` (validate Zod input), `portfolio.seed.js` (dữ liệu mẫu).
+  - **`projects.budget`**:
+    - Web Client: Nhập liệu khoảng ngân sách dự kiến trong `ProjectForm.tsx`, hiển thị thông tin chi phí ước tính trên thẻ dự án (`AdminProjectsGridView.tsx`).
+    - API Server: `projects.service.js` lưu trường ngân sách thỏa thuận, `projects.schema.js`.
+- **Kết luận**: **KHÔNG xóa** hai cột này vì đang phục vụ trực tiếp trải nghiệm người dùng và giao diện quản trị. Tiếp tục duy trì đồng bộ giữa form quản trị và hiển thị công khai.
+- **Trạng thái**: Đã rà soát và giữ nguyên.
 
 ### 4. [Ưu tiên Thấp] Đánh giá đồng bộ phiên bản Major của Vitest giữa Web (^2.x) và API (^5.x) (P25)
 
@@ -49,7 +56,16 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 
 ## II. Các hạng mục đã giải quyết (Resolved Items)
 
-### 1. [Đã giải quyết - P21] Xung đột Peer Dependency tại `apps/api/` khi chạy `npm ci`
+### 1. [Đã giải quyết - P29] Xóa bỏ các bảng và view mồ côi (`designs`, `media_assets`, `admin_dashboard_summary`, `venues_with_project_count`)
+
+- **Mô tả trước đây**: Bảng `designs` là tàn dư từ bản vẽ canvas cũ (nay snapshot đã tích hợp vào `leads.design_snapshot`), bảng `media_assets` không có consumer, hai view `admin_dashboard_summary` và `venues_with_project_count` không có route nào gọi.
+- **Giải pháp**:
+  - Tạo migration `0002_drop_orphan_objects.sql` drop tuần tự 2 view và 2 bảng theo đúng quan hệ phụ thuộc.
+  - Gỡ bỏ `designs` và `media_assets` khỏi `TABLES` allowlist và `layers` khỏi `JSONB_COLUMNS` trong `database.pg.js`.
+  - Gỡ bỏ trường `designs_total` khỏi `GET /api/admin/summary` và interface `AdminSummary` của web frontend.
+  - Cập nhật script phân quyền `create_app_role.sql` và tài liệu kỹ thuật `API.md`, `README.md`.
+
+### 2. [Đã giải quyết - P21] Xung đột Peer Dependency tại `apps/api/` khi chạy `npm ci`
 
 - **Mô tả trước đây**: `apps/api/package.json` dùng `cloudinary: "^2.5.0"` xung đột peer dependency với `multer-storage-cloudinary@4.0.0`.
 - **Giải pháp**: Đã cấu hình `.npmrc` hỗ trợ `legacy-peer-deps=true` đồng thời chuẩn hóa package-lock, cho phép CI chạy `npm ci` thành công tuyệt đối.

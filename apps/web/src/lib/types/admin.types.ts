@@ -60,7 +60,6 @@ export interface PaginatedLeadsResponse {
 export interface AdminSummary {
   leads_total: number;
   leads_new: number;
-  designs_total: number;
   materials_total: number;
   services_total: number;
   venues_total: number;

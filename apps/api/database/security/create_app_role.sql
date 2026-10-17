@@ -3,8 +3,7 @@
 -- ============================================================================
 -- Tạo role thứ hai với quyền tối thiểu (least privilege) cho Express app,
 -- tách biệt với role owner dùng để chạy migrations (cần quyền DDL CREATE/ALTER/DROP).
--- Express runtime chỉ cần SELECT / INSERT / UPDATE / DELETE trên 17 bảng
--- và SELECT trên 2 view.
+-- Express runtime chỉ cần SELECT / INSERT / UPDATE / DELETE trên 15 bảng nghiệp vụ.
 --
 -- ── Lưu ý đặc biệt khi sử dụng trên Neon Postgres ───────────────────────────
 -- Trên Neon, các role và user được quản lý tập trung thông qua Neon Console
@@ -29,30 +28,23 @@ $$;
 grant connect on database current_database() to pidecor_app;
 grant usage on schema public to pidecor_app;
 
--- 3. Cấp quyền DML trên toàn bộ 17 bảng nghiệp vụ
+-- 3. Cấp quyền DML trên toàn bộ 15 bảng nghiệp vụ
 grant select, insert, update, delete
-  on admins, leads, designs, materials, services, venues, projects,
-     media_assets, lead_activities, quotations, testimonials,
+  on admins, leads, materials, services, venues, projects,
+     lead_activities, quotations, testimonials,
      studio_templates, studio_slot_definitions, studio_assets, studio_slot_rules,
      refresh_tokens, quotation_counters
   to pidecor_app;
 
--- 4. Cấp quyền SELECT trên 2 views
-grant select
-  on venues_with_project_count, admin_dashboard_summary
-  to pidecor_app;
-
--- 5. Thu hồi quyền trên bảng migration bookkeeping
+-- 4. Thu hồi quyền trên bảng migration bookkeeping
 revoke all on schema_migrations from pidecor_app;
 
--- 6. Ngăn chặn quyền tạo mới đối tượng trên schema public
+-- 5. Ngăn chặn quyền tạo mới đối tượng trên schema public
 revoke create on schema public from pidecor_app;
 
--- 7. Thu hồi quyền từ role PUBLIC mặc định để đảm bảo bảo mật nhiều tầng
-revoke all on admins, leads, designs, materials, services, venues, projects,
-  media_assets, lead_activities, quotations, testimonials,
+-- 6. Thu hồi quyền từ role PUBLIC mặc định để đảm bảo bảo mật nhiều tầng
+revoke all on admins, leads, materials, services, venues, projects,
+  lead_activities, quotations, testimonials,
   studio_templates, studio_slot_definitions, studio_assets, studio_slot_rules,
   refresh_tokens, quotation_counters
   from public;
-
-revoke all on venues_with_project_count, admin_dashboard_summary from public;

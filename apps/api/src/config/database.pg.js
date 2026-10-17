@@ -219,7 +219,6 @@ const TABLES = {
     "status",
     "created_at",
   ],
-  designs: ["id", "lead_id", "layers", "thumbnail_url", "created_at"],
   materials: ["id", "name", "category", "color_hex", "image_url", "created_at", "updated_at"],
   services: [
     "id",
@@ -270,19 +269,6 @@ const TABLES = {
     "category_id",
     "tag",
     "price_tier",
-  ],
-  media_assets: [
-    "id",
-    "entity_type",
-    "entity_id",
-    "url",
-    "provider",
-    "public_id",
-    "width",
-    "height",
-    "format",
-    "bytes",
-    "created_at",
   ],
   lead_activities: ["id", "lead_id", "admin_id", "activity_type", "body", "metadata", "created_at"],
   quotations: [
@@ -384,7 +370,6 @@ const TABLES = {
 // params (it only auto-parses jsonb coming *back* from the database).
 const JSONB_COLUMNS = new Set([
   "design_snapshot",
-  "layers",
   "gallery",
   "metadata",
   "items",
