@@ -9,6 +9,7 @@ node_modules/
 dist/
 build/
 coverage/
+packages/shared/dist/
 
 # Logs
 *.log
@@ -20,3 +21,4 @@ coverage/
 
 # Local file uploads
 server/uploads/
+apps/api/uploads/

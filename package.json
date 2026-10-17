@@ -10,12 +10,15 @@
     "prepare": "husky",
     "dev:web": "npm --prefix apps/web run dev",
     "dev:api": "npm --prefix apps/api run dev",
-    "build:shared": "npm --prefix packages/shared run build",
-    "build:web": "npm run build:shared && npm --prefix apps/web run build",
+    "build:shared": "npm --workspace=@pidecor/shared run build",
+    "build:web": "npm --prefix apps/web run build",
     "test:web": "npm --prefix apps/web run test",
     "test:api": "npm --prefix apps/api run test",
     "lint:web": "npm --prefix apps/web run lint",
-    "lint:api": "npm --prefix apps/api run lint"
+    "lint:api": "npm --prefix apps/api run lint",
+    "verify:web": "npm run build:shared && npm --prefix apps/web run verify",
+    "verify:api": "npm run build:shared && npm --prefix apps/api run verify",
+    "verify": "npm run verify:web && npm run verify:api"
   },
   "devDependencies": {
     "eslint": "^8.57.1",

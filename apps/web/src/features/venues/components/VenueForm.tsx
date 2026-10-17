@@ -69,14 +69,16 @@ export function VenueForm({ venue, onCancel, onSubmit }: VenueFormProps) {
   const hasValidCoords =
     lat !== "" && lng !== "" && !Number.isNaN(parsedLat) && !Number.isNaN(parsedLng);
 
+  const initialCenterRef = useRef<[number, number]>(
+    hasValidCoords ? [parsedLat, parsedLng] : DEFAULT_CENTER
+  );
+  const initialZoomRef = useRef<number>(hasValidCoords ? 14 : 11);
+
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
-    const initialCenter: [number, number] = hasValidCoords
-      ? [parsedLat, parsedLng]
-      : DEFAULT_CENTER;
     const map = L.map(mapContainerRef.current, {
-      center: initialCenter,
-      zoom: hasValidCoords ? 14 : 11,
+      center: initialCenterRef.current,
+      zoom: initialZoomRef.current,
       zoomControl: false,
       attributionControl: false,
     });

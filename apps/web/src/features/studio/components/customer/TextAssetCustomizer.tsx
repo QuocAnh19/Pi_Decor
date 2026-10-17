@@ -77,6 +77,11 @@ export const TextAssetCustomizer: React.FC<TextAssetCustomizerProps> = ({
 
   const [selectedColor, setSelectedColor] = useState(COLOR_PRESETS[0]);
   const hasUserEdited = useRef(false);
+  const onApplyRef = useRef(onApply);
+
+  useEffect(() => {
+    onApplyRef.current = onApply;
+  }, [onApply]);
 
   useEffect(() => {
     const currentParsed = parseWeddingInfo(existingAsset);
@@ -138,7 +143,7 @@ export const TextAssetCustomizer: React.FC<TextAssetCustomizerProps> = ({
       svgData,
     };
 
-    onApply(customAsset);
+    onApplyRef.current(customAsset);
   }, [line1, line2, line3, line4, selectedColor]);
 
   const getActiveLineData = () => {

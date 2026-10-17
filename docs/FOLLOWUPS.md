@@ -39,6 +39,12 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 - **Đề xuất xử lý**: Khi chắc chắn không cần đối chiếu các bản vẽ cũ, tạo migration mới để drop bảng `designs` và dọn dẹp trường `designs_total`.
 - **Trạng thái**: Chờ xác nhận nghiệp vụ.
 
+### 4. [Ưu tiên Thấp] Đánh giá đồng bộ phiên bản Major của Vitest giữa Web (^2.x) và API (^5.x) (P25)
+
+- **Mô tả**: `apps/api` sử dụng Vitest `^5.0.5` cho testing thuần môi trường Node backend, trong khi `apps/web` dùng Vitest `^2.1.9` tích hợp chặt chẽ với `vite: ^5.3.1`, `@vitejs/plugin-react` và môi trường `jsdom`. Thử nghiệm nâng cấp `apps/web` lên Vitest 5 đòi hỏi phải nâng cấp Vite lên v6/v7/v8 và thay đổi toàn diện cấu hình môi trường test jsdom cũng như testing-library typing augmentations trong `vite-env.d.ts`.
+- **Đề xuất xử lý**: Giữ nguyên phiên bản độc lập giữa hai workspace (web dùng Vitest 2.x phù hợp Vite 5, api dùng Vitest 5.x) để đảm bảo độ ổn định cao nhất. Sẽ nâng cấp đồng bộ toàn diện khi dự án có kế hoạch nâng cấp Vite lên v6+ cho client.
+- **Trạng thái**: Đã đánh giá và giữ nguyên, theo dõi trong các bản nâng cấp bundler tiếp theo.
+
 ---
 
 ## II. Các hạng mục đã giải quyết (Resolved Items)

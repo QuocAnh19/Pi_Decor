@@ -5,14 +5,20 @@
   "type": "module",
   "description": "Pi Decor REST API — leads, saved designs, materials & a minimal admin area. See README.md.",
   "scripts": {
+    "predev": "npm run build:shared --prefix ../..",
     "dev": "node --watch src/server.js",
+    "prestart": "npm run build:shared --prefix ../..",
     "start": "node src/server.js",
     "migrate": "node database/migrate.js",
     "seed": "node src/utils/seed.js",
     "cleanup-tokens": "node scripts/cleanup-tokens.js",
     "purge-leads": "node scripts/purge-leads.js",
     "lint": "eslint src",
-    "test": "vitest run"
+    "check:syntax": "node ../../scripts/check-syntax.mjs src",
+    "check:db-env": "node ../../scripts/check-db-env.mjs",
+    "pretest": "npm run build:shared --prefix ../..",
+    "test": "vitest run",
+    "verify": "npm run check:db-env && npm run lint && npm run check:syntax && npm run migrate && npm run test"
   },
   "engines": {
     "node": ">=20"

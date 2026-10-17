@@ -103,11 +103,13 @@ export function ProjectMap({ venues, className = "" }: ProjectMapProps) {
       map.invalidateSize();
     }, 100);
 
+    const markers = markersRef.current;
+
     return () => {
       clearTimeout(timer);
       map.remove();
       mapRef.current = null;
-      markersRef.current.clear();
+      markers.clear();
     };
   }, [venues]);
 

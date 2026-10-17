@@ -4,13 +4,18 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "predev": "npm run build:shared --prefix ../..",
     "dev": "vite",
+    "prebuild": "npm run build:shared --prefix ../..",
     "build": "tsc && vite build",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:styles": "stylelint \"src/**/*.scss\"",
     "preview": "vite preview",
     "knip": "knip",
-    "test": "vitest run"
+    "pretest": "npm run build:shared --prefix ../..",
+    "test": "vitest run",
+    "verify": "npm run typecheck && npm run lint && npm run lint:styles && npm run knip && npm run test && npm run build"
   },
   "engines": {
     "node": ">=20"
