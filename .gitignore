@@ -25,3 +25,7 @@ apps/api/uploads/
 
 # Audit reports
 *media-audit-report.json
+
+# Test outputs
+test-results/
+playwright-report/

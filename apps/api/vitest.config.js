@@ -12,5 +12,15 @@ export default defineConfig({
     sequence: {
       concurrent: false,
     },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      thresholds: {
+        lines: 54,
+        functions: 61,
+        branches: 43,
+        statements: 54,
+      },
+    },
   },
 });

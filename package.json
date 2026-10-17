@@ -14,11 +14,14 @@
     "build:web": "npm --prefix apps/web run build",
     "test:web": "npm --prefix apps/web run test",
     "test:api": "npm --prefix apps/api run test",
+    "test:coverage": "npm --prefix apps/web run test:coverage && npm --prefix apps/api run test:coverage",
     "lint:web": "npm --prefix apps/web run lint",
     "lint:api": "npm --prefix apps/api run lint",
     "verify:web": "npm run build:shared && npm --prefix apps/web run verify",
     "verify:api": "npm run build:shared && npm --prefix apps/api run verify",
     "verify": "npm run verify:web && npm run verify:api",
+    "e2e": "playwright test",
+    "e2e:update": "playwright test -u",
     "launch:check": "node scripts/check-launch-readiness.mjs",
     "audit:prod": "npm audit --omit=dev --audit-level=high"
   },
@@ -28,6 +31,7 @@
     "qs": "^6.16.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "eslint": "^8.57.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",

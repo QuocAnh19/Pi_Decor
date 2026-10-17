@@ -20,6 +20,7 @@
     "check:db-env": "node ../../scripts/check-db-env.mjs",
     "pretest": "npm run build:shared --prefix ../..",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "verify": "npm run check:db-env && npm run lint && npm run check:syntax && npm run migrate && npm run test"
   },
   "engines": {

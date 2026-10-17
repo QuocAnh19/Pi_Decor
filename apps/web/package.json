@@ -15,6 +15,7 @@
     "knip": "knip",
     "pretest": "npm run build:shared --prefix ../..",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "verify": "npm run typecheck && npm run lint && npm run lint:styles && npm run knip && npm run test && npm run build"
   },
   "engines": {

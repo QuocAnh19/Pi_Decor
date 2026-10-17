@@ -9,6 +9,16 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      thresholds: {
+        lines: 9,
+        functions: 26,
+        branches: 40,
+        statements: 9,
+      },
+    },
   },
   resolve: {
     alias: {
@@ -44,4 +54,3 @@ export default defineConfig({
     },
   },
 });
-
