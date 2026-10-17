@@ -1,10 +1,43 @@
 /**
+ * Hàm hỗ trợ lấy chuỗi đã trim hoặc undefined nếu rỗng.
+ */
+function getEnvString(val: unknown): string | undefined {
+  if (typeof val !== "string") return undefined;
+  const trimmed = val.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+const env =
+  typeof import.meta !== "undefined" && import.meta.env
+    ? import.meta.env
+    : ({} as Record<string, string | undefined>);
+
+const businessName = getEnvString(env.VITE_BUSINESS_NAME) ?? "Pi Decor";
+const businessTelephone = getEnvString(env.VITE_BUSINESS_TELEPHONE);
+const businessEmail = getEnvString(env.VITE_BUSINESS_EMAIL);
+const streetAddress = getEnvString(env.VITE_BUSINESS_STREET_ADDRESS);
+const addressLocality = getEnvString(env.VITE_BUSINESS_LOCALITY);
+const addressRegion = getEnvString(env.VITE_BUSINESS_REGION);
+const postalCode = getEnvString(env.VITE_BUSINESS_POSTAL_CODE);
+const addressCountry =
+  getEnvString(env.VITE_BUSINESS_COUNTRY) ?? (streetAddress || addressLocality ? "VN" : undefined);
+const latitude = getEnvString(env.VITE_BUSINESS_LATITUDE);
+const longitude = getEnvString(env.VITE_BUSINESS_LONGITUDE);
+const openingHours = getEnvString(env.VITE_BUSINESS_OPENING_HOURS);
+const dataProtectionEmail = getEnvString(env.VITE_BUSINESS_DATA_PROTECTION_EMAIL);
+
+const retentionDaysParsed = parseInt(getEnvString(env.VITE_RETENTION_DAYS) ?? "", 10);
+const retentionDays =
+  !isNaN(retentionDaysParsed) && retentionDaysParsed > 0 ? retentionDaysParsed : undefined;
+
+const isPrivacyReviewed = getEnvString(env.VITE_PRIVACY_POLICY_REVIEWED)?.toLowerCase() === "true";
+
+/**
  * Cấu hình thông tin thương hiệu & siêu dữ liệu SEO cho Pi Decor.
- * Các trường thông tin doanh nghiệp (địa chỉ, SĐT, giờ mở cửa) chưa có quyết định
- * chính thức từ ban quản trị nên ĐỂ TRỐNG hoặc đặt TODO, tuyệt đối KHÔNG tự bịa.
+ * Đọc trực tiếp từ biến môi trường VITE_BUSINESS_*. Trường nào trống sẽ có giá trị undefined.
  */
 export const siteConfig = {
-  name: "Pi Decor",
+  name: businessName,
   siteUrl: "https://pidecor.vn",
   defaultOgImage: "/images/hero.webp",
   description:
@@ -12,23 +45,27 @@ export const siteConfig = {
 
   // Thông tin doanh nghiệp (LocalBusiness Schema)
   business: {
-    legalName: "Pi Decor",
-    telephone: "", // TODO: Bổ sung số điện thoại chính thức của doanh nghiệp
-    email: "", // TODO: Bổ sung email chính thức của doanh nghiệp
+    legalName: businessName,
+    telephone: businessTelephone,
+    email: businessEmail,
     address: {
-      streetAddress: "", // TODO: Bổ sung địa chỉ đường phố chính thức
-      addressLocality: "Hồ Chí Minh",
-      addressRegion: "TP. Hồ Chí Minh",
-      postalCode: "", // TODO: Bổ sung mã bưu chính
-      addressCountry: "VN",
+      streetAddress,
+      addressLocality,
+      addressRegion,
+      postalCode,
+      addressCountry,
     },
     geo: {
-      latitude: "", // TODO: Bổ sung tọa độ trụ sở chính
-      longitude: "", // TODO: Bổ sung tọa độ trụ sở chính
+      latitude,
+      longitude,
     },
-    openingHours: "", // TODO: Bổ sung khung giờ mở cửa chính thức (ví dụ: Mo-Su 08:00-20:00)
+    openingHours,
+    dataProtectionEmail,
     priceRange: "$$",
   },
+
+  retentionDays,
+  isPrivacyReviewed,
 };
 
 /**
@@ -56,25 +93,30 @@ export function generateLocalBusinessSchema(): Record<string, unknown> {
     schema.openingHours = siteConfig.business.openingHours;
   }
 
-  const { streetAddress, addressLocality, addressRegion, addressCountry, postalCode } =
-    siteConfig.business.address;
-  if (streetAddress || addressLocality) {
+  const {
+    streetAddress: street,
+    addressLocality: locality,
+    addressRegion: region,
+    addressCountry: country,
+    postalCode: post,
+  } = siteConfig.business.address;
+  if (street || locality || region || post) {
     schema.address = {
       "@type": "PostalAddress",
-      ...(streetAddress ? { streetAddress } : {}),
-      ...(addressLocality ? { addressLocality } : {}),
-      ...(addressRegion ? { addressRegion } : {}),
-      ...(postalCode ? { postalCode } : {}),
-      ...(addressCountry ? { addressCountry } : {}),
+      ...(street ? { streetAddress: street } : {}),
+      ...(locality ? { addressLocality: locality } : {}),
+      ...(region ? { addressRegion: region } : {}),
+      ...(post ? { postalCode: post } : {}),
+      ...(country ? { addressCountry: country } : {}),
     };
   }
 
-  const { latitude, longitude } = siteConfig.business.geo;
-  if (latitude && longitude) {
+  const { latitude: lat, longitude: lng } = siteConfig.business.geo;
+  if (lat && lng) {
     schema.geo = {
       "@type": "GeoCoordinates",
-      latitude,
-      longitude,
+      latitude: lat,
+      longitude: lng,
     };
   }
 

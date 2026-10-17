@@ -99,4 +99,22 @@ describe("Environment Validation Tests", () => {
       mockStderr.mockRestore();
     }
   });
+
+  it("gán mặc định RETENTION_DAYS=180 và chấp nhận giá trị số dương hợp lệ", () => {
+    const defaultConfig = {
+      NODE_ENV: "test",
+      DATABASE_URL: "postgresql://localhost:5432/test",
+      JWT_SECRET: "this_is_a_very_long_valid_jwt_secret_with_more_than_32_characters",
+    };
+    const parsedDefault = validateEnv(defaultConfig);
+    expect(parsedDefault.RETENTION_DAYS).toBe(180);
+
+    const customConfig = {
+      ...defaultConfig,
+      RETENTION_DAYS: "365",
+    };
+    const parsedCustom = validateEnv(customConfig);
+    expect(parsedCustom.RETENTION_DAYS).toBe(365);
+  });
 });
+

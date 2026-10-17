@@ -39,6 +39,7 @@ const envSchema = z
     ADMIN_EMAIL: z.string().optional(),
     ADMIN_PASSWORD: z.string().optional(),
     SENTRY_DSN: z.string().optional(),
+    RETENTION_DAYS: z.coerce.number().int().positive().default(180),
   })
   .transform((data) => {
     // Mặc định trust proxy: 1 khi ở production (phía sau reverse proxy Render/Railway), 0 khi dev

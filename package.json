@@ -19,6 +19,7 @@
     "verify:web": "npm run build:shared && npm --prefix apps/web run verify",
     "verify:api": "npm run build:shared && npm --prefix apps/api run verify",
     "verify": "npm run verify:web && npm run verify:api",
+    "launch:check": "node scripts/check-launch-readiness.mjs",
     "audit:prod": "npm audit --omit=dev --audit-level=high"
   },
   "overrides": {

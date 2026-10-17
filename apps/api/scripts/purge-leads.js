@@ -1,9 +1,10 @@
-import { pool } from "../src/config/database.js";
+import { directPool } from "../src/config/database.js";
+import { env } from "../src/config/env.js";
 import { logger } from "../src/config/logger.js";
 
 function parseArgs() {
   const args = process.argv.slice(2);
-  let days = 180; // Giá trị mặc định: 180 ngày (6 tháng)
+  let days = env.RETENTION_DAYS || 180;
   let confirm = false;
 
   for (let i = 0; i < args.length; i++) {
@@ -52,7 +53,7 @@ async function main() {
       WHERE created_at < NOW() - make_interval(days => $1)
       ORDER BY created_at ASC
     `;
-    const checkRes = await pool.query(checkQuery, [days]);
+    const checkRes = await directPool.query(checkQuery, [days]);
     const leads = checkRes.rows;
 
     if (leads.length === 0) {
@@ -83,7 +84,7 @@ async function main() {
         WHERE created_at < NOW() - make_interval(days => $1)
         RETURNING id
       `;
-      const deleteRes = await pool.query(deleteQuery, [days]);
+      const deleteRes = await directPool.query(deleteQuery, [days]);
       console.log(
         `\n✓ [THÀNH CÔNG]: Đã xóa vĩnh viễn ${deleteRes.rows.length} bản ghi lead cũ hơn ${days} ngày tuân thủ chính sách lưu trữ.\n`
       );
@@ -93,7 +94,7 @@ async function main() {
     console.error("Lỗi:", err.message);
     process.exitCode = 1;
   } finally {
-    await pool.end();
+    await directPool.end();
   }
 }
 

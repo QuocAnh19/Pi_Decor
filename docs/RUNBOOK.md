@@ -223,3 +223,79 @@ npm run media:audit -- --delete-orphans --confirm
 ```
 
 Báo cáo được ghi tự động vào file `media-audit-report.json` và hoàn toàn che giấu thông tin khóa bí mật (API Key/Secret).
+
+---
+
+## 8. Quản lý Thời hạn Lưu trữ & Thanh lọc Dữ liệu Khách hàng (`purge-leads`)
+
+Hệ thống tuân thủ Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân thông qua chính sách lưu trữ có thời hạn đối với dữ liệu liên hệ (leads):
+
+- **Biến môi trường**: `RETENTION_DAYS` (mặc định 180 ngày tại `apps/api/.env`, `VITE_RETENTION_DAYS` tại `apps/web/.env`).
+- **Script thanh lọc**: `apps/api/scripts/purge-leads.js` (sử dụng kết nối trực tiếp `DATABASE_URL_DIRECT`).
+
+```bash
+# 1. Xem trước danh sách leads quá hạn (Dry-run an toàn, không xóa dữ liệu)
+cd apps/api
+npm run purge-leads
+
+# 2. Tùy chỉnh số ngày lọc nếu cần
+npm run purge-leads -- --older-than-days=90
+
+# 3. Thực thi xóa vĩnh viễn (yêu cầu cờ --confirm)
+npm run purge-leads -- --confirm
+```
+
+---
+
+## 9. Quy trình Go-Live & Cổng Kiểm tra Sẵn sàng (`launch:check`)
+
+Trước khi triển khai lên môi trường Production chính thức, bắt buộc hoàn thành các bước thiết lập biến môi trường và chạy cổng kiểm tra sẵn sàng:
+
+### Bước 1: Điền đầy đủ biến môi trường Production
+
+1. **Backend (`apps/api/.env`)**:
+   - `NODE_ENV=production`
+   - `JWT_SECRET`: Khóa bí mật tối thiểu 32 ký tự.
+   - `DATABASE_URL`: Chuỗi kết nối Neon Pooled (PgBouncer).
+   - `DATABASE_URL_DIRECT`: Chuỗi kết nối Neon Direct.
+   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
+   - `CLOUDINARY_FOLDER_PREFIX=pidecor/prod`
+   - `RETENTION_DAYS=180`
+   - `CORS_ORIGIN=https://pidecor.vn,https://www.pidecor.vn`
+
+2. **Frontend (`apps/web/.env`)**:
+   - `VITE_API_URL=https://api.pidecor.vn/api` (tuyệt đối không trỏ về localhost)
+   - `VITE_BUSINESS_NAME`: Tên doanh nghiệp chính thức (VD: Pi Decor)
+   - `VITE_BUSINESS_TELEPHONE`: Hotline chính thức (VD: +84 789 241 260)
+   - `VITE_BUSINESS_EMAIL`: Email liên hệ chính thức (VD: contact@pidecor.vn)
+   - `VITE_BUSINESS_STREET_ADDRESS`: Địa chỉ đường phố chính thức
+   - `VITE_BUSINESS_LOCALITY`: Phường/Xã/Quận
+   - `VITE_BUSINESS_REGION`: Tỉnh/Thành phố
+   - `VITE_BUSINESS_COUNTRY=VN`
+   - `VITE_BUSINESS_OPENING_HOURS`: Giờ làm việc (VD: Mo-Su 08:00-20:00)
+   - `VITE_BUSINESS_DATA_PROTECTION_EMAIL`: Email tiếp nhận quyền dữ liệu cá nhân
+   - `VITE_RETENTION_DAYS=180`
+   - `VITE_PRIVACY_POLICY_REVIEWED=true`: Bật true sau khi bộ phận pháp lý đã rà soát chính sách bảo mật (xóa bỏ banner bản nháp trên web).
+
+### Bước 2: Build bản phân phối tĩnh
+
+```bash
+npm run build:web
+```
+
+### Bước 3: Chạy cổng kiểm tra mức độ sẵn sàng triển khai (Launch Gate)
+
+```bash
+# Kiểm tra nghiêm ngặt (Strict Gate) - bắt buộc vượt qua (Exit Code 0) trước khi deploy
+npm run launch:check -- --strict
+```
+
+> [!IMPORTANT]
+> Lệnh `launch:check --strict` sẽ kiểm tra toàn diện:
+>
+> 1. Toàn bộ biến `VITE_BUSINESS_*` bắt buộc đã được khai báo.
+> 2. Thư mục build `apps/web/dist` sạch, không còn bất kỳ chuỗi `[TODO` hoặc `[chưa cấu hình]`.
+> 3. `VITE_PRIVACY_POLICY_REVIEWED=true`.
+> 4. Tệp `LICENSE` không còn placeholder `<TÊN CHỦ SỞ HỮU>`.
+> 5. `VITE_API_URL` trỏ về domain chính thức, không trỏ về `localhost` hay `127.0.0.1`.
+> 6. Script không bao giờ in các giá trị bí mật ra màn hình log.
