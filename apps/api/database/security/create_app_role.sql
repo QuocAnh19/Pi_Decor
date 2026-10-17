@@ -1,47 +1,35 @@
 -- ============================================================================
 -- database/security/create_app_role.sql
 -- ============================================================================
--- Creates a SECOND, low-privilege Postgres role for the running Express app,
--- separate from the role used to run migrations (which needs CREATE TABLE /
--- ALTER / DROP rights). The app itself only ever needs SELECT / INSERT /
--- UPDATE / DELETE on its 7 tables — nothing else — so it should never
--- connect using the same "owner" credentials migrate.js uses.
+-- Tạo role thứ hai với quyền tối thiểu (least privilege) cho Express app,
+-- tách biệt với role owner dùng để chạy migrations (cần quyền DDL CREATE/ALTER/DROP).
+-- Express runtime chỉ cần SELECT / INSERT / UPDATE / DELETE trên 17 bảng
+-- và SELECT trên 2 view.
 --
--- Why this file is NOT in database/migrations/:
---   migrate.js applies every file in that folder automatically and commits
---   its filename to schema_migrations. A file that embeds a password can't
---   safely be auto-run like that (the password would sit in plain text in
---   this repo). Run this one manually, once, by hand — see the steps below.
---
--- ── How to run ────────────────────────────────────────────────────────────
--- 1. Generate a strong password, e.g.:
---      node -e "console.log(require('crypto').randomBytes(24).toString('base64'))"
--- 2. Connect with the OWNER connection string (the one already in
---    DATABASE_URL / used by `npm run migrate`), e.g.:
---      psql "$DATABASE_URL"
--- 3. Inside psql, set the password as a variable so it never touches your
---    shell history or this file, then run this script:
---      \set app_password 'PASTE_THE_GENERATED_PASSWORD_HERE'
---      \i database/security/create_app_role.sql
--- 4. Build the runtime connection string with this role and put it in your
---    hosting platform's environment variables (Render/Vercel dashboard),
---    e.g.:
---      postgresql://pidecor_app:PASSWORD@<host>/<db>?sslmode=require
---    Use THIS string as DATABASE_URL for the deployed server. Keep the
---    original owner string only for running `npm run migrate` (locally or
---    in a one-off CI step) — never give the running API server owner
---    credentials.
--- ============================================================================
+-- ── Lưu ý đặc biệt khi sử dụng trên Neon Postgres ───────────────────────────
+-- Trên Neon, các role và user được quản lý tập trung thông qua Neon Console
+-- hoặc Neon CLI (người dùng không có quyền superuser trực tiếp để CREATE ROLE).
+-- 1. Vào Neon Console -> Project -> Roles/Users -> "Create Role" (ví dụ: pidecor_app).
+-- 2. Đặt mật khẩu và tạo connection string riêng cho pidecor_app.
+-- 3. Đăng nhập bằng role owner (neondb_owner) qua Neon SQL Editor hoặc psql.
+-- 4. Bỏ qua lệnh CREATE ROLE bên dưới và chạy phần GRANT / REVOKE.
+-- ────────────────────────────────────────────────────────────────────────────
 
-create role pidecor_app with login password :'app_password';
+-- 1. Tạo role (chỉ áp dụng cho Postgres tự host hoặc local Docker)
+-- Trên Neon: tạo role qua Neon Console, sau đó comment dòng này.
+do $$
+begin
+  if not exists (select from pg_roles where rolname = 'pidecor_app') then
+    create role pidecor_app with login password :'app_password';
+  end if;
+end
+$$;
 
--- Only allow it to connect and use the public schema — nothing else.
+-- 2. Cấp quyền kết nối và sử dụng schema public
 grant connect on database current_database() to pidecor_app;
 grant usage on schema public to pidecor_app;
 
--- No CREATE, no DROP, no ALTER. Exactly the four verbs the app needs, on
--- exactly the tables config/database.pg.js knows about — never
--- schema_migrations (migration history is not the app's business).
+-- 3. Cấp quyền DML trên toàn bộ 17 bảng nghiệp vụ
 grant select, insert, update, delete
   on admins, leads, designs, materials, services, venues, projects,
      media_assets, lead_activities, quotations, testimonials,
@@ -49,28 +37,22 @@ grant select, insert, update, delete
      refresh_tokens, quotation_counters
   to pidecor_app;
 
--- New tables added by a future migration are NOT automatically visible to
--- pidecor_app — this is deliberate (least privilege by default). After
--- adding a table in database/migrations/, add one more GRANT line here and
--- re-run this file (owner connection) to extend access.
+-- 4. Cấp quyền SELECT trên 2 views
+grant select
+  on venues_with_project_count, admin_dashboard_summary
+  to pidecor_app;
 
--- Explicitly deny writing to the migration bookkeeping table and reading
--- the admins.password_hash column pattern-matching tools might otherwise
--- assume is open — belt-and-braces, since the GRANT list above already
--- doesn't mention schema_migrations.
+-- 5. Thu hồi quyền trên bảng migration bookkeeping
 revoke all on schema_migrations from pidecor_app;
 
--- Prevent the app role from creating objects in the public schema at all
--- (defense in depth against a compromised app connection trying to plant
--- a table/function).
+-- 6. Ngăn chặn quyền tạo mới đối tượng trên schema public
 revoke create on schema public from pidecor_app;
 
--- Belt-and-braces: make sure PUBLIC (i.e. "any role, by default") has no
--- standing access to these tables either. Neon/Supabase project defaults
--- are already reasonably locked down, but this makes the intent explicit
--- regardless of provider defaults.
+-- 7. Thu hồi quyền từ role PUBLIC mặc định để đảm bảo bảo mật nhiều tầng
 revoke all on admins, leads, designs, materials, services, venues, projects,
   media_assets, lead_activities, quotations, testimonials,
   studio_templates, studio_slot_definitions, studio_assets, studio_slot_rules,
   refresh_tokens, quotation_counters
   from public;
+
+revoke all on venues_with_project_count, admin_dashboard_summary from public;

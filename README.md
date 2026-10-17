@@ -54,7 +54,7 @@ Cơ sở dữ liệu sẽ lắng nghe tại cổng `localhost:5432` với tài k
 cd apps/api
 cp .env.example .env
 npm install
-npm run migrate      # Áp dụng 29 migrations schema
+npm run migrate      # Áp dụng 0001_baseline.sql (gộp từ 30 migrations)
 npm run seed         # Khởi tạo tài khoản admin và dữ liệu danh mục mẫu
 npm run dev          # API lắng nghe tại http://localhost:4000
 ```
@@ -134,7 +134,8 @@ Tài khoản admin mặc định khi seed: `admin@pidecor.vn` / mật khẩu đ�
 - `node --check src/**/*.js`: Kiểm tra cú pháp toàn bộ tệp JavaScript ESM.
 - `npm run lint`: Chạy ESLint kiểm tra mã nguồn backend.
 - `npm run test`: Chạy toàn bộ test suite backend bằng Vitest.
-- `npm run migrate`: Áp dụng các tệp migration mới nhất vào cơ sở dữ liệu.
+- `npm run migrate`: Áp dụng baseline migration (0001_baseline.sql) vào cơ sở dữ liệu.
+- `npm run migrate:adopt-baseline`: Đồng bộ schema_migrations sang baseline cho DB đã có schema cũ.
 - `npm run seed`: Nạp dữ liệu mẫu ban đầu cho database.
 - `npm run cleanup-tokens`: Dọn dẹp các refresh token hết hạn hoặc đã thu hồi.
 - `npm run purge-leads`: Dọn dẹp dữ liệu leads quá hạn lưu trữ theo chính sách bảo mật.

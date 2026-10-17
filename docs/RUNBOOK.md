@@ -14,15 +14,25 @@ Tài liệu hướng dẫn quy trình triển khai (deploy), khôi phục (rollb
 
 ### Bước 1: Chạy Migration Cơ sở dữ liệu
 
-Migration được thiết kế an toàn, có thể chạy lặp lại (`idempotent`). Trước khi ứng dụng phiên bản code mới, chạy lệnh migration từ môi trường CI/CD hoặc máy quản trị:
+Toàn bộ schema được đồng nhất tại `0001_baseline.sql` (gộp 30 migrations ban đầu). Quá trình migration được thiết kế an toàn, có thể chạy lặp lại (`idempotent`).
 
-```bash
-cd apps/api
-DATABASE_URL="<production_database_url>" npm run migrate
-```
+- **Cơ sở dữ liệu mới (Fresh DB)**:
+  ```bash
+  cd apps/api
+  DATABASE_URL_DIRECT="<direct_connection_string>" npm run migrate
+  ```
+- **Cơ sở dữ liệu đang chạy đã có schema cũ (Adopt Baseline)**:
+  Nếu cơ sở dữ liệu production/staging đã áp dụng các migration `0001`–`0029` trước đây, chạy lệnh adopt để cập nhật bảng `schema_migrations` sang `0001_baseline.sql` mà không chạy lại câu lệnh DDL:
+  ```bash
+  cd apps/api
+  DATABASE_URL_DIRECT="<direct_connection_string>" npm run migrate:adopt-baseline
+  ```
 
 > [!IMPORTANT]
-> Chỉ khởi động phiên bản backend mới sau khi toàn bộ migration đã áp dụng thành công.
+>
+> - Luôn sử dụng chuỗi kết nối trực tiếp `DATABASE_URL_DIRECT` (không qua PgBouncer pooler) khi chạy `migrate` hoặc `migrate:adopt-baseline`.
+> - Bắt buộc sao lưu dữ liệu trước khi chạy `migrate:adopt-baseline`.
+> - Chỉ khởi động phiên bản backend mới sau khi toàn bộ migration đã áp dụng thành công.
 
 ### Bước 2: Khởi động API Server (Render / Docker)
 
