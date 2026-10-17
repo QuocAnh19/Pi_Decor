@@ -90,11 +90,13 @@ export const testimonialsService = {
       if (containsBase64) {
         throw createHttpError(400, "Không chấp nhận ảnh chuỗi base64 Data URL.");
       }
-
-      await cleanupRemovedMedia(existing.photos, patch.photos);
     }
 
-    return testimonialsRepository.updateById(id, patch);
+    const updated = await testimonialsRepository.updateById(id, patch);
+    if (patch.photos && Array.isArray(patch.photos)) {
+      await cleanupRemovedMedia(existing.photos, patch.photos);
+    }
+    return updated;
   },
 
   async deleteTestimonial(id) {

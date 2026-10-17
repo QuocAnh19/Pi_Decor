@@ -11,6 +11,7 @@ import { StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import { Container, Section, SectionHeader } from "../../../components/ui/Layout";
 import { Reveal } from "../../../components/ui/Reveal";
 import type { TestimonialItem } from "../../../lib/types";
+import { cloudinaryUrl } from "../../../lib/cloudinary";
 import { useTestimonials } from "../hooks/useTestimonials";
 import { TestimonialFormModal } from "./TestimonialFormModal";
 import styles from "./TestimonialsSection.module.scss";
@@ -166,7 +167,7 @@ export function TestimonialsSection() {
                       {t.photos.map((photoUrl: string, pIdx: number) => (
                         <img
                           key={pIdx}
-                          src={photoUrl}
+                          src={cloudinaryUrl(photoUrl, { width: 800 })}
                           alt={`Ảnh đánh giá ${pIdx + 1} của ${t.author}`}
                           className={styles.photoThumb}
                           onClick={() =>
@@ -269,7 +270,7 @@ export function TestimonialsSection() {
 
             <div className={styles.lightboxImgWrapper}>
               <img
-                src={lightbox.photos[lightbox.currentIndex]}
+                src={cloudinaryUrl(lightbox.photos[lightbox.currentIndex], { width: 800 })}
                 alt={`Ảnh đánh giá ${lightbox.currentIndex + 1}`}
                 className={styles.lightboxImg}
               />
@@ -294,7 +295,7 @@ export function TestimonialsSection() {
               {lightbox.photos.map((url, idx) => (
                 <img
                   key={idx}
-                  src={url}
+                  src={cloudinaryUrl(url, { width: 200 })}
                   alt={`Thumbnail ${idx + 1}`}
                   className={`${styles.lightboxThumb} ${
                     idx === lightbox.currentIndex ? styles.lightboxThumbActive : ""

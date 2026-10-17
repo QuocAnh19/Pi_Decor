@@ -129,6 +129,8 @@ export const projectsService = {
       patch.title = String(patch.title).trim();
     }
 
+    const updated = await projectsRepository.updateById(id, patch);
+
     if (patch.cover_image !== undefined) {
       await cleanupRemovedMedia(existing.cover_image, patch.cover_image);
     }
@@ -137,7 +139,7 @@ export const projectsService = {
       await cleanupRemovedMedia(existing.gallery, patch.gallery);
     }
 
-    return projectsRepository.updateById(id, patch);
+    return updated;
   },
 
   async deleteProject(id) {

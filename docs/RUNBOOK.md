@@ -146,9 +146,70 @@ Trong trường hợp quên mật khẩu quản trị viên hoặc cần đặt 
 
 - **Triệu chứng**: API trả về lỗi HTTP 400 hoặc 500 khi lưu dự án/vật liệu kèm ảnh.
 - **Nguyên nhân**:
-  1. Dung lượng ảnh vượt quá giới hạn Multer (tối đa 5MB/file).
-  2. Định dạng tệp không phải ảnh được phép (chỉ chấp nhận JPG, PNG, WEBP, SVG).
+  1. Dung lượng ảnh vượt quá giới hạn Multer (tối đa 10MB/file).
+  2. Định dạng tệp không phải ảnh được phép (chỉ chấp nhận JPG, PNG, WEBP, GIF, SVG).
   3. Thiếu biến môi trường Cloudinary trên môi trường production (hệ thống Render có ổ đĩa tạm thời, nếu thiếu Cloudinary ảnh sẽ mất khi restart server).
 - **Cách xử lý**:
-  1. Nén ảnh xuống dưới 5MB trước khi tải lên.
-  2. Kiểm tra đủ 3 biến môi trường: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+  1. Nén ảnh xuống dưới 10MB trước khi tải lên.
+  2. Kiểm tra đủ các biến môi trường: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_FOLDER_PREFIX`.
+
+---
+
+## 7. Vận hành Neon Postgres & Cloudinary
+
+### a. Phân biệt Chuỗi kết nối Neon: Pooled vs Direct
+
+Neon Postgres cung cấp 2 chuỗi kết nối riêng biệt cho từng mục đích sử dụng:
+
+| Loại kết nối           | Biến môi trường       | Dạng Hostname       | Mục đích & Phạm vi sử dụng                                                                                                                                                     |
+| :--------------------- | :-------------------- | :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Pooled (PgBouncer)** | `DATABASE_URL`        | `ep-xxxx-pooler...` | Dành riêng cho **API Runtime** (Express pg Pool). Chạy ở Transaction Pooling mode, tối ưu tài nguyên kết nối cho compute serverless. `DB_POOL_MAX` đặt mặc định 5.             |
+| **Direct Connection**  | `DATABASE_URL_DIRECT` | `ep-xxxx...`        | Dành cho **Migrations** (`npm run migrate`), **Seed** (`npm run seed`), **Scripts quản trị** (`cleanup-tokens`, `purge-leads`, `media:audit`), và lệnh `pg_dump`/`pg_restore`. |
+
+> [!WARNING]
+> Tuyệt đối không chạy lệnh `npm run migrate` qua chuỗi Pooled vì PgBouncer transaction mode không hỗ trợ một số lệnh quản lý khóa/DDL phức tạp.
+
+### b. Cấu hình SSL An toàn (`DB_SSL` và `DB_SSL_CA`)
+
+Neon bắt buộc mã hóa SSL cho toàn bộ kết nối từ bên ngoài:
+
+- Mặc định, hệ thống tự động bật chế độ `DB_SSL=verify-full` (xác thực toàn diện chứng chỉ máy chủ nhằm chống tấn công Man-in-the-Middle) cho mọi hostname ngoài `localhost`/`postgres`.
+- Nếu container chạy trên Alpine Linux thiếu CA Root ISRG Root X1 của Let's Encrypt, tải chứng chỉ CA và truyền vào biến:
+  ```env
+  DB_SSL=verify-full
+  DB_SSL_CA=/etc/ssl/certs/isrgrootx1.pem
+  ```
+  Biến `DB_SSL_CA` chấp nhận cả đường dẫn file cục bộ hoặc chuỗi chứng chỉ PEM trực tiếp.
+
+### c. Xử lý Neon Compute Scale-to-Zero & Thiết lập Uptime Monitor
+
+Neon tự động tạm dừng compute (scale-to-zero) khi không có truy vấn trong một khoảng thời gian:
+
+1. **Khởi động server**: Hệ thống tích hợp cơ chế `startup retry` tự động thử lại tối đa 3 lần (giãn cách 2 giây) khi kết nối ban đầu để chờ compute Neon thức dậy mà không làm sập container.
+2. **Uptime Monitor**:
+   - Các dịch vụ giám sát bên ngoài (UptimeRobot, BetterStack, StatusCake) **CHỈ ĐƯỢC PING `/api/health`** (Liveness check, trả về HTTP 200 mà không query DB).
+   - **TUYỆT ĐỐI KHÔNG PING `/api/health/ready`** theo chu kỳ ngắn (1-5 phút) vì câu lệnh `SELECT 1` sẽ liên tục đánh thức compute của Neon, làm mất tính năng tiết kiệm chi phí/quota tự động.
+   - Endpoint `/api/health/ready` (Readiness check) chỉ dùng cho Kubernetes / Render readiness probe hoặc kiểm tra trước khi chuyển luồng traffic.
+
+### d. Quy ước Tiền tố Thư mục Cloudinary (`CLOUDINARY_FOLDER_PREFIX`)
+
+Để tránh ghi đè hoặc xung đột dữ liệu ảnh giữa các môi trường, hệ thống quy định tiền tố thư mục lưu trữ Cloudinary:
+
+- **Development**: `pidecor/dev` (tự động áp dụng khi `NODE_ENV !== "production"`).
+- **Staging / Testing**: `pidecor/staging`.
+- **Production**: `pidecor/prod` (bắt buộc khai báo trong biến `CLOUDINARY_FOLDER_PREFIX` trên Render).
+
+### e. Quy trình Kiểm tra & Thanh lọc Media Định kỳ (`media:audit`)
+
+Chạy script kiểm tra đồng bộ giữa tài nguyên lưu trên Cloudinary và dữ liệu trong Postgres:
+
+```bash
+# 1. Chạy kiểm tra và xuất báo cáo (Dry-run, không xóa ảnh)
+cd apps/api
+npm run media:audit
+
+# 2. Xóa an toàn các ảnh mồ côi (chỉ xóa ảnh đã tạo quá 7 ngày để tránh ảnh đang upload)
+npm run media:audit -- --delete-orphans --confirm
+```
+
+Báo cáo được ghi tự động vào file `media-audit-report.json` và hoàn toàn che giấu thông tin khóa bí mật (API Key/Secret).

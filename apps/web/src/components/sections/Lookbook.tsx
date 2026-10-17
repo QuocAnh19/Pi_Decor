@@ -6,6 +6,7 @@ import { Reveal } from "../ui/Reveal";
 import { ProjectAlbumModal } from "../../features/projects";
 import { api } from "../../lib/api";
 import { toCategoryPortfolioItem } from "../../lib/mappers";
+import { cloudinaryUrl } from "../../lib/cloudinary";
 import type { Project, CategoryPortfolioItem } from "../../lib/types";
 import styles from "./Lookbook.module.scss";
 
@@ -123,7 +124,7 @@ export function Lookbook() {
                     title={`Xem album: ${item.title || item.tag}`}
                   >
                     <MediaSlot
-                      src={item.src}
+                      src={cloudinaryUrl(item.src, { width: 600 })}
                       alt={item.title || item.tag}
                       label={`Ảnh: ${item.tag}`}
                       hint={`public${item.src ?? ""} · 16:10`}

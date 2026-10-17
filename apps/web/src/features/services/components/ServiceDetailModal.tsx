@@ -3,6 +3,7 @@ import * as Icons from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import type { CategoryPortfolioItem, ServiceCategory } from "../../../lib/types";
 import { resolveIcon } from "../../../lib/icons";
+import { cloudinaryUrl } from "../../../lib/cloudinary";
 import { MediaSlot } from "../../../components/ui/MediaSlot";
 import { Modal } from "../../../components/ui";
 import { ProjectAlbumModal } from "../../projects";
@@ -57,10 +58,14 @@ export function ServiceDetailModal({
       >
         <div className={styles.hero}>
           {category.cover ? (
-            <img src={category.cover} alt={category.title} className={styles.heroImage} />
+            <img
+              src={cloudinaryUrl(category.cover, { width: 800 })}
+              alt={category.title}
+              className={styles.heroImage}
+            />
           ) : (
             <MediaSlot
-              src={category.cover}
+              src={cloudinaryUrl(category.cover, { width: 800 })}
               alt={category.title}
               label={`Bìa ${category.brand}`}
               className={styles.heroMedia}

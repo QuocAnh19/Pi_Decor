@@ -84,24 +84,27 @@ Tài khoản admin mặc định khi seed: `admin@pidecor.vn` / mật khẩu đ�
 
 ### API Server (`apps/api/.env`)
 
-| Tên biến                | Bắt buộc  | Mặc định                | Mô tả                                             | Giá trị ví dụ (Dev)                                                 |
-| ----------------------- | :-------: | ----------------------- | ------------------------------------------------- | ------------------------------------------------------------------- |
-| `NODE_ENV`              |   Không   | `development`           | Môi trường runtime                                | `development`                                                       |
-| `PORT`                  |   Không   | `4000`                  | Cổng HTTP API lắng nghe                           | `4000`                                                              |
-| `CORS_ORIGIN`           | Có (prod) | `http://localhost:5173` | Domain client được phép gọi API                   | `http://localhost:5173`                                             |
-| `TRUST_PROXY`           |   Không   | `0` (dev) / `1` (prod)  | Đếm số hop qua reverse proxy                      | `0`                                                                 |
-| `JWT_SECRET`            |  **Có**   | —                       | Khóa bí mật ký access token (>= 32 ký tự)         | `dev_secret_key_at_least_32_characters_long`                        |
-| `JWT_EXPIRES_IN`        |   Không   | `15m`                   | Thời hạn của access token                         | `15m`                                                               |
-| `DATABASE_URL`          |  **Có**   | —                       | Chuỗi kết nối PostgreSQL                          | `postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor`      |
-| `DATABASE_URL_TEST`     |   Không   | —                       | Chuỗi kết nối Postgres riêng cho kiểm thử         | `postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test` |
-| `DB_POOL_MAX`           |   Không   | `10`                    | Số kết nối tối đa trong connection pool           | `10`                                                                |
-| `DB_SSL`                |   Không   | `false`                 | Bật/tắt SSL (`disable`, `require`, `verify-full`) | `disable`                                                           |
-| `CLOUDINARY_CLOUD_NAME` |   Không   | —                       | Cloud name tài khoản Cloudinary                   | `your_cloud_name`                                                   |
-| `CLOUDINARY_API_KEY`    |   Không   | —                       | API Key tài khoản Cloudinary                      | `123456789012345`                                                   |
-| `CLOUDINARY_API_SECRET` |   Không   | —                       | API Secret tài khoản Cloudinary                   | `example_cloudinary_secret`                                         |
-| `ADMIN_EMAIL`           | Có (seed) | —                       | Email đăng nhập admin khi seed                    | `admin@pidecor.vn`                                                  |
-| `ADMIN_PASSWORD`        | Có (seed) | —                       | Mật khẩu admin khi seed (>= 12 ký tự)             | `Admin@PiDecor2026!`                                                |
-| `SENTRY_DSN`            |   Không   | —                       | DSN giám sát lỗi qua Sentry                       | `https://examplePublicKey@o0.ingest.sentry.io/0`                    |
+| Tên biến                   | Bắt buộc  | Mặc định                        | Mô tả                                              | Giá trị ví dụ (Dev)                                                 |
+| -------------------------- | :-------: | ------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------- |
+| `NODE_ENV`                 |   Không   | `development`                   | Môi trường runtime                                 | `development`                                                       |
+| `PORT`                     |   Không   | `4000`                          | Cổng HTTP API lắng nghe                            | `4000`                                                              |
+| `CORS_ORIGIN`              | Có (prod) | `http://localhost:5173`         | Domain client được phép gọi API                    | `http://localhost:5173`                                             |
+| `TRUST_PROXY`              |   Không   | `0` (dev) / `1` (prod)          | Đếm số hop qua reverse proxy                       | `0`                                                                 |
+| `JWT_SECRET`               |  **Có**   | —                               | Khóa bí mật ký access token (>= 32 ký tự)          | `dev_secret_key_at_least_32_characters_long`                        |
+| `JWT_EXPIRES_IN`           |   Không   | `15m`                           | Thời hạn của access token                          | `15m`                                                               |
+| `DATABASE_URL`             |  **Có**   | —                               | Chuỗi kết nối PostgreSQL (khuyến nghị Neon Pooled) | `postgresql://user:pass@ep-pooler.neon.tech/pidecor`                |
+| `DATABASE_URL_DIRECT`      |   Không   | `= DATABASE_URL`                | Chuỗi kết nối Postgres trực tiếp (migrate, seed)   | `postgresql://user:pass@ep-direct.neon.tech/pidecor`                |
+| `DATABASE_URL_TEST`        |   Không   | —                               | Chuỗi kết nối Postgres riêng cho kiểm thử          | `postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test` |
+| `DB_POOL_MAX`              |   Không   | `5`                             | Số kết nối tối đa trong connection pool            | `5`                                                                 |
+| `DB_SSL`                   |   Không   | `disable` (dev) / `verify-full` | Chế độ SSL (`disable`, `require`, `verify-full`)   | `verify-full`                                                       |
+| `DB_SSL_CA`                |   Không   | —                               | Đường dẫn file PEM hoặc chứng chỉ CA tùy chọn      | `/etc/ssl/certs/isrgrootx1.pem`                                     |
+| `CLOUDINARY_CLOUD_NAME`    | Có (prod) | —                               | Cloud name tài khoản Cloudinary                    | `your_cloud_name`                                                   |
+| `CLOUDINARY_API_KEY`       | Có (prod) | —                               | API Key tài khoản Cloudinary                       | `123456789012345`                                                   |
+| `CLOUDINARY_API_SECRET`    | Có (prod) | —                               | API Secret tài khoản Cloudinary                    | `example_cloudinary_secret`                                         |
+| `CLOUDINARY_FOLDER_PREFIX` | Có (prod) | `pidecor/dev`                   | Tiền tố thư mục Cloudinary theo môi trường         | `pidecor/prod`                                                      |
+| `ADMIN_EMAIL`              | Có (seed) | —                               | Email đăng nhập admin khi seed                     | `admin@pidecor.vn`                                                  |
+| `ADMIN_PASSWORD`           | Có (seed) | —                               | Mật khẩu admin khi seed (>= 12 ký tự)              | `Admin@PiDecor2026!`                                                |
+| `SENTRY_DSN`               |   Không   | —                               | DSN giám sát lỗi qua Sentry                        | `https://examplePublicKey@o0.ingest.sentry.io/0`                    |
 
 ### Web Client (`apps/web/.env`)
 
@@ -135,6 +138,7 @@ Tài khoản admin mặc định khi seed: `admin@pidecor.vn` / mật khẩu đ�
 - `npm run seed`: Nạp dữ liệu mẫu ban đầu cho database.
 - `npm run cleanup-tokens`: Dọn dẹp các refresh token hết hạn hoặc đã thu hồi.
 - `npm run purge-leads`: Dọn dẹp dữ liệu leads quá hạn lưu trữ theo chính sách bảo mật.
+- `npm run media:audit`: Kiểm tra và đối chiếu đồng bộ ảnh giữa Cloudinary và PostgreSQL.
 
 ---
 

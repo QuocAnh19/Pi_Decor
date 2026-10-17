@@ -6,7 +6,14 @@ validateEnv();
 
 const { logger } = await import("./config/logger.js");
 const { app } = await import("./app.js");
-const { pool } = await import("./config/database.js");
+const { pool, testDbConnection } = await import("./config/database.pg.js");
+
+try {
+  await testDbConnection();
+} catch (err) {
+  logger.fatal({ err: err.message }, "[server] Khởi động thất bại do không thể kết nối database.");
+  process.exit(1);
+}
 
 const PORT = env.PORT;
 

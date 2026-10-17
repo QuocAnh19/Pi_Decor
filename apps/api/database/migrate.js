@@ -1,4 +1,5 @@
 import "dotenv/config";
+import fs from "fs";
 import { readdir, readFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -12,7 +13,7 @@ import pg from "pg";
  * created by 0002_schema_migrations.sql.
  *
  * Usage:
- *   DATABASE_URL=postgresql://... node database/migrate.js
+ *   DATABASE_URL_DIRECT=postgresql://... node database/migrate.js
  *   # or, once wired into package.json:
  *   npm run migrate
  *
@@ -32,10 +33,14 @@ async function client_bootstrap(pool) {
 }
 
 export async function runMigrations(customConnectionString) {
-  const dbUrl = customConnectionString || process.env.DATABASE_URL_TEST || process.env.DATABASE_URL;
+  const dbUrl =
+    customConnectionString ||
+    process.env.DATABASE_URL_DIRECT ||
+    process.env.DATABASE_URL_TEST ||
+    process.env.DATABASE_URL;
   if (!dbUrl) {
     throw new Error(
-      "DATABASE_URL is not set. Add it to server/.env before running migrations."
+      "DATABASE_URL hoặc DATABASE_URL_DIRECT chưa được thiết lập."
     );
   }
 
@@ -50,6 +55,19 @@ export async function runMigrations(customConnectionString) {
     ssl = { rejectUnauthorized: false };
   } else if (sslMode === "verify-full" || (!sslMode && !isLocalHost)) {
     ssl = { rejectUnauthorized: true };
+  }
+
+  if (ssl && process.env.DB_SSL_CA) {
+    try {
+      const trimmed = process.env.DB_SSL_CA.trim();
+      if (fs.existsSync(trimmed)) {
+        ssl.ca = fs.readFileSync(trimmed, "utf-8");
+      } else {
+        ssl.ca = trimmed;
+      }
+    } catch (err) {
+      console.error("[migrate.js] Lỗi khi nạp DB_SSL_CA:", err.message);
+    }
   }
 
   const pool = new pg.Pool({

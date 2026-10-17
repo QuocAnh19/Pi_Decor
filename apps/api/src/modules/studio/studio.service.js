@@ -41,11 +41,12 @@ export const studioService = {
     if (patch.svg_base) {
       patch.svg_base = sanitizeSvg(patch.svg_base);
     }
+
+    const updated = await studioRepository.updateTemplateById(id, patch);
     if (patch.thumbnail && existing.thumbnail && existing.thumbnail !== patch.thumbnail) {
       await cleanupRemovedMedia(existing.thumbnail, patch.thumbnail);
     }
-
-    return studioRepository.updateTemplateById(id, patch);
+    return updated;
   },
 
   async publishTemplate(rawTargetId, body = {}) {
@@ -190,11 +191,12 @@ export const studioService = {
     if (patch.svg_data) {
       patch.svg_data = sanitizeSvg(patch.svg_data);
     }
+
+    const updated = await studioRepository.updateAssetById(id, patch);
     if (patch.thumbnail && existing.thumbnail && existing.thumbnail !== patch.thumbnail) {
       await cleanupRemovedMedia(existing.thumbnail, patch.thumbnail);
     }
-
-    return studioRepository.updateAssetById(id, patch);
+    return updated;
   },
 
   async deleteAsset(id) {

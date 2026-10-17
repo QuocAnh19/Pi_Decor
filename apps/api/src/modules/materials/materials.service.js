@@ -73,12 +73,13 @@ export const materialsService = {
 
     if (file) {
       patch.image_url = publicUrlFor(req, file);
-      if (existing.image_url) {
-        await cleanupRemovedMedia(existing.image_url, patch.image_url);
-      }
     }
 
-    return materialsRepository.updateById(id, patch);
+    const updated = await materialsRepository.updateById(id, patch);
+    if (file && existing.image_url && patch.image_url !== existing.image_url) {
+      await cleanupRemovedMedia(existing.image_url, patch.image_url);
+    }
+    return updated;
   },
 
   async deleteMaterial(id) {

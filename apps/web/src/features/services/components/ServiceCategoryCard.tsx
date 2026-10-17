@@ -1,6 +1,7 @@
 import * as Icons from "@heroicons/react/24/outline";
 import type { ServiceCategory } from "../../../lib/types";
 import { resolveIcon } from "../../../lib/icons";
+import { cloudinaryUrl } from "../../../lib/cloudinary";
 import { MediaSlot } from "../../../components/ui/MediaSlot";
 import styles from "./ServiceCategoryCard.module.scss";
 
@@ -22,6 +23,13 @@ export function ServiceCategoryCard({
     category.featured ? styles.featured : ""
   }`;
 
+  const isCloudinary = Boolean(category.cover?.includes("res.cloudinary.com"));
+  const coverSrc = isCloudinary
+    ? cloudinaryUrl(category.cover, { width: 800 })
+    : category.cover
+      ? category.cover.replace(/\.png$/i, ".webp")
+      : null;
+
   return (
     <article className={cardClass}>
       <button
@@ -32,9 +40,9 @@ export function ServiceCategoryCard({
       >
         <span className={styles.mediaWrap}>
           <MediaSlot
-            src={category.cover ? category.cover.replace(/\.png$/i, ".webp") : null}
+            src={coverSrc}
             srcSet={
-              category.cover
+              !isCloudinary && category.cover
                 ? `${category.cover.replace(/\.png$/i, "-800w.webp")} 800w, ${category.cover.replace(/\.png$/i, ".webp")} 1200w`
                 : undefined
             }

@@ -28,7 +28,7 @@ if (hasCloudinary) {
   storage = new CloudinaryStorage({
     cloudinary,
     params: {
-      folder: "pidecor",
+      folder: env.CLOUDINARY_FOLDER_PREFIX || "pidecor/dev",
       resource_type: "auto",
     },
   });

@@ -85,11 +85,11 @@ export const servicesService = {
 
     const newCover = patch.cover || patch.image_url;
     const oldCover = existing.cover || existing.image_url;
-    if (newCover !== undefined && oldCover) {
-      await cleanupRemovedMedia(oldCover, newCover);
-    }
 
     const updated = await servicesRepository.updateById(id, patch);
+    if (newCover !== undefined && oldCover && newCover !== oldCover) {
+      await cleanupRemovedMedia(oldCover, newCover);
+    }
     return formatService(updated);
   },
 

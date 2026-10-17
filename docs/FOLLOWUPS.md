@@ -73,3 +73,14 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 
 - **Mô tả trước đây**: Xem xét lưu refresh token qua httpOnly cookie.
 - **Giải pháp**: Đã phân tích rủi ro Third-Party Cookie khi triển khai Client (Vercel) và Server (Render) trên hai domain khác nhau. Duy trì lưu trữ phiên an toàn qua `sessionStorage` kết hợp token rotation và single-flight refresh.
+
+### 6. [Đã giải quyết - P27B] Rà soát tính năng cấp session SQL với PgBouncer Transaction Pooling (Neon)
+
+- **Mô tả**: Khi dùng PgBouncer ở chế độ Transaction Pooling (hostname có hậu tố `-pooler` của Neon), các lệnh can thiệp trạng thái session (như `SET lc_time`, `pg_advisory_lock`, `LISTEN/NOTIFY`, prepared statements có tên, hoặc bảng tạm `TEMPORARY TABLE`) có thể gây rò rỉ trạng thái giữa các client hoặc báo lỗi kết nối.
+- **Kết quả rà soát codebase**:
+  - Không sử dụng `pg_advisory_lock` (0 kết quả).
+  - Không sử dụng `LISTEN` / `NOTIFY` (0 kết quả).
+  - Không sử dụng `TEMPORARY TABLE` (0 kết quả).
+  - Không sử dụng Prepared Statements có tên (toàn bộ truy vấn qua `pg` dùng parameterized queries `$1, $2, ...` ẩn danh).
+  - Chỉ có duy nhất câu lệnh `SET enable_seqscan = off` trong script benchmark `apps/api/scripts/explain-leads.mjs` (chạy cục bộ độc lập). Runtime API hoàn toàn không gọi session `SET`.
+- **Kết luận & Giải pháp**: Codebase runtime API tương thích 100% với PgBouncer Transaction Mode của Neon qua `DATABASE_URL`. Các tác vụ DDL/Admin (migrations, seed, backup/restore, scripts quản trị) được phân tách chạy qua kết nối trực tiếp `DATABASE_URL_DIRECT`.

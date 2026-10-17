@@ -72,6 +72,7 @@ jobs:
         working-directory: .
         env:
           DATABASE_URL: postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test
+          DATABASE_URL_DIRECT: postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test
           DATABASE_URL_TEST: postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test
           JWT_SECRET: test_jwt_secret_must_be_at_least_32_characters_long
         run: npm run verify:api

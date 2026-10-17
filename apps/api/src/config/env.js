@@ -1,5 +1,11 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { z } from "zod";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, "..", "..", ".env") });
 
 /**
  * Schema định nghĩa và ép kiểu toàn bộ biến môi trường của hệ thống.
@@ -18,8 +24,9 @@ const envSchema = z
       .min(32, "JWT_SECRET phải có độ dài tối thiểu 32 ký tự."),
     JWT_EXPIRES_IN: z.string().default("15m"),
     DATABASE_URL: z.string().optional(),
+    DATABASE_URL_DIRECT: z.string().optional(),
     DATABASE_URL_TEST: z.string().optional(),
-    DB_POOL_MAX: z.coerce.number().int().positive().default(10),
+    DB_POOL_MAX: z.coerce.number().int().positive().default(5),
     DB_SSL: z.enum(["disable", "require", "verify-full"]).optional(),
     DB_SSL_CA: z.string().optional(),
     LOG_LEVEL: z
@@ -28,6 +35,7 @@ const envSchema = z
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
     CLOUDINARY_API_KEY: z.string().optional(),
     CLOUDINARY_API_SECRET: z.string().optional(),
+    CLOUDINARY_FOLDER_PREFIX: z.string().optional(),
     ADMIN_EMAIL: z.string().optional(),
     ADMIN_PASSWORD: z.string().optional(),
     SENTRY_DSN: z.string().optional(),
@@ -39,6 +47,15 @@ const envSchema = z
     }
     if (data.NODE_ENV === "test" && data.DATABASE_URL_TEST) {
       data.DATABASE_URL = data.DATABASE_URL_TEST;
+      if (!data.DATABASE_URL_DIRECT) {
+        data.DATABASE_URL_DIRECT = data.DATABASE_URL_TEST;
+      }
+    }
+    if (!data.DATABASE_URL_DIRECT && data.DATABASE_URL) {
+      data.DATABASE_URL_DIRECT = data.DATABASE_URL;
+    }
+    if (data.NODE_ENV !== "production" && !data.CLOUDINARY_FOLDER_PREFIX) {
+      data.CLOUDINARY_FOLDER_PREFIX = "pidecor/dev";
     }
     return data;
   })
@@ -70,6 +87,13 @@ const envSchema = z
           code: z.ZodIssueCode.custom,
           message: "CLOUDINARY_API_SECRET là bắt buộc ở production.",
           path: ["CLOUDINARY_API_SECRET"],
+        });
+      }
+      if (!data.CLOUDINARY_FOLDER_PREFIX || !data.CLOUDINARY_FOLDER_PREFIX.trim()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "CLOUDINARY_FOLDER_PREFIX là bắt buộc ở production (ví dụ: pidecor/prod).",
+          path: ["CLOUDINARY_FOLDER_PREFIX"],
         });
       }
     }

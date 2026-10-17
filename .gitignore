@@ -22,3 +22,6 @@ packages/shared/dist/
 # Local file uploads
 server/uploads/
 apps/api/uploads/
+
+# Audit reports
+*media-audit-report.json

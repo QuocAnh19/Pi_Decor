@@ -7,6 +7,6 @@ if (!env.DATABASE_URL) {
   );
 }
 
-const { db, pool } = await import("./database.pg.js");
+const { db, pool, directPool } = await import("./database.pg.js");
 
-export { db, pool };
+export { db, pool, directPool };

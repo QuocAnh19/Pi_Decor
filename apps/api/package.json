@@ -13,6 +13,7 @@
     "seed": "node src/utils/seed.js",
     "cleanup-tokens": "node scripts/cleanup-tokens.js",
     "purge-leads": "node scripts/purge-leads.js",
+    "media:audit": "node scripts/media-audit.js",
     "lint": "eslint src",
     "check:syntax": "node ../../scripts/check-syntax.mjs src",
     "check:db-env": "node ../../scripts/check-db-env.mjs",

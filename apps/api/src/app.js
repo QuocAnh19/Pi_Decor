@@ -85,12 +85,33 @@ if (!hasCloudinary) {
   );
 }
 
-app.get("/api/health", async (_req, res) => {
+// Liveness check: chỉ kiểm tra tiến trình Node.js sống, KHÔNG query DB để tránh đánh thức Neon compute
+app.get("/api/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Readiness check: kiểm tra kết nối cơ sở dữ liệu với timeout 3s
+app.get("/api/health/ready", async (_req, res) => {
+  const start = Date.now();
   try {
-    if (pool) {
-      await pool.query("SELECT 1");
+    if (!pool) {
+      return res.status(503).json({ status: "degraded", db: "unreachable" });
     }
-    res.json({ status: "ok", db: "connected", ts: new Date().toISOString() });
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("DB ping timeout")), 3000)
+    );
+    await Promise.race([pool.query("SELECT 1"), timeoutPromise]);
+    const latency_ms = Date.now() - start;
+    res.json({
+      status: "ok",
+      db: "connected",
+      latency_ms,
+      timestamp: new Date().toISOString(),
+    });
   } catch {
     // Không lộ chi tiết err.message để tránh rò rỉ thông tin hạ tầng
     res.status(503).json({ status: "degraded", db: "unreachable" });

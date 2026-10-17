@@ -33,13 +33,10 @@ export async function publishTemplate(rawTargetId, body = {}) {
     if (env.CLOUDINARY_CLOUD_NAME && env.CLOUDINARY_API_KEY) {
       try {
         const uploadRes = await cloudinary.uploader.upload(thumbnail, {
-          folder: "pidecor/templates",
+          folder: `${env.CLOUDINARY_FOLDER_PREFIX || "pidecor/dev"}/templates`,
           resource_type: "image",
         });
         finalThumbnail = uploadRes.secure_url;
-        if (existing?.thumbnail && existing.thumbnail !== finalThumbnail) {
-          await cleanupRemovedMedia(existing.thumbnail, finalThumbnail);
-        }
       } catch (err) {
         logger.error(
           { err },
@@ -59,6 +56,9 @@ export async function publishTemplate(rawTargetId, body = {}) {
       is_active: activeFlag,
       default_config: slot_config ?? existing.default_config ?? {},
     });
+    if (existing.thumbnail && existing.thumbnail !== finalThumbnail) {
+      await cleanupRemovedMedia(existing.thumbnail, finalThumbnail);
+    }
   } else {
     const templateRow = {
       name: String(name).trim(),

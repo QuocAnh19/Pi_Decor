@@ -7,6 +7,7 @@ import {
   ArrowsPointingOutIcon,
 } from "@heroicons/react/24/outline";
 import type { CategoryPortfolioItem } from "../../../lib/types";
+import { cloudinaryUrl } from "../../../lib/cloudinary";
 import { MediaSlot } from "../../../components/ui/MediaSlot";
 import { Modal } from "../../../components/ui";
 import styles from "./ProjectAlbumModal.module.scss";
@@ -162,7 +163,7 @@ export function ProjectAlbumModal({ project, onClose }: ProjectAlbumModalProps) 
                 aria-label={`Xem ảnh ${idx + 1}`}
               >
                 <MediaSlot
-                  src={item.url}
+                  src={cloudinaryUrl(item.url, { width: 800 })}
                   alt={`${project.title} - Ảnh ${idx + 1}`}
                   label={`Ảnh ${idx + 1}`}
                   hint="16:9 · JPG"
@@ -211,7 +212,7 @@ export function ProjectAlbumModal({ project, onClose }: ProjectAlbumModalProps) 
           <div className={styles.lightboxBody} onClick={(e) => e.stopPropagation()}>
             <div className={styles.lightboxViewer}>
               <MediaSlot
-                src={images[lightboxIndex]}
+                src={cloudinaryUrl(images[lightboxIndex], { width: 1200 })}
                 alt={`${project.title} - Ảnh ${lightboxIndex + 1}`}
                 label={project.title}
                 hint="16:9 · ngang · JPG"
