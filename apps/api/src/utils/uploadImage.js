@@ -3,7 +3,7 @@ import fs from "fs";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "crypto";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { env } from "../config/env.js";
@@ -40,7 +40,7 @@ if (hasCloudinary) {
     filename: (_req, file, cb) => {
       // Suy ra phần mở rộng file từ MIME type được kiểm duyệt thay vì tin tưởng originalname của client
       const ext = ALLOWED_IMAGE_MIME_TYPES.get(file.mimetype) || ".jpg";
-      cb(null, `${uuid()}${ext}`);
+      cb(null, `${randomUUID()}${ext}`);
     },
   });
 

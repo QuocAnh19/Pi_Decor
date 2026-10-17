@@ -1,6 +1,6 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "crypto";
 import { db } from "../config/database.js";
 import { env } from "../config/env.js";
 import { portfolioSeed } from "../data/portfolio.seed.js";
@@ -23,7 +23,7 @@ async function seed() {
 
   if (!existingAdmin) {
     const password_hash = await bcrypt.hash(password, 10);
-    await db.insert("admins", { id: uuid(), email, password_hash, role: "owner" });
+    await db.insert("admins", { id: randomUUID(), email, password_hash, role: "owner" });
     console.log(`✓ Admin account created with owner role: ${email}`);
   } else if (isResetPassword) {
     const password_hash = await bcrypt.hash(password, 10);
@@ -38,12 +38,48 @@ async function seed() {
   const materials = await db.get("materials");
   if (materials.length === 0) {
     const seedMaterials = [
-      { id: uuid(), name: "Hồng Phấn", category: "fabric", color_hex: "#E7B6BB", image_url: null },
-      { id: uuid(), name: "Rêu Nhạt", category: "fabric", color_hex: "#AFC49C", image_url: null },
-      { id: uuid(), name: "Vàng Cát", category: "fabric", color_hex: "#C99F6F", image_url: null },
-      { id: uuid(), name: "Oải Hương", category: "fabric", color_hex: "#B98AC9", image_url: null },
-      { id: uuid(), name: "Champagne", category: "fabric", color_hex: "#E7BE79", image_url: null },
-      { id: uuid(), name: "Xanh Khói", category: "fabric", color_hex: "#8A9BAE", image_url: null },
+      {
+        id: randomUUID(),
+        name: "Hồng Phấn",
+        category: "fabric",
+        color_hex: "#E7B6BB",
+        image_url: null,
+      },
+      {
+        id: randomUUID(),
+        name: "Rêu Nhạt",
+        category: "fabric",
+        color_hex: "#AFC49C",
+        image_url: null,
+      },
+      {
+        id: randomUUID(),
+        name: "Vàng Cát",
+        category: "fabric",
+        color_hex: "#C99F6F",
+        image_url: null,
+      },
+      {
+        id: randomUUID(),
+        name: "Oải Hương",
+        category: "fabric",
+        color_hex: "#B98AC9",
+        image_url: null,
+      },
+      {
+        id: randomUUID(),
+        name: "Champagne",
+        category: "fabric",
+        color_hex: "#E7BE79",
+        image_url: null,
+      },
+      {
+        id: randomUUID(),
+        name: "Xanh Khói",
+        category: "fabric",
+        color_hex: "#8A9BAE",
+        image_url: null,
+      },
     ];
     await db.set("materials", seedMaterials);
     console.log(`✓ Seeded ${seedMaterials.length} materials.`);
@@ -115,7 +151,7 @@ async function seed() {
   if (venues.length <= 1) {
     const seedVenues = [
       {
-        id: uuid(),
+        id: randomUUID(),
         name: "Riverside Resort & Spa Đà Nẵng",
         type: "hotel",
         address: "Đường Bạch Đằng, Quận Hải Châu",
@@ -125,7 +161,7 @@ async function seed() {
         cover_image: null,
       },
       {
-        id: uuid(),
+        id: randomUUID(),
         name: "Furama Resort Đà Nẵng",
         type: "resort",
         address: "105 Võ Nguyên Giáp, Ngũ Hành Sơn",
@@ -135,7 +171,7 @@ async function seed() {
         cover_image: null,
       },
       {
-        id: uuid(),
+        id: randomUUID(),
         name: "Anantara Hội An Resort",
         type: "resort",
         address: "1 Phạm Hồng Thái, Cẩm Châu",
@@ -145,7 +181,7 @@ async function seed() {
         cover_image: null,
       },
       {
-        id: uuid(),
+        id: randomUUID(),
         name: "InterContinental Danang Sun Peninsula Resort",
         type: "resort",
         address: "Bãi Bắc, Bán đảo Sơn Trà",
@@ -155,7 +191,7 @@ async function seed() {
         cover_image: null,
       },
       {
-        id: uuid(),
+        id: randomUUID(),
         name: "Gem Center TPHCM",
         type: "sảnh tiệc",
         address: "8 Nguyễn Bỉnh Khiêm, Đa Kao, Quận 1",
@@ -284,7 +320,7 @@ async function seed() {
   if (testimonials.length === 0) {
     const seedTestimonials = [
       {
-        id: uuid(),
+        id: randomUUID(),
         author: "Thu Hà",
         role: "Cô dâu, TP.HCM · PiWedding",
         quote: "Mình tự tay thử màu vải trước cả tuần, đến ngày cưới đúng y như hình dung.",
@@ -296,7 +332,7 @@ async function seed() {
         updated_at: new Date().toISOString(),
       },
       {
-        id: uuid(),
+        id: randomUUID(),
         author: "Minh & Anh",
         role: "Ba mẹ bé Tôm, Hà Nội · PiKids",
         quote: "Đặt tiệc thôi nôi cho con mà vẫn chọn được đúng tông pastel mình thích, nhanh gọn.",
@@ -308,7 +344,7 @@ async function seed() {
         updated_at: new Date().toISOString(),
       },
       {
-        id: uuid(),
+        id: randomUUID(),
         author: "Ngọc Linh",
         role: "Quản lý thương hiệu, Đà Nẵng · PiEvent",
         quote: "Đội thi công dựng đúng 100% timeline sự kiện khai trương, không lệch một khâu nào.",

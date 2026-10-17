@@ -18,7 +18,13 @@
     "lint:api": "npm --prefix apps/api run lint",
     "verify:web": "npm run build:shared && npm --prefix apps/web run verify",
     "verify:api": "npm run build:shared && npm --prefix apps/api run verify",
-    "verify": "npm run verify:web && npm run verify:api"
+    "verify": "npm run verify:web && npm run verify:api",
+    "audit:prod": "npm audit --omit=dev --audit-level=high"
+  },
+  "overrides": {
+    "dompurify": "^3.4.17",
+    "proxy-addr": "^2.0.8",
+    "qs": "^6.16.1"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
