@@ -23,6 +23,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=4000
 
+# Nâng cấp các gói hệ điều hành Alpine lên bản vá bảo mật mới nhất
+RUN apk upgrade --no-cache
+
 # Tạo thư mục uploads và phân quyền cho user non-root (node)
 RUN mkdir -p /app/uploads && chown -R node:node /app
 

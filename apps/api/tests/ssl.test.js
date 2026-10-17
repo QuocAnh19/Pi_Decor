@@ -19,13 +19,13 @@ describe("Database SSL Configuration & Normalization (pg v9 compatibility)", () 
 
   describe("resolveEffectiveSslMode", () => {
     it("mặc định disable khi host là localhost", () => {
-      expect(resolveEffectiveSslMode(localUrl)).toBe("disable");
-      expect(resolveEffectiveSslMode("postgresql://u:p@127.0.0.1:5432/db")).toBe("disable");
-      expect(resolveEffectiveSslMode("postgresql://u:p@postgres:5432/db")).toBe("disable");
+      expect(resolveEffectiveSslMode(localUrl, null)).toBe("disable");
+      expect(resolveEffectiveSslMode("postgresql://u:p@127.0.0.1:5432/db", null)).toBe("disable");
+      expect(resolveEffectiveSslMode("postgresql://u:p@postgres:5432/db", null)).toBe("disable");
     });
 
     it("mặc định verify-full khi host ngoài localhost", () => {
-      expect(resolveEffectiveSslMode(remoteUrl)).toBe("verify-full");
+      expect(resolveEffectiveSslMode(remoteUrl, null)).toBe("verify-full");
     });
 
     it("ưu tiên explicitMode nếu được cung cấp", () => {

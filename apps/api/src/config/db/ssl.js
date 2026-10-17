@@ -31,10 +31,12 @@ export function extractHost(targetUrl = "") {
 
 /**
  * Xác định chế độ SSL thực tế (disable | require | verify-full).
+ * Nếu explicitMode được chỉ định rõ (kể cả null/chuỗi rỗng), ưu tiên giá trị đó.
  */
-export function resolveEffectiveSslMode(targetUrl = "", explicitMode = env?.DB_SSL) {
-  if (explicitMode) {
-    return explicitMode;
+export function resolveEffectiveSslMode(targetUrl = "", explicitMode) {
+  const mode = explicitMode !== undefined ? explicitMode : env?.DB_SSL;
+  if (mode) {
+    return mode;
   }
   const host = extractHost(targetUrl).toLowerCase();
   const isLocalHost = ["localhost", "127.0.0.1", "postgres"].includes(host);
@@ -48,7 +50,7 @@ export function resolveEffectiveSslMode(targetUrl = "", explicitMode = env?.DB_S
  */
 export function resolveSslConfig(
   targetUrl = env?.DATABASE_URL,
-  explicitMode = env?.DB_SSL,
+  explicitMode,
   caInput = env?.DB_SSL_CA
 ) {
   const sslMode = resolveEffectiveSslMode(targetUrl, explicitMode);
@@ -84,10 +86,7 @@ export function resolveSslConfig(
  * - Khi mode='require': bật tùy chọn libpq-compat uselibpqcompat=true&sslmode=require
  * - Khi mode='disable': đảm bảo sslmode=disable
  */
-export function normalizeConnectionString(
-  targetUrl = env?.DATABASE_URL,
-  explicitMode = env?.DB_SSL
-) {
+export function normalizeConnectionString(targetUrl = env?.DATABASE_URL, explicitMode) {
   if (!targetUrl || typeof targetUrl !== "string") {
     return targetUrl;
   }
