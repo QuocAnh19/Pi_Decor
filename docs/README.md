@@ -32,7 +32,32 @@ Chi tiết đặc tả kỹ thuật, luồng người dùng và API của 10 ph�
 
 ---
 
-## 3. Kiến trúc & Đặc tả Kỹ thuật
+## 3. Đặc tả Tính năng Quản trị (`docs/features/admin/`)
+
+Chi tiết đặc tả kỹ thuật, ma trận phân quyền và luồng vận hành của 12 phân hệ quản trị:
+
+- **[admin-auth.md](features/admin/admin-auth.md)**: Xác thực quản trị viên, Access Token, Refresh Token Rotation, Reuse Detection, Logout và AdminGuard.
+- **[admin-dashboard.md](features/admin/admin-dashboard.md)**: Bảng điều khiển trung tâm, tổng hợp các chỉ số leads, dịch vụ, vật liệu, địa điểm, dự án.
+- **[leads-crm.md](features/admin/leads-crm.md)**: Quản lý Leads CRM, tìm kiếm trigram, đổi trạng thái, xem snapshot và Activity Timeline.
+- **[quotations.md](features/admin/quotations.md)**: Khởi tạo báo giá, đánh số nguyên tử `BG-YYYY-XXXX` qua `quotation_counters`, tính chiết khấu và xuất PDF.
+- **[projects-admin.md](features/admin/projects-admin.md)**: Quản trị dự án Lookbook, tải ảnh Cloudinary, phân loại giá Standard/Premium, bản nháp và xuất bản.
+- **[venues-admin.md](features/admin/venues-admin.md)**: Quản trị địa điểm sự kiện, cấu hình tọa độ GPS, liên kết dự án và xử lý SET NULL khóa ngoại.
+- **[materials-admin.md](features/admin/materials-admin.md)**: Quản lý danh mục vật tư mẫu, cập nhật mã màu HEX và cơ chế xóa lạc quan (Optimistic Deletion).
+- **[services-admin.md](features/admin/services-admin.md)**: Quản lý danh mục dịch vụ, kéo thả thay đổi thứ tự `order`, biên tập hạng mục JSONB và upload ảnh.
+- **[testimonials-moderation.md](features/admin/testimonials-moderation.md)**: Kiểm duyệt đánh giá khách hàng (pending, approved, rejected) và cô lập thông tin nội bộ.
+- **[studio-admin.md](features/admin/studio-admin.md)**: Quản trị bản mẫu phông nền Studio, lọc mã độc qua DOMPurify, định nghĩa slot/rule và xuất bản nguyên tử.
+- **[admin-settings-users.md](features/admin/admin-settings-users.md)**: Đổi thông tin cá nhân, cập nhật mật khẩu, cấp mới và thu hồi tài khoản admin theo quyền Owner.
+- **[media-and-uploads.md](features/admin/media-and-uploads.md)**: Quản lý tải lên hình ảnh qua Cloudinary, MIME allowlist, giới hạn 10MB và dọn dẹp ảnh mồ côi.
+
+---
+
+## 4. Ma trận Truy vết Yêu cầu & Kiểm thử
+
+- **[TRACEABILITY.md](features/TRACEABILITY.md)**: Bảng đối chiếu chéo hai chiều giữa User Stories (US-001 đến US-014), tài liệu đặc tả, API endpoints và các bài kiểm thử tự động (Unit / API / E2E).
+
+---
+
+## 5. Kiến trúc & Đặc tả Kỹ thuật
 
 Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
@@ -44,7 +69,7 @@ Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
 ---
 
-## 4. Vận hành, Kiểm thử & An toàn Thông tin
+## 6. Vận hành, Kiểm thử & An toàn Thông tin
 
 Hướng dẫn quy trình vận hành máy chủ, tự động hóa kiểm thử và bảo vệ dữ liệu:
 
@@ -55,7 +80,7 @@ Hướng dẫn quy trình vận hành máy chủ, tự động hóa kiểm thử
 
 ---
 
-## 5. Thiết kế Giao diện & Design Tokens
+## 7. Thiết kế Giao diện & Design Tokens
 
 Quy chuẩn hệ thống nhận diện và styling:
 
@@ -64,7 +89,7 @@ Quy chuẩn hệ thống nhận diện và styling:
 
 ---
 
-## 6. Pháp lý, Bản quyền & Quản trị Kho lưu trữ
+## 8. Pháp lý, Bản quyền & Quản trị Kho lưu trữ
 
 Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
@@ -75,7 +100,7 @@ Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
 ---
 
-## 7. Tài liệu Tiêu chuẩn ở Cấp gốc (Root Documentation)
+## 9. Tài liệu Tiêu chuẩn ở Cấp gốc (Root Documentation)
 
 - **[README.md](../README.md)**: Trang giới thiệu dự án tổng thể và hướng dẫn cài đặt môi trường phát triển cục bộ.
 - **[AGENTS.md](../AGENTS.md)**: Quy tắc làm việc bắt buộc cho AI Agents và nhà phát triển (quy tắc 1 commit, 300 dòng, `npm run verify`).
