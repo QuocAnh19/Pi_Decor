@@ -16,7 +16,7 @@ Tài liệu này ghi nhận các vấn đề kỹ thuật phát hiện trong qu�
 
 - **Mô tả**: Sau khi xóa các endpoint granular `POST`, `PATCH`, `DELETE /api/studio/assets` ở P30, API runtime hiện tại không còn luồng endpoint nào trực tiếp tạo/xóa và dọn dẹp ảnh thumbnail Cloudinary của `studio_assets`. Flow `PUT /api/studio/templates/:id/publish` chỉ quản lý `studio_templates`, `studio_slot_definitions` và `studio_slot_rules` (không quản lý bảng `studio_assets`). Đồng thời backend chưa có script seed riêng cho bảng `studio_assets` (client đang dựa vào fallback seed local `apps/web/src/features/studio/data/seed/templates.ts`).
 - **Đề xuất xử lý**: Khi xây dựng tính năng CMS quản lý thư viện tài nguyên Studio (Asset Management) trong tương lai, cần bổ sung endpoint quản lý asset tập trung kèm cơ chế dọn dẹp ảnh Cloudinary (hoặc script đồng bộ định kỳ kết hợp `apps/api/scripts/media-audit.js` để rà soát media mồ côi).
-- **Trạng thái**: Đang theo dõi, hiện `scripts/media-audit.js` vẫn quét cột `thumbnail` của `studio_assets` để phát hiện ảnh mồ côi.
+- **Trạng thái**: Đang theo dõi, hiện `apps/api/scripts/media-audit.js` vẫn quét cột `thumbnail` của `studio_assets` để phát hiện ảnh mồ côi.
 
 ### 3. [Theo dõi Nghiệp vụ] Đánh giá việc sử dụng hai cột `projects.tag` và `projects.budget` (P29)
 
