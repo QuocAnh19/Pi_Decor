@@ -2,6 +2,13 @@
 
 Tài liệu hướng dẫn quy trình triển khai (deploy), khôi phục (rollback), sao lưu/phục hồi dữ liệu (backup/restore), xoay vòng khóa bảo mật và xử lý các sự cố thường gặp cho hệ thống Pi Decor.
 
+Xem thêm các cẩm nang vận hành và an toàn dữ liệu chuyên sâu:
+
+- [Chi tiết Sao lưu & Diễn tập Phục hồi (BACKUP_RESTORE.md)](ops/BACKUP_RESTORE.md)
+- [Ma trận Môi trường & Luồng Triển khai (ENVIRONMENTS.md)](ops/ENVIRONMENTS.md)
+- [Hệ thống Giám sát & Cảnh báo (MONITORING.md)](ops/MONITORING.md)
+- [Sổ Ghi nhận Xử lý Dữ liệu Cá nhân (PROCESSING_REGISTER.md)](privacy/PROCESSING_REGISTER.md)
+
 ---
 
 ## 1. Quy trình Triển khai (Deployment Procedure)
@@ -66,32 +73,38 @@ Khi phiên bản mới gặp lỗi nghiêm trọng sau khi deploy:
 
 ## 3. Sao lưu & Phục hồi Cơ sở Dữ liệu (Postgres Backup & Restore)
 
+Xem tài liệu đặc tả và kết quả diễn tập tại [docs/ops/BACKUP_RESTORE.md](ops/BACKUP_RESTORE.md).
+
 ### a. Sao lưu Định kỳ (Backup)
 
-Sử dụng công cụ tiêu chuẩn `pg_dump` với định dạng nén tùy biến (`custom format` `-Fc`):
+Sử dụng script chuẩn hóa `scripts/db-backup.sh` (tự động đọc `DATABASE_URL_DIRECT`, ẩn mật khẩu trong output, xuất định dạng `-Fc`):
 
 ```bash
-# Sao lưu toàn bộ schema và dữ liệu
-pg_dump -Fc -v \
-  -d "postgresql://user:password@host:port/database?sslmode=verify-full" \
-  -f "pidecor_backup_$(date +%Y%m%d_%H%M%S).dump"
+# Thực hiện sao lưu vào thư mục backups/
+bash scripts/db-backup.sh
 ```
 
-Khuyến nghị thiết lập Cron job tự động chạy hàng ngày và đẩy file dump lên lưu trữ đám mây (AWS S3, Google Cloud Storage).
+Khuyến nghị thiết lập Cron job tự động chạy hàng ngày và đẩy file dump lên kho lưu trữ ngoài hạ tầng Neon (AWS S3, Google Cloud Storage, Cloudflare R2).
 
 ### b. Phục hồi Dữ liệu (Restore)
 
-Sử dụng `pg_restore` để khôi phục dữ liệu từ bản dump:
+Sử dụng script `scripts/db-restore.sh` (tự động kiểm tra an toàn và chặn phục hồi trên production nếu thiếu cờ `--i-know`):
 
 ```bash
-# Phục hồi vào cơ sở dữ liệu trống hoặc ghi đè
-pg_restore -v --clean --no-acl --no-owner \
-  -d "postgresql://user:password@host:port/database?sslmode=verify-full" \
-  "pidecor_backup_YYYYMMDD_HHMMSS.dump"
+# Phục hồi vào DB chỉ định từ bản dump
+bash scripts/db-restore.sh backups/pidecor_backup_YYYYMMDD_HHMMSS.dump
 ```
 
 > [!CAUTION]
-> Cờ `--clean` sẽ xóa các bảng hiện tại trước khi tạo lại. Tuyệt đối kiểm tra kỹ connection string trước khi chạy.
+> Lệnh restore với cờ `--clean` sẽ xóa các bảng hiện tại trước khi tạo lại. Tuyệt đối kiểm tra kỹ connection string trước khi chạy.
+
+### c. Diễn tập Phục hồi Tự động (Backup/Restore Drill)
+
+Để đảm bảo các bản sao lưu luôn sẵn sàng phục hồi khi có thảm họa, chạy kịch bản diễn tập tự động qua `scripts/backup-restore-drill.sh`:
+
+```bash
+bash scripts/backup-restore-drill.sh
+```
 
 ---
 
@@ -247,6 +260,22 @@ npm run purge-leads -- --older-than-days=90
 
 # 3. Thực thi xóa vĩnh viễn (yêu cầu cờ --confirm)
 npm run purge-leads -- --confirm
+```
+
+### Xử lý Yêu cầu Thực thi Quyền Dữ liệu Cá nhân (Data Subject Rights)
+
+Quy định và căn cứ pháp lý được mô tả tại [docs/privacy/PROCESSING_REGISTER.md](privacy/PROCESSING_REGISTER.md). Khi khách hàng thực hiện quyền truy cập hoặc quyền xóa dữ liệu theo NĐ 13/2023/NĐ-CP:
+
+```bash
+# 1. Xuất dữ liệu cá nhân dạng JSON gửi cho chủ thể dữ liệu
+node apps/api/scripts/export-lead.js --email="khach@example.com"
+node apps/api/scripts/export-lead.js --phone="0901234567"
+
+# 2. Kiểm tra trước bản ghi sẽ xóa (Dry-run an toàn)
+node apps/api/scripts/delete-lead.js --email="khach@example.com"
+
+# 3. Thực thi xóa dữ liệu cá nhân (bắt buộc cờ --confirm)
+node apps/api/scripts/delete-lead.js --email="khach@example.com" --confirm
 ```
 
 ---

@@ -100,19 +100,28 @@ Tài liệu phân tích mô hình đe dọa, kiểm soát an ninh ứng dụng v
 - **[INCIDENT_RESPONSE.md](security/INCIDENT_RESPONSE.md)**: Quy trình 6 bước xử lý sự cố an ninh, xoay vòng khóa bí mật, thu hồi phiên và mẫu báo cáo Post-Mortem.
 - **[SECURITY_NOTES.md](SECURITY_NOTES.md)**: Ghi chú bảo mật, cấu hình xác thực JWT Refresh Rotation và tuân thủ Nghị định 13/2023/NĐ-CP.
 
----
+## 9. Vận Hành Hệ Thống (`docs/ops/` & Cẩm Nang)
 
-## 9. Vận Hành & Nhật Ký Phát Triển
+Cẩm nang vận hành hệ thống thực tế, kiến trúc môi trường, giám sát và sao lưu dữ liệu:
 
-Cẩm nang vận hành hệ thống thực tế và nhật ký ghi nhận tiến độ dự án:
-
-- **[DEVLOG.md](DEVLOG.md)**: Khung nhật ký phát triển theo ngày trích xuất tự động từ lịch sử commit Git.
+- **[BACKUP_RESTORE.md](ops/BACKUP_RESTORE.md)**: Quy trình sao lưu, phục hồi dữ liệu, cơ chế chống ghi đè production, kết quả kiểm tra diễn tập tự động và RPO/RTO.
+- **[ENVIRONMENTS.md](ops/ENVIRONMENTS.md)**: Ma trận môi trường dev / staging / production, quy trình thăng cấp mã nguồn và khôi phục sự cố.
+- **[MONITORING.md](ops/MONITORING.md)**: Danh mục chỉ số giám sát vận hành, cấu hình cảnh báo và định dạng audit log bảo mật.
 - **[RUNBOOK.md](RUNBOOK.md)**: Cẩm nang vận hành production, hướng dẫn triển khai, sao lưu cơ sở dữ liệu và khắc phục sự cố.
+- **[DEVLOG.md](DEVLOG.md)**: Khung nhật ký phát triển theo ngày trích xuất tự động từ lịch sử commit Git.
 - **[FOLLOWUPS.md](FOLLOWUPS.md)**: Danh mục các vấn đề kỹ thuật đang theo dõi và kế hoạch xử lý tương lai.
 
 ---
 
-## 10. Thiết Kế Giao Diện & Design Tokens
+## 10. Quyền Riêng Tư & Bảo Vệ Dữ Liệu (`docs/privacy/`)
+
+Tuân thủ pháp lý theo Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân:
+
+- **[PROCESSING_REGISTER.md](privacy/PROCESSING_REGISTER.md)**: Sổ ghi nhận hoạt động xử lý dữ liệu cá nhân (ROPA), bên thứ ba xử lý dữ liệu và quy trình thực thi quyền chủ thể dữ liệu (xuất/xóa dữ liệu cá nhân).
+
+---
+
+## 11. Thiết Kế Giao Diện & Design Tokens
 
 Quy chuẩn hệ thống nhận diện và styling:
 
@@ -121,7 +130,7 @@ Quy chuẩn hệ thống nhận diện và styling:
 
 ---
 
-## 11. Pháp Lý, Bản Quyền & Quản Trị Kho Lưu Trữ
+## 12. Pháp Lý, Bản Quyền & Quản Trị Kho Lưu Trữ
 
 Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
@@ -132,7 +141,7 @@ Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
 ---
 
-## 12. Tài Liệu Tiêu Chuẩn ở Cấp Gốc (Root Documentation)
+## 13. Tài Liệu Tiêu Chuẩn ở Cấp Gốc (Root Documentation)
 
 - **[README.md](../README.md)**: Trang giới thiệu dự án tổng thể và hướng dẫn cài đặt môi trường phát triển cục bộ.
 - **[AGENTS.md](../AGENTS.md)**: Quy tắc làm việc bắt buộc cho AI Agents và nhà phát triển (quy tắc 1 commit, 300 dòng, `npm run verify`).
