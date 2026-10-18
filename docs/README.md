@@ -79,19 +79,40 @@ Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
 ---
 
-## 7. Vận hành, Kiểm thử & An toàn Thông tin
+## 7. Đảm Bảo Chất Lượng & Kiểm Thử (`docs/quality/`)
 
-Hướng dẫn quy trình vận hành máy chủ, tự động hóa kiểm thử và bảo vệ dữ liệu:
+Tài liệu chiến lược kiểm thử, danh sách ca kiểm thử và quy trình nghiệm thu chất lượng phần mềm:
+
+- **[TEST_PLAN.md](quality/TEST_PLAN.md)**: Kế hoạch kiểm thử toàn diện đa tầng (Unit, API, E2E, Visual Baseline), môi trường, dữ liệu test và tiêu chí vào/ra.
+- **[TEST_CASES.md](quality/TEST_CASES.md)**: Danh mục ca kiểm thử chức năng (TC-001 đến TC-016) đối chiếu với các User Story.
+- **[UAT_CHECKLIST.md](quality/UAT_CHECKLIST.md)**: Bảng kiểm tra nghiệm thu bằng ngôn ngữ đời thường dành cho Chủ doanh nghiệp trực tiếp nghiệm thu.
+- **[REGRESSION_CHECKLIST.md](quality/REGRESSION_CHECKLIST.md)**: Danh sách kiểm tra hồi quy nhanh (Smoke Test 10–15 phút) trước mỗi lần phát hành.
+- **[TESTING.md](TESTING.md)**: Báo cáo độ bao phủ mã nguồn (Coverage thực tế qua Vitest v8) và cấu hình kịch bản Playwright E2E.
+
+---
+
+## 8. An Toàn Thông Tin & Ứng Phó Sự Cố (`docs/security/`)
+
+Tài liệu phân tích mô hình đe dọa, kiểm soát an ninh ứng dụng và quy trình ứng phó khẩn cấp:
+
+- **[THREAT_MODEL.md](security/THREAT_MODEL.md)**: Mô hình đe dọa theo phương pháp STRIDE rút gọn, phân tích tài sản, ranh giới tin cậy và biện pháp phòng vệ.
+- **[OWASP_CHECKLIST.md](security/OWASP_CHECKLIST.md)**: Bảng đối chiếu 10 danh mục rủi ro OWASP Top 10:2021 kèm bằng chứng mã nguồn và kiểm thử.
+- **[INCIDENT_RESPONSE.md](security/INCIDENT_RESPONSE.md)**: Quy trình 6 bước xử lý sự cố an ninh, xoay vòng khóa bí mật, thu hồi phiên và mẫu báo cáo Post-Mortem.
+- **[SECURITY_NOTES.md](SECURITY_NOTES.md)**: Ghi chú bảo mật, cấu hình xác thực JWT Refresh Rotation và tuân thủ Nghị định 13/2023/NĐ-CP.
+
+---
+
+## 9. Vận Hành & Nhật Ký Phát Triển
+
+Cẩm nang vận hành hệ thống thực tế và nhật ký ghi nhận tiến độ dự án:
 
 - **[DEVLOG.md](DEVLOG.md)**: Khung nhật ký phát triển theo ngày trích xuất tự động từ lịch sử commit Git.
 - **[RUNBOOK.md](RUNBOOK.md)**: Cẩm nang vận hành production, hướng dẫn triển khai, sao lưu cơ sở dữ liệu và khắc phục sự cố.
-- **[TESTING.md](TESTING.md)**: Chiến lược kiểm thử tự động, số liệu độ phủ mã nguồn (Coverage) và bộ kiểm thử giao diện Playwright E2E.
-- **[SECURITY_NOTES.md](SECURITY_NOTES.md)**: Ghi chú bảo mật, cấu hình xác thực JWT Refresh Rotation và tuân thủ Nghị định 13/2023/NĐ-CP.
 - **[FOLLOWUPS.md](FOLLOWUPS.md)**: Danh mục các vấn đề kỹ thuật đang theo dõi và kế hoạch xử lý tương lai.
 
 ---
 
-## 8. Thiết kế Giao diện & Design Tokens
+## 10. Thiết Kế Giao Diện & Design Tokens
 
 Quy chuẩn hệ thống nhận diện và styling:
 
@@ -100,7 +121,7 @@ Quy chuẩn hệ thống nhận diện và styling:
 
 ---
 
-## 9. Pháp lý, Bản quyền & Quản trị Kho lưu trữ
+## 11. Pháp Lý, Bản Quyền & Quản Trị Kho Lưu Trữ
 
 Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
@@ -111,7 +132,7 @@ Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
 ---
 
-## 10. Tài liệu Tiêu chuẩn ở Cấp gốc (Root Documentation)
+## 12. Tài Liệu Tiêu Chuẩn ở Cấp Gốc (Root Documentation)
 
 - **[README.md](../README.md)**: Trang giới thiệu dự án tổng thể và hướng dẫn cài đặt môi trường phát triển cục bộ.
 - **[AGENTS.md](../AGENTS.md)**: Quy tắc làm việc bắt buộc cho AI Agents và nhà phát triển (quy tắc 1 commit, 300 dòng, `npm run verify`).
