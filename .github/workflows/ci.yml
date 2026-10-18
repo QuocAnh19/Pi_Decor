@@ -84,6 +84,15 @@ jobs:
           JWT_SECRET: test_jwt_secret_must_be_at_least_32_characters_long
         run: npm run verify:api
 
+      - name: Verify Database Documentation Freshness
+        working-directory: .
+        env:
+          DATABASE_URL: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
+          DATABASE_URL_DIRECT: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
+        run: |
+          npm run docs:db
+          git diff --exit-code docs/data/
+
   e2e:
     name: End-to-End Tests (Playwright)
     runs-on: ubuntu-latest

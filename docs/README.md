@@ -55,9 +55,17 @@ Chi tiết đặc tả kỹ thuật, ma trận phân quyền và luồng vận h
 
 - **[TRACEABILITY.md](features/TRACEABILITY.md)**: Bảng đối chiếu chéo hai chiều giữa User Stories (US-001 đến US-014), tài liệu đặc tả, API endpoints và các bài kiểm thử tự động (Unit / API / E2E).
 
+## 5. Dữ Liệu & Cơ Sở Dữ Liệu (`docs/data/`)
+
+Tài liệu thiết kế lược đồ, từ điển dữ liệu và sơ đồ thực thể quan hệ cơ sở dữ liệu:
+
+- **[DATA_DICTIONARY.md](data/DATA_DICTIONARY.md)**: Từ điển dữ liệu chi tiết 15 bảng trong PostgreSQL (kiểu dữ liệu, khóa chính, khóa ngoại, chỉ mục, trigger, mô tả cột).
+- **[ERD.md](data/ERD.md)**: Sơ đồ thực thể quan hệ (Mermaid `erDiagram`) phân tách theo các nhóm CRM, Nội dung, Studio và Xác thực.
+- **[DATA_NOTES.md](data/DATA_NOTES.md)**: Ghi chú quy ước kiểu dữ liệu (UUID, timestamptz), cấu trúc chi tiết các trường JSONB, chính sách dữ liệu cá nhân (PII) và danh mục các trường nghi thừa.
+
 ---
 
-## 5. Kiến trúc & Đặc tả Kỹ thuật
+## 6. Kiến trúc & Đặc tả Kỹ thuật
 
 Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
@@ -69,7 +77,7 @@ Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
 ---
 
-## 6. Vận hành, Kiểm thử & An toàn Thông tin
+## 7. Vận hành, Kiểm thử & An toàn Thông tin
 
 Hướng dẫn quy trình vận hành máy chủ, tự động hóa kiểm thử và bảo vệ dữ liệu:
 
@@ -80,7 +88,7 @@ Hướng dẫn quy trình vận hành máy chủ, tự động hóa kiểm thử
 
 ---
 
-## 7. Thiết kế Giao diện & Design Tokens
+## 8. Thiết kế Giao diện & Design Tokens
 
 Quy chuẩn hệ thống nhận diện và styling:
 
@@ -89,7 +97,7 @@ Quy chuẩn hệ thống nhận diện và styling:
 
 ---
 
-## 8. Pháp lý, Bản quyền & Quản trị Kho lưu trữ
+## 9. Pháp lý, Bản quyền & Quản trị Kho lưu trữ
 
 Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
@@ -100,7 +108,7 @@ Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
 ---
 
-## 9. Tài liệu Tiêu chuẩn ở Cấp gốc (Root Documentation)
+## 10. Tài liệu Tiêu chuẩn ở Cấp gốc (Root Documentation)
 
 - **[README.md](../README.md)**: Trang giới thiệu dự án tổng thể và hướng dẫn cài đặt môi trường phát triển cục bộ.
 - **[AGENTS.md](../AGENTS.md)**: Quy tắc làm việc bắt buộc cho AI Agents và nhà phát triển (quy tắc 1 commit, 300 dòng, `npm run verify`).
