@@ -1,0 +1,18 @@
+# CODEOWNERS — Phân công người chịu trách nhiệm mã nguồn Pi Decor
+# Người phụ trách được tự động yêu cầu review khi có Pull Request thay đổi các đường dẫn tương ứng.
+
+# Người phụ trách mặc định cho toàn bộ repository
+* @QuocAnh19
+
+# Các khu vực nhạy cảm bắt buộc xem xét cẩn trọng:
+# 1. Cơ sở dữ liệu và các kịch bản migration
+apps/api/database/ @QuocAnh19
+
+# 2. Module xác thực, quản lý phân quyền và bảo mật tài khoản
+apps/api/src/modules/auth/ @QuocAnh19
+
+# 3. Cấu hình CI/CD, Workflows và Issue/PR Templates
+.github/ @QuocAnh19
+
+# 4. Schemas Zod và DTO chia sẻ giữa Client và Server
+packages/shared/ @QuocAnh19

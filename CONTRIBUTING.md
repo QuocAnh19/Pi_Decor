@@ -4,7 +4,15 @@ Tài liệu này quy định các tiêu chuẩn kỹ thuật, quy trình làm vi
 
 ---
 
-## 1. Quy ước Đặt tên Nhánh (Branching Conventions)
+## 1. Báo cáo Sự cố & Đề xuất Tính năng
+
+- **Báo cáo lỗi thông thường**: Vui lòng sử dụng [Bug Report Form](.github/ISSUE_TEMPLATE/bug_report.yml) để cung cấp đầy đủ các bước tái hiện và môi trường gặp lỗi.
+- **Đề xuất tính năng mới**: Sử dụng [Feature Request Form](.github/ISSUE_TEMPLATE/feature_request.yml) để nêu rõ bối cảnh nghiệp vụ và phương án đề xuất.
+- **Lỗ hổng bảo mật**: Tuyệt đối **KHÔNG** mở Issue công khai. Hãy tham khảo [SECURITY.md](SECURITY.md) và sử dụng kênh [Private Vulnerability Reporting](https://github.com/QuocAnh19/Pi_Decor/security/advisories/new).
+
+---
+
+## 2. Quy ước Đặt tên Nhánh & Chữ ký Commit
 
 Mọi thay đổi phải được thực hiện trên nhánh riêng biệt tách từ `main`, tuân thủ cú pháp:
 
@@ -14,9 +22,11 @@ Mọi thay đổi phải được thực hiện trên nhánh riêng biệt tách
 - `docs/<noi-dung>`: Bổ sung hoặc cập nhật tài liệu kỹ thuật (ví dụ: `docs/api-guide`).
 - `chore/<tac-vu>`: Cập nhật thư viện, cấu hình CI/CD hoặc công cụ phát triển (ví dụ: `chore/bump-deps`).
 
+> **Yêu cầu Chữ ký số Commit**: Theo quy tắc bảo vệ nhánh tại [docs/GITHUB_SETTINGS.md](docs/GITHUB_SETTINGS.md), mọi commit phải được ký số qua GPG hoặc SSH (`commit.gpgsign = true`).
+
 ---
 
-## 2. Quy chuẩn Commit (Conventional Commits)
+## 3. Quy chuẩn Commit (Conventional Commits)
 
 Dự án áp dụng chặt chẽ chuẩn **Conventional Commits**:
 
@@ -24,70 +34,56 @@ Dự án áp dụng chặt chẽ chuẩn **Conventional Commits**:
 <type>(<scope>): <mô tả ngắn gọn về thay đổi>
 ```
 
-- **Các kiểu commit hợp lệ**:
-  - `feat`: Tính năng mới cho người dùng.
-  - `fix`: Sửa lỗi hệ thống hoặc giao diện.
-  - `refactor`: Tái cấu trúc mã nguồn, tối ưu hóa kích thước file.
-  - `docs`: Cập nhật tài liệu, README, runbook.
-  - `test`: Bổ sung hoặc sửa đổi các bài kiểm thử tự động.
-  - `chore`: Tác vụ bảo trì, cấu hình build, cập nhật package.
-- **Quy tắc 1 Nhiệm vụ = 1 Commit**: Mỗi nhiệm vụ tương ứng với 1 commit độc lập, mô tả chính xác nội dung thay đổi.
-- **Phạm vi (Scope)**: Không thực hiện các thay đổi ngoài phạm vi yêu cầu. Nếu phát hiện vấn đề kỹ thuật khác, ghi nhận vào `docs/FOLLOWUPS.md` thay vì tự ý sửa.
+- **Các kiểu commit hợp lệ**: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
+- **Quy tắc 1 Nhiệm vụ = 1 Commit**: Mỗi nhiệm vụ tương ứng với đúng 1 commit độc lập, mô tả chính xác nội dung.
+- **Tuân thủ đúng phạm vi (Scope)**: Tuyệt đối không làm ngoài phạm vi prompt/nhiệm vụ. Nếu phát hiện vấn đề kỹ thuật khác, ghi nhận vào [docs/FOLLOWUPS.md](docs/FOLLOWUPS.md) thay vì tự ý sửa.
 
 ---
 
-## 3. Tiêu chuẩn Viết Code & Cấu trúc Tệp
+## 4. Tiêu chuẩn Viết Code & Cấu trúc Tệp
 
 ### a. Giới hạn Kích thước File (Quy tắc 300 dòng)
 
-- **Bắt buộc**: Không có file mã nguồn nào vượt quá **300 dòng** (được kiểm tra qua luật ESLint `max-lines`).
-- **Cách phân rã file lớn**:
-  - Tách các khối giao diện thành component con đặt cùng thư mục (ví dụ `components/`).
-  - Đưa toàn bộ state logic và hiệu ứng phụ vào custom hook riêng (`hooks/useXxx.ts`).
-  - Chuyển các hàm thuần túy (pure functions, tính toán) vào `utils/`.
-  - Gom các hằng số, bảng màu hoặc cấu hình cố định vào `constants.ts`.
+- **Bắt buộc**: Không có file mã nguồn nào vượt quá **300 dòng** (luật ESLint `max-lines`).
+- **Cách phân rã**: Tách component con, custom hooks (`useXxx`), helpers và constants riêng biệt.
 
 ### b. Quy chuẩn Chú thích (Comments)
 
-- Sử dụng tiếng Việt cho các chú thích nội bộ trong mã nguồn.
-- **Chỉ giải thích "vì sao" (Why)**: Nêu rõ lý do kiến trúc, quyết định kỹ thuật hoặc ngữ cảnh nghiệp vụ đặc biệt; không viết chú thích mô tả lại cú pháp hiển nhiên của dòng code (What).
+- Sử dụng tiếng Việt cho các chú thích nội bộ.
+- **Chỉ giải thích "vì sao" (Why)**: Nêu rõ lý do thiết kế hoặc ràng buộc kỹ thuật; không diễn giải cú pháp code.
 
-### c. Bảo mật & Biến Môi trường
+### c. Bảo mật Tuyệt đối
 
-- **Tuyệt đối không commit bí mật**: Không bao giờ đưa `.env`, API key, token hoặc chuỗi kết nối cơ sở dữ liệu thật vào Git. Mọi giá trị mẫu phải nằm trong `.env.example`.
-- Pre-commit hook (Husky + Lint-staged) sẽ tự động kiểm tra định dạng và ngăn chặn các vi phạm cơ bản.
+- **Không commit thông tin bí mật**: Không đưa `.env`, secret keys, tokens hoặc mật khẩu vào Git. Mọi giá trị mẫu an toàn chỉ nằm trong `.env.example`.
 
 ---
 
-## 4. Danh sách Kiểm tra Bắt buộc Trước khi Tạo PR (PR Checklist)
+## 5. Quy trình Kiểm tra Bắt buộc Trước khi Tạo PR
 
-Trước khi commit và gửi Pull Request, lập trình viên phải đảm bảo toàn bộ các bước kiểm tra sau đây đều vượt qua mà không có lỗi:
-
-### Phía Web Client (`apps/web/`)
+Trước khi gửi Pull Request, lập trình viên bắt buộc phải chạy lệnh xác thực toàn diện từ thư mục gốc:
 
 ```bash
-cd apps/web
-npx tsc --noEmit        # Kiểm tra kiểu dữ liệu TypeScript không lỗi
-npm run lint           # Kiểm tra quy chuẩn ESLint (0 errors)
-npm run lint:styles    # Kiểm tra SCSS module qua Stylelint
-npm test               # Chạy toàn bộ test suite frontend
-npm run knip           # Kiểm tra không có code/export/dependency thừa
-npm run build          # Đảm bảo đóng gói Vite thành công
+npm run verify
 ```
 
-### Phía API Server (`apps/api/`)
+Lệnh này sẽ tuần tự kiểm tra:
+
+1. `packages/shared`: build ra dist và dts.
+2. `apps/web`: `typecheck`, `lint`, `lint:styles`, `knip`, `test`, `build`.
+3. `apps/api`: `check:db-env`, `lint`, `check:syntax`, `migrate`, `test`.
+
+Nếu có thay đổi luồng giao diện hoặc nghiệp vụ, chạy thêm bộ kiểm thử E2E:
 
 ```bash
-cd apps/api
-node --check src/**/*.js   # Kiểm tra cú pháp toàn bộ file JS ESM
-npm run lint              # Kiểm tra quy chuẩn ESLint cho server
-npm test                  # Chạy test suite backend (Postgres test)
+npm run e2e
 ```
 
 ---
 
-## 5. Quy trình Đánh giá Mã nguồn (Code Review)
+## 6. Gửi Pull Request & Đánh giá Mã nguồn (Code Review)
 
-1. Mọi Pull Request cần có ít nhất một phê duyệt (approve) từ thành viên cốt lõi.
-2. Kiểm tra CI (GitHub Actions) phải chạy thành công cả 2 jobs: `test-client` và `test-server`.
-3. Nhánh `main` được cấu hình squash merge hoặc rebase merge để giữ lịch sử commit sạch sẽ và tuyến tính.
+1. **Biểu mẫu PR**: Khi mở Pull Request, điền đầy đủ các mục theo [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md).
+2. **Cập nhật CHANGELOG**: Bổ sung tóm tắt thay đổi vào mục `[Unreleased]` trong [CHANGELOG.md](CHANGELOG.md).
+3. **Phân công Review**: Hệ thống sẽ tự động gán người đánh giá theo quy tắc tại [`.github/CODEOWNERS`](.github/CODEOWNERS). Các khu vực nhạy cảm (`auth`, `database`, `packages/shared`) yêu cầu sự phê duyệt bắt buộc từ chủ repository `@QuocAnh19`.
+4. **Hợp nhất**: Nhánh `main` áp dụng Squash Merge hoặc Rebase Merge để bảo toàn lịch sử tuyến tính theo quy định tại [docs/GITHUB_SETTINGS.md](docs/GITHUB_SETTINGS.md).
+5. **Quy trình Phát hành**: Khi hoàn tất chu kỳ tính năng, quy trình đóng gói và phát hành phiên bản được thực hiện theo [docs/RELEASING.md](docs/RELEASING.md).

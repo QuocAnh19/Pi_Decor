@@ -1,0 +1,48 @@
+name: 💡 Đề xuất tính năng mới (Feature Request)
+description: Gợi ý ý tưởng, cải tiến tính năng hoặc trải nghiệm người dùng
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cảm ơn bạn đã đóng góp ý tưởng cải tiến Pi Decor! Vui lòng chia sẻ chi tiết về nhu cầu và giải pháp đề xuất bên dưới.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Vấn đề hoặc Nhu cầu thực tế (Problem Statement)
+      description: Mô tả rõ ràng vấn đề bạn đang gặp phải hoặc bối cảnh cần tính năng mới này.
+      placeholder: "Tôi cảm thấy bất tiện khi... / Hiện tại hệ thống chưa hỗ trợ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Giải pháp đề xuất (Proposed Solution)
+      description: Mô tả cách giải quyết hoặc giao diện bạn mong muốn hệ thống hoạt động.
+      placeholder: "Hệ thống nên có thêm nút/tùy chọn... để cho phép..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Các phương án thay thế đã cân nhắc (Alternatives Considered)
+      description: Bạn đã thử giải pháp nào khác chưa hoặc có giải pháp thay thế nào không?
+      placeholder: "Có thể xử lý tạm bằng cách..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: affected-areas
+    attributes:
+      label: Khu vực dự kiến ảnh hưởng
+      description: Chọn tất cả các thành phần liên quan.
+      options:
+        - label: Web Client (`apps/web`)
+        - label: API Backend (`apps/api`)
+        - label: Schema / DTO dùng chung (`packages/shared`)
+        - label: Thiết kế giao diện / SCSS / Token
+        - label: Cơ sở dữ liệu / Migration

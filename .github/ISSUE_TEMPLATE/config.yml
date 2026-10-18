@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🛡️ Báo cáo lỗ hổng bảo mật (Security Advisory)
+    url: https://github.com/QuocAnh19/Pi_Decor/security/advisories/new
+    about: Vui lòng sử dụng tính năng Private Vulnerability Reporting hoặc đọc SECURITY.md để báo cáo lỗ hổng bảo mật riêng tư thay vì mở issue công khai.
