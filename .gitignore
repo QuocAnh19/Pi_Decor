@@ -10,6 +10,8 @@ dist/
 build/
 coverage/
 packages/shared/dist/
+dist-sbom/
+bom.json
 
 # Logs
 *.log

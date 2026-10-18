@@ -1,6 +1,8 @@
 {
   "name": "pi-decor-workspace",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "<TÊN CHỦ SỞ HỮU>",
   "type": "module",
   "workspaces": [
     "apps/*",
@@ -25,7 +27,8 @@
     "launch:check": "node scripts/check-launch-readiness.mjs",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
     "check:licenses": "node scripts/check-licenses.mjs",
-    "sbom": "npx @cyclonedx/cyclonedx-npm --ignore-npm-errors --output-format JSON --output-file bom.json"
+    "licenses:generate": "node scripts/generate-notice.mjs",
+    "sbom": "node -e \"require('fs').mkdirSync('dist-sbom', { recursive: true })\" && npx @cyclonedx/cyclonedx-npm --ignore-npm-errors --output-format JSON --output-file dist-sbom/bom.json"
   },
   "overrides": {
     "dompurify": "^3.4.17",

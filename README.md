@@ -1,5 +1,7 @@
 # Pi Decor
 
+> **Lưu ý bản quyền**: Mã nguồn độc quyền, xem [LICENSE](LICENSE).
+
 Nền tảng website và ứng dụng Studio tương tác phục vụ thiết kế, tư vấn trang trí tiệc cưới & sự kiện cao cấp. Hệ thống được tổ chức theo cấu trúc npm workspaces monorepo với frontend web (`apps/web`), backend API (`apps/api`) và các gói thư viện dùng chung (`packages/*`).
 
 ---

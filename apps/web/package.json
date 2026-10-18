@@ -1,6 +1,8 @@
 {
   "name": "pi-decor-client",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "<TÊN CHỦ SỞ HỮU>",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

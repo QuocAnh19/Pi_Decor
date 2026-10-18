@@ -1,6 +1,8 @@
 {
   "name": "pi-decor-server",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "<TÊN CHỦ SỞ HỮU>",
   "version": "1.0.0",
   "type": "module",
   "description": "Pi Decor REST API — leads, saved designs, materials & a minimal admin area. See README.md.",
