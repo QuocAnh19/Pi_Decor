@@ -15,7 +15,24 @@ Các tài liệu định nghĩa yêu cầu, phạm vi và hành vi nghiệp vụ
 
 ---
 
-## 2. Kiến trúc & Đặc tả Kỹ thuật
+## 2. Đặc tả Tính năng Công khai (`docs/features/public/`)
+
+Chi tiết đặc tả kỹ thuật, luồng người dùng và API của 10 phân hệ công khai:
+
+- **[home-and-brand.md](features/public/home-and-brand.md)**: Trang chủ, khối Hero giới thiệu và hệ thống điều hướng toàn trang.
+- **[services-showcase.md](features/public/services-showcase.md)**: Danh mục các gói dịch vụ trang trí và xem chi tiết dịch vụ.
+- **[lookbook-projects.md](features/public/lookbook-projects.md)**: Bộ sưu tập dự án thực tế, bộ lọc phân khúc giá (Standard/Premium) và xem album ảnh.
+- **[materials-palette.md](features/public/materials-palette.md)**: Bảng tra cứu vật liệu thi công, bảng màu và chất liệu vải.
+- **[testimonials-public.md](features/public/testimonials-public.md)**: Xem cảm nhận khách hàng đã duyệt và gửi đánh giá trải nghiệm dịch vụ mới.
+- **[lead-form.md](features/public/lead-form.md)**: Biểu mẫu thu thập lead, xác thực SĐT di động Việt Nam, cam kết bảo vệ dữ liệu và đính kèm snapshot.
+- **[studio-customer.md](features/public/studio-customer.md)**: Xưởng thiết kế trực quan Studio cho khách hàng, tùy biến rèm, chữ và xuất ảnh snapshot.
+- **[venue-map.md](features/public/venue-map.md)**: Bản đồ tương tác Leaflet hiển thị các địa điểm sự kiện và danh sách dự án liên kết.
+- **[privacy-and-consent.md](features/public/privacy-and-consent.md)**: Chính sách bảo vệ dữ liệu cá nhân theo NĐ 13/2023/NĐ-CP và cơ chế thanh lọc dữ liệu.
+- **[seo-and-metadata.md](features/public/seo-and-metadata.md)**: Cấu hình SEO, Open Graph, Twitter Cards, robots.txt, sitemap và Schema LocalBusiness.
+
+---
+
+## 3. Kiến trúc & Đặc tả Kỹ thuật
 
 Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
@@ -27,7 +44,7 @@ Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
 ---
 
-## 3. Vận hành, Kiểm thử & An toàn Thông tin
+## 4. Vận hành, Kiểm thử & An toàn Thông tin
 
 Hướng dẫn quy trình vận hành máy chủ, tự động hóa kiểm thử và bảo vệ dữ liệu:
 
@@ -38,7 +55,7 @@ Hướng dẫn quy trình vận hành máy chủ, tự động hóa kiểm thử
 
 ---
 
-## 4. Thiết kế Giao diện & Design Tokens
+## 5. Thiết kế Giao diện & Design Tokens
 
 Quy chuẩn hệ thống nhận diện và styling:
 
@@ -47,7 +64,7 @@ Quy chuẩn hệ thống nhận diện và styling:
 
 ---
 
-## 5. Pháp lý, Bản quyền & Quản trị Kho lưu trữ
+## 6. Pháp lý, Bản quyền & Quản trị Kho lưu trữ
 
 Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
@@ -58,7 +75,7 @@ Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 
 ---
 
-## 6. Tài liệu Tiêu chuẩn ở Cấp gốc (Root Documentation)
+## 7. Tài liệu Tiêu chuẩn ở Cấp gốc (Root Documentation)
 
 - **[README.md](../README.md)**: Trang giới thiệu dự án tổng thể và hướng dẫn cài đặt môi trường phát triển cục bộ.
 - **[AGENTS.md](../AGENTS.md)**: Quy tắc làm việc bắt buộc cho AI Agents và nhà phát triển (quy tắc 1 commit, 300 dòng, `npm run verify`).
