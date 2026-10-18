@@ -69,11 +69,13 @@ Tài liệu thiết kế lược đồ, từ điển dữ liệu và sơ đồ t
 
 Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
+- **[C4.md](architecture/C4.md)**: Mô hình kiến trúc C4 đa tầng (Context, Containers, Components) trực quan hóa bằng Mermaid.
 - **[ARCHITECTURE.md](ARCHITECTURE.md)**: Tổng quan kiến trúc Monorepo (`apps/web`, `apps/api`, `packages/shared`), mô hình dữ liệu và các luồng tương tác chính.
 - **[API.md](API.md)**: Danh mục đặc tả các REST API endpoints, tham số truy vấn, body schemas và cấu trúc phản hồi.
 - **[TYPES.md](TYPES.md)**: Quy ước chia sẻ kiểu dữ liệu TypeScript, cấu trúc Zod Schemas và Centralized Mappers.
 - **[DATA_SOURCES.md](DATA_SOURCES.md)**: Quản lý nguồn dữ liệu, kết nối PostgreSQL (Neon Pooled/Direct) và lưu trữ media Cloudinary.
 - **[BASELINE.md](BASELINE.md)**: Báo cáo hiện trạng kỹ thuật và lịch sử chuẩn hóa hệ thống.
+- **[Hồ sơ Quyết định Kiến trúc (docs/adr/)](adr/0000-template.md)**: Danh mục 13 bản ghi quyết định kiến trúc (ADRs) dựng từ lịch sử Git và mã nguồn thực tế.
 
 ---
 
@@ -81,6 +83,7 @@ Tài liệu thiết kế kiến trúc phần mềm và giao tiếp dữ liệu:
 
 Hướng dẫn quy trình vận hành máy chủ, tự động hóa kiểm thử và bảo vệ dữ liệu:
 
+- **[DEVLOG.md](DEVLOG.md)**: Khung nhật ký phát triển theo ngày trích xuất tự động từ lịch sử commit Git.
 - **[RUNBOOK.md](RUNBOOK.md)**: Cẩm nang vận hành production, hướng dẫn triển khai, sao lưu cơ sở dữ liệu và khắc phục sự cố.
 - **[TESTING.md](TESTING.md)**: Chiến lược kiểm thử tự động, số liệu độ phủ mã nguồn (Coverage) và bộ kiểm thử giao diện Playwright E2E.
 - **[SECURITY_NOTES.md](SECURITY_NOTES.md)**: Ghi chú bảo mật, cấu hình xác thực JWT Refresh Rotation và tuân thủ Nghị định 13/2023/NĐ-CP.

@@ -2,6 +2,8 @@
 
 Tài liệu mô tả chi tiết kiến trúc phần mềm, các luồng dữ liệu chính, mô hình thực thể quan hệ cơ sở dữ liệu và các quyết định thiết kế cốt lõi của nền tảng Pi Decor.
 
+> Xem chi tiết biểu đồ kiến trúc đa tầng theo mô hình C4 (Context, Containers, Components) tại [docs/architecture/C4.md](architecture/C4.md).
+
 ---
 
 ## 1. Các Luồng Dữ liệu Chính
