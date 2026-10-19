@@ -160,5 +160,9 @@ export function generateErd({ tables, columns, constraints }) {
     lines.push("```", "", "---", "");
   }
 
+  // Loại bỏ dòng phân cách thừa ở cuối file nếu có
+  while (lines.length > 0 && lines[lines.length - 1] === "") {
+    lines.pop();
+  }
   return lines.join("\n") + "\n";
 }

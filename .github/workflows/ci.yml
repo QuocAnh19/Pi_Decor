@@ -93,7 +93,13 @@ jobs:
           DATABASE_URL_DIRECT: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
         run: |
           npm run docs:db
-          git diff --exit-code docs/data/
+          if ! git diff --exit-code docs/data/; then
+            echo "::error::docs/data/ is out of sync with freshly migrated schema!"
+            git diff --stat docs/data/
+            echo "--- First 40 lines of diff ---"
+            git diff docs/data/ | head -n 40
+            exit 1
+          fi
 
   e2e:
     name: End-to-End Tests (Playwright)

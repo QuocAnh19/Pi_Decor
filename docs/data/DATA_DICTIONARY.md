@@ -34,8 +34,8 @@
 | `id`            | `uuid`                     | Không         | `gen_random_uuid()` | Khóa chính định danh quản trị viên (UUID)                |
 | `email`         | `text`                     | Không         | —                   | Địa chỉ email đăng nhập duy nhất của quản trị viên       |
 | `password_hash` | `text`                     | Không         | —                   | Chuỗi băm mật khẩu bằng bcryptjs, không lưu mật khẩu gốc |
-| `created_at`    | `timestamp with time zone` | Không         | `now()`             | Thời điểm tạo tài khoản quản trị                         |
 | `role`          | `text`                     | Không         | `'admin'::text`     | Vai trò phân quyền quản trị viên: admin hoặc owner       |
+| `created_at`    | `timestamp with time zone` | Không         | `now()`             | Thời điểm tạo tài khoản quản trị                         |
 
 #### Khóa ngoại (Foreign Keys)
 
@@ -480,9 +480,9 @@
 | `svg_base`       | `text`                     | Không         | —                   | Mã nguồn SVG gốc của khung nền không gian                  |
 | `category`       | `text`                     | Có            | —                   | Phân loại bối cảnh: backdrop, gallery_table, entrance      |
 | `is_active`      | `boolean`                  | Không         | `true`              | Cờ cho phép sử dụng mẫu không gian trên Studio             |
+| `default_config` | `jsonb`                    | Không         | `'{}'::jsonb`       | Cấu hình mặc định các slot vật liệu ban đầu dưới dạng JSON |
 | `created_at`     | `timestamp with time zone` | Không         | `now()`             | Thời điểm tạo mẫu không gian                               |
 | `updated_at`     | `timestamp with time zone` | Không         | `now()`             | Thời điểm cập nhật mẫu không gian gần nhất                 |
-| `default_config` | `jsonb`                    | Không         | `'{}'::jsonb`       | Cấu hình mặc định các slot vật liệu ban đầu dưới dạng JSON |
 
 #### Khóa ngoại (Foreign Keys)
 

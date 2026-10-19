@@ -4,13 +4,14 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 import pg from "pg";
+import prettier from "prettier";
 import { generateDataDictionary, generateErd } from "./db-docs-formatter.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config();
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
-function resolveConnectionOptions(customUrl) {
+function resolveConnectionOptions(customUrl, allowRemote = false) {
   const dbUrl =
     customUrl ||
     process.env.DATABASE_URL_DIRECT ||
@@ -34,6 +35,17 @@ function resolveConnectionOptions(customUrl) {
   const isLocalHost = ["localhost", "127.0.0.1", "postgres"].includes(
     (host || "").toLowerCase()
   );
+
+  if (!isLocalHost) {
+    if (!allowRemote) {
+      throw new Error(
+        `[gen-db-docs.js] Từ chối chạy: Host DB '${host}' không phải cục bộ (localhost, 127.0.0.1, postgres). Tài liệu phải được sinh từ DB dựng mới bằng migration để tránh lệch schema. Dùng cờ --allow-remote nếu muốn sinh từ DB từ xa.`
+      );
+    }
+    console.warn(
+      `[gen-db-docs.js] ⚠️ CẢNH BÁO: Đang sinh tài liệu từ DB từ xa '${host}' (--allow-remote). Tài liệu chuẩn phải được sinh từ DB dựng mới bằng migration.`
+    );
+  }
   const effectiveSslMode =
     process.env.DB_SSL || (isLocalHost ? "disable" : "verify-full");
 
@@ -154,8 +166,8 @@ export async function fetchDbMetadata(pool) {
   };
 }
 
-export async function generateDatabaseDocumentation(customUrl) {
-  const options = resolveConnectionOptions(customUrl);
+export async function generateDatabaseDocumentation(customUrl, { allowRemote = false } = {}) {
+  const options = resolveConnectionOptions(customUrl, allowRemote);
   const pool = new pg.Pool(options);
 
   try {
@@ -163,16 +175,31 @@ export async function generateDatabaseDocumentation(customUrl) {
     const dataDictionaryMd = generateDataDictionary(metadata);
     const erdMd = generateErd(metadata);
 
-    const outDir = path.resolve(__dirname, "..", "..", "..", "docs", "data");
+    const rootDir = path.resolve(__dirname, "..", "..", "..");
+    const outDir = path.join(rootDir, "docs", "data");
     await mkdir(outDir, { recursive: true });
 
-    await writeFile(path.join(outDir, "DATA_DICTIONARY.md"), dataDictionaryMd, "utf-8");
-    await writeFile(path.join(outDir, "ERD.md"), erdMd, "utf-8");
+    // Format bằng Prettier API trước khi ghi để đảm bảo deterministic
+    const prettierConfigFile = path.join(rootDir, ".prettierrc");
+    const prettierConfig = (await prettier.resolveConfig(prettierConfigFile)) || {};
 
-    console.log(`[gen-db-docs.js] ✓ Đã sinh tài liệu thành công:`);
+    const formattedDataDict = await prettier.format(dataDictionaryMd, {
+      ...prettierConfig,
+      parser: "markdown",
+    });
+
+    const formattedErd = await prettier.format(erdMd, {
+      ...prettierConfig,
+      parser: "markdown",
+    });
+
+    await writeFile(path.join(outDir, "DATA_DICTIONARY.md"), formattedDataDict, "utf-8");
+    await writeFile(path.join(outDir, "ERD.md"), formattedErd, "utf-8");
+
+    console.log(`[gen-db-docs.js] ✓ Đã sinh tài liệu thành công (Prettier-formatted):`);
     console.log(`  - docs/data/DATA_DICTIONARY.md (${metadata.tables.length} bảng)`);
     console.log(`  - docs/data/ERD.md (sơ đồ Mermaid)`);
-    return { metadata, dataDictionaryMd, erdMd };
+    return { metadata, dataDictionaryMd: formattedDataDict, erdMd: formattedErd };
   } finally {
     await pool.end();
   }
@@ -182,16 +209,20 @@ export async function generateDatabaseDocumentation(customUrl) {
 const isDirectCli = process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
 if (isDirectCli) {
   let customUrl = null;
+  let allowRemote = false;
   for (const arg of process.argv.slice(2)) {
     if (arg.startsWith("--url=")) {
       customUrl = arg.split("=")[1];
+    } else if (arg === "--allow-remote") {
+      allowRemote = true;
     }
   }
 
-  generateDatabaseDocumentation(customUrl)
+  generateDatabaseDocumentation(customUrl, { allowRemote })
     .then(() => process.exit(0))
     .catch((err) => {
-      console.error("[gen-db-docs.js] Lỗi thực thi:", err);
+      console.error("[gen-db-docs.js] Lỗi thực thi:", err.message || err);
       process.exit(1);
     });
 }
+

@@ -166,9 +166,9 @@ erDiagram
         text svg_base
         text category
         boolean is_active
+        jsonb default_config
         timestamp_with_time_zone created_at
         timestamp_with_time_zone updated_at
-        jsonb default_config
     }
     studio_slot_definitions {
         uuid id PK
@@ -226,8 +226,8 @@ erDiagram
         uuid id PK
         text email
         text password_hash
-        timestamp_with_time_zone created_at
         text role
+        timestamp_with_time_zone created_at
     }
     refresh_tokens {
         uuid id PK
