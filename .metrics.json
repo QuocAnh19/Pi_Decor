@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-19",
+  "build": {
+    "durationSec": "16.15",
+    "initialJsFile": "index-DF9Rd08W.js",
+    "initialJsRawKb": "383.81 kB",
+    "initialJsGzipKb": "83.30 kB",
+    "chunkCount": 31
+  },
+  "code": {
+    "totalSourceLines": 36743,
+    "totalSourceFiles": 408,
+    "webLines": 30451,
+    "apiLines": 5945,
+    "sharedLines": 347,
+    "duplicationPercent": "2.10%"
+  },
+  "architecture": {
+    "endpointCount": 54,
+    "tableCount": 15
+  },
+  "testing": {
+    "totalTests": 138,
+    "webTests": 46,
+    "apiTests": 92,
+    "coverage": {
+      "web": {
+        "lines": "14.61",
+        "branches": "46.36",
+        "functions": "31.94",
+        "statements": "14.61"
+      },
+      "api": {
+        "lines": "62.71",
+        "branches": "50.33",
+        "functions": "68.19",
+        "statements": "62.71"
+      }
+    }
+  }
+}

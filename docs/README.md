@@ -100,10 +100,13 @@ Tài liệu phân tích mô hình đe dọa, kiểm soát an ninh ứng dụng v
 - **[INCIDENT_RESPONSE.md](security/INCIDENT_RESPONSE.md)**: Quy trình 6 bước xử lý sự cố an ninh, xoay vòng khóa bí mật, thu hồi phiên và mẫu báo cáo Post-Mortem.
 - **[SECURITY_NOTES.md](SECURITY_NOTES.md)**: Ghi chú bảo mật, cấu hình xác thực JWT Refresh Rotation và tuân thủ Nghị định 13/2023/NĐ-CP.
 
-## 9. Vận Hành Hệ Thống (`docs/ops/` & Cẩm Nang)
+## 9. Vận Hành Hệ Thống & Hướng Dẫn Sử Dụng (`docs/ops/`, `docs/user-guide/`)
 
-Cẩm nang vận hành hệ thống thực tế, kiến trúc môi trường, giám sát và sao lưu dữ liệu:
+Cẩm nang vận hành hệ thống thực tế, kiến trúc môi trường, hướng dẫn sử dụng và đo lường:
 
+- **[ADMIN_GUIDE.md](user-guide/ADMIN_GUIDE.md)**: Cẩm nang quản trị hệ thống dành cho Chủ doanh nghiệp theo quy trình trực quan "Làm gì → Bấm ở đâu → Kết quả" kèm ảnh chụp màn hình.
+- **[FAQ.md](user-guide/FAQ.md)**: Giải đáp các câu hỏi và tình huống thường gặp của quản trị viên (mật khẩu, báo giá, xóa dữ liệu, kiểm duyệt).
+- **[CASE_STUDY.md](CASE_STUDY.md)**: Bài nghiên cứu điển hình cho portfolio với đầy đủ các chỉ số kỹ thuật đo lường thực tế và quyết định kiến trúc.
 - **[BACKUP_RESTORE.md](ops/BACKUP_RESTORE.md)**: Quy trình sao lưu, phục hồi dữ liệu, cơ chế chống ghi đè production, kết quả kiểm tra diễn tập tự động và RPO/RTO.
 - **[ENVIRONMENTS.md](ops/ENVIRONMENTS.md)**: Ma trận môi trường dev / staging / production, quy trình thăng cấp mã nguồn và khôi phục sự cố.
 - **[MONITORING.md](ops/MONITORING.md)**: Danh mục chỉ số giám sát vận hành, cấu hình cảnh báo và định dạng audit log bảo mật.

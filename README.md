@@ -1,184 +1,127 @@
-# Pi Decor
+# Pi Decor — Nền Tảng Thiết Kế & Trang Trí Tiệc Cưới
 
-> **Lưu ý bản quyền**: Mã nguồn độc quyền, xem [LICENSE](LICENSE).
+[![CI](https://github.com/QuocAnh19/Pi_Decor/actions/workflows/ci.yml/badge.svg)](https://github.com/QuocAnh19/Pi_Decor/actions/workflows/ci.yml)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D20-brightgreen.svg)](.nvmrc)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg)](packages/shared)
 
-Nền tảng website và ứng dụng Studio tương tác phục vụ thiết kế, tư vấn trang trí tiệc cưới & sự kiện cao cấp. Hệ thống được tổ chức theo cấu trúc npm workspaces monorepo với frontend web (`apps/web`), backend API (`apps/api`) và các gói thư viện dùng chung (`packages/*`).
+> **Bản quyền**: Mã nguồn độc quyền, xem [LICENSE](LICENSE).
+
+Pi Decor là nền tảng số hóa dịch vụ trang trí tiệc cưới và sự kiện cao cấp, kết hợp xưởng Studio phối cảnh 2D trực quan cho khách hàng và hệ thống CRM quản trị toàn diện. Hệ thống cho phép cô dâu chú rể tự tay tùy biến phông cưới, xem bộ sưu tập Lookbook thực tế và nhận dự toán chi phí minh bạch trong vòng 60 giây. Toàn bộ giải pháp được xây dựng theo kiến trúc monorepo hiện đại, bảo mật đa tầng và tuân thủ nghiêm ngặt quy định bảo vệ dữ liệu cá nhân theo Nghị định 13/2023/NĐ-CP.
+
+![Giao diện Trang chủ Pi Decor](docs/user-guide/img/01-homepage.png)
 
 ---
 
-## Kiến trúc Tổng quan
+## 1. Sơ Đồ Kiến Trúc Rút Gọn
 
+```mermaid
+graph TD
+  subgraph Client["Phía Máy Khách (Frontend)"]
+    WebSPA["Web Client (React 18 + Vite SPA)<br/>Trang chủ • Studio Canvas • Admin Portal"]
+  end
+
+  subgraph Server["Phía Máy Chủ (Backend)"]
+    ExpressAPI["API Server (Express 5 ESM)<br/>Zod Validation • JWT Auth • Rate Limiting"]
+    SharedPkg["@pidecor/shared<br/>Schemas & DTOs TypeScript"]
+  end
+
+  subgraph Storage["Lưu Trữ & Dịch Vụ Ngoài"]
+    PostgresDB[("PostgreSQL 16 (Neon / Docker)<br/>ACID • pg_trgm • Triggers")]
+    CloudinaryCloud["Cloudinary Media Storage<br/>Tối ưu hóa ảnh & CDN"]
+  end
+
+  WebSPA -->|"REST API (JSON / HTTPS)"| ExpressAPI
+  ExpressAPI -->|"Shared Types & Schemas"| SharedPkg
+  WebSPA -->|"Shared Types & Schemas"| SharedPkg
+  ExpressAPI -->|"Parameterized SQL Pool"| PostgresDB
+  ExpressAPI -->|"Upload Stream"| CloudinaryCloud
+  WebSPA -.->|"Tải ảnh trực tiếp"| CloudinaryCloud
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                 Web Client (apps/web - React 18 + Vite)     │
-│   Trang chủ (Bento) │ Bản đồ (Leaflet) │ Studio Canvas      │
-│   Quản trị Admin (CRM, Báo giá, Dự án, Dịch vụ, Templates) │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ REST API (JSON / HTTPS)
-┌──────────────────────────────▼──────────────────────────────┐
-│                 API Server (apps/api - Express 5 ESM)       │
-│   verifyToken (JWT) │ Zod Validation │ Rate Limit (Helmet)  │
-│   Domain Routers: leads, auth, quotations, services, studio │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Parameterized SQL
-┌──────────────────────────────▼──────────────────────────────┐
-│                 Database (PostgreSQL 16)                    │
-│   Schema Migrations (0001_baseline) │ Triggers │ pg_trgm    │
-│   Admins, Leads, Quotations, Services, Templates, Venues    │
-└─────────────────────────────────────────────────────────────┘
-```
 
 ---
 
-## Yêu cầu Hệ thống
+## 2. Bảng Công Nghệ Cốt Lõi
 
-- **Node.js**: Phiên bản `>= 20.0.0` (được khai báo trong [.nvmrc](.nvmrc) và `package.json`).
-- **Docker & Docker Compose**: Để khởi chạy cơ sở dữ liệu PostgreSQL cục bộ (hoặc có thể dùng dịch vụ cloud PostgreSQL như Neon).
-- **Git**: Quản lý phiên bản mã nguồn.
+| Tầng Hệ thống     | Công nghệ / Thư viện            | Vai trò & Mục đích sử dụng                                                                       |
+| :---------------- | :------------------------------ | :----------------------------------------------------------------------------------------------- |
+| **Monorepo**      | npm workspaces                  | Quản lý đa dự án trong một kho lưu trữ duy nhất (`apps/web`, `apps/api`, `packages/shared`)      |
+| **Frontend**      | React 18, Vite, TypeScript      | SPA hiệu năng cao, SCSS Modules theo Design Tokens, TanStack Query đồng bộ dữ liệu               |
+| **Backend**       | Node.js v20, Express 5 ESM      | Kiến trúc Module hóa (`routes` → `controller` → `service` → `repository`), bảo mật Helmet & CORS |
+| **Cơ sở Dữ liệu** | PostgreSQL 16 (Neon Serverless) | Lưu trữ quan hệ, khóa ngoại toàn vẹn, tìm kiếm Trigram tiếng Việt, đánh số báo giá nguyên tử     |
+| **Media CDN**     | Cloudinary                      | Lưu trữ hình ảnh sản phẩm, kiểm duyệt MIME allowlist và tự động tạo biến thể ảnh tối ưu          |
+| **Bảo mật**       | JWT, bcryptjs, DOMPurify        | Refresh token xoay vòng, băm mật khẩu 10 rounds, lọc mã độc XSS trong tệp vector SVG             |
+| **Kiểm thử**      | Vitest v8, Playwright           | Kiểm thử đa tầng: Unit test, Integration test cơ sở dữ liệu thật, E2E test và Visual regression  |
 
 ---
 
-## Hướng dẫn Chạy Cục bộ Từng bước (Từ Máy Trống)
+## 3. Hướng Dẫn Chạy Cục Bộ (Local Quickstart)
 
-### 1. Khởi động Cơ sở dữ liệu PostgreSQL
-
-Tại thư mục gốc của repository, khởi chạy container PostgreSQL 16:
+### Bước 1: Khởi động Cơ sở dữ liệu PostgreSQL
 
 ```bash
 docker compose up -d
 ```
 
-Cơ sở dữ liệu sẽ lắng nghe tại cổng `localhost:5432` với tài khoản mặc định `pidecor` / `pidecor_dev_only`.
+_(Cơ sở dữ liệu sẽ sẵn sàng tại `localhost:5432` với user `pidecor`)_
 
-_(Ghi chú: Nếu môi trường máy tính chưa cài đặt hoặc không bật Docker Desktop, bạn có thể sử dụng PostgreSQL cài trực tiếp trên máy hoặc chuỗi kết nối từ Neon PostgreSQL / Supabase, và điền vào biến `DATABASE_URL` bên dưới. Quá trình kiểm thử Docker sẽ được CI tự động xác nhận)._
-
-### 2. Cấu hình Biến Môi trường
-
-Sao chép tệp mẫu và điền cấu hình cho từng ứng dụng:
+### Bước 2: Thiết lập Biến Môi trường
 
 ```bash
-# Backend API
 cp apps/api/.env.example apps/api/.env
-
-# Frontend Web
 cp apps/web/.env.example apps/web/.env
 ```
 
-Tại `apps/api/.env`, cấu hình tối thiểu:
+_(Điền `JWT_SECRET` ngẫu nhiên tối thiểu 32 ký tự và `ADMIN_PASSWORD` tối thiểu 12 ký tự vào `apps/api/.env`)_
 
-- `JWT_SECRET`: Chuỗi bí mật ký token tối thiểu 32 ký tự (chạy `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` để sinh chuỗi ngẫu nhiên an toàn).
-- `DATABASE_URL`: `postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor` (nếu dùng Docker cục bộ).
-- `DATABASE_URL_DIRECT`: `= DATABASE_URL`.
-- `ADMIN_PASSWORD`: Mật khẩu tài khoản admin ban đầu (tối thiểu 12 ký tự, ví dụ: `Admin@PiDecor2026!`).
-
-### 3. Cài đặt Toàn bộ Phụ thuộc (Workspaces)
-
-**BẮT BUỘC thực hiện tại thư mục gốc repository** để npm thiết lập liên kết workspace monorepo và gói thư viện dùng chung `@pidecor/shared`:
+### Bước 3: Cài đặt Dependencies & Khởi tạo Dữ liệu
 
 ```bash
+# Bắt buộc chạy tại thư mục gốc repository
 npm install
-```
 
-_(Lưu ý: Tuyệt đối không chạy `npm install` riêng lẻ bên trong `apps/api` hay `apps/web` vì sẽ làm sai lệch cấu trúc liên kết symlink giữa các gói workspace)._
-
-### 4. Khởi tạo Cơ sở dữ liệu Backend
-
-Chạy script migration để khởi tạo cấu trúc bảng từ baseline và nạp dữ liệu mẫu ban đầu:
-
-```bash
+# Áp dụng migration schema và nạp dữ liệu mẫu ban đầu
 cd apps/api && npm run migrate && npm run seed && cd ../..
 ```
 
-### 5. Khởi chạy Ứng dụng Chế độ Phát triển
-
-Từ thư mục gốc repository, bạn có thể khởi chạy song song cả hai ứng dụng:
+### Bước 4: Khởi chạy Ứng dụng Phát triển
 
 ```bash
+# Chạy đồng thời cả Frontend và Backend từ thư mục gốc
 npm run dev:api    # Backend API lắng nghe tại http://localhost:4000
 npm run dev:web    # Frontend Web giao diện tại http://localhost:5173
 ```
 
-Hoặc chạy trong từng terminal riêng biệt:
-
-- Backend: `cd apps/api && npm run dev`
-- Frontend: `cd apps/web && npm run dev`
-
-Kiểm tra trạng thái sẵn sàng của backend:
-
-```bash
-curl http://localhost:4000/api/health
-```
-
-Tài khoản quản trị viên mặc định: `admin@pidecor.vn` / mật khẩu đã cấu hình trong `ADMIN_PASSWORD` tại `apps/api/.env`.
+- **Tài khoản quản trị viên mặc định**: `admin@pidecor.vn` / mật khẩu đã đặt trong `apps/api/.env`.
+- **Kiểm tra trạng thái sẵn sàng**: `curl http://localhost:4000/api/health`
 
 ---
 
-## Bảng Biến Môi trường
-
-### API Server (`apps/api/.env`)
-
-| Tên biến                   | Bắt buộc  | Mặc định                        | Mô tả                                            | Giá trị ví dụ (Dev)                                                      |
-| -------------------------- | :-------: | ------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------ |
-| `NODE_ENV`                 |   Không   | `development`                   | Môi trường runtime                               | `development`                                                            |
-| `PORT`                     |   Không   | `4000`                          | Cổng HTTP API lắng nghe                          | `4000`                                                                   |
-| `CORS_ORIGIN`              | Có (prod) | `http://localhost:5173`         | Domain client được phép gọi API                  | `http://localhost:5173`                                                  |
-| `TRUST_PROXY`              |   Không   | `0` (dev) / `1` (prod)          | Đếm số hop qua reverse proxy                     | `0`                                                                      |
-| `JWT_SECRET`               |  **Có**   | —                               | Khóa bí mật ký access token (>= 32 ký tự)        | `dev_secret_key_at_least_32_characters_long`                             |
-| `JWT_EXPIRES_IN`           |   Không   | `15m`                           | Thời hạn của access token                        | `15m`                                                                    |
-| `DATABASE_URL`             |  **Có**   | —                               | Chuỗi kết nối PostgreSQL (Neon Pooled)           | `postgresql://user:pass@ep-pooler.neon.tech/pidecor?sslmode=verify-full` |
-| `DATABASE_URL_DIRECT`      |   Không   | `= DATABASE_URL`                | Chuỗi kết nối Postgres trực tiếp (migrate, seed) | `postgresql://user:pass@ep-direct.neon.tech/pidecor?sslmode=verify-full` |
-| `DATABASE_URL_TEST`        |   Không   | —                               | Chuỗi kết nối Postgres riêng cho kiểm thử        | `postgresql://pidecor:pidecor_dev_only@localhost:5432/pidecor_test`      |
-| `DB_POOL_MAX`              |   Không   | `5`                             | Số kết nối tối đa trong connection pool          | `5`                                                                      |
-| `DB_SSL`                   |   Không   | `disable` (dev) / `verify-full` | Chế độ SSL (`disable`, `require`, `verify-full`) | `verify-full`                                                            |
-| `DB_SSL_CA`                |   Không   | —                               | Đường dẫn file PEM hoặc chứng chỉ CA tùy chọn    | `/etc/ssl/certs/isrgrootx1.pem`                                          |
-| `CLOUDINARY_CLOUD_NAME`    | Có (prod) | —                               | Cloud name tài khoản Cloudinary                  | `your_cloud_name`                                                        |
-| `CLOUDINARY_API_KEY`       | Có (prod) | —                               | API Key tài khoản Cloudinary                     | `123456789012345`                                                        |
-| `CLOUDINARY_API_SECRET`    | Có (prod) | —                               | API Secret tài khoản Cloudinary                  | `example_cloudinary_secret`                                              |
-| `CLOUDINARY_FOLDER_PREFIX` | Có (prod) | `pidecor/dev`                   | Tiền tố thư mục Cloudinary theo môi trường       | `pidecor/prod`                                                           |
-| `ADMIN_EMAIL`              | Có (seed) | —                               | Email đăng nhập admin khi seed                   | `admin@pidecor.vn`                                                       |
-| `ADMIN_PASSWORD`           | Có (seed) | —                               | Mật khẩu admin khi seed (>= 12 ký tự)            | `Admin@PiDecor2026!`                                                     |
-| `SENTRY_DSN`               |   Không   | —                               | DSN giám sát lỗi qua Sentry                      | `https://examplePublicKey@o0.ingest.sentry.io/0`                         |
-
-### Web Client (`apps/web/.env`)
-
-| Tên biến                       | Bắt buộc | Mặc định                    | Mô tả                                     | Giá trị ví dụ                                    |
-| ------------------------------ | :------: | --------------------------- | ----------------------------------------- | ------------------------------------------------ |
-| `VITE_API_URL`                 |  Không   | `http://localhost:4000/api` | Địa chỉ gốc của backend API               | `http://localhost:4000/api`                      |
-| `VITE_SENTRY_DSN`              |  Không   | —                           | DSN Sentry phía client                    | `https://examplePublicKey@o0.ingest.sentry.io/0` |
-| `VITE_BUSINESS_NAME`           |  Không   | —                           | Tên thương hiệu doanh nghiệp              | `Pi Decor Wedding & Event`                       |
-| `VITE_BUSINESS_TELEPHONE`      |  Không   | —                           | Số điện thoại hotline                     | `+84 789 241 260`                                |
-| `VITE_BUSINESS_EMAIL`          |  Không   | —                           | Email liên hệ chính                       | `contact@pidecor.vn`                             |
-| `VITE_PRIVACY_POLICY_REVIEWED` |  Không   | `false`                     | Đánh dấu chính sách bảo mật đã được duyệt | `true`                                           |
-
----
-
-## Kiểm Tra Toàn Diện & Đảm Bảo Chất Lượng
-
-Trước mỗi commit hoặc deploy, luôn chạy lệnh kiểm tra toàn diện từ thư mục gốc repository:
+## 4. Kiểm Tra Chất Lượng & Đo Lường
 
 ```bash
-# Kiểm tra tự động toàn bộ workspaces (TypeScript, ESLint, Stylelint, Knip, Test, Build, Syntax)
+# 1. Kiểm tra toàn diện mọi quy chuẩn (Typecheck, Lints, Knip, Tests, Build)
 npm run verify
 
-# Chạy bộ kiểm thử tự động End-to-End với Playwright (bao gồm visual snapshot)
+# 2. Đo lường chỉ số kỹ thuật thực tế (Gzip bundle, LOC, coverage, trùng lặp mã)
+npm run metrics
+
+# 3. Tự động chụp bộ ảnh màn hình hướng dẫn sử dụng
+npm run docs:screenshots
+
+# 4. Chạy bộ kiểm thử tự động End-to-End với Playwright
 npm run e2e
-
-# Quét kiểm tra bản quyền giấy phép (chặn copyleft GPL/AGPL)
-npm run check:licenses
-
-# Quét bảo mật lỗ hổng phụ thuộc production
-npm run audit:prod
-
-# Xuất hóa đơn nguyên vật liệu phần mềm (CycloneDX SBOM)
-npm run sbom
 ```
 
 ---
 
-## Tài liệu Kỹ thuật Chi tiết
+## 5. Danh Mục Tài Liệu Chi Tiết
 
-- [Kiến trúc Hệ thống & Luồng Dữ liệu](docs/ARCHITECTURE.md) (`docs/ARCHITECTURE.md`)
-- [Đặc tả Giao diện Lập trình REST API](docs/API.md) (`docs/API.md`)
-- [Sổ tay Vận hành & Xử lý Sự cố](docs/RUNBOOK.md) (`docs/RUNBOOK.md`)
-- [Hướng dẫn Đóng góp Mã nguồn](CONTRIBUTING.md) (`CONTRIBUTING.md`)
-- [Kế hoạch Xử lý Vấn đề Kỹ thuật](docs/FOLLOWUPS.md) (`docs/FOLLOWUPS.md`)
+Toàn bộ tài liệu nghiệp vụ, kiến trúc và vận hành được tập trung tại thư mục [`docs/`](docs/README.md):
+
+- 📖 **[Mục lục Toàn bộ Tài liệu (docs/README.md)](docs/README.md)**: Chỉ mục điều hướng toàn bộ 78+ tệp tài liệu dự án.
+- 👨‍💼 **[Cẩm Nang Quản Trị Hệ Thống (ADMIN_GUIDE.md)](docs/user-guide/ADMIN_GUIDE.md)**: Hướng dẫn chi tiết từng bước cho chủ doanh nghiệp kèm ảnh chụp màn hình trực quan.
+- ❓ **[Câu Hỏi Thường Gặp (FAQ.md)](docs/user-guide/FAQ.md)**: Giải đáp các thắc mắc và tình huống thường gặp của quản trị viên.
+- 📊 **[Nghiên Cứu Điển Hình (CASE_STUDY.md)](docs/CASE_STUDY.md)**: Bài viết chuyên sâu cho portfolio kèm các chỉ số kỹ thuật đo lường thực tế.
+- 🏗️ **[Sơ Đồ Kiến Trúc C4 (C4.md)](docs/architecture/C4.md)** & **[Quyết Định Kiến Trúc (ADRs)](docs/adr/0000-template.md)**: Mô hình kiến trúc đa tầng và danh mục 13 bản ghi ADR.
+- 🛠️ **[Sổ Tay Vận Hành & Khắc Phục Sự Cố (RUNBOOK.md)](docs/RUNBOOK.md)**: Quy trình triển khai, backup, phục hồi thảm họa và xử lý sự cố.
