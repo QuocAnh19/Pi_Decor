@@ -18,7 +18,7 @@ export async function seedServices() {
         href: "/studio",
         cta_label: "Vào Studio thiết kế",
         featured: true,
-        cover: "/images/service-piwedding.png",
+        cover: "/images/service-piwedding.webp",
         order: 0,
       },
       {
@@ -34,7 +34,7 @@ export async function seedServices() {
         href: null,
         cta_label: "Liên hệ tư vấn",
         featured: false,
-        cover: "/images/service-pikids.png",
+        cover: "/images/service-pikids.webp",
         order: 1,
       },
       {
@@ -50,7 +50,7 @@ export async function seedServices() {
         href: null,
         cta_label: "Liên hệ tư vấn",
         featured: false,
-        cover: "/images/service-pievent.png",
+        cover: "/images/service-pievent.webp",
         order: 2,
       },
     ];

@@ -56,6 +56,8 @@ Có thể chạy riêng lẻ từng phần khi đang phát triển:
 - Web: `npm run verify:web`
 - API: `npm run verify:api`
 
+- **Tính trung thực trong báo cáo trạng thái**: Tuyệt đối **KHÔNG** ghi trạng thái "ĐẠT" cho CI, e2e hay drill nếu chưa xem kết quả thực tế của chính lần chạy đó; chỉ ghi "chưa xác minh".
+
 ---
 
 ## 6. Hướng dẫn chạy cục bộ từ máy trống

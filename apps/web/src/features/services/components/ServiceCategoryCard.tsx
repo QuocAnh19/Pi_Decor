@@ -27,7 +27,7 @@ export function ServiceCategoryCard({
   const coverSrc = isCloudinary
     ? cloudinaryUrl(category.cover, { width: 800 })
     : category.cover
-      ? category.cover.replace(/\.png$/i, ".webp")
+      ? category.cover.replace(/\.(png|jpe?g)$/i, ".webp")
       : null;
 
   return (
@@ -43,7 +43,7 @@ export function ServiceCategoryCard({
             src={coverSrc}
             srcSet={
               !isCloudinary && category.cover
-                ? `${category.cover.replace(/\.png$/i, "-800w.webp")} 800w, ${category.cover.replace(/\.png$/i, ".webp")} 1200w`
+                ? `${category.cover.replace(/(\.png|\.webp|\.jpe?g)$/i, "-800w.webp")} 800w, ${category.cover.replace(/\.(png|jpe?g)$/i, ".webp")} 1200w`
                 : undefined
             }
             sizes="(max-width: 768px) 100vw, 33vw"

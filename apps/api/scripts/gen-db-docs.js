@@ -166,7 +166,7 @@ export async function fetchDbMetadata(pool) {
   };
 }
 
-export async function generateDatabaseDocumentation(customUrl, { allowRemote = false } = {}) {
+export async function generateDatabaseDocumentation(customUrl, { allowRemote = false, outDir = null } = {}) {
   const options = resolveConnectionOptions(customUrl, allowRemote);
   const pool = new pg.Pool(options);
 
@@ -176,8 +176,8 @@ export async function generateDatabaseDocumentation(customUrl, { allowRemote = f
     const erdMd = generateErd(metadata);
 
     const rootDir = path.resolve(__dirname, "..", "..", "..");
-    const outDir = path.join(rootDir, "docs", "data");
-    await mkdir(outDir, { recursive: true });
+    const targetDir = outDir || path.join(rootDir, "docs", "data");
+    await mkdir(targetDir, { recursive: true });
 
     // Format bằng Prettier API trước khi ghi để đảm bảo deterministic
     const prettierConfigFile = path.join(rootDir, ".prettierrc");
@@ -193,12 +193,12 @@ export async function generateDatabaseDocumentation(customUrl, { allowRemote = f
       parser: "markdown",
     });
 
-    await writeFile(path.join(outDir, "DATA_DICTIONARY.md"), formattedDataDict, "utf-8");
-    await writeFile(path.join(outDir, "ERD.md"), formattedErd, "utf-8");
+    await writeFile(path.join(targetDir, "DATA_DICTIONARY.md"), formattedDataDict, "utf-8");
+    await writeFile(path.join(targetDir, "ERD.md"), formattedErd, "utf-8");
 
     console.log(`[gen-db-docs.js] ✓ Đã sinh tài liệu thành công (Prettier-formatted):`);
-    console.log(`  - docs/data/DATA_DICTIONARY.md (${metadata.tables.length} bảng)`);
-    console.log(`  - docs/data/ERD.md (sơ đồ Mermaid)`);
+    console.log(`  - ${path.join(targetDir, "DATA_DICTIONARY.md")} (${metadata.tables.length} bảng)`);
+    console.log(`  - ${path.join(targetDir, "ERD.md")} (sơ đồ Mermaid)`);
     return { metadata, dataDictionaryMd: formattedDataDict, erdMd: formattedErd };
   } finally {
     await pool.end();

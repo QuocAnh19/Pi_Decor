@@ -14,7 +14,7 @@ và dự án này tuân thủ chuẩn [Semantic Versioning](https://semver.org/s
 - Toàn bộ hệ thống tài liệu sản phẩm và nghiệp vụ: PRD, ROLES_PERMISSIONS, USER_STORIES, GLOSSARY.
 - Đặc tả kỹ thuật chi tiết cho 10 phân hệ công khai (`docs/features/public/`) và 12 phân hệ quản trị (`docs/features/admin/`).
 - Ma trận truy vết kiểm thử hai chiều đối chiếu User Stories với mã nguồn và kiểm thử tự động tại [docs/features/TRACEABILITY.md](docs/features/TRACEABILITY.md).
-- Từ điển dữ liệu PostgreSQL [docs/data/DATA_DICTIONARY.md](docs/data/DATA_DICTIONARY.md), sơ đồ ERD Mermaid [docs/data/ERD.md](docs/data/ERD.md) và migration `0002_column_comments.sql`.
+- Từ điển dữ liệu PostgreSQL [docs/data/DATA_DICTIONARY.md](docs/data/DATA_DICTIONARY.md), sơ đồ ERD Mermaid [docs/data/ERD.md](docs/data/ERD.md) và migration `0004_column_comments.sql`.
 - Mô hình kiến trúc đa tầng [docs/architecture/C4.md](docs/architecture/C4.md) và danh mục 13 bản ghi Quyết định Kiến trúc [docs/adr/](docs/adr/0000-template.md).
 - Bộ tài liệu chất lượng và nghiệm thu: [docs/quality/TEST_PLAN.md](docs/quality/TEST_PLAN.md), [docs/quality/TEST_CASES.md](docs/quality/TEST_CASES.md), [docs/quality/UAT_CHECKLIST.md](docs/quality/UAT_CHECKLIST.md) và [docs/quality/REGRESSION_CHECKLIST.md](docs/quality/REGRESSION_CHECKLIST.md).
 - Bộ công cụ sao lưu, phục hồi và kịch bản diễn tập thảm họa tự động: `scripts/db-backup.sh`, `scripts/db-restore.sh`, `scripts/backup-restore-drill.sh` và job CI định kỳ.
@@ -27,6 +27,7 @@ và dự án này tuân thủ chuẩn [Semantic Versioning](https://semver.org/s
 
 ### Changed
 
+- Tách toàn bộ ảnh gốc PNG/JPG sang thư mục nguồn `apps/web/assets-src/images/`, chỉ phục vụ ảnh nén WebP trong `apps/web/public/images/`.
 - Làm mới toàn diện [README.md](README.md) gốc với mô tả chuẩn, ảnh chụp màn hình thực tế, sơ đồ kiến trúc Mermaid và bảng công nghệ.
 - Đồng bộ số hiệu phiên bản `"1.0.0"` trên toàn bộ các tệp `package.json` trong monorepo.
 

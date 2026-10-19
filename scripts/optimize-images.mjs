@@ -4,6 +4,7 @@ import sharp from 'sharp';
 
 const PUBLIC_DIR = path.resolve('apps/web/public');
 const IMAGES_DIR = path.resolve('apps/web/public/images');
+const ASSETS_SRC_DIR = path.resolve('apps/web/assets-src/images');
 
 async function processFavicon() {
   const svgPath = path.join(PUBLIC_DIR, 'favicon.svg');
@@ -65,7 +66,7 @@ async function processImages() {
   ];
 
   for (const img of images) {
-    const inputPath = path.join(IMAGES_DIR, img.name);
+    const inputPath = path.join(ASSETS_SRC_DIR, img.name);
     if (!fs.existsSync(inputPath)) {
       console.warn(`File not found: ${inputPath}`);
       continue;
