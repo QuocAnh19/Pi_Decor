@@ -25,6 +25,11 @@ if [ -z "$BASE_PG_URL" ]; then
   BASE_PG_URL="postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable"
 fi
 
+# Tự đặt mặc định CHỈ cho DB tạm nếu biến chưa có (không ghi đè biến sẵn có)
+export JWT_SECRET="${JWT_SECRET:-drill_jwt_secret_minimum_32_chars_long_xxxxx}"
+export ADMIN_EMAIL="${ADMIN_EMAIL:-drill-admin@example.test}"
+export ADMIN_PASSWORD="${ADMIN_PASSWORD:-DrillPassword123!}"
+
 # Tách URL để tạo tên DB tạm
 DRILL_SRC_DB="pidecor_drill_src"
 DRILL_DEST_DB="pidecor_drill_dest"
@@ -55,8 +60,8 @@ psql "$ADMIN_URL" -c "DROP DATABASE IF EXISTS $DRILL_SRC_DB WITH (FORCE);" > /de
 psql "$ADMIN_URL" -c "CREATE DATABASE $DRILL_SRC_DB;" > /dev/null 2>&1
 
 echo "[2/6] Áp dụng migrations và seed dữ liệu vào DB nguồn..."
-DATABASE_URL_DIRECT="$SRC_URL" node "$ROOT_DIR/apps/api/database/migrate.js" > /dev/null
-DATABASE_URL="$SRC_URL" node "$ROOT_DIR/apps/api/src/utils/seed.js" > /dev/null
+DATABASE_URL_DIRECT="$SRC_URL" node "$ROOT_DIR/apps/api/database/migrate.js"
+DATABASE_URL="$SRC_URL" node "$ROOT_DIR/apps/api/src/utils/seed.js"
 
 echo "[3/6] Thực thi sao lưu dữ liệu (db-backup.sh)..."
 DATABASE_URL_DIRECT="$SRC_URL" bash "$SCRIPT_DIR/db-backup.sh" "$DUMP_FILE"
@@ -84,7 +89,7 @@ for table in "${TABLES[@]}"; do
   fi
 done
 
-echo "[6/6] Kiểm tra quy trình Neon Branching (Mô phỏng khôi phục Point-In-Time)..."
+echo "[6/6] Quy trình Neon Branching (Hướng dẫn thủ công, không được kiểm thử tự động)..."
 echo "  [i] Ghi chú quy trình Neon Cloud: Khi cần khôi phục thời điểm cũ:"
 echo "      - Bước 1: Tạo branch mới từ timestamp mục tiêu qua Neon API/CLI"
 echo "      - Bước 2: Chạy kiểm tra schema và đếm số lượng dòng trên branch tạm"

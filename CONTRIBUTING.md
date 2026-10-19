@@ -78,6 +78,12 @@ Nếu có thay đổi luồng giao diện hoặc nghiệp vụ, chạy thêm b�
 npm run e2e
 ```
 
+Để kiểm tra giả lập môi trường CI sạch trước khi push (chạy `env -i` chỉ truyền các biến mà job CI khai báo nhằm phát hiện sớm lỗi thiếu biến môi trường):
+
+```bash
+bash scripts/ci-local.sh
+```
+
 ---
 
 ## 6. Gửi Pull Request & Đánh giá Mã nguồn (Code Review)

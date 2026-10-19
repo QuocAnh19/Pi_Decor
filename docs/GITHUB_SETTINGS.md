@@ -18,14 +18,9 @@ Vào **Settings** → **Branches** → Chọn **Add branch protection rule** (ho
    - Tích chọn: _Require review from Code Owners_ (kết hợp với [`.github/CODEOWNERS`](../.github/CODEOWNERS)).
 2. **Require status checks to pass before merging**:
    - Tích chọn: _Require branches to be up to date before merging_.
-   - Tìm kiếm và tích chọn các status checks bắt buộc:
-     - `Web Checks (apps/web)`
-     - `API Checks (apps/api)`
-     - `Playwright E2E Tests`
-     - `Audit & Licenses`
-     - `Secret Scan (Gitleaks)`
-     - `Docker Smoke & Trivy Scan`
-     - `CodeQL`
+   - Tìm kiếm và tích chọn status check bắt buộc duy nhất:
+     - `CI Success Gate` (tương ứng job `ci-success` trong `.github/workflows/ci.yml`, tổng hợp toàn bộ các job web, api, e2e, security-scans, secret-scan, docker-smoke-test, backup-restore-drill).
+     - `CodeQL` (từ workflow `.github/workflows/codeql.yml`).
 3. **Require signed commits**:
    - Tích chọn: Mọi commit đẩy vào `main` bắt buộc phải có chữ ký số GPG hoặc SSH hợp lệ (Verified badge).
 4. **Require linear history**:

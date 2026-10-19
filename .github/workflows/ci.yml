@@ -342,5 +342,50 @@ jobs:
           DATABASE_URL: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
           DATABASE_URL_DIRECT: postgresql://pidecor:pidecor_dev_only@127.0.0.1:5432/pidecor_test?sslmode=disable
           RESTORE_TEST_DB_NAME: pidecor_restore_drill
+          JWT_SECRET: drill_jwt_secret_minimum_32_chars_long_xxxxx
+          ADMIN_EMAIL: drill-admin@example.test
+          ADMIN_PASSWORD: DrillPassword123!
         run: bash scripts/backup-restore-drill.sh
+
+  ci-success:
+    name: CI Success Gate
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - web
+      - api
+      - e2e
+      - security-scans
+      - secret-scan
+      - docker-smoke-test
+      - backup-restore-drill
+    steps:
+      - name: Verify all required jobs succeeded
+        run: |
+          failures=()
+          check_job() {
+            local name="$1"
+            local result="$2"
+            if [ "$result" != "success" ]; then
+              echo "::error::Job '$name' did not succeed: result is '$result'"
+              failures+=("$name ($result)")
+            else
+              echo "✓ Job '$name' succeeded"
+            fi
+          }
+
+          check_job "web" "${{ needs.web.result }}"
+          check_job "api" "${{ needs.api.result }}"
+          check_job "e2e" "${{ needs.e2e.result }}"
+          check_job "security-scans" "${{ needs.security-scans.result }}"
+          check_job "secret-scan" "${{ needs.secret-scan.result }}"
+          check_job "docker-smoke-test" "${{ needs.docker-smoke-test.result }}"
+          check_job "backup-restore-drill" "${{ needs.backup-restore-drill.result }}"
+
+          if [ ${#failures[@]} -ne 0 ]; then
+            echo "::error::CI Gate Failed: ${failures[*]}"
+            exit 1
+          fi
+          echo "All required CI jobs succeeded!"
+
 
