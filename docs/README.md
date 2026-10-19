@@ -141,6 +141,7 @@ Các tiêu chuẩn pháp lý và quy tắc làm việc trên GitHub:
 - **[ASSETS.md](ASSETS.md)**: Bảng kiểm kê tài sản số phi mã nguồn (hình ảnh, phông chữ tự host, biểu tượng vector) và tình trạng pháp lý.
 - **[GITHUB_SETTINGS.md](GITHUB_SETTINGS.md)**: Hướng dẫn thiết lập bảo vệ nhánh `main`, bảo mật repository và ký commit số.
 - **[RELEASING.md](RELEASING.md)**: Quy trình đánh số phiên bản SemVer 2.0.0, gắn thẻ Git và phát hành tự động qua GitHub Actions.
+- **[RELEASE_READINESS.md](RELEASE_READINESS.md)**: Báo cáo mức độ sẵn sàng phát hành phiên bản v1.0.0, bảng nghiệm thu kỹ thuật và danh sách bàn giao cho Chủ dự án.
 
 ---
 

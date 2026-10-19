@@ -7,13 +7,37 @@ và dự án này tuân thủ chuẩn [Semantic Versioning](https://semver.org/s
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2026-10-19
 
 ### Added
 
+- Toàn bộ hệ thống tài liệu sản phẩm và nghiệp vụ: PRD, ROLES_PERMISSIONS, USER_STORIES, GLOSSARY.
+- Đặc tả kỹ thuật chi tiết cho 10 phân hệ công khai (`docs/features/public/`) và 12 phân hệ quản trị (`docs/features/admin/`).
+- Ma trận truy vết kiểm thử hai chiều đối chiếu User Stories với mã nguồn và kiểm thử tự động tại [docs/features/TRACEABILITY.md](docs/features/TRACEABILITY.md).
+- Từ điển dữ liệu PostgreSQL [docs/data/DATA_DICTIONARY.md](docs/data/DATA_DICTIONARY.md), sơ đồ ERD Mermaid [docs/data/ERD.md](docs/data/ERD.md) và migration `0002_column_comments.sql`.
+- Mô hình kiến trúc đa tầng [docs/architecture/C4.md](docs/architecture/C4.md) và danh mục 13 bản ghi Quyết định Kiến trúc [docs/adr/](docs/adr/0000-template.md).
+- Bộ tài liệu chất lượng và nghiệm thu: [docs/quality/TEST_PLAN.md](docs/quality/TEST_PLAN.md), [docs/quality/TEST_CASES.md](docs/quality/TEST_CASES.md), [docs/quality/UAT_CHECKLIST.md](docs/quality/UAT_CHECKLIST.md) và [docs/quality/REGRESSION_CHECKLIST.md](docs/quality/REGRESSION_CHECKLIST.md).
+- Bộ công cụ sao lưu, phục hồi và kịch bản diễn tập thảm họa tự động: `scripts/db-backup.sh`, `scripts/db-restore.sh`, `scripts/backup-restore-drill.sh` và job CI định kỳ.
+- Bộ công cụ thực thi quyền chủ thể dữ liệu cá nhân (Nghị định 13/2023/NĐ-CP): `apps/api/scripts/export-lead.js`, `apps/api/scripts/delete-lead.js` và [docs/privacy/PROCESSING_REGISTER.md](docs/privacy/PROCESSING_REGISTER.md).
+- Cẩm nang quản trị trực quan [docs/user-guide/ADMIN_GUIDE.md](docs/user-guide/ADMIN_GUIDE.md), [docs/user-guide/FAQ.md](docs/user-guide/FAQ.md) kèm script chụp ảnh tự động `scripts/capture-screenshots.mjs`.
+- Nghiên cứu điển hình [docs/CASE_STUDY.md](docs/CASE_STUDY.md) kèm script đo lường chỉ số kỹ thuật thực tế `scripts/collect-metrics.mjs`.
 - Quy trình phát hành tự động qua GitHub Actions (`.github/workflows/release.yml`) khi push tag phiên bản `v*.*.*`.
 - Hướng dẫn cấu hình repository và bảo vệ nhánh trong [docs/GITHUB_SETTINGS.md](docs/GITHUB_SETTINGS.md).
 - Quy chuẩn phát hành và gắn thẻ phiên bản trong [docs/RELEASING.md](docs/RELEASING.md).
+
+### Changed
+
+- Làm mới toàn diện [README.md](README.md) gốc với mô tả chuẩn, ảnh chụp màn hình thực tế, sơ đồ kiến trúc Mermaid và bảng công nghệ.
+- Đồng bộ số hiệu phiên bản `"1.0.0"` trên toàn bộ các tệp `package.json` trong monorepo.
+
+### Fixed
+
+- Hoàn thiện kiểm tra toàn vẹn liên kết tương đối và đường dẫn mã nguồn tài liệu qua script `npm run verify:docs`.
+
+### Security
+
+- Tích hợp Structured Security Audit Logging (`securityLogger`) ghi nhận có cấu trúc các sự kiện: đăng nhập sai, phát hiện dùng lại refresh token, đổi mật khẩu, cấp/thu hồi quyền admin.
+- Chống ghi đè cơ sở dữ liệu production trong script khôi phục bằng cờ an toàn bắt buộc `--i-know`.
 
 ---
 
