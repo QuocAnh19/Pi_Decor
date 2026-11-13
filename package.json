@@ -42,10 +42,10 @@
     "qs": "^6.16.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.64.1",
-    "eslint": "^8.57.1",
+    "@playwright/test": "^1.65.0",
+    "eslint": "^10.14.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
     "sharp": "^0.35.5"
   }
